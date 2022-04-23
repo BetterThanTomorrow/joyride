@@ -1,0 +1,13 @@
+# Put everything on the blacklist by default
+*
+*/**
+**/.DS_Store
+*/**/.DS_Store
+
+# Whitelist
+!extension.js
+!package.json
+!assets/**
+!README.md
+!CHANGELOG.md
+!LICENSE.txt

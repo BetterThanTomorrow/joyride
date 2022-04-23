@@ -1,0 +1,24 @@
+# vs code
+*.vsix
+.vscode/settings.json
+
+# Dependency directories
+node_modules
+
+# macos
+.DS_Store
+
+# Clojure
+.cpcache/
+.nrepl-port
+
+# CLJS
+.shadow-cljs/
+
+# Calva
+.cache
+/.portal/vs-code.edn
+.calva/output-window/
+
+# Congas
+/out/

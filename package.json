@@ -1,0 +1,87 @@
+{
+  "name": "congas",
+  "displayName": "Congas: Hack your editor",
+  "description": "Makes VS Code scriptable using nbb (interpreted Clojure for node-js)",
+  "icon": "assets/congas.png",
+  "version": "0.0.1",
+  "publisher": "betterthantomorrow",
+  "author": {
+    "name": "Better Than Tomorrow",
+    "email": "pez@pezius.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PEZ/congas.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.66.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "nbb",
+    "vscode",
+    "clojure",
+    "repl",
+    "automation"
+  ],
+  "galleryBanner": {
+    "color": "#344D81",
+    "theme": "dark"
+  },
+  "badges": [
+    {
+      "url": "https://img.shields.io/badge/clojurians-congas-blue.svg?logo=slack",
+      "href": "https://clojurians.slack.com/messages/vscode/",
+      "description": "Let's talk in the #congas channel on the Clojurians Slack"
+    }
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Congas",
+      "properties": {
+        "congas.scriptsPath": {
+          "type": "string",
+          "default": ".congas/scriptz",
+          "markdownDescription": "Where Congas should look for scripts"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "congas.runScript",
+        "title": "Run Script",
+        "category": "Congas"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "congas.runScript",
+        "key": "ctrl+shift+space"
+      }
+    ]
+  },
+  "scripts": {
+    "clean": "rimraf .shadow-cljs/ out/",
+    "watch": "npx shadow-cljs watch :extension",
+    "prewatch": "npm run clean",
+    "compile": "npx shadow-cljs compile :extension",
+    "release": "npx shadow-cljs release :extension",
+    "vscode:prepublish": "npm run clean && npm run release"
+  },
+  "dependencies": {
+    "nbb": "^0.3.9",
+    "vsce": "^2.7.0"
+  },
+  "devDependencies": {
+    "rimraf": "^3.0.2",
+    "shadow-cljs": "^2.18.0"
+  }
+}
