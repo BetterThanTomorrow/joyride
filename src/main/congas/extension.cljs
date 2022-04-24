@@ -1,9 +1,10 @@
 (ns congas.extension
   (:require
-   ["vscode" :as vscode]
-   ["nbb" :as nbb]
+   ["fs" :as fs]
    ["path" :as path]
-   [promesa.core :as p]))
+   ["vscode" :as vscode]
+   [promesa.core :as p]
+   [sci.core :as sci]))
 
 (defn register-disposable [^js context ^js disposable]
   (.push context.subscriptions disposable))
@@ -15,12 +16,17 @@
   (->> (register-command command)
        (register-disposable context)))
 
+(def ctx (sci/init {:classes {'js goog/global
+                              :allow :all}}))
+
 (defn ^{:command "congas.runScript"} run-script [& script]
   (println "BOOM!")
   (let [ws-folder ^js (first js/vscode.workspace.workspaceFolders)
         ws-root ws-folder.uri.fsPath]
-    (nbb/loadFile (path/resolve ws-root ".congas/scripts/hello.cljs")))
-  (js/vscode.window.showInformationMessage (str "Hello " script)))
+    (sci/eval-string* ctx
+                      "(js/vscode.window.showInformationMessage \"Hello from SCI!!!!!!\")"
+                      #_(fs/readFileSync (path/resolve ws-root ".congas/scripts/hello.cljs"))))
+  )
 ; /Users/pez/Desktop/empty/congas/scripts/hello.cljs
 (defn activate [^js context]
   (aset js/globalThis "vscode" vscode)
