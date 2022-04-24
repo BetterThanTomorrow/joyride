@@ -64,7 +64,7 @@
     "keybindings": [
       {
         "command": "congas.runScript",
-        "key": "ctrl+shift+space"
+        "key": "ctrl+shift+space space"
       }
     ]
   },
