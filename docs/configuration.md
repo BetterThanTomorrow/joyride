@@ -1,6 +1,6 @@
 # Configuration
 
-VS Code settings to 
+VS Code settings to configure Joy.
 
 You can specify two sources for Joy scripts:
 
