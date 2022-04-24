@@ -7,6 +7,8 @@
    [sci.core :as sci]))
 
 (defn register-disposable [^js context ^js disposable]
+  (js/console.log "BOOM!!!!!!")
+  (js/console.log "BOOM ctx" (some? context) "disp" (some? disposable))
   (.push context.subscriptions disposable))
 
 (defn- register-command [command]
@@ -28,8 +30,11 @@
                       #_(fs/readFileSync (path/resolve ws-root ".congas/scripts/hello.cljs"))))
   )
 ; /Users/pez/Desktop/empty/congas/scripts/hello.cljs
-(defn activate [^js context]
+(defn ^:export activate [^js context]
   (aset js/globalThis "vscode" vscode)
   (setup-command context #'run-script))
+
+(defn ^:export deactivate []
+  )
 
 (comment)
