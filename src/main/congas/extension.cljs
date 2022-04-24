@@ -1,6 +1,7 @@
 (ns congas.extension
   (:require
    ["vscode" :as vscode]
+   [goog.object :as gobj]
    [sci-configs.funcool.promesa :as pconfig]
    [sci.core :as sci]))
 
@@ -15,7 +16,7 @@
   (let [ws-folder ^js (first js/vscode.workspace.workspaceFolders)
         ws-root (some-> ws-folder (.uri) (.fsPath))]
     (sci/eval-string* ctx
-                      "(js/vscode.window.showInformationMessage \"Hello from SCI!!!!!!\")"
+                      "(js/vscode.window.showInformationMessage \"Hello from SCI\")"
                       #_(fs/readFileSync (path/resolve ws-root ".congas/scripts/hello.cljs")))
     (sci/eval-form ctx
                    '(do (require '[promesa.core :as p])
@@ -34,7 +35,7 @@
 
 ; /Users/pez/Desktop/empty/congas/scripts/hello.cljs
 (defn ^:export activate [^js context]
-  (aset js/globalThis "vscode" vscode)
+  (gobj/set js/globalThis "vscode" vscode)
   (setup-command context))
 
 (defn ^:export deactivate []
