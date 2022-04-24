@@ -1,5 +1,7 @@
 {:paths ["src/main"]
- :deps {;; org.clojure/core.async {:mvn/version "1.5.648"}
-        funcool/promesa {:mvn/version "8.0.450"}
+ :deps {funcool/promesa {:mvn/version "8.0.450"}
         thheller/shadow-cljs {:mvn/version "2.18.0"}
-        org.babashka/sci {:mvn/version "0.3.4"}}}
+        org.babashka/sci {:mvn/version "0.3.4"}
+        org.babashka/sci-configs
+        {:git/url "https://github.com/babashka/sci-configs"
+         :git/sha "d197da2413bd8e4e5c43159620ddfe4286c731ba"}}}
