@@ -1,14 +1,10 @@
 (ns congas.extension
   (:require
-   ["path" :as path]
    ["vscode" :as vscode]
-   [promesa.core :as p]
-   [sci.core :as sci]
-   [sci-configs.funcool.promesa :as pconfig]))
+   [sci-configs.funcool.promesa :as pconfig]
+   [sci.core :as sci]))
 
 (defn register-disposable [^js context ^js disposable]
-  (js/console.log "BOOM!!!!!!")
-  (js/console.log "BOOM ctx" (some? context) "disp" (some? disposable))
   (.push (.-subscriptions context) disposable))
 
 (def ctx (sci/init {:classes {'js goog/global
@@ -16,7 +12,6 @@
                     :namespaces (:namespaces pconfig/config)}))
 
 (defn run-script [& script]
-  (println "BOOM!")
   (let [ws-folder ^js (first js/vscode.workspace.workspaceFolders)
         ws-root (some-> ws-folder (.uri) (.fsPath))]
     (sci/eval-string* ctx
