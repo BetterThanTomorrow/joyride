@@ -1,6 +1,5 @@
 (ns congas.extension
   (:require
-   ["fs" :as fs]
    ["path" :as path]
    ["vscode" :as vscode]
    [promesa.core :as p]
