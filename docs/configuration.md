@@ -20,5 +20,5 @@ The `joy.commands` setting is an array of objects, each with the following field
 
 ### User and Workspace command conflicts
 
-The **Run Script** menu will contain the concatenation of the commands defined in the **User** and **Workspace** configuration. If two commands are bound to the same keyboard shortcut, the **User** defined one will win.
+The **Run Script** menu will contain the concatenation of the commands defined in the **User** and **Workspace** configuration. If two commands are bound to the same keyboard shortcut, the **Workspace** defined one will win. (If some other extension binds the same shortcut, it's undefined which one will win.)
 
