@@ -1,4 +1,4 @@
-(ns joy.extension
+(ns joyride.extension
   (:require
    ["vscode" :as vscode]
    [clojure.string :as str]
@@ -43,7 +43,7 @@
                                         (vscode/window.showInformationMessage "Hello from SCI!")]))]
     (sci/eval-string* @!ctx
                       program
-                      #_(fs/readFileSync (path/resolve ws-root ".joy/scripts/hello.cljs"))))
+                      #_(fs/readFileSync (path/resolve ws-root ".joyride/scripts/hello.cljs"))))
   (sci/eval-form @!ctx
                  '(do (require '[promesa.core :as p])
                       (p/do
@@ -52,7 +52,7 @@
   (eval-query))
 
 (defn- register-command []
-  (vscode/commands.registerCommand "joy.runScript" run-script))
+  (vscode/commands.registerCommand "joyride.runScript" run-script))
 
 (defn- setup-command [^js context]
   (->> (register-command)
@@ -60,7 +60,7 @@
 
 
 
-                                        ; /Users/pez/Desktop/empty/joy/scripts/hello.cljs
+                                        ; /Users/pez/Desktop/empty/joyride/scripts/hello.cljs
 (defn ^:export activate [^js context]
   (setup-command context))
 

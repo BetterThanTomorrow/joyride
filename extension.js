@@ -1,15 +1,15 @@
 const vscode = require("vscode");
-const joy = require("./out/joy.js");
+const joyride = require("./out/joyride.js");
 
 /**
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-  joy.activate(context);
+  joyride.activate(context);
 }
 
 function deactivate() {
-  joy.deactivate();
+  joyride.deactivate();
 }
 
 module.exports = {

@@ -1,6 +1,6 @@
 # Change Log
 
-Changes to Joy
+Changes to Joyride
 
 ## [Unreleased]
 

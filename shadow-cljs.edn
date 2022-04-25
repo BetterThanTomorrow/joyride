@@ -6,5 +6,5 @@
                            :keep-as-require #{"vscode"}}
               :compiler-options {:infer-externs :auto}
               :output-dir "out/js"
-              :output-to "out/joy.js"
-              :exports {:activate joy.extension/activate}}}}
+              :output-to "out/joyride.js"
+              :exports {:activate joyride.extension/activate}}}}

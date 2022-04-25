@@ -1,8 +1,8 @@
 {
-  "name": "joy",
-  "displayName": "Joy: Hack your editor",
+  "name": "joyride",
+  "displayName": "Joyride: Hack your editor",
   "description": "Makes VS Code scriptable using nbb (interpreted Clojure for node-js)",
-  "icon": "assets/joy.png",
+  "icon": "assets/joyride.png",
   "version": "0.0.1",
   "publisher": "betterthantomorrow",
   "author": {
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/PEZ/joy.git"
+    "url": "https://github.com/PEZ/joyride.git"
   },
   "license": "MIT",
   "engines": {
@@ -33,9 +33,9 @@
   },
   "badges": [
     {
-      "url": "https://img.shields.io/badge/clojurians-joy-blue.svg?logo=slack",
+      "url": "https://img.shields.io/badge/clojurians-joyride-blue.svg?logo=slack",
       "href": "https://clojurians.slack.com/messages/vscode/",
-      "description": "Let's talk in the #joy channel on the Clojurians Slack"
+      "description": "Let's talk in the #joyride channel on the Clojurians Slack"
     }
   ],
   "activationEvents": [
@@ -45,25 +45,25 @@
   "contributes": {
     "configuration": {
       "type": "object",
-      "title": "Joy",
+      "title": "Joyride",
       "properties": {
-        "joy.scriptsPath": {
+        "joyride.scriptsPath": {
           "type": "string",
-          "default": ".joy/scriptz",
-          "markdownDescription": "Where Joy should look for scripts"
+          "default": ".joyride/scriptz",
+          "markdownDescription": "Where Joyride should look for scripts"
         }
       }
     },
     "commands": [
       {
-        "command": "joy.runScript",
+        "command": "joyride.runScript",
         "title": "Run Script",
-        "category": "Joy"
+        "category": "Joyride"
       }
     ],
     "keybindings": [
       {
-        "command": "joy.runScript",
+        "command": "joyride.runScript",
         "key": "ctrl+shift+space space"
       }
     ]
