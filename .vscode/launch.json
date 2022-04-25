@@ -10,8 +10,7 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "--extensionDevelopmentPath=${workspaceRoot}",
-                "--enable-proposed-api betterthantomorrow.congas"
+                "--extensionDevelopmentPath=${workspaceRoot}"
             ],
             "stopOnEntry": false,
             "sourceMaps": true,
@@ -26,8 +25,7 @@
             "runtimeExecutable": "${execPath}",
             "args": [
                 "--extensionDevelopmentPath=${workspaceRoot}",
-                "--disable-extensions",
-                "--enable-proposed-api betterthantomorrow.congas"
+                "--disable-extensions"
             ],
             "stopOnEntry": false,
             "sourceMaps": true,
