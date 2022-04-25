@@ -20,5 +20,5 @@ node_modules
 /.portal/vs-code.edn
 .calva/output-window/
 
-# Congas
+# Joy
 /out/

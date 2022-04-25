@@ -1,8 +1,8 @@
 {
-  "name": "congas",
-  "displayName": "Congas: Hack your editor",
+  "name": "joy",
+  "displayName": "Joy: Hack your editor",
   "description": "Makes VS Code scriptable using nbb (interpreted Clojure for node-js)",
-  "icon": "assets/congas.png",
+  "icon": "assets/joy.png",
   "version": "0.0.1",
   "publisher": "betterthantomorrow",
   "author": {
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/PEZ/congas.git"
+    "url": "https://github.com/PEZ/joy.git"
   },
   "license": "MIT",
   "engines": {
@@ -33,9 +33,9 @@
   },
   "badges": [
     {
-      "url": "https://img.shields.io/badge/clojurians-congas-blue.svg?logo=slack",
+      "url": "https://img.shields.io/badge/clojurians-joy-blue.svg?logo=slack",
       "href": "https://clojurians.slack.com/messages/vscode/",
-      "description": "Let's talk in the #congas channel on the Clojurians Slack"
+      "description": "Let's talk in the #joy channel on the Clojurians Slack"
     }
   ],
   "activationEvents": [
@@ -45,25 +45,25 @@
   "contributes": {
     "configuration": {
       "type": "object",
-      "title": "Congas",
+      "title": "Joy",
       "properties": {
-        "congas.scriptsPath": {
+        "joy.scriptsPath": {
           "type": "string",
-          "default": ".congas/scriptz",
-          "markdownDescription": "Where Congas should look for scripts"
+          "default": ".joy/scriptz",
+          "markdownDescription": "Where Joy should look for scripts"
         }
       }
     },
     "commands": [
       {
-        "command": "congas.runScript",
+        "command": "joy.runScript",
         "title": "Run Script",
-        "category": "Congas"
+        "category": "Joy"
       }
     ],
     "keybindings": [
       {
-        "command": "congas.runScript",
+        "command": "joy.runScript",
         "key": "ctrl+shift+space space"
       }
     ]

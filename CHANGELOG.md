@@ -1,6 +1,6 @@
 # Change Log
 
-Changes to Congas
+Changes to Joy
 
 ## [Unreleased]
 

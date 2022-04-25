@@ -1,4 +1,4 @@
-(ns congas.extension
+(ns joy.extension
   (:require
    ["vscode" :as vscode]
    [clojure.string :as str]
@@ -18,7 +18,7 @@
                       :namespaces (:namespaces pconfig/config)
                       :load-fn (fn [{:keys [namespace opts]}]
                                  (when ;; assume npm library
-                                     (string? namespace)
+                                  (string? namespace)
                                    (if (= "vscode" namespace)
                                      (do (sci/add-class! @!ctx 'vscode vscode)
                                          (sci/add-import! @!ctx (symbol (str @sci/ns)) 'vscode (:as opts))
@@ -43,7 +43,7 @@
                                         (vscode/window.showInformationMessage "Hello from SCI!")]))]
     (sci/eval-string* @!ctx
                       program
-                      #_(fs/readFileSync (path/resolve ws-root ".congas/scripts/hello.cljs"))))
+                      #_(fs/readFileSync (path/resolve ws-root ".joy/scripts/hello.cljs"))))
   (sci/eval-form @!ctx
                  '(do (require '[promesa.core :as p])
                       (p/do
@@ -52,7 +52,7 @@
   (eval-query))
 
 (defn- register-command []
-  (vscode/commands.registerCommand "congas.runScript" run-script))
+  (vscode/commands.registerCommand "joy.runScript" run-script))
 
 (defn- setup-command [^js context]
   (->> (register-command)
@@ -60,11 +60,10 @@
 
 
 
-                                        ; /Users/pez/Desktop/empty/congas/scripts/hello.cljs
+                                        ; /Users/pez/Desktop/empty/joy/scripts/hello.cljs
 (defn ^:export activate [^js context]
   (setup-command context))
 
-(defn ^:export deactivate []
-  )
+(defn ^:export deactivate [])
 
 (comment)
