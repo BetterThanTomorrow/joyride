@@ -1,24 +1,32 @@
 # Configuration
 
-VS Code settings to configure Joy.
+VS Code settings to configure Joyride.
 
-You can specify two sources for Joy scripts:
+You can specify two sources for Joyride scripts:
 
-* `joy.scriptsPath.user`: An absolute path
-* `joy.scriptsPath.workspace`: A workspace relative path 
+- `joyride.scriptsPath.user`: An absolute path
+- `joyride.scriptsPath.workspace`: A workspace relative path
 
-## Commands
+The sources ar used the following way:
 
-The `joy.commands` setting is an array of objects, each with the following fields (required fields in **bold**):
+- The **Joyride: Run Script** menu (default keybinding `ctrl+alt+j`) will list the contents of these directories.
+- Joyride has two configured commands for running scripts that take a relative path as an argument. You can use these commands in custom keybindings.
+    1. `joyride.runUserScript`
+    2. `joyride.runWorkspaceScript`
 
-* **`name`**: The name of the command as it will appear in the **Run Script** menu.
-* `key`: Will prefix `name` in the **Run Script** menu. Specifying a key enumerated in [VS Code Keybindingds Accepted Keys](https://code.visualstudio.com/docs/getstarted/keybindings#_accepted-keys), except `space`, will bind the command to the keyboard shortcut `ctrl+shift+space <key>`.
-* `root`: Either `user` or `workspace`. Defaults to the `user` if in **User** settings and `workspace` if in **Workspace** settings.
-* **`source`**: An object with one of:
-  * `file`: A string with the path to the file that should be loaded, the path is relative to the `root`
-  * `code`: A string with the code to be evaluated 
+An example `keybindings.json` fragment:
 
-### User and Workspace command conflicts
+```json
+  {
+    "key": "cmd+j",
+    "command": "joyride.runUserScript",
+    "args": "a-script.cljs"
+  },
+  {
+    "key": "alt+shift+.",
+    "command": "joyride.runWorkspaceScript",
+    "args": "a-script.cljs"
+  }
+```
 
-The **Run Script** menu will contain the concatenation of the commands defined in the **User** and **Workspace** configuration. If two commands are bound to the same keyboard shortcut, the **Workspace** defined one will win. (If some other extension binds the same shortcut, it's undefined which one will win.)
-
+This would bind `cmd+j` to Joyride running the script `<joyride.scriptsPath.user>/a-script.cljs` and `alt/option+shift+.` to `<joyride.scriptsPath.workspace>/a-script.cljs`.
