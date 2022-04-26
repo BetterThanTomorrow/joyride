@@ -4,6 +4,7 @@
    [clojure.string :as str]
    [sci-configs.funcool.promesa :as pconfig]
    [sci.core :as sci]
+   ["path" :as path]
    [promesa.core :as p]))
 
 (defn register-disposable [^js context ^js disposable]
@@ -51,18 +52,45 @@
                         (vscode/window.showInformationMessage "Hello from SCI again!!!!!!"))))
   (eval-query))
 
-(defn- register-command []
-  (vscode/commands.registerCommand "joyride.runScript" run-script))
+(defn vscode-read-uri+ [^js uri]
+  (try
+    (p/let [_ (vscode/workspace.fs.stat uri)
+            data (vscode/workspace.fs.readFile uri)
+            _ (def data data)
+            decoder (js/TextDecoder. "utf-8")
+            code (.decode decoder data)]
+      code)
+    (catch :default e
+      (js/console.error "Rading file failed: " (.-message e)))))
 
-(defn- setup-command [^js context]
-  (->> (register-command)
+;; TODO get this from settings
+(def workspace-scripts-path ".joyride/scripts")
+
+(defn run-workspace-script+ [script-path]
+  (->
+   (p/let [abs-path (path/join vscode/workspace.rootPath script-path)
+           script-uri (vscode/Uri.file abs-path)
+           code (vscode-read-uri+ script-uri)]
+     (sci/eval-string code))
+   (p/handle (fn [result error]
+                       (if error
+                         (js/console.error "Run Workspace Script Failed: " script-path (.-message error))
+                         result)))))
+
+(comment
+  (run-workspace-script+ ".joyride/scripts/hello.cljs")
+  )
+
+(defn- register-command [command-id var]
+  (vscode/commands.registerCommand command-id var))
+
+(defn- setup-command [^js context command-id var]
+  (->> (register-command command-id var)
        (register-disposable context)))
 
-
-
-                                        ; /Users/pez/Desktop/empty/joyride/scripts/hello.cljs
 (defn ^:export activate [^js context]
-  (setup-command context))
+  (setup-command context "joyride.runScript" #'run-script)
+  (setup-command context "joyride.runWorkspaceScript" #'run-workspace-script+))
 
 (defn ^:export deactivate [])
 

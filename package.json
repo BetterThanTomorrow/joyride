@@ -59,6 +59,11 @@
         "command": "joyride.runScript",
         "title": "Run Script",
         "category": "Joyride"
+      },
+      {
+        "command": "joyride.runWorkspaceScript",
+        "title": "Run Workspace Script",
+        "category": "Joyride"
       }
     ],
     "keybindings": [
