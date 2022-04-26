@@ -74,7 +74,9 @@
                                      :openLabel "Open script"}))
 
 (defn run-workspace-script+ [script-path]
-  (-> (p/let [script-uri (or (some-> script-path (path/join vscode/workspace.rootPath))
+  (-> (p/let [script-uri (or (some->> script-path
+                                      (path/join vscode/workspace.rootPath ".joyride/scripts")
+                                      vscode/Uri.file)
                               (p/let [files (choose-file
                                              (vscode/Uri.file (path/join
                                                                vscode/workspace.rootPath
