@@ -59,7 +59,6 @@
   (try
     (p/let [_ (vscode/workspace.fs.stat uri)
             data (vscode/workspace.fs.readFile uri)
-            _ (def data data)
             decoder (js/TextDecoder. "utf-8")
             code (.decode decoder data)]
       code)
@@ -72,23 +71,6 @@
   (vscode/window.showOpenDialog #js {:canSelectMany false
                                      :defaultUri default-uri
                                      :openLabel "Open script"}))
-
-#_(defn run-workspace-script+ [script-path]
-  (-> (p/let [script-uri (or (some->> script-path
-                                      (path/join vscode/workspace.rootPath ".joyride/scripts")
-                                      vscode/Uri.file)
-                              (p/let [files (choose-file
-                                             (vscode/Uri.file (path/join
-                                                               vscode/workspace.rootPath
-                                                               ".joyride/scripts")))
-                                      file (first files)]
-                                file))
-              code (vscode-read-uri+ script-uri)]
-        (sci/eval-string* @!ctx code))
-      (p/handle (fn [result error]
-                  (if error
-                    (js/console.error "Run Workspace Script Failed: " script-path (.-message error))
-                    result)))))
 
 (defn run-workspace-script+
   ([]
