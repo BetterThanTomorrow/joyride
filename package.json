@@ -69,6 +69,11 @@
         "command": "joyride.loadCurrentFile",
         "title": "Load Current File",
         "category": "Joyride"
+      },
+      {
+        "command": "joyride.evaluateSelection",
+        "title": "Evaluate Selection",
+        "category": "Joyride"
       }
     ],
     "keybindings": [

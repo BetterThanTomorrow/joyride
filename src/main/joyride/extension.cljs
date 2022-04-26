@@ -94,9 +94,22 @@
           (sci/eval-string* @!ctx code))
         (p/handle (fn [result error]
                     (if error
-                      (js/console.error "Run Workspace Script Failed: " (.-fileName current-doc) (.-message error))
+                      (js/console.error "Load Current File Failed: " (.-fileName current-doc) (.-message error))
                       result))))
     (vscode/window.showInformationMessage "There is no current document to load")))
+
+(defn evaluate-selection+ []
+  (if-let [selection (some->> vscode/window.activeTextEditor
+                              (.-selection))]
+    (-> (p/let [selected-text (some-> vscode/window.activeTextEditor
+                                      (.-document)
+                                      (.getText selection))]
+          (sci/eval-string* @!ctx selected-text))
+        (p/handle (fn [result error]
+                    (if error
+                      (js/console.error "Evaluate Selection Failed: " (.-message error))
+                      result))))
+    (vscode/window.showInformationMessage "There is no current document, so no selection")))
 
 (comment
   (run-workspace-script+)
@@ -105,7 +118,8 @@
 (defn ^:export activate [^js context]
   (register-command context "joyride.runScript" #'run-script)
   (register-command context "joyride.runWorkspaceScript" #'run-workspace-script+)
-  (register-command context "joyride.loadCurrentFile" #'load-current-file+))
+  (register-command context "joyride.loadCurrentFile" #'load-current-file+)
+  (register-command context "joyride.evaluateSelection" #'evaluate-selection+))
 
 (defn ^:export deactivate [])
 
