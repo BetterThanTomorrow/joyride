@@ -5,10 +5,12 @@
    [sci-configs.funcool.promesa :as pconfig]
    [sci.core :as sci]
    ["path" :as path]
-   [promesa.core :as p]))
+   [promesa.core :as p]
+   [joyride.scripts-menu :refer [show-workspace-scripts-menu+]]))
 
-(defn register-disposable [^js context ^js disposable]
-  (.push (.-subscriptions context) disposable))
+(defn- register-command [^js context command-id var]
+  (->> (vscode/commands.registerCommand command-id var)
+       (.push (.-subscriptions context))))
 
 (defn debug [& xs]
   (apply vscode/window.showInformationMessage (into-array (mapv str xs))))
@@ -63,9 +65,6 @@
     (catch :default e
       (js/console.error "Rading file failed: " (.-message e)))))
 
-;; TODO get this from settings
-(def workspace-scripts-path ".joyride/scripts")
-
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
 
 (defn choose-file [default-uri]
@@ -73,7 +72,7 @@
                                      :defaultUri default-uri
                                      :openLabel "Open script"}))
 
-(defn run-workspace-script+ [script-path]
+#_(defn run-workspace-script+ [script-path]
   (-> (p/let [script-uri (or (some->> script-path
                                       (path/join vscode/workspace.rootPath ".joyride/scripts")
                                       vscode/Uri.file)
@@ -90,20 +89,29 @@
                     (js/console.error "Run Workspace Script Failed: " script-path (.-message error))
                     result)))))
 
+(defn run-workspace-script+
+  ([]
+   (p/let [picked-script (show-workspace-scripts-menu+)
+           script-path (path/join (:workspace-scripts-path picked-script)
+                                  (:section-path picked-script))]
+     (run-workspace-script+ script-path)))
+  ([script-path]
+   (-> (p/let [abs-path (path/join vscode/workspace.rootPath script-path)
+               script-uri (vscode/Uri.file abs-path)
+               code (vscode-read-uri+ script-uri)]
+         (sci/eval-string* @!ctx code))
+       (p/handle (fn [result error]
+                   (if error
+                     (js/console.error "Run Workspace Script Failed: " script-path (.-message error))
+                     result))))))
+
 (comment
-  (run-workspace-script+ ".joyride/scripts/hello.cljs")
-  )
-
-(defn- register-command [command-id var]
-  (vscode/commands.registerCommand command-id var))
-
-(defn- setup-command [^js context command-id var]
-  (->> (register-command command-id var)
-       (register-disposable context)))
+  (run-workspace-script+)
+  (run-workspace-script+ ".joyride/scripts/hello.cljs"))
 
 (defn ^:export activate [^js context]
-  (setup-command context "joyride.runScript" #'run-script)
-  (setup-command context "joyride.runWorkspaceScript" #'run-workspace-script+))
+  (register-command context "joyride.runScript" #'run-script)
+  (register-command context "joyride.runWorkspaceScript" #'run-workspace-script+))
 
 (defn ^:export deactivate [])
 
