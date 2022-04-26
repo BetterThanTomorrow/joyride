@@ -93,8 +93,7 @@
 (defn run-workspace-script+
   ([]
    (p/let [picked-script (show-workspace-scripts-menu+)
-           script-path (path/join (:workspace-scripts-path picked-script)
-                                  (:section-path picked-script))]
+           script-path (:section-path picked-script)]
      (run-workspace-script+ script-path)))
   ([script-path]
    (-> (p/let [abs-path (path/join vscode/workspace.rootPath workspace-scripts-path script-path)
