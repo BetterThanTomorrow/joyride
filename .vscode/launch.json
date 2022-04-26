@@ -29,11 +29,26 @@
             ],
             "stopOnEntry": false,
             "sourceMaps": true,
-            "env": {
-            },
+            "env": {},
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"
             ]
         },
+        {
+            "name": "Launch in playground/hello-joyride folder",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceRoot}",
+                "${workspaceFolder}/playground/hello-joyride"
+            ],
+            "stopOnEntry": false,
+            "sourceMaps": true,
+            "env": {},
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ]
+        }
     ]
 }
