@@ -1,12 +1,13 @@
 (ns joyride.extension
   (:require
+   ["path" :as path]
    ["vscode" :as vscode]
    [clojure.string :as str]
-   [sci-configs.funcool.promesa :as pconfig]
-   [sci.core :as sci]
-   ["path" :as path]
+   [joyride.settings :refer [workspace-scripts-path]]
+   [joyride.scripts-menu :refer [show-workspace-scripts-menu+]]
    [promesa.core :as p]
-   [joyride.scripts-menu :refer [show-workspace-scripts-menu+]]))
+   [sci-configs.funcool.promesa :as pconfig]
+   [sci.core :as sci]))
 
 (defn- register-command [^js context command-id var]
   (->> (vscode/commands.registerCommand command-id var)
@@ -63,7 +64,7 @@
             code (.decode decoder data)]
       code)
     (catch :default e
-      (js/console.error "Rading file failed: " (.-message e)))))
+      (js/console.error "Reading file failed: " (.-message e)))))
 
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
 
@@ -96,7 +97,7 @@
                                   (:section-path picked-script))]
      (run-workspace-script+ script-path)))
   ([script-path]
-   (-> (p/let [abs-path (path/join vscode/workspace.rootPath script-path)
+   (-> (p/let [abs-path (path/join vscode/workspace.rootPath workspace-scripts-path script-path)
                script-uri (vscode/Uri.file abs-path)
                code (vscode-read-uri+ script-uri)]
          (sci/eval-string* @!ctx code))

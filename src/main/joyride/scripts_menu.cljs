@@ -1,12 +1,9 @@
 (ns joyride.scripts-menu
   (:require ["path" :as path]
-            [joyride.util :refer [jsify cljify]]
             ["vscode" :as vscode]
+            [joyride.settings :refer [workspace-scripts-path]]
+            [joyride.util :refer [jsify cljify]]
             [promesa.core :as p]))
-
-;; TODO: Pick these from settings
-(def user-scripts-path "/Users/pez/.joyride/scripts")
-(def workspace-scripts-path ".joyride/scripts")
 
 (defn find-script-uris+ [script-folder-path]
   (let [glob (path/join script-folder-path "*.cljs")]
