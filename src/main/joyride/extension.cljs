@@ -66,16 +66,27 @@
 ;; TODO get this from settings
 (def workspace-scripts-path ".joyride/scripts")
 
+(sci/alter-var-root sci/print-fn (constantly *print-fn*))
+
+(defn choose-file [default-uri]
+  (vscode/window.showOpenDialog #js {:canSelectMany false
+                                     :defaultUri default-uri
+                                     :openLabel "Open script"}))
+
 (defn run-workspace-script+ [script-path]
-  (->
-   (p/let [abs-path (path/join vscode/workspace.rootPath script-path)
-           script-uri (vscode/Uri.file abs-path)
-           code (vscode-read-uri+ script-uri)]
-     (sci/eval-string code))
-   (p/handle (fn [result error]
-                       (if error
-                         (js/console.error "Run Workspace Script Failed: " script-path (.-message error))
-                         result)))))
+  (-> (p/let [script-uri (or (some-> script-path (path/join vscode/workspace.rootPath))
+                              (p/let [files (choose-file
+                                             (vscode/Uri.file (path/join
+                                                               vscode/workspace.rootPath
+                                                               ".joyride/scripts")))
+                                      file (first files)]
+                                file))
+              code (vscode-read-uri+ script-uri)]
+        (sci/eval-string* @!ctx code))
+      (p/handle (fn [result error]
+                  (if error
+                    (js/console.error "Run Workspace Script Failed: " script-path (.-message error))
+                    result)))))
 
 (comment
   (run-workspace-script+ ".joyride/scripts/hello.cljs")
