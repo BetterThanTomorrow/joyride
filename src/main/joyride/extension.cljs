@@ -9,6 +9,8 @@
    [sci-configs.funcool.promesa :as pconfig]
    [sci.core :as sci]))
 
+(def !db (atom {}))
+
 (defn- register-command [^js context command-id var]
   (->> (vscode/commands.registerCommand command-id var)
        (.push (.-subscriptions context))))
@@ -108,7 +110,10 @@
         (p/handle (fn [result error]
                     (if error
                       (js/console.error "Evaluate Selection Failed: " (.-message error))
-                      result))))
+                      (do (doto (:output-channel @!db)
+                            (.appendLine (str "=>\n" result))
+                            (.show true))
+                          result)))))
     (vscode/window.showInformationMessage "There is no current document, so no selection")))
 
 (comment
@@ -116,10 +121,14 @@
   (run-workspace-script+ ".joyride/scripts/hello.cljs"))
 
 (defn ^:export activate [^js context]
+  (swap! !db assoc :output-channel (vscode/window.createOutputChannel "Joyride"))
   (register-command context "joyride.runScript" #'run-script)
   (register-command context "joyride.runWorkspaceScript" #'run-workspace-script+)
   (register-command context "joyride.loadCurrentFile" #'load-current-file+)
-  (register-command context "joyride.evaluateSelection" #'evaluate-selection+))
+  (register-command context "joyride.evaluateSelection" #'evaluate-selection+)
+  (doto (:output-channel @!db)
+    (.appendLine "🟢 Take VS Code on a Joyride. 🚗")
+    (.show true)))
 
 (defn ^:export deactivate [])
 
