@@ -87,13 +87,25 @@
                      (js/console.error "Run Workspace Script Failed: " script-path (.-message error))
                      result))))))
 
+(defn load-current-file+ []
+  (if-let [current-doc (some->> vscode/window.activeTextEditor
+                                (.-document))]
+    (-> (p/let [code (vscode-read-uri+ (.-uri current-doc))]
+          (sci/eval-string* @!ctx code))
+        (p/handle (fn [result error]
+                    (if error
+                      (js/console.error "Run Workspace Script Failed: " (.-fileName current-doc) (.-message error))
+                      result))))
+    (vscode/window.showInformationMessage "There is no current document to load")))
+
 (comment
   (run-workspace-script+)
   (run-workspace-script+ ".joyride/scripts/hello.cljs"))
 
 (defn ^:export activate [^js context]
   (register-command context "joyride.runScript" #'run-script)
-  (register-command context "joyride.runWorkspaceScript" #'run-workspace-script+))
+  (register-command context "joyride.runWorkspaceScript" #'run-workspace-script+)
+  (register-command context "joyride.loadCurrentFile" #'load-current-file+))
 
 (defn ^:export deactivate [])
 

@@ -64,6 +64,11 @@
         "command": "joyride.runWorkspaceScript",
         "title": "Run Workspace Script",
         "category": "Joyride"
+      },
+      {
+        "command": "joyride.loadCurrentFile",
+        "title": "Load Current File",
+        "category": "Joyride"
       }
     ],
     "keybindings": [
