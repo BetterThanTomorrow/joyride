@@ -10,7 +10,7 @@ Powered by [SCI](https://github.com/babashka/sci) (Small Clojure Interpreter).
 
 Create a script in your workspace under `.joyride/scripts`, e.g. `example.cljs`:
 
-```
+``` clojure
 (ns example
   (:require ["fs" :as fs]
             ["path" :as path]
@@ -30,7 +30,7 @@ your workspace.
 
 Then in your keyboard shortcuts, add:
 
-```
+``` json
  {
         "key": "cmd+1",
         "command": "joyride.runWorkspaceScript",
