@@ -5,7 +5,7 @@ VS Code settings to configure Joyride.
 You can specify two sources for Joyride scripts:
 
 - `joyride.scriptsPath.user`: An absolute path
-- `joyride.scriptsPath.workspace`: A workspace relative path
+- `joyride.scriptsPath.workspace`: A workspace relative path. Defaults to `.joyride/scripts`.
 
 The sources ar used the following way:
 
@@ -18,15 +18,15 @@ An example `keybindings.json` fragment:
 
 ```json
   {
-    "key": "cmd+j",
+    "key": "cmd+1",
     "command": "joyride.runUserScript",
-    "args": "a-script.cljs"
+    "args": "my_user_script.cljs"
   },
   {
-    "key": "alt+shift+.",
+    "key": "cmd+2",
     "command": "joyride.runWorkspaceScript",
-    "args": "a-script.cljs"
+    "args": "my_workspace_script.cljs"
   }
 ```
 
-This would bind `cmd+j` to Joyride running the script `<joyride.scriptsPath.user>/a-script.cljs` and `alt/option+shift+.` to `<joyride.scriptsPath.workspace>/a-script.cljs`.
+This would bind `cmd+1` to Joyride running the script `<joyride.scriptsPath.user>/my_user_script.cljs` and `cmd+2` to `<joyride.scriptsPath.workspace>/my_workspace_.cljs`.
