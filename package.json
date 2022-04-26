@@ -49,7 +49,7 @@
       "properties": {
         "joyride.scriptsPath": {
           "type": "string",
-          "default": ".joyride/scriptz",
+          "default": ".joyride/scripts",
           "markdownDescription": "Where Joyride should look for scripts"
         }
       }
@@ -78,8 +78,16 @@
     ],
     "keybindings": [
       {
-        "command": "joyride.runScript",
-        "key": "ctrl+shift+space space"
+        "command": "joyride.runWorkspaceScript",
+        "key": "ctrl+shift+space ctrl+shift+w"
+      },
+      {
+        "command": "joyride.loadCurrentFile",
+        "key": "ctrl+shift+space ctrl+shift+f"
+      },
+      {
+        "command": "joyride.evaluateSelection",
+        "key": "ctrl+shift+space ctrl+shift+s"
       }
     ]
   },
