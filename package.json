@@ -47,17 +47,6 @@
   ],
   "main": "./extension.js",
   "contributes": {
-    "configuration": {
-      "type": "object",
-      "title": "Joyride",
-      "properties": {
-        "joyride.scriptsPath": {
-          "type": "string",
-          "default": ".joyride/scripts",
-          "markdownDescription": "Where Joyride should look for scripts"
-        }
-      }
-    },
     "commands": [
       {
         "command": "joyride.runScript",
