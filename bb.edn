@@ -1,0 +1,1 @@
+{:tasks {dev (shell "npx shadow-cljs watch extension")}}
