@@ -1,4 +1,4 @@
-# Take VSCode for a Joyride!
+# Take VSCode on a Joyride!
 
 <img src="assets/joyride.png" height=300></img>
 
