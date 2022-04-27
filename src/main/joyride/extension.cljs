@@ -15,6 +15,20 @@
   (->> (vscode/commands.registerCommand command-id var)
        (.push (.-subscriptions context))))
 
+(def ^{:dynamic true
+       :doc "Should the Joyride output channel be revealed after `say`?
+             Default: `true`"} 
+  *show-when-said?* true)
+
+(defn say [message]
+  (let [channel ^js (:output-channel @!db)]
+    (.appendLine channel message)
+    (when *show-when-said?*
+      (.show channel true))))
+
+(defn say-error [message]
+  (say (str "ERROR: " message)))
+
 (defn debug [& xs]
   (apply vscode/window.showInformationMessage (into-array (mapv str xs))))
 
@@ -86,7 +100,9 @@
          (sci/eval-string* @!ctx code))
        (p/handle (fn [result error]
                    (if error
-                     (js/console.error "Run Workspace Script Failed: " script-path (.-message error))
+                     (do
+                       (say-error (str (js/console.error "Run Workspace Script Failed: " script-path (.-message error))))
+                       (js/console.error "Run Workspace Script Failed: " script-path (.-message error) error))
                      result))))))
 
 (defn load-current-file+ []
@@ -96,7 +112,9 @@
           (sci/eval-string* @!ctx code))
         (p/handle (fn [result error]
                     (if error
-                      (js/console.error "Load Current File Failed: " (.-fileName current-doc) (.-message error))
+                      (do
+                        (say-error (str "Load Current File Failed: " (.-fileName current-doc)))
+                        (js/console.error "Load Current File Failed: " (.-fileName current-doc) (.-message error) error))
                       result))))
     (vscode/window.showInformationMessage "There is no current document to load")))
 
@@ -109,10 +127,10 @@
           (sci/eval-string* @!ctx selected-text))
         (p/handle (fn [result error]
                     (if error
-                      (js/console.error "Evaluate Selection Failed: " (.-message error))
-                      (do (doto (:output-channel @!db)
-                            (.appendLine (str "=>\n" result))
-                            (.show true))
+                      (do
+                        (say-error (str "Evaluate Selection Failed: " (.-message error)))
+                        (js/console.error "Evaluate Selection Failed: " (.-message error) error))
+                      (do (say (str "=>\n" result))
                           result)))))
     (vscode/window.showInformationMessage "There is no current document, so no selection")))
 
@@ -126,9 +144,7 @@
   (register-command context "joyride.runWorkspaceScript" #'run-workspace-script+)
   (register-command context "joyride.loadCurrentFile" #'load-current-file+)
   (register-command context "joyride.evaluateSelection" #'evaluate-selection+)
-  (doto (:output-channel @!db)
-    (.appendLine "🟢 Take VS Code on a Joyride. 🚗")
-    (.show true)))
+  (say "🟢 Take VS Code on a Joyride. 🚗"))
 
 (defn ^:export deactivate [])
 
