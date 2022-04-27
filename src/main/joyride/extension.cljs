@@ -6,6 +6,7 @@
    [joyride.sci :as sci]
    [joyride.scripts-menu :refer [show-workspace-scripts-menu+]]
    [joyride.settings :refer [workspace-scripts-path]]
+   [joyride.utils :refer [vscode-read-uri+]]
    [promesa.core :as p]))
 
 (def !db (atom {}))
@@ -39,16 +40,6 @@
 
 (defn run-script [& _script]
   (eval-query))
-
-(defn vscode-read-uri+ [^js uri]
-  (try
-    (p/let [_ (vscode/workspace.fs.stat uri)
-            data (vscode/workspace.fs.readFile uri)
-            decoder (js/TextDecoder. "utf-8")
-            code (.decode decoder data)]
-      code)
-    (catch :default e
-      (js/console.error "Reading file failed: " (.-message e)))))
 
 (defn choose-file [default-uri]
   (vscode/window.showOpenDialog #js {:canSelectMany false
