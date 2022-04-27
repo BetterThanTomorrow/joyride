@@ -103,7 +103,8 @@
                      (do
                        (say-error (str (js/console.error "Run Workspace Script Failed: " script-path (.-message error))))
                        (js/console.error "Run Workspace Script Failed: " script-path (.-message error) error))
-                     result))))))
+                     (do (say (str script-path " evaluated. =>\n" result))
+                       result)))))))
 
 (defn load-current-file+ []
   (if-let [current-doc (some->> vscode/window.activeTextEditor
@@ -115,7 +116,8 @@
                       (do
                         (say-error (str "Load Current File Failed: " (.-fileName current-doc)))
                         (js/console.error "Load Current File Failed: " (.-fileName current-doc) (.-message error) error))
-                      result))))
+                      (do (say (str (.-fileName current-doc) " evaluated. =>\n" result))
+                          result)))))
     (vscode/window.showInformationMessage "There is no current document to load")))
 
 (defn evaluate-selection+ []
