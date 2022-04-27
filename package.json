@@ -77,6 +77,16 @@
         "command": "joyride.evaluateSelection",
         "title": "Evaluate Selection",
         "category": "Joyride"
+      },
+      {
+        "command": "joyride.startNRepl",
+        "title": "Start nREPL",
+        "category": "Joyride"
+      },
+      {
+        "command": "joyride.stopNRepl",
+        "title": "Stop nREPL",
+        "category": "Joyride"
       }
     ],
     "keybindings": [

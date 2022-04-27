@@ -2,12 +2,11 @@
   (:require
    ["path" :as path]
    ["vscode" :as vscode]
-   [clojure.string :as str]
-   [joyride.settings :refer [workspace-scripts-path]]
+   [joyride.nrepl :as nrepl]
+   [joyride.sci :as sci]
    [joyride.scripts-menu :refer [show-workspace-scripts-menu+]]
-   [promesa.core :as p]
-   [sci-configs.funcool.promesa :as pconfig]
-   [sci.core :as sci]))
+   [joyride.settings :refer [workspace-scripts-path]]
+   [promesa.core :as p]))
 
 (def !db (atom {}))
 
@@ -17,7 +16,7 @@
 
 (def ^{:dynamic true
        :doc "Should the Joyride output channel be revealed after `say`?
-             Default: `true`"} 
+             Default: `true`"}
   *show-when-said?* true)
 
 (defn say [message]
@@ -32,43 +31,13 @@
 (defn debug [& xs]
   (apply vscode/window.showInformationMessage (into-array (mapv str xs))))
 
-(def !ctx (volatile!
-           (sci/init {:classes {'js goog/global
-                                :allow :all}
-                      :namespaces (:namespaces pconfig/config)
-                      :load-fn (fn [{:keys [namespace opts]}]
-                                 (when ;; assume npm library
-                                  (string? namespace)
-                                   (if (= "vscode" namespace)
-                                     (do (sci/add-class! @!ctx 'vscode vscode)
-                                         (sci/add-import! @!ctx (symbol (str @sci/ns)) 'vscode (:as opts))
-                                         {:handled true})
-                                     (let [mod (js/require namespace)
-                                           ns-sym (symbol namespace)]
-                                       (sci/add-class! @!ctx ns-sym mod)
-                                       (sci/add-import! @!ctx (symbol (str @sci/ns)) ns-sym
-                                                        (or (:as opts)
-                                                            ns-sym))
-                                       {:handled true}))))})))
-
 (defn eval-query []
   (p/let [input (vscode/window.showInputBox #js {:placeHolder "(require '[\"path\" :as path]) (path/resolve \".\")"
                                                  :prompt "Type one or more expressions to evaluate"})
-          res (sci/eval-string* @!ctx input)]
+          res (sci/eval-string input)]
     (vscode/window.showInformationMessage (str "The result: " res))))
 
-(defn run-script [& script]
-  (let [program (str/join "\n"
-                          (map pr-str '[(require '["vscode" :as vscode])
-                                        (vscode/window.showInformationMessage "Hello from SCI!")]))]
-    (sci/eval-string* @!ctx
-                      program
-                      #_(fs/readFileSync (path/resolve ws-root ".joyride/scripts/hello.cljs"))))
-  (sci/eval-form @!ctx
-                 '(do (require '[promesa.core :as p])
-                      (p/do
-                        (p/delay 2000)
-                        (vscode/window.showInformationMessage "Hello from SCI again!!!!!!"))))
+(defn run-script [& _script]
   (eval-query))
 
 (defn vscode-read-uri+ [^js uri]
@@ -80,8 +49,6 @@
       code)
     (catch :default e
       (js/console.error "Reading file failed: " (.-message e)))))
-
-(sci/alter-var-root sci/print-fn (constantly *print-fn*))
 
 (defn choose-file [default-uri]
   (vscode/window.showOpenDialog #js {:canSelectMany false
@@ -97,7 +64,7 @@
    (-> (p/let [abs-path (path/join vscode/workspace.rootPath workspace-scripts-path script-path)
                script-uri (vscode/Uri.file abs-path)
                code (vscode-read-uri+ script-uri)]
-         (sci/eval-string* @!ctx code))
+         (sci/eval-string code))
        (p/handle (fn [result error]
                    (if error
                      (do
@@ -109,7 +76,7 @@
   (if-let [current-doc (some->> vscode/window.activeTextEditor
                                 (.-document))]
     (-> (p/let [code (vscode-read-uri+ (.-uri current-doc))]
-          (sci/eval-string* @!ctx code))
+          (sci/eval-string code))
         (p/handle (fn [result error]
                     (if error
                       (do
@@ -124,7 +91,7 @@
     (-> (p/let [selected-text (some-> vscode/window.activeTextEditor
                                       (.-document)
                                       (.getText selection))]
-          (sci/eval-string* @!ctx selected-text))
+          (sci/eval-string selected-text))
         (p/handle (fn [result error]
                     (if error
                       (do
@@ -133,6 +100,14 @@
                       (do (say (str "=>\n" result))
                           result)))))
     (vscode/window.showInformationMessage "There is no current document, so no selection")))
+
+(def !server (volatile! nil))
+
+(defn start-nrepl []
+  (vreset! !server (nrepl/start-server {})))
+
+(defn stop-nrepl []
+  (nrepl/stop-server @!server))
 
 (comment
   (run-workspace-script+)
@@ -144,6 +119,8 @@
   (register-command context "joyride.runWorkspaceScript" #'run-workspace-script+)
   (register-command context "joyride.loadCurrentFile" #'load-current-file+)
   (register-command context "joyride.evaluateSelection" #'evaluate-selection+)
+  (register-command context "joyride.startNRepl" #'start-nrepl)
+  (register-command context "joyride.stopNRepl" #'start-nrepl)
   (say "🟢 Take VS Code on a Joyride. 🚗"))
 
 (defn ^:export deactivate [])
