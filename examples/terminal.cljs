@@ -14,3 +14,6 @@
 
 ;; send an initial command to it
 (terminal.sendText "bb dev")
+
+;; see live demo here:
+;; https://twitter.com/borkdude/status/1519304323703971841
