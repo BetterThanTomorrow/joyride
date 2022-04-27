@@ -3,6 +3,8 @@
   (:require
    ["fs" :as fs]
    ["net" :as node-net]
+   ["path" :as path]
+   ["vscode" :as vscode]
    [clojure.string :as str]
    [joyride.bencode :refer [encode decode-all]]
    [joyride.repl-utils :as utils :refer [the-sci-ns]]
@@ -75,21 +77,19 @@
     (sci/alter-var-root sci/print-fn (constantly
                                       (fn [s]
                                         (send-fn request {"out" s}))))
-    (-> (jsci/eval-string code)
-        (.then (fn [v]
-                 (let [v (first v)]
-                   (reset! last-ns @sci/ns)
-                   (send-fn request {"value" (pr-str v)
-                                     "ns" (str @sci/ns)}))
-                 (send-fn request {"status" ["done"]})))
-        (.catch (fn [e]
-                  (sci/alter-var-root sci-last-error (constantly e))
-                  (let [data (ex-data e)]
-                    (when-let [message (or (:message data) (.-message e))]
-                      (send-fn request {"err" (str message "\n")}))
-                    (send-fn request {"ex" (str e)
-                                      "ns" (str @sci/ns)
-                                      "status" ["done"]})))))))
+    (try (let [v (jsci/eval-string code)]
+           (reset! last-ns @sci/ns)
+           (send-fn request {"value" (pr-str v)
+                             "ns" (str @sci/ns)})
+           (send-fn request {"status" ["done"]}))
+         (catch :default e
+          (sci/alter-var-root sci-last-error (constantly e))
+            (let [data (ex-data e)]
+              (when-let [message (or (:message data) (.-message e))]
+                (send-fn request {"err" (str message "\n")}))
+              (send-fn request {"ex" (str e)
+                                "ns" (str @sci/ns)
+                                "status" ["done"]}))))))
 
 (defn handle-eval [{:keys [ns sci-ctx-atom] :as request} send-fn]
   (do-handle-eval (assoc request :ns (or (when ns
@@ -207,7 +207,9 @@
                      host (-> addr .-address)]
                  (println (str "nREPL server started on port " port " on host " host " - nrepl://" host ":" port))
                  (try
-                   (.writeFileSync fs ".nrepl-port" (str port))
+                   (vscode/workspace.fs.writeFile (vscode/Uri.file
+                                                   (path/join vscode/workspace.rootPath ".nrepl-port"))
+                                                  (-> (new js/TextEncoder) (.encode (str port))))
                    (catch :default e
                      (warn "Could not write .nrepl-port" e))))))
     server)
