@@ -64,8 +64,6 @@
             "ops" (zipmap (map name (keys ops)) (repeat {}))
             "status" ["done"]}))
 
-;; TODO: this should not be global
-(def last-ns (atom nil))
 
 (defn do-handle-eval [{:keys [ns code sci-last-error _sci-ctx-atom _load-file?] :as request} send-fn]
   (sci/with-bindings
@@ -78,23 +76,22 @@
                                       (fn [s]
                                         (send-fn request {"out" s}))))
     (try (let [v (jsci/eval-string code)]
-           (reset! last-ns @sci/ns)
            (send-fn request {"value" (pr-str v)
                              "ns" (str @sci/ns)})
            (send-fn request {"status" ["done"]}))
          (catch :default e
-          (sci/alter-var-root sci-last-error (constantly e))
-            (let [data (ex-data e)]
-              (when-let [message (or (:message data) (.-message e))]
-                (send-fn request {"err" (str message "\n")}))
-              (send-fn request {"ex" (str e)
-                                "ns" (str @sci/ns)
-                                "status" ["done"]}))))))
+           (sci/alter-var-root sci-last-error (constantly e))
+           (let [data (ex-data e)]
+             (when-let [message (or (:message data) (.-message e))]
+               (send-fn request {"err" (str message "\n")}))
+             (send-fn request {"ex" (str e)
+                               "ns" (str @sci/ns)
+                               "status" ["done"]}))))))
 
 (defn handle-eval [{:keys [ns sci-ctx-atom] :as request} send-fn]
   (do-handle-eval (assoc request :ns (or (when ns
                                            (the-sci-ns @sci-ctx-atom (symbol ns)))
-                                         @last-ns
+                                         @jsci/!last-ns
                                          @sci/ns))
                   send-fn))
 
@@ -106,11 +103,11 @@
   (send-fn request {"status" ["done"]}))
 
 #_(defn handle-classpath [request send-fn]
-  (send-fn
-   request
-   {"status" ["done"]
-    "classpath"
-    (cp/split-classpath (cp/get-classpath))}))
+    (send-fn
+     request
+     {"status" ["done"]
+      "classpath"
+      (cp/split-classpath (cp/get-classpath))}))
 
 (defn handle-load-file [{:keys [file] :as request} send-fn]
   (do-handle-eval (assoc request
@@ -223,4 +220,3 @@
           (fn []
             (when (fs/existsSync ".nrepl-port")
               (fs/unlinkSync ".nrepl-port")))))
-

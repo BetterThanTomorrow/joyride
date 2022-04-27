@@ -44,5 +44,15 @@
                                                             ns-sym))
                                        {:handled true}))))})))
 
+(def !last-ns (volatile! @sci/ns))
+
 (defn eval-string [s]
-  (sci/eval-string* @!ctx s))
+  (sci/binding [sci/ns @!last-ns]
+    (let [rdr (sci/reader s)]
+      (loop [res nil]
+        (let [form (sci/parse-next @!ctx rdr)]
+          (if (= :sci.core/eof form)
+            (do
+              (vreset! !last-ns @sci/ns)
+              res)
+            (recur (sci/eval-form @!ctx form))))))))
