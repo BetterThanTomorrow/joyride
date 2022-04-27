@@ -1,10 +1,15 @@
-# Joyride
+# Take VSCode for a Joyride!
 
-Take VSCode for a Joyride!
+<img src="assets/joyride.png" height=300></img>
 
-Execute CLJS scripts using keyboard shortcuts.
 
-Powered by [SCI](https://github.com/babashka/sci) (Small Clojure Interpreter).
+Modify your editor by executing ClojureScript code in your REPL adn/or run scripts via keyboard shortcuts you choose. The Visual Studio Code API is at your command!
+
+Joyride is Powered by [SCI](https://github.com/babashka/sci) (Small Clojure Interpreter).
+
+## WIP
+
+You are entering a construction yard. Your feedback is so welcome!
 
 ## Quickstart
 
@@ -41,6 +46,10 @@ Then in your keyboard shortcuts, add:
 Now you can run the `example.cljs` script by just hitting Cmd+1!
 
 See [doc/configuration.md](doc/configuration.md) for full configuration options
+
+## Support and feedback
+
+You'll find us in the `#joyride` channel on the [Clojurians Slack](http://clojurians.net)
 
 ## News
 
