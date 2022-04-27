@@ -69,16 +69,6 @@
         "category": "Joyride"
       },
       {
-        "command": "joyride.loadCurrentFile",
-        "title": "Load Current File",
-        "category": "Joyride"
-      },
-      {
-        "command": "joyride.evaluateSelection",
-        "title": "Evaluate Selection",
-        "category": "Joyride"
-      },
-      {
         "command": "joyride.startNRepl",
         "title": "Start nREPL",
         "category": "Joyride"
@@ -92,15 +82,8 @@
     "keybindings": [
       {
         "command": "joyride.runWorkspaceScript",
-        "key": "ctrl+shift+space ctrl+shift+w"
-      },
-      {
-        "command": "joyride.loadCurrentFile",
-        "key": "ctrl+shift+space ctrl+shift+f"
-      },
-      {
-        "command": "joyride.evaluateSelection",
-        "key": "ctrl+shift+space ctrl+shift+s"
+        "key": "ctrl+alt .",
+        "mac": "cmd+alt ."
       }
     ]
   },

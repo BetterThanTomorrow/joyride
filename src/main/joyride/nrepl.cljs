@@ -9,17 +9,13 @@
    [joyride.bencode :refer [encode decode-all]]
    [joyride.repl-utils :as utils :refer [the-sci-ns]]
    [joyride.sci :as jsci]
+   [joyride.utils :refer [info warn]]
+   [promesa.core :as p]
    [sci.core :as sci]))
 
 (defn debug [& strs]
   (when true
     (.debug js/console (str/join " " strs))))
-
-(defn warn [& strs]
-  (.warn js/console (str/join " " strs)))
-
-(defn info [& strs]
-  (.info js/console (str/join " " strs)))
 
 (defn response-for-mw [handler]
   (fn [{:keys [id session] :as request} response]
@@ -64,8 +60,6 @@
             "ops" (zipmap (map name (keys ops)) (repeat {}))
             "status" ["done"]}))
 
-;; TODO: this should not be global
-(def last-ns (atom nil))
 
 (defn do-handle-eval [{:keys [ns code sci-last-error _sci-ctx-atom _load-file?] :as request} send-fn]
   (sci/with-bindings
@@ -78,23 +72,22 @@
                                       (fn [s]
                                         (send-fn request {"out" s}))))
     (try (let [v (jsci/eval-string code)]
-           (reset! last-ns @sci/ns)
            (send-fn request {"value" (pr-str v)
                              "ns" (str @sci/ns)})
            (send-fn request {"status" ["done"]}))
          (catch :default e
-          (sci/alter-var-root sci-last-error (constantly e))
-            (let [data (ex-data e)]
-              (when-let [message (or (:message data) (.-message e))]
-                (send-fn request {"err" (str message "\n")}))
-              (send-fn request {"ex" (str e)
-                                "ns" (str @sci/ns)
-                                "status" ["done"]}))))))
+           (sci/alter-var-root sci-last-error (constantly e))
+           (let [data (ex-data e)]
+             (when-let [message (or (:message data) (.-message e))]
+               (send-fn request {"err" (str message "\n")}))
+             (send-fn request {"ex" (str e)
+                               "ns" (str @sci/ns)
+                               "status" ["done"]}))))))
 
 (defn handle-eval [{:keys [ns sci-ctx-atom] :as request} send-fn]
   (do-handle-eval (assoc request :ns (or (when ns
                                            (the-sci-ns @sci-ctx-atom (symbol ns)))
-                                         @last-ns
+                                         @jsci/!last-ns
                                          @sci/ns))
                   send-fn))
 
@@ -106,11 +99,11 @@
   (send-fn request {"status" ["done"]}))
 
 #_(defn handle-classpath [request send-fn]
-  (send-fn
-   request
-   {"status" ["done"]
-    "classpath"
-    (cp/split-classpath (cp/get-classpath))}))
+    (send-fn
+     request
+     {"status" ["done"]
+      "classpath"
+      (cp/split-classpath (cp/get-classpath))}))
 
 (defn handle-load-file [{:keys [file] :as request} send-fn]
   (do-handle-eval (assoc request
@@ -205,13 +198,15 @@
                (let [addr (-> server (.address))
                      port (-> addr .-port)
                      host (-> addr .-address)]
-                 (println (str "nREPL server started on port " port " on host " host " - nrepl://" host ":" port))
-                 (try
+                 (info "nREPL server started on port" port "on host"
+                       (str host "- nrepl://" host ":" port))
+                 (->
                    (vscode/workspace.fs.writeFile (vscode/Uri.file
                                                    (path/join vscode/workspace.rootPath ".nrepl-port"))
                                                   (-> (new js/TextEncoder) (.encode (str port))))
-                   (catch :default e
-                     (warn "Could not write .nrepl-port" e))))))
+                   (p/catch
+                       (fn [e]
+                         (info "Could not write .nrepl-port" e)))))))
     server)
   #_(let [onExit (js/require "signal-exit")]
       (onExit (fn [_code _signal]
@@ -223,4 +218,3 @@
           (fn []
             (when (fs/existsSync ".nrepl-port")
               (fs/unlinkSync ".nrepl-port")))))
-

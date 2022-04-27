@@ -2,7 +2,7 @@
   (:require ["path" :as path]
             ["vscode" :as vscode]
             [joyride.settings :refer [workspace-scripts-path]]
-            [joyride.util :refer [jsify cljify]]
+            [joyride.utils :refer [jsify cljify]]
             [promesa.core :as p]))
 
 (defn find-script-uris+ [script-folder-path]
