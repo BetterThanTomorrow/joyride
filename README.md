@@ -45,7 +45,7 @@ Then in your keyboard shortcuts, add:
 
 Now you can run the `example.cljs` script by just hitting Cmd+1!
 
-See [doc/configuration.md](doc/configuration.md) for full configuration options
+See [doc/configuration.md](https://github.com/BetterThanTomorrow/joyride/blob/master/doc/configuration.md) for full configuration options
 
 ## There's a REPL server
 
