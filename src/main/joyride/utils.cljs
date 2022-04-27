@@ -1,6 +1,7 @@
 (ns joyride.utils
   (:require ["vscode" :as vscode]
-            [promesa.core :as p]))
+            [promesa.core :as p]
+            [clojure.string :as str]))
 
 (defn jsify [clj-thing]
   (clj->js clj-thing))
@@ -23,3 +24,12 @@
 
 (defn workspace-root []
   vscode/workspace.rootPath)
+
+(defn info [& xs]
+  (vscode/window.showInformationMessage (str/join " " (mapv str xs))))
+
+(defn warn [& xs]
+  (vscode/window.showWarningMessage (str/join " " (mapv str xs))))
+
+(defn error [& xs]
+  (vscode/window.showErrorMessage (str/join " " (mapv str xs))))

@@ -9,17 +9,13 @@
    [joyride.bencode :refer [encode decode-all]]
    [joyride.repl-utils :as utils :refer [the-sci-ns]]
    [joyride.sci :as jsci]
+   [joyride.utils :refer [info warn]]
+   [promesa.core :as p]
    [sci.core :as sci]))
 
 (defn debug [& strs]
   (when true
     (.debug js/console (str/join " " strs))))
-
-(defn warn [& strs]
-  (.warn js/console (str/join " " strs)))
-
-(defn info [& strs]
-  (.info js/console (str/join " " strs)))
 
 (defn response-for-mw [handler]
   (fn [{:keys [id session] :as request} response]
@@ -202,13 +198,15 @@
                (let [addr (-> server (.address))
                      port (-> addr .-port)
                      host (-> addr .-address)]
-                 (println (str "nREPL server started on port " port " on host " host " - nrepl://" host ":" port))
-                 (try
+                 (info "nREPL server started on port" port "on host"
+                       (str host "- nrepl://" host ":" port))
+                 (->
                    (vscode/workspace.fs.writeFile (vscode/Uri.file
                                                    (path/join vscode/workspace.rootPath ".nrepl-port"))
                                                   (-> (new js/TextEncoder) (.encode (str port))))
-                   (catch :default e
-                     (warn "Could not write .nrepl-port" e))))))
+                   (p/catch
+                       (fn [e]
+                         (info "Could not write .nrepl-port" e)))))))
     server)
   #_(let [onExit (js/require "signal-exit")]
       (onExit (fn [_code _signal]

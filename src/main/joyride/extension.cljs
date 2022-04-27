@@ -6,7 +6,7 @@
    [joyride.sci :as sci]
    [joyride.scripts-menu :refer [show-workspace-scripts-menu+]]
    [joyride.settings :refer [workspace-scripts-path]]
-   [joyride.utils :refer [vscode-read-uri+]]
+   [joyride.utils :refer [vscode-read-uri+ info]]
    [promesa.core :as p]))
 
 (def !db (atom {}))
@@ -29,14 +29,11 @@
 (defn say-error [message]
   (say (str "ERROR: " message)))
 
-(defn debug [& xs]
-  (apply vscode/window.showInformationMessage (into-array (mapv str xs))))
-
 (defn eval-query []
   (p/let [input (vscode/window.showInputBox #js {:placeHolder "(require '[\"path\" :as path]) (path/resolve \".\")"
                                                  :prompt "Type one or more expressions to evaluate"})
           res (sci/eval-string input)]
-    (vscode/window.showInformationMessage (str "The result: " res))))
+    (info "The result:" res)))
 
 (defn run-script [& _script]
   (eval-query))
@@ -74,7 +71,7 @@
                         (say-error (str "Load Current File Failed: " (.-fileName current-doc)))
                         (js/console.error "Load Current File Failed: " (.-fileName current-doc) (.-message error) error))
                       result))))
-    (vscode/window.showInformationMessage "There is no current document to load")))
+    (info "There is no current document to load")))
 
 (defn evaluate-selection+ []
   (if-let [selection (some->> vscode/window.activeTextEditor
@@ -90,7 +87,7 @@
                         (js/console.error "Evaluate Selection Failed: " (.-message error) error))
                       (do (say (str "=>\n" result))
                           result)))))
-    (vscode/window.showInformationMessage "There is no current document, so no selection")))
+    (info "There is no current document, so no selection")))
 
 (def !server (volatile! nil))
 
