@@ -47,6 +47,15 @@ Now you can run the `example.cljs` script by just hitting Cmd+1!
 
 See [doc/configuration.md](doc/configuration.md) for full configuration options
 
+## There's a REPL server
+
+While developing Joyride scripts you should of course do it leveraging Interactive Programming (see [this video](https://www.youtube.com/watch?v=d0K1oaFGvuQ) demonstrating it). Here are the steps:
+
+1. Issue the command <kbd>**Joyride: Start nREPL**</kbd>. This will start Joyride's nREPL server.
+2. Connect your Clojure editor (we suggest [Calva](https://calva.io) for super biased reasons.)
+3. Open a script (presumeably in the `.joyride/scripts` folder)
+4. Hack away!
+
 ## Support and feedback
 
 You'll find us in the `#joyride` channel on the [Clojurians Slack](http://clojurians.net)
