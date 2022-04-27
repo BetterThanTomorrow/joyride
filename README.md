@@ -10,6 +10,8 @@ Joyride is Powered by [SCI](https://github.com/babashka/sci) (Small Clojure Inte
 
 You are entering a construction yard. Your feedback is highly welcome!
 
+![](assets/joyride-demo-terminal.gif)
+
 ## Quickstart
 
 Create a script in your workspace under `.joyride/scripts`, e.g. `example.cljs`:
