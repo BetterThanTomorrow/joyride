@@ -79,7 +79,7 @@
   (register-command context "joyride.runWorkspaceScript" #'run-workspace-script+)
   (register-command context "joyride.startNRepl" #'start-nrepl)
   (register-command context "joyride.stopNRepl" #'start-nrepl)
-  (say "🟢 Take VS Code on a Joyride. 🚗"))
+  (say "🟢 Joyride VS Code with Clojure. 🚗"))
 
 (defn ^:export deactivate [])
 

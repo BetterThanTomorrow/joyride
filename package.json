@@ -1,7 +1,7 @@
 {
   "name": "joyride",
   "displayName": "Joyride",
-  "description": "Take VS Code on a Joyride! Makes your editor scriptable. Powered by SCI, the Small Clojure Interpreter.",
+  "description": "Joyride VS Code with Clojure! Makes your editor scriptable. Powered by SCI, the Small Clojure Interpreter.",
   "icon": "assets/joyride.png",
   "version": "0.0.2",
   "publisher": "betterthantomorrow",

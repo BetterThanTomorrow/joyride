@@ -1,7 +1,6 @@
-# Take VSCode for a Joyride!
+# Joyride VS Code with Clojure!
 
 <img src="assets/joyride.png" height=300></img>
-
 
 Modify your editor by executing ClojureScript code in your REPL adn/or run scripts via keyboard shortcuts you choose. The Visual Studio Code API is at your command!
 
