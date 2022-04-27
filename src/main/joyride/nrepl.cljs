@@ -202,7 +202,7 @@
                        (str host "- nrepl://" host ":" port))
                  (->
                    (vscode/workspace.fs.writeFile (vscode/Uri.file
-                                                   (path/join vscode/workspace.rootPath ".nrepl-port"))
+                                                   (path/join vscode/workspace.rootPath ".joyride" ".nrepl-port"))
                                                   (-> (new js/TextEncoder) (.encode (str port))))
                    (p/catch
                        (fn [e]
