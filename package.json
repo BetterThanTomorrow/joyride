@@ -1,7 +1,7 @@
 {
   "name": "joyride",
-  "displayName": "Joyride: Hack your editor",
-  "description": "Makes VS Code scriptable using nbb (interpreted Clojure for node-js)",
+  "displayName": "Joyride",
+  "description": "Take VS Code on a Joyride. Makes the editor scriptable. Powered by SCI, the Small Clojure Interpreter.",
   "icon": "assets/joyride.png",
   "version": "0.0.1",
   "publisher": "betterthantomorrow",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/PEZ/joyride.git"
+    "url": "https://github.com/BetterThanTomorrow/joyride.git"
   },
   "license": "MIT",
   "engines": {
@@ -21,11 +21,14 @@
     "Other"
   ],
   "keywords": [
-    "nbb",
     "vscode",
     "clojure",
+    "sci",
+    "hackable",
+    "scripting",
     "repl",
-    "automation"
+    "automation",
+    "emacs"
   ],
   "galleryBanner": {
     "color": "#344D81",
@@ -34,7 +37,7 @@
   "badges": [
     {
       "url": "https://img.shields.io/badge/clojurians-joyride-blue.svg?logo=slack",
-      "href": "https://clojurians.slack.com/messages/vscode/",
+      "href": "https://clojurians.slack.com/messages/joyride/",
       "description": "Let's talk in the #joyride channel on the Clojurians Slack"
     }
   ],
