@@ -12,10 +12,10 @@
         document (.-document editor)]
     document))
 
-(defn insert-text!+ [editor text]
-  (p/do (.edit editor
-               (fn [^js builder]
-                 (.insert builder (.-active (current-selection)) text))
-               #js {:undoStopBefore true :undoStopAfter false})
-        (p/catch (fn [e]
-                   (js/console.error e)))))
+(defn insert-text!+ [editor selection text]
+  (p/do! (.edit editor
+                (fn [^js builder]
+                  (.insert builder (.-active selection) text))
+                #js {:undoStopBefore true :undoStopAfter false})
+         (p/catch (fn [e]
+                    (js/console.error e)))))
