@@ -67,6 +67,16 @@
         "command": "joyride.stopNRepl",
         "title": "Stop nREPL",
         "category": "Joyride"
+      },
+      {
+        "command": "joyride.enableNReplMessageLogging",
+        "title": "Enable nREPL message logging",
+        "category": "Joyride"
+      },
+      {
+        "command": "joyride.disableNReplMessageLogging",
+        "title": "Disable nREPL message logging",
+        "category": "Joyride"
       }
     ],
     "keybindings": [

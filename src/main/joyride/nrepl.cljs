@@ -13,6 +13,8 @@
    [promesa.core :as p]
    [sci.core :as sci]))
 
+(def !db (atom {:log-messages? false}))
+
 (defn debug [& strs]
   (when true
     (.debug js/console (str/join " " strs))))
@@ -30,12 +32,14 @@
 
 (defn log-request-mw [handler]
   (fn [request send-fn]
-    (debug "request" request)
+    (when (:log-messages? @!db)
+      (debug "request" request))
     (handler request send-fn)))
 
 (defn log-response-mw [handler]
   (fn [request response]
-    (debug "response" response)
+    (when (:log-messages? @!db)
+      (debug "response" response))
     (handler request response)))
 
 (defn eval-ctx-mw [handler {:keys [sci-last-error sci-ctx-atom]}]
@@ -218,3 +222,9 @@
           (fn []
             (when (fs/existsSync ".nrepl-port")
               (fs/unlinkSync ".nrepl-port")))))
+
+(defn enable-message-logging! []
+  (swap! !db :log-messages? true))
+
+(defn disable-message-logging! []
+  (swap! !db :log-messages? false))
