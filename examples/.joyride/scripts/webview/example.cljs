@@ -14,5 +14,3 @@
                                       "page.html")))
 
 (set! (.. panel -webview -html) (str html))
-
-

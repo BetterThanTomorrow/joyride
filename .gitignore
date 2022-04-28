@@ -23,3 +23,5 @@ node_modules
 # Joyride
 /out/
 .portal
+examples/.joyride/.calva
+examples/.vscode
