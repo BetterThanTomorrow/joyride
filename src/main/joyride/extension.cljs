@@ -78,7 +78,7 @@
   (register-command context "joyride.runScript" #'run-script)
   (register-command context "joyride.runWorkspaceScript" #'run-workspace-script+)
   (register-command context "joyride.startNRepl" #'start-nrepl)
-  (register-command context "joyride.stopNRepl" #'start-nrepl)
+  (register-command context "joyride.stopNRepl" #'stop-nrepl)
   (register-command context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
   (register-command context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)
   (say "🟢 Joyride VS Code with Clojure. 🚗"))
