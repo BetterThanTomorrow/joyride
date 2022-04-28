@@ -2,7 +2,7 @@
 
 <img src="assets/joyride-logo.png" width=620></img>
 
-Modify your editor by executing ClojureScript code in your REPL adn/or run scripts via keyboard shortcuts you choose. The Visual Studio Code API is at your command!
+Modify your editor by executing ClojureScript code in your REPL and/or run scripts via keyboard shortcuts you choose. The Visual Studio Code API is at your command!
 
 Joyride is Powered by [SCI](https://github.com/babashka/sci) (Small Clojure Interpreter).
 
