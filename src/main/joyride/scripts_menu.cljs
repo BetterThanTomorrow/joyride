@@ -6,9 +6,11 @@
             [promesa.core :as p]))
 
 (defn find-script-uris+ [script-folder-path]
-  (let [glob (path/join script-folder-path "*.cljs")]
-    (p/let [script-uris (vscode/workspace.findFiles glob)]
-      script-uris)))
+  (let [glob (path/join script-folder-path "**" "*.cljs")]
+    (p/let [script-uris (p/->> (vscode/workspace.findFiles glob)
+                               cljify
+                               (sort-by #(.-fsPath %)))]
+      (jsify script-uris))))
 
 (defn strip-base-path [base-path abs-path]
   (subs abs-path (count (str base-path path/sep))))
