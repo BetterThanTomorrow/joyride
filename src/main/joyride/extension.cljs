@@ -59,7 +59,7 @@
                        (say-error (str (js/console.error "Run Workspace Script Failed: " script-path (.-message error))))
                        (js/console.error "Run Workspace Script Failed: " script-path (.-message error) error))
                      (do (say (str script-path " evaluated. =>\n" result))
-                       result)))))))
+                         result)))))))
 
 (def !server (volatile! nil))
 
