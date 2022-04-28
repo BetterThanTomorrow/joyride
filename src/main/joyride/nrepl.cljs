@@ -138,7 +138,8 @@
   (if-let [op-fn (get ops op)]
     (op-fn request send-fn)
     (do
-      (warn "Unhandled operation" op)
+      (when (:log-messages? @!db)
+        (warn "Unhandled operation" op))
       (send-fn request {"status" ["error" "unknown-op" "done"]}))))
 
 (defn make-request-handler [opts]
