@@ -82,8 +82,7 @@
     "keybindings": [
       {
         "command": "joyride.runWorkspaceScript",
-        "key": "ctrl+alt .",
-        "mac": "cmd+alt ."
+        "key": "ctrl+shift ."
       }
     ]
   },
