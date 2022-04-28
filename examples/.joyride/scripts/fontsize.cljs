@@ -1,9 +1,9 @@
 (ns fontsize
   (:require ["vscode" :as vscode]))
 
-(defn set-global-fontsize [dots]
+(defn set-global-fontsize [pts]
   (-> (vscode/workspace.getConfiguration)
-      (.update "editor.fontSize" dots true))
+      (.update "editor.fontSize" pts true))
   nil)
 
 (comment
