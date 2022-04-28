@@ -21,7 +21,7 @@
           _ (vscode/commands.executeCommand "paredit.backwardUpSexp")
           before-edit-selection (vsu/current-selection)]
     (p/do 
-          (vsu/insert-text!+ "#_")
+          (vsu/insert-text!+ editor "#_")
           (aset "selection" editor original-selection)
           (restore-selection! editor original-selection before-edit-selection "#_"))))
 

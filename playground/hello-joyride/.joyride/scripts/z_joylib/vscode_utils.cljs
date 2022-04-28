@@ -12,9 +12,10 @@
         document (.-document editor)]
     document))
 
-(defn insert-text!+ [text]
-  (let [edits #js [(vscode/TextEdit.insert (.-active (current-selection)) text)]
-        ws-edit (vscode/WorkspaceEdit.)]
-    (.set ws-edit (.-uri (current-document)) edits)
-    (p/do!
-     (vscode/workspace.applyEdit ws-edit))))
+(defn insert-text!+ [editor text]
+  (p/do (.edit editor
+               (fn [^js builder]
+                 (.insert builder (.-active (current-selection)) text))
+               #js {:undoStopBefore true :undoStopAfter false})
+        (p/catch (fn [e]
+                   (js/console.error e)))))
