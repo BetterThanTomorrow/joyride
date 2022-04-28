@@ -14,3 +14,5 @@
                                       "page.html")))
 
 (set! (.. panel -webview -html) (str html))
+
+;; live demo here: https://twitter.com/borkdude/status/1519607386218053632
