@@ -9,7 +9,7 @@
   (let [glob (path/join script-folder-path "**" "*.cljs")]
     (p/let [script-uris (p/->> (vscode/workspace.findFiles glob)
                                cljify
-                               (sort-by #(.-fsPath %)))]
+                               (sort-by #(.-fsPath ^js %)))]
       (jsify script-uris))))
 
 (defn strip-base-path [base-path abs-path]
