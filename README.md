@@ -48,6 +48,8 @@ Now you can run the `example.cljs` script by just hitting Cmd+1!
 
 See [doc/configuration.md](https://github.com/BetterThanTomorrow/joyride/blob/master/doc/configuration.md) for full configuration options
 
+Check out [this video](https://www.youtube.com/watch?v=V1oTf-1EchU) for a demonstration.
+
 ## There's a REPL server
 
 While developing Joyride scripts you should of course do it leveraging Interactive Programming (see [this video](https://www.youtube.com/watch?v=d0K1oaFGvuQ) demonstrating it). Here are the steps:
