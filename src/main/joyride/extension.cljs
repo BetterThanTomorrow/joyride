@@ -4,6 +4,7 @@
    ["vscode" :as vscode]
    [joyride.nrepl :as nrepl]
    [joyride.sci :as sci]
+   [sci.core]
    [joyride.scripts-menu :refer [show-workspace-scripts-menu+]]
    [joyride.settings :refer [workspace-scripts-path]]
    [joyride.utils :refer [vscode-read-uri+ info]]
@@ -52,7 +53,8 @@
    (-> (p/let [abs-path (path/join vscode/workspace.rootPath workspace-scripts-path script-path)
                script-uri (vscode/Uri.file abs-path)
                code (vscode-read-uri+ script-uri)]
-         (sci/eval-string code))
+         (sci.core/with-bindings {sci.core/file abs-path}
+           (sci/eval-string code)))
        (p/handle (fn [result error]
                    (if error
                      (do
