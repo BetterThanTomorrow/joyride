@@ -52,7 +52,7 @@ See [doc/configuration.md](https://github.com/BetterThanTomorrow/joyride/blob/ma
 
 See the [examples](./examples) for examples including:
 
-* Creating an interactive Webvies
+* Creating an interactive Webview
 * Terminal creation and control
 * Fontsize manipulation
 * Calva Structural Editing enhancements
