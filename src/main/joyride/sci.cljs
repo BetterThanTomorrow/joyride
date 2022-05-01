@@ -19,8 +19,8 @@
 (def !ctx (volatile!
            (sci/init {:classes {'js goog/global
                                 :allow :all}
-                      :namespaces (merge (:namespaces pconfig/config)
-                                         {'joyride.core {'*file* sci/file}})
+                      :namespaces (assoc (:namespaces pconfig/config)
+                                         'joyride.core {'*file* sci/file})
                       :load-fn (fn [{:keys [namespace opts]}]
                                  (cond
                                    (symbol? namespace)
