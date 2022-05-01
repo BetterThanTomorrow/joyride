@@ -10,11 +10,17 @@
    [joyride.utils :refer [vscode-read-uri+ info]]
    [promesa.core :as p]))
 
-(def !db (atom {}))
+(defonce !db (atom {}))
 
-(defn- register-command [^js context command-id var]
-  (->> (vscode/commands.registerCommand command-id var)
-       (.push (.-subscriptions context))))
+(defn- register-command! [^js context command-id var]
+  (let [disposable (vscode/commands.registerCommand command-id var)]
+    (swap! !db update :disposables conj disposable)
+    (.push (.-subscriptions context) disposable)))
+
+(defn- clear-disposables! []
+  (doseq [^js disposable (:disposables @!db)]
+    (.dispose disposable))
+  (swap! !db assoc :disposables []))
 
 (def ^{:dynamic true
        :doc "Should the Joyride output channel be revealed after `say`?
@@ -42,12 +48,13 @@
 (defn run-code
   ([]
    (p/let [input (vscode/window.showInputBox #js {:title "Run Code"
-                                                  :placeHolder "(require '[\"vscode\" :as vscode]) (vscode/showInformationMessage \"Hello World!\" [\"Hi there\"])"
+                                                  ;; "(require '[\"vscode\" :as vscode]) (vscode/window.showInformationMessage \"Hello World!\" [\"Hi there\"])"
+                                                  :placeHolder "(inc 41)"
                                                   :prompt "Enter some code to be evaluated"})]
      (when input
        (run-code input))))
   ([code]
-   (let [result (jsci/eval-string code)]
+   (p/let [result (jsci/eval-string code)]
      (say-result result))))
 
 (defn choose-file [default-uri]
@@ -87,15 +94,30 @@
   (run-workspace-script+ ".joyride/scripts/hello.cljs"))
 
 (defn ^:export activate [^js context]
-  (swap! !db assoc :output-channel (vscode/window.createOutputChannel "Joyride"))
-  (register-command context "joyride.runCode" #'run-code)
-  (register-command context "joyride.runWorkspaceScript" #'run-workspace-script+)
-  (register-command context "joyride.startNRepl" #'start-nrepl)
-  (register-command context "joyride.stopNRepl" #'stop-nrepl)
-  (register-command context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
-  (register-command context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)
-  (say "🟢 Joyride VS Code with Clojure. 🚗"))
+  (if context
+    (do
+      (reset! !db {:output-channel (vscode/window.createOutputChannel "Joyride")
+                   :extension-context context
+                   :disposables []})
+      (say "🟢 Joyride VS Code with Clojure. 🚗"))
+    (let [{:keys [extension-context]} @!db]
+      (register-command! extension-context "joyride.runCode" #'run-code)
+      (register-command! extension-context "joyride.runWorkspaceScript" #'run-workspace-script+)
+      (register-command! extension-context "joyride.startNRepl" #'start-nrepl)
+      (register-command! extension-context "joyride.stopNRepl" #'stop-nrepl)
+      (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
+      (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!))))
 
-(defn ^:export deactivate [])
+(defn ^:export deactivate []
+  (clear-disposables!))
+
+(defn before [done]
+  (deactivate)
+  (done))
+
+(defn after []
+  (activate nil)
+  (info "shadow-cljs reloaded Joyride")
+  (js/console.log "shadow-cljs Reloaded"))
 
 (comment)

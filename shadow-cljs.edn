@@ -7,4 +7,6 @@
               :compiler-options {:infer-externs :auto}
               :output-dir "out/js"
               :output-to "out/joyride.js"
-              :exports {:activate joyride.extension/activate}}}}
+              :exports {:activate joyride.extension/activate}
+              :devtools {:before-load-async joyride.extension/before
+                         :after-load joyride.extension/after}}}}
