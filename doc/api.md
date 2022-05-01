@@ -24,7 +24,7 @@ See [promesa docs](https://cljdoc.org/d/funcool/promesa/6.0.2/doc/user-guide).
 
 ### `promesa.core`
 
-- `let`, `do!`
+`p/->>`, `p/->`, `p/all`, `p/any`, `p/catch`, `p/chain`, `p/create`, `p/deferred`, `p/delay`, `p/do`, `p/do`, `p/done`, `p/finally`, `p/let`, `p/map`, `p/mapcat`, `p/pending`, `p/promise`, `p/promise`, `p/race`, `p/rejected`, `p/rejected`, `p/resolved`, `p/resolved`, `p/run`, `p/then`, `p/thenable`, `p/with`, and `p/wrap`
 
 ## Possibly coming additions
 
