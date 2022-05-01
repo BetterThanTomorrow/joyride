@@ -94,19 +94,18 @@
   (run-workspace-script+ ".joyride/scripts/hello.cljs"))
 
 (defn ^:export activate [^js context]
-  (if context
-    (do
-      (reset! !db {:output-channel (vscode/window.createOutputChannel "Joyride")
-                   :extension-context context
-                   :disposables []})
-      (say "🟢 Joyride VS Code with Clojure. 🚗"))
-    (let [{:keys [extension-context]} @!db]
-      (register-command! extension-context "joyride.runCode" #'run-code)
-      (register-command! extension-context "joyride.runWorkspaceScript" #'run-workspace-script+)
-      (register-command! extension-context "joyride.startNRepl" #'start-nrepl)
-      (register-command! extension-context "joyride.stopNRepl" #'stop-nrepl)
-      (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
-      (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!))))
+  (when context
+    (reset! !db {:output-channel (vscode/window.createOutputChannel "Joyride")
+                 :extension-context context
+                 :disposables []})
+    (say "🟢 Joyride VS Code with Clojure. 🚗"))
+  (let [{:keys [extension-context]} @!db]
+    (register-command! extension-context "joyride.runCode" #'run-code)
+    (register-command! extension-context "joyride.runWorkspaceScript" #'run-workspace-script+)
+    (register-command! extension-context "joyride.startNRepl" #'start-nrepl)
+    (register-command! extension-context "joyride.stopNRepl" #'stop-nrepl)
+    (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
+    (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)))
 
 (defn ^:export deactivate []
   (clear-disposables!))
