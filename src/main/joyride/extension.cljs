@@ -1,6 +1,7 @@
 (ns joyride.extension
   (:require ["path" :as path]
             ["vscode" :as vscode]
+            [clojure.pprint :as pprint]
             [joyride.config :as conf]
             [joyride.nrepl :as nrepl]
             [joyride.sci :as jsci]
@@ -41,8 +42,9 @@
   ([message result]
    (let [prefix (if (empty? message)
                   "=> "
-                  (str "message\n=> "))]
-     (say (str prefix result)))))
+                  (str message "\n=> "))]
+     (.append ^js (:output-channel @!db) prefix)
+     (say (with-out-str (pprint/pprint result))))))
 
 (defn run-code
   ([]
@@ -61,15 +63,15 @@
                                      :defaultUri default-uri
                                      :openLabel "Open script"}))
 
-(defn run-workspace-script+
-  ([]
-   (p/let [picked-script (show-workspace-scripts-menu+ "Run Workspace Script" 
-                                                       vscode/workspace.rootPath 
-                                                       conf/workspace-scripts-path)
+(defn run-script+
+  ([title base-path scripts-path]
+   (p/let [picked-script (show-workspace-scripts-menu+ title 
+                                                       base-path 
+                                                       scripts-path)
            script-path (:relative-path picked-script)]
-     (run-workspace-script+ script-path)))
-  ([script-path]
-   (-> (p/let [abs-path (path/join vscode/workspace.rootPath conf/workspace-scripts-path script-path)
+     (run-script+ title base-path scripts-path script-path)))
+  ([title base-path scripts-path script-path]
+   (-> (p/let [abs-path (path/join base-path scripts-path script-path)
                script-uri (vscode/Uri.file abs-path)
                code (vscode-read-uri+ script-uri)]
          (sci/with-bindings {sci/file abs-path}
@@ -77,10 +79,30 @@
        (p/handle (fn [result error]
                    (if error
                      (do
-                       (say-error (str (js/console.error "Run Workspace Script Failed: " script-path (.-message error))))
-                       (js/console.error "Run Workspace Script Failed: " script-path (.-message error) error))
+                       (say-error (str title " Failed: " script-path " " (.-message error)))
+                       (js/console.error title "Failed: " script-path (.-message error) error))
                      (do (say-result (str script-path " evaluated.") result)
                          result)))))))
+
+(def run-workspace-script-args ["Run Workspace Script"
+                                vscode/workspace.rootPath
+                                conf/workspace-scripts-path])
+
+(defn run-workspace-script+
+  ([]
+   (apply run-script+ run-workspace-script-args))
+  ([script]
+   (apply run-script+ (conj run-workspace-script-args script))))
+
+(def run-user-script-args ["Run User Script"
+                                conf/user-config-path
+                                conf/user-scripts-path])
+
+(defn run-user-script+
+  ([]
+   (apply run-script+ run-user-script-args))
+  ([script]
+   (apply run-script+ (conj run-user-script-args script))))
 
 (def !server (volatile! nil))
 
@@ -90,9 +112,6 @@
 (defn stop-nrepl []
   (nrepl/stop-server @!server))
 
-(comment
-  (run-workspace-script+)
-  (run-workspace-script+ ".joyride/scripts/hello.cljs"))
 
 (defn ^:export activate [^js context]
   (when context
@@ -103,6 +122,7 @@
   (let [{:keys [extension-context]} @!db]
     (register-command! extension-context "joyride.runCode" #'run-code)
     (register-command! extension-context "joyride.runWorkspaceScript" #'run-workspace-script+)
+    (register-command! extension-context "joyride.runUserScript" #'run-user-script+)
     (register-command! extension-context "joyride.startNRepl" #'start-nrepl)
     (register-command! extension-context "joyride.stopNRepl" #'stop-nrepl)
     (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
@@ -119,5 +139,3 @@
   (activate nil)
   (info "shadow-cljs reloaded Joyride")
   (js/console.log "shadow-cljs Reloaded"))
-
-(comment)
