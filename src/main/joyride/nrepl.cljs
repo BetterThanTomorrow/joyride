@@ -110,10 +110,6 @@
       (cp/split-classpath (cp/get-classpath))}))
 
 (defn handle-load-file [{:keys [file file-path] :as request} send-fn]
-  (def request request)
-  (comment (type request)
-           (keys request)
-           )
   (sci/with-bindings {sci/file file-path}
     (do-handle-eval (assoc request
                            :code file
