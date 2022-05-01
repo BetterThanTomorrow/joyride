@@ -109,12 +109,17 @@
       "classpath"
       (cp/split-classpath (cp/get-classpath))}))
 
-(defn handle-load-file [{:keys [file] :as request} send-fn]
-  (do-handle-eval (assoc request
-                         :code file
-                         :load-file? true
-                         :ns @sci/ns)
-                  send-fn))
+(defn handle-load-file [{:keys [file file-path] :as request} send-fn]
+  (def request request)
+  (comment (type request)
+           (keys request)
+           )
+  (sci/with-bindings {sci/file file-path}
+    (do-handle-eval (assoc request
+                           :code file
+                           :load-file? true
+                           :ns @sci/ns)
+                    send-fn)))
 
 
 ;;;; Completions, based on babashka.nrepl

@@ -4,6 +4,7 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Add `joyride.core/*file*`](https://github.com/BetterThanTomorrow/joyride/issues/5)
 
 ## [0.0.2] - 2022-04-27
 
