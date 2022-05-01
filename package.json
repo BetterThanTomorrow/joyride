@@ -54,6 +54,11 @@
         "category": "Joyride"
       },
       {
+        "command": "joyride.runUserScript",
+        "title": "Run User Script",
+        "category": "Joyride"
+      },
+      {
         "command": "joyride.runWorkspaceScript",
         "title": "Run Workspace Script",
         "category": "Joyride"

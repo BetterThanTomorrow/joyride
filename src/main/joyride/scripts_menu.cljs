@@ -1,85 +1,65 @@
 (ns joyride.scripts-menu
   (:require ["path" :as path]
             ["vscode" :as vscode]
-            [joyride.settings :refer [workspace-scripts-path]]
+            [joyride.config :as conf]
             [joyride.utils :refer [jsify cljify]]
             [promesa.core :as p]))
 
-(defn find-script-uris+ [script-folder-path]
-  (let [glob (path/join script-folder-path "**" "*.cljs")]
+(defn find-script-uris+ [base-path script-folder-path]
+  (let [glob (vscode/RelativePattern. base-path (path/join script-folder-path "**" "*.cljs"))]
     (p/let [script-uris (p/->> (vscode/workspace.findFiles glob)
                                cljify
                                (sort-by #(.-fsPath ^js %)))]
       (jsify script-uris))))
 
-(defn strip-base-path [base-path abs-path]
-  (subs abs-path (count (str base-path path/sep))))
+(comment
+  (let [uris (find-script-uris+ vscode/workspace.rootPath conf/workspace-scripts-path)]
+    (def uris uris)
+    uris)
 
-(defn script-uri->file-info [base-path ^js uri]
+  (let [uris (find-script-uris+ conf/user-config-path conf/user-scripts-path)]
+    (def uris uris)
+    uris)
+  (def glob (path/join conf/user-scripts-path "**" "*.cljs")))
+
+(defn strip-abs-scripts-path [abs-scripts-path abs-path]
+  (subs abs-path (count (str abs-scripts-path path/sep))))
+
+(defn script-uri->file-info [abs-scripts-path ^js uri]
   (let [abs-path (.-fsPath uri)
-        section-path (strip-base-path base-path abs-path)]
+        section-path (strip-abs-scripts-path abs-scripts-path abs-path)]
     {:uri uri
      :absolute-path abs-path
-     :section-path section-path}))
+     :relative-path section-path}))
 
-(defn script-uris->file-infos+ [base-path script-uris]
-  (p/let [file-infos (map (partial script-uri->file-info base-path)
+(defn script-uris->file-infos+ [abs-scripts-path script-uris]
+  (p/let [file-infos (map (partial script-uri->file-info abs-scripts-path)
                           script-uris)]
     file-infos))
 
-(defn file-info->menu-item [section file-infos]
+(defn file-info->menu-item [file-infos]
   (map (fn [file-info]
-         (merge file-info
-                (if section
-                  {:label section
-                   :description (:section-path file-info)}
-                  {:label (:section-path file-info)})))
+         (assoc file-info :label (:relative-path file-info)))
        file-infos))
 
-(defn show-scripts-menu+
-  "Shows a menu with scripts to the user.
-   Returns the `vscode.Uri` of the picked item"
-  ;; TODO: Add user scripts to the menu
-  [title section file-infos]
-  (p/let [menu-items (jsify (file-info->menu-item section file-infos))
+(defn- show-scripts-menu'+
+  [title file-infos]
+  (p/let [menu-items (jsify (file-info->menu-item file-infos))
           script-info (vscode/window.showQuickPick menu-items #js {:title title})]
     (cljify script-info)))
 
-(defn show-workspace-scripts-menu+ []
-  (-> (p/let [ws-folder-path vscode/workspace.rootPath
-              script-uris (find-script-uris+ workspace-scripts-path)
-              base-path (path/join ws-folder-path workspace-scripts-path)
-              file-infos (p/->> (script-uris->file-infos+ base-path script-uris)
-                                (map (fn [f-i]
-                                       (assoc f-i :workspace-scripts-path workspace-scripts-path))))
-              picked-script (show-scripts-menu+ "Run Workspace Script" nil #_"Workspace" file-infos)]
+(defn show-workspace-scripts-menu+
+  "Shows a menu with scripts to the user.
+   Returns the picked item as a map with keys:
+   `:uri`, `:absolute-path`, `:relative-path`
+   Where `:relative-path` is relative to the `base-path`"
+  [title base-path scripts-path]
+  (-> (p/let [script-uris (find-script-uris+ base-path scripts-path)
+              abs-scripts-path (path/join base-path scripts-path)
+              file-infos (script-uris->file-infos+ abs-scripts-path script-uris)
+              picked-script (show-scripts-menu'+ title file-infos)]
         picked-script)
       (p/handle (fn [result error]
                   (if error
-                    (js/console.error "Selecting Workspace Script Failed: " (.-message error))
+                    (js/console.error title "Failed:" (.-message error))
                     result)))))
-
-(comment
-  (p/let [picked-script (show-workspace-scripts-menu+)]
-    (def picked-script picked-script)
-    picked-script)
-
-  (p/let [script-uris (find-script-uris+ (path/join ".joyride" "scripts"))]
-    (def script-uris script-uris)
-    script-uris)
-
-  (def ws-folder-path (-> vscode/workspace.workspaceFolders
-                          first
-                          (.-uri)
-                          (.-fsPath)))
-
-  (p/let [base-path (path/join ws-folder-path workspace-scripts-path)
-          file-infos (script-uris->file-infos+ base-path script-uris)]
-    (def file-infos file-infos)
-    file-infos)
-
-  (p/let [picked-script (show-scripts-menu+ "Run Workspace Script" nil #_"Workspace" file-infos)]
-    (def picked-script picked-script)
-    picked-script)
-
-  )

@@ -1,14 +1,13 @@
 (ns joyride.extension
-  (:require
-   ["path" :as path]
-   ["vscode" :as vscode]
-   [joyride.nrepl :as nrepl]
-   [joyride.sci :as jsci]
-   [sci.core :as sci]
-   [joyride.scripts-menu :refer [show-workspace-scripts-menu+]]
-   [joyride.settings :refer [workspace-scripts-path]]
-   [joyride.utils :refer [vscode-read-uri+ info]]
-   [promesa.core :as p]))
+  (:require ["path" :as path]
+            ["vscode" :as vscode]
+            [joyride.config :as conf]
+            [joyride.nrepl :as nrepl]
+            [joyride.sci :as jsci]
+            [joyride.scripts-menu :refer [show-workspace-scripts-menu+]]
+            [joyride.utils :refer [info vscode-read-uri+]]
+            [promesa.core :as p]
+            [sci.core :as sci]))
 
 (defonce !db (atom {}))
 
@@ -64,11 +63,13 @@
 
 (defn run-workspace-script+
   ([]
-   (p/let [picked-script (show-workspace-scripts-menu+)
-           script-path (:section-path picked-script)]
+   (p/let [picked-script (show-workspace-scripts-menu+ "Run Workspace Script" 
+                                                       vscode/workspace.rootPath 
+                                                       conf/workspace-scripts-path)
+           script-path (:relative-path picked-script)]
      (run-workspace-script+ script-path)))
   ([script-path]
-   (-> (p/let [abs-path (path/join vscode/workspace.rootPath workspace-scripts-path script-path)
+   (-> (p/let [abs-path (path/join vscode/workspace.rootPath conf/workspace-scripts-path script-path)
                script-uri (vscode/Uri.file abs-path)
                code (vscode-read-uri+ script-uri)]
          (sci/with-bindings {sci/file abs-path}
