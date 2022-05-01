@@ -30,14 +30,25 @@
 (defn say-error [message]
   (say (str "ERROR: " message)))
 
-(defn eval-query []
-  (p/let [input (vscode/window.showInputBox #js {:placeHolder "(require '[\"path\" :as path]) (path/resolve \".\")"
-                                                 :prompt "Type one or more expressions to evaluate"})
-          res (jsci/eval-string input)]
-    (info "The result:" res)))
+(defn say-result
+  ([result]
+   (say-result nil result))
+  ([message result]
+   (let [prefix (if (empty? message)
+                  "=> "
+                  (str "message\n=> "))]
+     (say (str prefix result)))))
 
-(defn run-script [& _script]
-  (eval-query))
+(defn run-code
+  ([]
+   (p/let [input (vscode/window.showInputBox #js {:title "Run Code"
+                                                  :placeHolder "(require '[\"vscode\" :as vscode]) (vscode/showInformationMessage \"Hello World!\" [\"Hi there\"])"
+                                                  :prompt "Enter some code to be evaluated"})]
+     (when input
+       (run-code input))))
+  ([code]
+   (let [result (jsci/eval-string code)]
+     (say-result result))))
 
 (defn choose-file [default-uri]
   (vscode/window.showOpenDialog #js {:canSelectMany false
@@ -60,7 +71,7 @@
                      (do
                        (say-error (str (js/console.error "Run Workspace Script Failed: " script-path (.-message error))))
                        (js/console.error "Run Workspace Script Failed: " script-path (.-message error) error))
-                     (do (say (str script-path " evaluated. =>\n" result))
+                     (do (say-result (str script-path " evaluated.") result)
                          result)))))))
 
 (def !server (volatile! nil))
@@ -77,7 +88,7 @@
 
 (defn ^:export activate [^js context]
   (swap! !db assoc :output-channel (vscode/window.createOutputChannel "Joyride"))
-  (register-command context "joyride.runScript" #'run-script)
+  (register-command context "joyride.runCode" #'run-code)
   (register-command context "joyride.runWorkspaceScript" #'run-workspace-script+)
   (register-command context "joyride.startNRepl" #'start-nrepl)
   (register-command context "joyride.stopNRepl" #'stop-nrepl)
