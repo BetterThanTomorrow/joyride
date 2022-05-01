@@ -3,8 +3,8 @@
    ["path" :as path]
    ["vscode" :as vscode]
    [joyride.nrepl :as nrepl]
-   [joyride.sci :as sci]
-   [sci.core]
+   [joyride.sci :as jsci]
+   [sci.core :as sci]
    [joyride.scripts-menu :refer [show-workspace-scripts-menu+]]
    [joyride.settings :refer [workspace-scripts-path]]
    [joyride.utils :refer [vscode-read-uri+ info]]
@@ -33,7 +33,7 @@
 (defn eval-query []
   (p/let [input (vscode/window.showInputBox #js {:placeHolder "(require '[\"path\" :as path]) (path/resolve \".\")"
                                                  :prompt "Type one or more expressions to evaluate"})
-          res (sci/eval-string input)]
+          res (jsci/eval-string input)]
     (info "The result:" res)))
 
 (defn run-script [& _script]
@@ -53,8 +53,8 @@
    (-> (p/let [abs-path (path/join vscode/workspace.rootPath workspace-scripts-path script-path)
                script-uri (vscode/Uri.file abs-path)
                code (vscode-read-uri+ script-uri)]
-         (sci.core/with-bindings {sci.core/file abs-path}
-           (sci/eval-string code)))
+         (sci/with-bindings {sci/file abs-path}
+           (jsci/eval-string code)))
        (p/handle (fn [result error]
                    (if error
                      (do
