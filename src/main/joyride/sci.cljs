@@ -3,7 +3,7 @@
             ["path" :as path]
             ["vscode" :as vscode]
             [clojure.string :as str]
-            [joyride.settings :refer [workspace-scripts-path]]
+            [joyride.config :refer [workspace-scripts-path]]
             [joyride.utils :as utils]
             [sci-configs.funcool.promesa :as pconfig]
             [sci.core :as sci]))
