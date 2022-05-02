@@ -5,7 +5,7 @@
             [joyride.config :as conf]
             [joyride.nrepl :as nrepl]
             [joyride.sci :as jsci]
-            [joyride.scripts-menu :refer [show-workspace-scripts-menu+]]
+            [joyride.scripts-menu :refer [show-script-picker+]]
             [joyride.utils :refer [info vscode-read-uri+]]
             [promesa.core :as p]
             [sci.core :as sci]))
@@ -65,9 +65,9 @@
 
 (defn run-script+
   ([title base-path scripts-path]
-   (p/let [picked-script (show-workspace-scripts-menu+ title 
-                                                       base-path 
-                                                       scripts-path)
+   (p/let [picked-script (show-script-picker+ title
+                                              base-path
+                                              scripts-path)
            script-path (:relative-path picked-script)]
      (run-script+ title base-path scripts-path script-path)))
   ([title base-path scripts-path script-path]
@@ -95,8 +95,8 @@
    (apply run-script+ (conj run-workspace-script-args script))))
 
 (def run-user-script-args ["Run User Script"
-                                conf/user-config-path
-                                conf/user-scripts-path])
+                           conf/user-config-path
+                           conf/user-scripts-path])
 
 (defn run-user-script+
   ([]

@@ -42,13 +42,13 @@
          (assoc file-info :label (:relative-path file-info)))
        file-infos))
 
-(defn- show-scripts-menu'+
+(defn- show-script-picker'+
   [title file-infos]
   (p/let [menu-items (jsify (file-info->menu-item file-infos))
           script-info (vscode/window.showQuickPick menu-items #js {:title title})]
     (cljify script-info)))
 
-(defn show-workspace-scripts-menu+
+(defn show-script-picker+
   "Shows a menu with scripts to the user.
    Returns the picked item as a map with keys:
    `:uri`, `:absolute-path`, `:relative-path`
@@ -57,7 +57,7 @@
   (-> (p/let [script-uris (find-script-uris+ base-path scripts-path)
               abs-scripts-path (path/join base-path scripts-path)
               file-infos (script-uris->file-infos+ abs-scripts-path script-uris)
-              picked-script (show-scripts-menu'+ title file-infos)]
+              picked-script (show-script-picker'+ title file-infos)]
         picked-script)
       (p/handle (fn [result error]
                   (if error
