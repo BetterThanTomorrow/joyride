@@ -23,6 +23,15 @@
        (p/catch (fn [e]
                   (js/console.error e))))))
 
+(defn delete-range!
+  [^js editor ^js range]
+  (-> (p/do (.edit editor
+                   (fn [^js builder]
+                     (.delete builder range))
+                   #js {:undoStopBefore true :undoStopAfter false}))
+      (p/catch (fn [e]
+                 (js/console.error e)))))
+
 (comment
   (def a-selection (current-selection))
   (aset vscode/window.activeTextEditor "selection" a-selection)
