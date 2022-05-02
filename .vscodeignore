@@ -1,8 +1,8 @@
 # Put everything on the blacklist by default
 *
 */**
-**/.DS_Store
-*/**/.DS_Store
+**/.*
+*/**/.*
 
 # Whitelist
 !extension.js
