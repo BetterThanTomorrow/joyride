@@ -4,7 +4,7 @@ Modify your editor by executing ClojureScript code in your REPL and/or run scrip
 
 https://user-images.githubusercontent.com/30010/165934412-ffeb5729-07be-4aa5-b291-ad991d2f9f6c.mp4
 
-[The vido in much better quality on Youtube (CalvaTV)](https://www.youtube.com/watch?v=V1oTf-1EchU)
+[The video in much better quality on Youtube (CalvaTV)](https://www.youtube.com/watch?v=V1oTf-1EchU)
 
 Joyride is Powered by [SCI](https://github.com/babashka/sci) (Small Clojure Interpreter).
 
