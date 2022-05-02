@@ -34,7 +34,26 @@ Live demo: https://twitter.com/borkdude/status/1519709769157775360
 
 `.joyride/scripts/ignore_form.cljs`
 
-Adds a command for ignoring out (Clojure-wise) the current enclosing form. Depends on that the [Calva](calva.io) extension is installed, because it is what helps us find out of the current list in order to insert the ignore tag (`#_`).
+Adds a command for (un)ignoring (Clojure-wise) the current enclosing form.
+Depends on that the [Calva](calva.io) extension is installed, because it is what
+helps us find out of the current list in order to insert the ignore tag (`#_`).
+
+If you want to use this script, you can setup a VSCode key binding for it by
+editing VSCode's keybindings JSON and adding the following. Note that this
+overrides the default comment-keyboard-shortcut on macOS. The result is that
+pressing CMD-/ in a Clojure file will use the (un)ignore script when there is no
+selection, and keep using the default comment action (prepend the line with `;;`
+when there is a selection). For Windows you probably want to change the key to
+the default Windows comment keyboard shortcut.
+
+```json
+{
+  "key": "cmd+/",
+  "command": "joyride.runWorkspaceScript",
+  "args": "ignore_form.cljs",
+  "when": "!editorHasSelection && editorTextFocus && !editorReadOnly && editorLangId =~ /clojure|scheme|lisp/"
+}
+```
 
 * Video here: https://www.youtube.com/watch?v=V1oTf-1EchU
 * Tweet to like/comment/retweet: https://twitter.com/pappapez/status/1519825664177807363
