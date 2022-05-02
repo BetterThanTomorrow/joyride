@@ -36,7 +36,8 @@ Live demo: https://twitter.com/borkdude/status/1519709769157775360
 
 Adds a command for (un)ignoring (Clojure-wise) the current enclosing form.
 Depends on that the [Calva](calva.io) extension is installed, because it is what
-helps us find out of the current list in order to insert the ignore tag (`#_`).
+helps us find out of the current list in order to insert, or remove, the ignore
+tag (`#_`).
 
 If you want to use this script, you can setup a VSCode key binding for it by
 editing VSCode's keybindings JSON and adding the following. Note that this
