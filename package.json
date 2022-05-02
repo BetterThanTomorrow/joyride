@@ -86,12 +86,16 @@
     ],
     "keybindings": [
       {
+        "command": "joyride.runCode",
+        "key": "ctrl+shift+alt+space"
+      },
+      {
         "command": "joyride.runUserScript",
-        "key": "ctrl+shift ,"
+        "key": "ctrl+shift+,"
       },
       {
         "command": "joyride.runWorkspaceScript",
-        "key": "ctrl+shift ,"
+        "key": "ctrl+shift+,"
       }
     ]
   },
