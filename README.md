@@ -10,7 +10,19 @@ Joyride is Powered by [SCI](https://github.com/babashka/sci) (Small Clojure Inte
 
 ## WIP
 
-You are entering a construction yard. Your feedback is highly welcome!
+You are entering a construction yard. Things are going to change and break your configs while we are searching for good APIs and UI/Ux.
+
+Your feedback is highly welcome!
+
+## Quickest Start
+
+1. Bring up the VS Code Command Palette (`cmd/ctrl+shift+p`)
+2. Execute **Joyride: Run Clojure Code**
+3. Type in some code into the prompt, e.g.
+    ```clojure
+    (require '["vscode" :as vscode]) (vscode/window.showInformationMessage "Hello World!")`
+    ```
+4. Submit
 
 ## Quickstart
 
