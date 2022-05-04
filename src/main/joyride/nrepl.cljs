@@ -13,11 +13,12 @@
    [promesa.core :as p]
    [sci.core :as sci]))
 
-(def !db (atom {:log-messages? false}))
+(defonce !db (atom {:log-messages? false
+                    :server nil}))
 
-(defn debug [& strs]
+(defn debug [& objects]
   (when true
-    (.debug js/console (str/join " " strs))))
+    (apply (.-debug js/console) objects)))
 
 (defn response-for-mw [handler]
   (fn [{:keys [id session] :as request} response]
@@ -182,7 +183,23 @@
            (debug "Connection lost")
            (debug "Connection closed")))))
 
-(defn start-server
+(defn port-file-uri []
+  (vscode/Uri.file
+   (path/join vscode/workspace.rootPath ".joyride" ".nrepl-port")))
+
+(defn remove-port-file [uri]
+  (-> uri
+      vscode/workspace.fs.stat
+      (p/then (fn [stat]
+                (when stat
+                  (vscode/workspace.fs.delete uri))))
+      (p/catch (fn [e]
+                 (debug "Failed deleting port file" e)))))
+
+(defn server-running? []
+  (boolean (:server @!db)))
+
+(defn start-server'
   "Start nRepl server. Accepts options either as JS object or Clojure map."
   [opts]
   (let [port (or (:port opts)
@@ -195,7 +212,13 @@
         ctx-atom jsci/!ctx
         server (node-net/createServer
                 (partial on-connect {:sci-ctx-atom ctx-atom
-                                     :sci-last-error sci-last-error}))]
+                                     :sci-last-error sci-last-error}))
+        onExit (js/require "signal-exit")]
+    
+    (onExit (fn [_code _signal]
+              (debug "Process exit, removing port file")
+              (remove-port-file (port-file-uri))))
+    
     ;; Expose "app" key under js/app in the repl
     (.listen server
              port
@@ -207,23 +230,29 @@
                  (info "nREPL server started on port" port "on host"
                        (str host "- nrepl://" host ":" port))
                  (->
-                   (vscode/workspace.fs.writeFile (vscode/Uri.file
-                                                   (path/join vscode/workspace.rootPath ".joyride" ".nrepl-port"))
+                   (vscode/workspace.fs.writeFile (port-file-uri)
                                                   (-> (new js/TextEncoder) (.encode (str port))))
                    (p/catch
                        (fn [e]
-                         (info "Could not write .nrepl-port" e)))))))
-    server)
-  #_(let [onExit (js/require "signal-exit")]
-      (onExit (fn [_code _signal]
-                (debug "Process exit, removing .nrepl-port")
-                (fs/unlinkSync ".nrepl-port")))))
+                         (info "Could not write port file" e)))))))
+    (swap! !db assoc :server server)))
 
-(defn stop-server [server]
-  (.close server
-          (fn []
-            (when (fs/existsSync ".nrepl-port")
-              (fs/unlinkSync ".nrepl-port")))))
+(defn start-server [opts]
+  (if-not (server-running?)
+    (start-server' opts)
+    (info "The nREPL server is already running")))
+
+(defn stop-server []
+  (debug "nREPL stop-server")
+  (if-let [server (:server @!db)]
+    (.close server
+            (fn []
+              (-> (remove-port-file (port-file-uri))
+                  (p/then
+                   (fn []
+                     (swap! !db dissoc :server)
+                     (info "nREPL server stopped"))))))
+    (info "There is no nREPL Server running")))
 
 (defn enable-message-logging! []
   (swap! !db :log-messages? true))

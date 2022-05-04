@@ -64,13 +64,13 @@
         "category": "Joyride"
       },
       {
-        "command": "joyride.startNRepl",
-        "title": "Start nREPL",
+        "command": "joyride.startNReplServer",
+        "title": "Start nREPL Server",
         "category": "Joyride"
       },
       {
-        "command": "joyride.stopNRepl",
-        "title": "Stop nREPL",
+        "command": "joyride.stopNReplServer",
+        "title": "Stop nREPL Server",
         "category": "Joyride"
       },
       {

@@ -104,15 +104,6 @@
   ([script]
    (apply run-script+ (conj run-user-script-args script))))
 
-(def !server (volatile! nil))
-
-(defn start-nrepl []
-  (vreset! !server (nrepl/start-server {})))
-
-(defn stop-nrepl []
-  (nrepl/stop-server @!server))
-
-
 (defn ^:export activate [^js context]
   (when context
     (reset! !db {:output-channel (vscode/window.createOutputChannel "Joyride")
@@ -123,16 +114,18 @@
     (register-command! extension-context "joyride.runCode" #'run-code)
     (register-command! extension-context "joyride.runWorkspaceScript" #'run-workspace-script+)
     (register-command! extension-context "joyride.runUserScript" #'run-user-script+)
-    (register-command! extension-context "joyride.startNRepl" #'start-nrepl)
-    (register-command! extension-context "joyride.stopNRepl" #'stop-nrepl)
+    (register-command! extension-context "joyride.startNReplServer" #'nrepl/start-server)
+    (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server)
     (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
     (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)))
 
 (defn ^:export deactivate []
+  (when (nrepl/server-running?)
+    (nrepl/stop-server))
   (clear-disposables!))
 
 (defn before [done]
-  (deactivate)
+  (clear-disposables!)
   (done))
 
 (defn after []
