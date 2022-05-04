@@ -199,7 +199,7 @@
 (defn server-running? []
   (boolean (:server @!db)))
 
-(defn start-server'
+(defn- start-server'+
   "Start nRepl server. Accepts options either as JS object or Clojure map."
   [opts]
   (let [port (or (:port opts)
@@ -210,37 +210,44 @@
                        "info")
         sci-last-error (sci/new-var '*e nil {:ns (sci/create-ns 'clojure.core)})
         ctx-atom jsci/!ctx
-        server (node-net/createServer
-                (partial on-connect {:sci-ctx-atom ctx-atom
-                                     :sci-last-error sci-last-error}))
-        onExit (js/require "signal-exit")]
-    
-    (onExit (fn [_code _signal]
-              (debug "Process exit, removing port file")
-              (remove-port-file (port-file-uri))))
-    
+        #_#_on-exit (js/require "signal-exit")]
+    ;; TODO: I don't understand the following comment
     ;; Expose "app" key under js/app in the repl
-    (.listen server
-             port
-             "127.0.0.1" ;; default for now
-             (fn []
-               (let [addr (-> server (.address))
-                     port (-> addr .-port)
-                     host (-> addr .-address)]
-                 (info "nREPL server started on port" port "on host"
-                       (str host "- nrepl://" host ":" port))
-                 (->
-                   (vscode/workspace.fs.writeFile (port-file-uri)
-                                                  (-> (new js/TextEncoder) (.encode (str port))))
-                   (p/catch
-                       (fn [e]
-                         (info "Could not write port file" e)))))))
-    (swap! !db assoc :server server)))
 
-(defn start-server [opts]
+    #_(on-exit (fn [_code _signal]
+                 (debug "Process exit, removing port file")
+                 (remove-port-file (port-file-uri))))
+
+    (p/create (fn [resolve reject]
+                (try
+                  (let [server (node-net/createServer
+                                (partial on-connect {:sci-ctx-atom ctx-atom
+                                                     :sci-last-error sci-last-error}))]
+                    (swap! !db assoc :server server)
+                    (.listen server
+                             port
+                             "127.0.0.1" ;; default for now
+                             (fn []
+                               (let [addr (-> server (.address))
+                                     port (-> addr .-port)
+                                     host (-> addr .-address)]
+                                 (info "nREPL server started on port" port "on host"
+                                       (str host "- nrepl://" host ":" port))
+                                 (-> (vscode/workspace.fs.writeFile (port-file-uri)
+                                                                    (-> (new js/TextEncoder) (.encode (str port))))
+                                     (p/handle (fn [_result error]
+                                                 (resolve port)
+                                                 (when error
+                                                   (info "Could not write port file" error)))))))))
+                  (catch :default e
+                    (reject (ex-info "Error creating nREPL server" e))))))))
+
+(defn start-server+ [opts]
   (if-not (server-running?)
-    (start-server' opts)
-    (info "The nREPL server is already running")))
+    (start-server'+ opts)
+    (do
+      (info "The nREPL server is already running")
+      (p/rejected "The nREPL server is already running"))))
 
 (defn stop-server []
   (debug "nREPL stop-server")
