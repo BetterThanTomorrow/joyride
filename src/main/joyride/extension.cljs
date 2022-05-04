@@ -6,7 +6,7 @@
             [joyride.nrepl :as nrepl]
             [joyride.sci :as jsci]
             [joyride.scripts-menu :refer [show-script-picker+]]
-            [joyride.utils :refer [info vscode-read-uri+]]
+            [joyride.utils :refer [info vscode-read-uri+ jsify]]
             [promesa.core :as p]
             [sci.core :as sci]))
 
@@ -19,7 +19,8 @@
 
 (defn- clear-disposables! []
   (doseq [^js disposable (:disposables @!db)]
-    (.dispose disposable))
+    (p/all
+     (.dispose disposable)))
   (swap! !db assoc :disposables []))
 
 (def ^{:dynamic true
@@ -104,7 +105,9 @@
   ([script]
    (apply run-script+ (conj run-user-script-args script))))
 
-(defn ^:export activate [^js context]
+(def api (jsify {:startNReplServer nrepl/start-server+}))
+
+(defn ^:export activate' [^js context]
   (when context
     (reset! !db {:output-channel (vscode/window.createOutputChannel "Joyride")
                  :extension-context context
@@ -114,10 +117,15 @@
     (register-command! extension-context "joyride.runCode" #'run-code)
     (register-command! extension-context "joyride.runWorkspaceScript" #'run-workspace-script+)
     (register-command! extension-context "joyride.runUserScript" #'run-user-script+)
-    (register-command! extension-context "joyride.startNReplServer" #'nrepl/start-server)
+    (register-command! extension-context "joyride.startNReplServer" #'nrepl/start-server+)
     (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server)
     (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
-    (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)))
+    (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)
+    api))
+
+(defn activate [^js context]
+  (def a (activate' context))
+  a)
 
 (defn ^:export deactivate []
   (when (nrepl/server-running?)
@@ -125,10 +133,12 @@
   (clear-disposables!))
 
 (defn before [done]
-  (clear-disposables!)
-  (done))
+  (-> (clear-disposables!)
+      (p/then done)))
 
 (defn after []
-  (activate nil)
   (info "shadow-cljs reloaded Joyride")
   (js/console.log "shadow-cljs Reloaded"))
+
+(comment
+  (def ba (before after)))
