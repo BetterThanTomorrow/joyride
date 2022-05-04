@@ -5,7 +5,7 @@ const joyride = require("./out/joyride.js");
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-  joyride.activate(context);
+  return joyride.activate(context);
 }
 
 function deactivate() {
