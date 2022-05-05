@@ -5,7 +5,7 @@ There are two different APIs here:
 1. The Joyride *Scripting API*
 1. The Joyride *Extension API*
 
-Please note that Joyride's *Extension API* is available from *Joyride scripts*.
+Please note that Joyride's *Extension API* is also available to *Joyride scripts*.
 
 ## Scripting API
 
