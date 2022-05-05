@@ -226,49 +226,52 @@
                  (debug "Process exit, removing port file")
                  (remove-port-file (port-file-uri))))
 
-    (p/create (fn [resolve reject]
-                (try
-                  (let [server (node-net/createServer
-                                (partial on-connect {:sci-ctx-atom ctx-atom
-                                                     :sci-last-error sci-last-error}))]
-                    (swap! !db assoc ::server server)
-                    (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning true)
-                    (.listen server
-                             port
-                             "127.0.0.1" ;; default for now
-                             (fn []
-                               (let [addr (-> server (.address))
-                                     port (-> addr .-port)
-                                     host (-> addr .-address)]
-                                 (info "nREPL server started on port" port "on host"
-                                       (str host "- nrepl://" host ":" port))
-                                 (-> (vscode/workspace.fs.writeFile (port-file-uri root-path)
-                                                                    (-> (new js/TextEncoder) (.encode (str port))))
-                                     (p/handle (fn [_result error]
-                                                 (resolve port)
-                                                 (when error
-                                                   (info "Could not write port file" error)))))))))
-                  (catch :default e
-                    (reject (ex-info "Error creating nREPL server" e))))))))
+    (p/create
+     (fn [resolve _reject]
+       (let [server (node-net/createServer
+                     (partial on-connect {:sci-ctx-atom ctx-atom
+                                          :sci-last-error sci-last-error}))]
+         (swap! !db assoc ::server server)
+         (p/do
+           (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning true))
+         (.listen server
+                  port
+                  "127.0.0.1" ;; default for now
+                  (fn []
+                    (let [addr (-> server (.address))
+                          port (-> addr .-port)
+                          host (-> addr .-address)]
+                      (info "nREPL server started on port" port "on host"
+                            (str host "- nrepl://" host ":" port))
+                      (-> (vscode/workspace.fs.writeFile (port-file-uri root-path)
+                                                         (-> (new js/TextEncoder) (.encode (str port))))
+                          (p/handle (fn [_result error]
+                                      (resolve port)
+                                      (when error
+                                        (info "Could not write port file" error)))))))))))))
 
 (defn start-server+ [opts]
   (if-not (server-running?)
     (start-server'+ opts)
     (do
       (info "The nREPL server is already running")
-      (p/rejected "The nREPL server is already running"))))
+      (p/rejected (js/Error. "The nREPL server is already running" {})))))
 
 (defn stop-server []
   (debug "nREPL stop-server")
-  (if-let [server (::server @!db)]
-    (.close server
-            (fn []
-              (-> (remove-port-file (::root-path @!db))
-                  (p/then
-                   (fn []
-                     (swap! !db dissoc ::server ::root-path)
-                     (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning false)
-                     (info "nREPL server stopped"))))))
+
+  (if (server-running?)
+    (let [server (::server @!db)]
+      (.close server
+              (fn []
+                (swap! !db dissoc ::server)
+                (p/do
+                  (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning false))
+                (-> (remove-port-file (::root-path @!db))
+                    (p/then
+                     (fn []
+                       (swap! !db dissoc ::root-path)
+                       (info "nREPL server stopped")))))))
     (info "There is no nREPL Server running")))
 
 (defn enable-message-logging! []

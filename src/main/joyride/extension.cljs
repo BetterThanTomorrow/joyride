@@ -19,10 +19,11 @@
     (.push (.-subscriptions context) disposable)))
 
 (defn- clear-disposables! []
-  (doseq [^js disposable (:disposables @!db)]
-    (p/all
-     (.dispose disposable)))
-  (swap! !db assoc :disposables []))
+  (swap! !db assoc :disposables [])
+  (p/do
+    (doseq [^js disposable (:disposables @!db)]
+      (p/all
+       (.dispose disposable)))))
 
 (def ^{:dynamic true
        :doc "Should the Joyride output channel be revealed after `say`?
