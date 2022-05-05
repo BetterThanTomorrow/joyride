@@ -41,9 +41,27 @@ We want to add `clojure.test` and `clojure.pprint` as well in the near future. H
 
 ## Extension API
 
+Joyride's Extension API has two parts:
+
+1. [`when` clauses contexts](https://code.visualstudio.com/api/references/when-clause-contexts)
+1. The `exports` map/object on the activated [extension](https://code.visualstudio.com/api/references/vscode-api#extensions) instance.
+
+### `when` clause context
+
+The following contexts are available for users of Joyride when binding commands to keyboard shortcuts:
+
+* `joyride.isActive`, `boolean` - Wether the joyRide extension is active or not
+* `joyride.isNReplServerRunning`, `boolean` - Wether the Joyride nREPL server is running or not
+
+If your script needs access to these contexts, use the `getContextValue` function from the [Joyride `exports`](#exports) API.
+
+### `exports`
+
 When the Joyride extension has activated it has the following API:
 
 * `startNReplServer [project-root-path]`
    * Returns a promise resolving to the port where the nREPL server started
    * `project-root-path` is optional, defaulting to `vscode/workspace.rootPath`
-
+* `getContextValue context-key`
+   * Returns the value of a Joyride [`when` clause context](#when-clause-context)
+   * Returns undefined for non-existing `context-key`s

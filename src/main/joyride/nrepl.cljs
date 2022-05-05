@@ -1,12 +1,12 @@
 (ns joyride.nrepl
   "Original implementation taken from https://github.com/viesti/nrepl-cljs-sci."
   (:require
-   ["fs" :as fs]
    ["net" :as node-net]
    ["path" :as path]
    ["vscode" :as vscode]
    [clojure.string :as str]
    [joyride.bencode :refer [encode decode-all]]
+   [joyride.when-contexts :as when-contexts]
    [joyride.repl-utils :as repl-utils :refer [the-sci-ns]]
    [joyride.sci :as jsci]
    [joyride.utils :refer [info warn cljify]]
@@ -199,7 +199,7 @@
                 (debug "Failed deleting port file" e))))))
 
 (defn server-running? []
-  (boolean (::server @!db)))
+  (when-contexts/get-context ::when-contexts/joyride.isNReplServerRunning))
 
 (defn- start-server'+
   "Start nRepl server. Accepts options either as JS object or Clojure map."
@@ -232,6 +232,7 @@
                                 (partial on-connect {:sci-ctx-atom ctx-atom
                                                      :sci-last-error sci-last-error}))]
                     (swap! !db assoc ::server server)
+                    (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning true)
                     (.listen server
                              port
                              "127.0.0.1" ;; default for now
@@ -266,6 +267,7 @@
                   (p/then
                    (fn []
                      (swap! !db dissoc ::server ::root-path)
+                     (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning false)
                      (info "nREPL server stopped"))))))
     (info "There is no nREPL Server running")))
 
@@ -277,6 +279,7 @@
 
 (comment
   (-> (start-server+ {:root-path "/Users/pez/Projects/joyride/playground" #_"/hello-joyride"})
-      (p/catch #()))
+      (p/catch #(js/console.error %)))
   (stop-server)
+  (server-running?)
   )

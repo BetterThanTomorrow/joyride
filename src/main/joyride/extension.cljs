@@ -3,6 +3,7 @@
             ["vscode" :as vscode]
             [clojure.pprint :as pprint]
             [joyride.config :as conf]
+            [joyride.when-contexts :as when-contexts]
             [joyride.nrepl :as nrepl]
             [joyride.sci :as jsci]
             [joyride.scripts-menu :refer [show-script-picker+]]
@@ -108,7 +109,9 @@
 (defn start-nrepl-server+ [root-path]
   (nrepl/start-server+ {:root-path (or root-path vscode/workspace.rootPath)}))
 
-(def api (jsify {:startNReplServer nrepl/start-server+}))
+(def api (jsify {:startNReplServer nrepl/start-server+
+                 :getContextValue (fn [k]
+                                    (when-contexts/get-context k))}))
 
 (defn ^:export activate [^js context]
   (when context
@@ -124,9 +127,11 @@
     (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server)
     (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
     (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)
+    (when-contexts/set-context! ::when-contexts/joyride.isActive true)
     api))
 
 (defn ^:export deactivate []
+  (when-contexts/set-context! ::when-contexts/joyride.isActive false)
   (when (nrepl/server-running?)
     (nrepl/stop-server))
   (clear-disposables!))
