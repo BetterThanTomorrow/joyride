@@ -3,10 +3,11 @@
             ["vscode" :as vscode]
             [clojure.pprint :as pprint]
             [joyride.config :as conf]
+            [joyride.when-contexts :as when-contexts]
             [joyride.nrepl :as nrepl]
             [joyride.sci :as jsci]
             [joyride.scripts-menu :refer [show-script-picker+]]
-            [joyride.utils :refer [info vscode-read-uri+]]
+            [joyride.utils :refer [info vscode-read-uri+ jsify]]
             [promesa.core :as p]
             [sci.core :as sci]))
 
@@ -18,9 +19,10 @@
     (.push (.-subscriptions context) disposable)))
 
 (defn- clear-disposables! []
-  (doseq [^js disposable (:disposables @!db)]
-    (.dispose disposable))
-  (swap! !db assoc :disposables []))
+  (swap! !db assoc :disposables [])
+  (p/run! (fn [^js disposable]
+            (.dispose disposable))
+          (:disposables @!db)))
 
 (def ^{:dynamic true
        :doc "Should the Joyride output channel be revealed after `say`?
@@ -104,14 +106,12 @@
   ([script]
    (apply run-script+ (conj run-user-script-args script))))
 
-(def !server (volatile! nil))
+(defn start-nrepl-server+ [root-path]
+  (nrepl/start-server+ {:root-path (or root-path vscode/workspace.rootPath)}))
 
-(defn start-nrepl []
-  (vreset! !server (nrepl/start-server {})))
-
-(defn stop-nrepl []
-  (nrepl/stop-server @!server))
-
+(def api (jsify {:startNReplServer nrepl/start-server+
+                 :getContextValue (fn [k]
+                                    (when-contexts/get-context k))}))
 
 (defn ^:export activate [^js context]
   (when context
@@ -123,19 +123,26 @@
     (register-command! extension-context "joyride.runCode" #'run-code)
     (register-command! extension-context "joyride.runWorkspaceScript" #'run-workspace-script+)
     (register-command! extension-context "joyride.runUserScript" #'run-user-script+)
-    (register-command! extension-context "joyride.startNRepl" #'start-nrepl)
-    (register-command! extension-context "joyride.stopNRepl" #'stop-nrepl)
+    (register-command! extension-context "joyride.startNReplServer" #'start-nrepl-server+)
+    (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server)
     (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
-    (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)))
+    (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)
+    (when-contexts/set-context! ::when-contexts/joyride.isActive true)
+    api))
 
 (defn ^:export deactivate []
+  (when-contexts/set-context! ::when-contexts/joyride.isActive false)
+  (when (nrepl/server-running?)
+    (nrepl/stop-server))
   (clear-disposables!))
 
 (defn before [done]
-  (deactivate)
-  (done))
+  (-> (clear-disposables!)
+      (p/then done)))
 
 (defn after []
-  (activate nil)
   (info "shadow-cljs reloaded Joyride")
   (js/console.log "shadow-cljs Reloaded"))
+
+(comment
+  (def ba (before after)))

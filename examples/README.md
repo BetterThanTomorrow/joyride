@@ -58,3 +58,9 @@ the default Windows comment keyboard shortcut.
 
 * Video here: https://www.youtube.com/watch?v=V1oTf-1EchU
 * Tweet to like/comment/retweet: https://twitter.com/pappapez/status/1519825664177807363
+
+## Joyride API
+
+Yes, you can script Joyride with Joyride. See the [Joyride API docs](../doc/api.md) for more about this.
+
+Example script: [`.joyride/scripts/joyride_api.cljs`](.joyride/scripts/joyride_api.cljs)

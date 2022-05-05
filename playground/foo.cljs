@@ -1,4 +1,4 @@
-(ns hello
+(ns foo
   (:require ["vscode" :as vscode]
             [joyride.core :as j]))
 
