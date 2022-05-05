@@ -191,12 +191,10 @@
 (defn remove-port-file [^js path]
   (let [uri (port-file-uri path)]
     (-> uri
-     vscode/workspace.fs.stat
-     (p/then (fn [stat]
-               (when stat
-                 (vscode/workspace.fs.delete uri))))
-     (p/catch (fn [e]
-                (debug "Failed deleting port file" e))))))
+        vscode/workspace.fs.stat
+        (p/then (fn [stat]
+                  (when stat
+                    (vscode/workspace.fs.delete uri)))))))
 
 (defn server-running? []
   (when-contexts/get-context ::when-contexts/joyride.isNReplServerRunning))
@@ -259,7 +257,6 @@
 
 (defn stop-server []
   (debug "nREPL stop-server")
-
   (if (server-running?)
     (let [server (::server @!db)]
       (.close server
