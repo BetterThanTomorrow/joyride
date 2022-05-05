@@ -155,7 +155,7 @@
   (fn [_request response]
     (.write socket (encode response))))
 
-(defn make-reponse-handler [socket]
+(defn make-response-handler [socket]
   (-> (make-send-fn socket)
       log-response-mw
       response-for-mw))
@@ -164,7 +164,7 @@
   (debug "Connection accepted")
   (.setNoDelay ^node-net/Socket socket true)
   (let [handler (make-request-handler opts)
-        response-handler (make-reponse-handler socket)
+        response-handler (make-response-handler socket)
         pending (atom nil)]
     (.on ^node-net/Socket socket "data"
          (fn [data]
