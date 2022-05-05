@@ -51,7 +51,7 @@ Joyride's Extension API has two parts:
 The following contexts are available for users of Joyride when binding commands to keyboard shortcuts:
 
 * `joyride.isActive`, `boolean` - Whether the joyRide extension is active or not
-* `joyride.isNReplServerRunning`, `boolean` - Wether the Joyride nREPL server is running or not
+* `joyride.isNReplServerRunning`, `boolean` - Whether the Joyride nREPL server is running or not
 
 If your script needs access to these contexts, use the `getContextValue` function from the [Joyride `exports`](#exports) API.
 
