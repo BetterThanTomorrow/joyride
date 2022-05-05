@@ -1,4 +1,13 @@
-# API
+# APIs
+
+There are two different APIs here:
+
+1. The Joyride *Scripting API*
+1. The Joyride *Extension API*
+
+Please note that Joyride's *Extension API* is available from *Joyride scripts*.
+
+## Scripting API
 
 In addition to `clojure.core`, `clojure.set`, `clojure.edn`, `clojure.string`,
 `clojure.walk`, `clojure.data`, Joyride exposes
@@ -29,3 +38,12 @@ See [promesa docs](https://cljdoc.org/d/funcool/promesa/6.0.2/doc/user-guide).
 ## Possibly coming additions
 
 We want to add `clojure.test` and `clojure.pprint` as well in the near future. How near/if depends on things like how much time we can spend on it, and how easy/hard it will be to port this over from [nbb](https://github.com/babashka/nbb).
+
+## Extension API
+
+When the Joyride extension has activated it has the following API:
+
+* `startNReplServer [project-root-path]`
+   * Returns a promise resolving to the port where the nREPL server started
+   * `project-root-path` is optional, defaulting to `vscode/workspace.rootPath`
+
