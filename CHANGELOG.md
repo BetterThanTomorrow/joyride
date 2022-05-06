@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix [API call `startNReplServer` not honoring the `root-path` argument](https://github.com/BetterThanTomorrow/joyride/issues/32)
+
 ## [0.0.4] - 2022-05-05
 
 - [API for starting the nREPL server](https://github.com/BetterThanTomorrow/joyride/issues/28)
