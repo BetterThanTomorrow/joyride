@@ -109,7 +109,7 @@
 (defn start-nrepl-server+ [root-path]
   (nrepl/start-server+ {:root-path (or root-path vscode/workspace.rootPath)}))
 
-(def api (jsify {:startNReplServer nrepl/start-server+
+(def api (jsify {:startNReplServer start-nrepl-server+
                  :getContextValue (fn [k]
                                     (when-contexts/get-context k))}))
 
