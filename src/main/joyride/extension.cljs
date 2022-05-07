@@ -7,7 +7,7 @@
             [joyride.nrepl :as nrepl]
             [joyride.sci :as jsci]
             [joyride.scripts-menu :refer [show-script-picker+]]
-            [joyride.utils :refer [info vscode-read-uri+ jsify]]
+            [joyride.utils :as utils :refer [info vscode-read-uri+ jsify]]
             [promesa.core :as p]
             [sci.core :as sci]))
 
@@ -106,6 +106,16 @@
   ([script]
    (apply run-script+ (conj run-user-script-args script))))
 
+(defn maybe-run-init-script+ [run-fn {:keys [label script script-path]}]
+  (say (str label " script: " script-path))
+  (-> (utils/path-exists?+ script-path)
+      (p/then (fn [exists?]
+                (if exists?
+                  (do
+                    (say (str "  Running..."))
+                    (run-fn script))
+                  (say (str "  No " label " script present")))))))
+
 (defn start-nrepl-server+ [root-path]
   (nrepl/start-server+ {:root-path (or root-path vscode/workspace.rootPath)}))
 
@@ -119,7 +129,10 @@
                  :extension-context context
                  :disposables []})
     (vreset! jsci/!extension-context context)
-    (say "🟢 Joyride VS Code with Clojure. 🚗"))
+    (say "🟢 Joyride VS Code with Clojure. 🚗")
+    (p/-> (maybe-run-init-script+ run-user-script+ (:user conf/init-scripts))
+          (p/then
+           (maybe-run-init-script+ run-workspace-script+ (:workspace conf/init-scripts)))))
   (let [{:keys [extension-context]} @!db]
     (register-command! extension-context "joyride.runCode" #'run-code)
     (register-command! extension-context "joyride.runWorkspaceScript" #'run-workspace-script+)
