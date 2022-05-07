@@ -27,11 +27,11 @@ Your feedback is highly welcome!
 
 ## Quick Start - Start the REPL
 
-With Calva it is very quick to start a Joyride REPL and connect Calva to it. This video demonstrates starting from scratch, including installing Joyride.
+While developing Joyride scripts you should of course do it leveraging Interactive Programming (see [this video](https://www.youtube.com/watch?v=d0K1oaFGvuQ) demonstrating it). With Calva it is very quick to start a Joyride REPL and connect Calva to it. This video demonstrates starting from scratch, including installing Joyride.
 
 https://user-images.githubusercontent.com/30010/167246562-24638f12-120b-48e9-893a-7408d5beeb77.mp4
 
-The demo ”project” used here is just a folder with this a file `hello_joyride.cljs`. Here's the code, if you want to try it out yourself:
+The demo ”project” used here is only a directory with this file `hello_joyride.cljs`. Here's the code, if you want to try it out yourself:
 
 ```clojure
 (ns hello-joyride
@@ -101,15 +101,6 @@ See the [examples](./examples) for examples including:
 * Terminal creation and control
 * Fontsize manipulation
 * Calva Structural Editing enhancements
-
-## There's a REPL server
-
-While developing Joyride scripts you should of course do it leveraging Interactive Programming (see [this video](https://www.youtube.com/watch?v=d0K1oaFGvuQ) demonstrating it). Here are the steps:
-
-1. Issue the command <kbd>**Joyride: Start nREPL**</kbd>. This will start Joyride's nREPL server.
-2. Connect your Clojure editor (we suggest [Calva](https://calva.io) for super biased reasons.)
-3. Open a script (presumeably in the `.joyride/scripts` folder)
-4. Hack away!
 
 ## Support and feedback
 
