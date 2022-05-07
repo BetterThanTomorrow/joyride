@@ -14,7 +14,7 @@ You are entering a construction yard. Things are going to change and break your 
 
 Your feedback is highly welcome!
 
-## Quickest Start
+## Quickest Start - Run some Code
 
 1. Bring up the VS Code Command Palette (`cmd/ctrl+shift+p`)
 2. Execute **Joyride: Run Clojure Code**
@@ -24,9 +24,42 @@ Your feedback is highly welcome!
     ```
 4. Submit
 
-## Quickstart
 
-Create a script in your workspace under `.joyride/scripts`, e.g. `example.cljs`:
+## Quick Start - Start the REPL
+
+With Calva it is very quick to start a Joyride REPL and connect Calva to it. This video demonstrates starting from scratch, including installing Joyride.
+
+https://user-images.githubusercontent.com/30010/167246562-24638f12-120b-48e9-893a-7408d5beeb77.mp4
+
+The demo ”project” used here is just a folder with this a file `hello_joyride.cljs`. Here's the code, if you want to try it out yourself:
+
+```clojure
+(ns hello-joyride
+  (:require ["vscode" :as vscode]
+            [promesa.core :as p]))
+
+(comment
+  (+ 1 2 3 4 5 6 7 8 6)
+  (-> (vscode/window.showInformationMessage
+       "Come on, Join the Joyride!"
+       "Be a Joyrider")
+      (p/then
+       (fn [choice]
+         (println "You choose to:" choice)))))
+
+"Hello World"
+```
+
+## Quick Start - Start your Scripts Library
+
+Joyride lets you bind keyboard shortcuts to its User and Workspace scripts.
+
+* User Scripts: `<user home>/.config/joyride/scripts`
+* Workspace scripts: `<workspace root>.joyride/scripts`
+
+Let's go with a Workspace script:
+
+Create a script in your workspace, e.g `.joyride/scripts/example.cljs`:
 
 ``` clojure
 (ns example
@@ -58,7 +91,7 @@ Then in your keyboard shortcuts, add:
 
 Now you can run the `example.cljs` script by just hitting Cmd+1!
 
-See [doc/configuration.md](https://github.com/BetterThanTomorrow/joyride/blob/master/doc/configuration.md) for full configuration options
+See [doc/configuration.md](https://github.com/BetterThanTomorrow/joyride/blob/master/doc/configuration.md) for full configuration options.
 
 ## Examples
 
