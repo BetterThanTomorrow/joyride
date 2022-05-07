@@ -17,9 +17,10 @@ the following namespaces:
 
 ### `joyride.core`
 
-- `*file*`: dynamic var representing the currently executing file.
+- `*file*`: dynamic var representing the currently executing file
+- `get-extension-context`: function returning the Joyride [extension context](https://code.visualstudio.com/api/references/vscode-api#ExtensionContext) object
 
-NB: While using `*file*` bare works, this will probably stop working soon. Always use it from `joyride.core`, e.g.:
+NB: While using `*file*` bare works, it will probably stop working soon. Always use it from `joyride.core`, e.g.:
 
 ```clojure
 (ns your-awesome-script

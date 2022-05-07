@@ -10,6 +10,8 @@
 
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
 
+(def !extension-context (volatile! nil))
+
 (defn ns->path [namespace]
   (-> (str namespace)
       (munge)
@@ -20,7 +22,9 @@
            (sci/init {:classes {'js goog/global
                                 :allow :all}
                       :namespaces (assoc (:namespaces pconfig/config)
-                                         'joyride.core {'*file* sci/file})
+                                         'joyride.core {'*file* sci/file
+                                                        'get-extension-context (fn []
+                                                                                 @!extension-context)})
                       :load-fn (fn [{:keys [namespace opts]}]
                                  (cond
                                    (symbol? namespace)
