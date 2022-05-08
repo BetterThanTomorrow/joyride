@@ -1,7 +1,9 @@
 (ns joyride.utils
   (:require ["vscode" :as vscode]
-            [promesa.core :as p]
-            [clojure.string :as str]))
+            [clojure.pprint :as pprint]
+            [clojure.string :as str]
+            [joyride.db :as db]
+            [promesa.core :as p]))
 
 (defn jsify [clj-thing]
   (clj->js clj-thing))
@@ -41,3 +43,27 @@
 
 (defn error [& xs]
   (vscode/window.showErrorMessage (str/join " " (mapv str xs))))
+
+(def ^{:dynamic true
+       :doc "Should the Joyride output channel be revealed after `say`?
+             Default: `true`"}
+  *show-when-said?* true)
+
+(defn say [message]
+  (let [channel ^js (:output-channel @db/!app-db)]
+    (.appendLine channel message)
+    (when *show-when-said?*
+      (.show channel true))))
+
+(defn say-error [message]
+  (say (str "ERROR: " message)))
+
+(defn say-result
+  ([result]
+   (say-result nil result))
+  ([message result]
+   (let [prefix (if (empty? message)
+                  "=> "
+                  (str message "\n=> "))]
+     (.append ^js (:output-channel @db/!app-db) prefix)
+     (say (with-out-str (pprint/pprint result))))))

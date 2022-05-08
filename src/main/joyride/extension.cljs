@@ -1,52 +1,27 @@
 (ns joyride.extension
   (:require ["path" :as path]
             ["vscode" :as vscode]
-            [clojure.pprint :as pprint]
             [joyride.config :as conf]
-            [joyride.when-contexts :as when-contexts]
+            [joyride.db :as db]
+            [joyride.life-cycle :as life-cycle]
             [joyride.nrepl :as nrepl]
             [joyride.sci :as jsci]
             [joyride.scripts-menu :refer [show-script-picker+]]
-            [joyride.utils :as utils :refer [info vscode-read-uri+ jsify]]
+            [joyride.utils :as utils :refer [info jsify vscode-read-uri+]]
+            [joyride.when-contexts :as when-contexts]
             [promesa.core :as p]
             [sci.core :as sci]))
 
-(defonce !db (atom {}))
-
 (defn- register-command! [^js context command-id var]
   (let [disposable (vscode/commands.registerCommand command-id var)]
-    (swap! !db update :disposables conj disposable)
+    (swap! db/!app-db update :disposables conj disposable)
     (.push (.-subscriptions context) disposable)))
 
 (defn- clear-disposables! []
-  (swap! !db assoc :disposables [])
+  (swap! db/!app-db assoc :disposables [])
   (p/run! (fn [^js disposable]
             (.dispose disposable))
-          (:disposables @!db)))
-
-(def ^{:dynamic true
-       :doc "Should the Joyride output channel be revealed after `say`?
-             Default: `true`"}
-  *show-when-said?* true)
-
-(defn say [message]
-  (let [channel ^js (:output-channel @!db)]
-    (.appendLine channel message)
-    (when *show-when-said?*
-      (.show channel true))))
-
-(defn say-error [message]
-  (say (str "ERROR: " message)))
-
-(defn say-result
-  ([result]
-   (say-result nil result))
-  ([message result]
-   (let [prefix (if (empty? message)
-                  "=> "
-                  (str message "\n=> "))]
-     (.append ^js (:output-channel @!db) prefix)
-     (say (with-out-str (pprint/pprint result))))))
+          (:disposables @db/!app-db)))
 
 (defn run-code
   ([]
@@ -58,7 +33,7 @@
        (run-code input))))
   ([code]
    (p/let [result (jsci/eval-string code)]
-     (say-result result))))
+     (utils/say-result result))))
 
 (defn choose-file [default-uri]
   (vscode/window.showOpenDialog #js {:canSelectMany false
@@ -81,9 +56,9 @@
        (p/handle (fn [result error]
                    (if error
                      (do
-                       (say-error (str title " Failed: " script-path " " (.-message error)))
+                       (utils/say-error (str title " Failed: " script-path " " (.-message error)))
                        (js/console.error title "Failed: " script-path (.-message error) error))
-                     (do (say-result (str script-path " evaluated.") result)
+                     (do (utils/say-result (str script-path " evaluated.") result)
                          result)))))))
 
 (def run-workspace-script-args ["Run Workspace Script"
@@ -106,16 +81,6 @@
   ([script]
    (apply run-script+ (conj run-user-script-args script))))
 
-(defn maybe-run-init-script+ [run-fn {:keys [label script script-path]}]
-  (say (str label " script: " script-path))
-  (-> (utils/path-exists?+ script-path)
-      (p/then (fn [exists?]
-                (if exists?
-                  (do
-                    (say (str "  Running..."))
-                    (run-fn script))
-                  (say (str "  No " label " script present")))))))
-
 (defn start-nrepl-server+ [root-path]
   (nrepl/start-server+ {:root-path (or root-path vscode/workspace.rootPath)}))
 
@@ -125,15 +90,16 @@
 
 (defn ^:export activate [^js context]
   (when context
-    (reset! !db {:output-channel (vscode/window.createOutputChannel "Joyride")
+    (reset! db/!app-db {:output-channel (vscode/window.createOutputChannel "Joyride")
                  :extension-context context
                  :disposables []})
-    (vreset! jsci/!extension-context context)
-    (say "🟢 Joyride VS Code with Clojure. 🚗")
-    (p/-> (maybe-run-init-script+ run-user-script+ (:user conf/init-scripts))
+    (utils/say "🟢 Joyride VS Code with Clojure. 🚗")
+    (p/-> (life-cycle/maybe-run-init-script+ run-user-script+ 
+                                             (:user life-cycle/init-scripts))
           (p/then
-           (maybe-run-init-script+ run-workspace-script+ (:workspace conf/init-scripts)))))
-  (let [{:keys [extension-context]} @!db]
+           (life-cycle/maybe-run-init-script+ run-workspace-script+ 
+                                              (:workspace life-cycle/init-scripts)))))
+  (let [{:keys [extension-context]} @db/!app-db]
     (register-command! extension-context "joyride.runCode" #'run-code)
     (register-command! extension-context "joyride.runWorkspaceScript" #'run-workspace-script+)
     (register-command! extension-context "joyride.runUserScript" #'run-user-script+)

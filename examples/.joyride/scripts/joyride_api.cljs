@@ -34,9 +34,9 @@
   ;; Joyride scripts can also reach the Joyride extension
   ;; through `joyride.core`
   (require '[joyride.core :as joyride])
+  (require '[clojure.repl :refer [doc]])
   (-> (joyride/get-extension-context)
       .-extension
       .-exports)
-  (require '[clojure.repl :refer [doc]])
   (doc joyride/get-extension-context)
   )
