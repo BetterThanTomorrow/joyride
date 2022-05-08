@@ -4,6 +4,15 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.7] - 2022-05-06
+
+- [Activation scripts](https://github.com/BetterThanTomorrow/joyride/issues/8)
+
+
+## [0.0.6] - 2022-05-06
+
+- [Give the scripts access to the Joyride extension context](https://github.com/BetterThanTomorrow/joyride/issues/33)
+
 ## [0.0.5] - 2022-05-06
 
 - Fix [API call `startNReplServer` not honoring the `root-path` argument](https://github.com/BetterThanTomorrow/joyride/issues/32)
