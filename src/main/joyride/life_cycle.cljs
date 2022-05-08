@@ -9,7 +9,6 @@
 (def user-init-script-path (path/join conf/user-config-path
                                       conf/user-scripts-path
                                       user-init-script))
-(def user-init-script-abs-path user-init-script-path)
 
 (def workspace-init-script "activate.cljs")
 (def workspace-init-script-path (path/join conf/workspace-scripts-path
@@ -20,7 +19,7 @@
 (def init-scripts {:user {:label "User activate"
                           :script user-init-script
                           :script-path user-init-script-path
-                          :script-abs-path user-init-script-abs-path}
+                          :script-abs-path user-init-script-path}
                    :workspace {:label "Workspace activate"
                                :script user-init-script
                                :script-path workspace-init-script-path
