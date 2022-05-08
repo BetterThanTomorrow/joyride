@@ -101,6 +101,8 @@ See the [examples](./examples) for examples including:
 * Terminal creation and control
 * Fontsize manipulation
 * Calva Structural Editing enhancements
+* Opening and showing project files
+* Workspace activation script
 
 ## Support and feedback
 
