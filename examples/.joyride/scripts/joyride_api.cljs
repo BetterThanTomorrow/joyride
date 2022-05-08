@@ -36,4 +36,7 @@
   (require '[joyride.core :as joyride])
   (-> (joyride/get-extension-context)
       .-extension
-      .-exports))
+      .-exports)
+  (require '[clojure.repl :refer [doc]])
+  (doc joyride/get-extension-context)
+  )
