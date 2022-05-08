@@ -97,8 +97,9 @@
     (p/-> (life-cycle/maybe-run-init-script+ run-user-script+ 
                                              (:user life-cycle/init-scripts))
           (p/then
-           (life-cycle/maybe-run-init-script+ run-workspace-script+ 
-                                              (:workspace life-cycle/init-scripts)))))
+           (fn [_result]
+             (life-cycle/maybe-run-init-script+ run-workspace-script+
+                                                (:workspace life-cycle/init-scripts))))))
   (let [{:keys [extension-context]} @db/!app-db]
     (register-command! extension-context "joyride.runCode" #'run-code)
     (register-command! extension-context "joyride.runWorkspaceScript" #'run-workspace-script+)
