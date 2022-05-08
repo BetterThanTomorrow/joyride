@@ -12,6 +12,14 @@
 
 (def !extension-context (volatile! nil))
 
+(defn get-extension-context
+  "Returns the Joyride extension context object.
+   See: https://code.visualstudio.com/api/references/vscode-api#ExtensionContext"
+  []
+  @!extension-context)
+
+(def joyride-ns (sci/create-ns 'joyride.core nil))
+
 (defn ns->path [namespace]
   (-> (str namespace)
       (munge)
@@ -23,8 +31,7 @@
                                 :allow :all}
                       :namespaces (assoc (:namespaces pconfig/config)
                                          'joyride.core {'*file* sci/file
-                                                        'get-extension-context (fn []
-                                                                                 @!extension-context)})
+                                                        'get-extension-context (sci/copy-var get-extension-context joyride-ns)})
                       :load-fn (fn [{:keys [namespace opts]}]
                                  (cond
                                    (symbol? namespace)
