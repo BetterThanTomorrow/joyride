@@ -1,9 +1,6 @@
 (ns activate
   (:require [joyride.core :as joyride]
-            ["vscode" :as vscode]
-            [promesa.core :as p]))
-
-(println "Hello World, from Workspace activate.cljs script")
+            ["vscode" :as vscode]))
 
 (defonce !db (atom {:disposables []}))
 
@@ -26,6 +23,7 @@
       (.push disposable)))
 
 (defn- my-main []
+  (println "Hello World, from Workspace activate.cljs script")
   (clear-disposables!)
   (push-disposable
    ;; It might surprise you to see how often and when this happens,
@@ -37,5 +35,5 @@
                "document opened:" 
                (.-fileName doc))))))
 
-(when true
+(when (= (joyride/get-invoked-script) joyride/*file*)
   (my-main))

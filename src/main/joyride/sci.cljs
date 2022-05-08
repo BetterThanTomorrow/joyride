@@ -11,13 +11,19 @@
 
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
 
+(def joyride-ns (sci/create-ns 'joyride.core nil))
+
 (defn get-extension-context
   "Returns the Joyride extension context object.
    See: https://code.visualstudio.com/api/references/vscode-api#ExtensionContext"
   []
   (:extension-context @db/!app-db))
 
-(def joyride-ns (sci/create-ns 'joyride.core nil))
+(defn get-invoked-script
+  "Returns the absolute path of theinvoked script when the evaluation is made
+   through *Run Script*, otherwise returns `nil`."
+  []
+  (:invoked-script @db/!app-db))
 
 (defn ns->path [namespace]
   (-> (str namespace)
@@ -30,7 +36,8 @@
                                 :allow :all}
                       :namespaces (assoc (:namespaces pconfig/config)
                                          'joyride.core {'*file* sci/file
-                                                        'get-extension-context (sci/copy-var get-extension-context joyride-ns)})
+                                                        'get-extension-context (sci/copy-var get-extension-context joyride-ns)
+                                                        'get-invoked-script (sci/copy-var get-invoked-script joyride-ns)})
                       :load-fn (fn [{:keys [namespace opts]}]
                                  (cond
                                    (symbol? namespace)

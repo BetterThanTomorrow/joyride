@@ -1,6 +1,7 @@
 (ns open-document
-  (:require [promesa.core :as p]
-            ["vscode" :as vscode]))
+  (:require ["vscode" :as vscode]
+            [joyride.core :as joyride]
+            [promesa.core :as p]))
 
 (defn show-random-example []
   (p/let [examples (vscode/workspace.findFiles ".joyride/scripts/**/*.cljs")
@@ -9,9 +10,13 @@
           (vscode/window.showTextDocument
            #js {:preview false, :preserveFocus false}))))
 
-(p/-> (vscode/window.showInformationMessage "Welcome to the Joyride examples workspace. Want to look at a random example?" "Yes" "No")
-      (p/then (fn [choice]
-                (case choice
-                  "Yes" (show-random-example)
-                  "No" :no
-                  :none))))
+(defn my-main []
+  (p/-> (vscode/window.showInformationMessage "Welcome to the Joyride examples workspace. Want to look at a random example?" "Yes" "No")
+        (p/then (fn [choice]
+                  (case choice
+                    "Yes" (show-random-example)
+                    "No" :no
+                    :none)))))
+
+(when (= (joyride/get-invoked-script) joyride/*file*)
+  (my-main))

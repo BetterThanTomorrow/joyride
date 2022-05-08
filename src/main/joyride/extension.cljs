@@ -51,9 +51,11 @@
    (-> (p/let [abs-path (path/join base-path scripts-path script-path)
                script-uri (vscode/Uri.file abs-path)
                code (vscode-read-uri+ script-uri)]
+         (swap! db/!app-db assoc :invoked-script abs-path)
          (sci/with-bindings {sci/file abs-path}
            (jsci/eval-string code)))
        (p/handle (fn [result error]
+                   (swap! db/!app-db assoc :invoked-script nil)
                    (if error
                      (do
                        (utils/say-error (str title " Failed: " script-path " " (.-message error)))
