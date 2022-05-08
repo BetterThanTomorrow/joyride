@@ -118,6 +118,7 @@
     (reset! !db {:output-channel (vscode/window.createOutputChannel "Joyride")
                  :extension-context context
                  :disposables []})
+    (vreset! jsci/!extension-context context)
     (say "🟢 Joyride VS Code with Clojure. 🚗"))
   (let [{:keys [extension-context]} @!db]
     (register-command! extension-context "joyride.runCode" #'run-code)
