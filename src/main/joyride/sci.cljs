@@ -3,6 +3,7 @@
             ["path" :as path]
             ["vscode" :as vscode]
             [clojure.string :as str]
+            [joyride.db :as db]
             [joyride.config :refer [workspace-scripts-path]]
             [joyride.utils :as utils]
             [sci-configs.funcool.promesa :as pconfig]
@@ -10,13 +11,11 @@
 
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
 
-(def !extension-context (volatile! nil))
-
 (defn get-extension-context
   "Returns the Joyride extension context object.
    See: https://code.visualstudio.com/api/references/vscode-api#ExtensionContext"
   []
-  @!extension-context)
+  (:extension-context @db/!app-db))
 
 (def joyride-ns (sci/create-ns 'joyride.core nil))
 

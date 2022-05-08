@@ -6,6 +6,13 @@ Demonstrating some ways to [Joyride VS Code](https://marketplace.visualstudio.co
 
 In the `.joyride/scripts` folder you'll find mostly small examples:
 
+## Activation script
+
+A Workspace [activate.cljs] script that registers a `vscode/workspace.onDidOpenTextDocument` event handler. Demonstrates:
+
+* Using the `joyride.core/get-extension-context` to push disposables on its `subscriptions` array. Making VS Code dispose of them when Joyride is deactivated.
+* A re-runnable recipe to avoid re-registering the event handler. (By disposing it and then re-register.)
+
 ## Create a Webview
 
 `webview/example.cljs`

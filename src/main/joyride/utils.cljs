@@ -1,13 +1,23 @@
 (ns joyride.utils
   (:require ["vscode" :as vscode]
-            [promesa.core :as p]
-            [clojure.string :as str]))
+            [clojure.pprint :as pprint]
+            [clojure.string :as str]
+            [joyride.db :as db]
+            [promesa.core :as p]))
 
 (defn jsify [clj-thing]
   (clj->js clj-thing))
 
 (defn cljify [js-thing]
   (js->clj js-thing :keywordize-keys true))
+
+(defn path-exists?+ [path]
+  (-> (p/let [uri (vscode/Uri.file path)]
+        (vscode/workspace.fs.stat uri)
+        true)
+      (p/catch
+       (fn [_e]
+         false))))
 
 (defn vscode-read-uri+ [^js uri-or-path]
   (let [uri (if (string? uri-or-path)
@@ -33,3 +43,27 @@
 
 (defn error [& xs]
   (vscode/window.showErrorMessage (str/join " " (mapv str xs))))
+
+(def ^{:dynamic true
+       :doc "Should the Joyride output channel be revealed after `say`?
+             Default: `true`"}
+  *show-when-said?* true)
+
+(defn say [message]
+  (let [channel ^js (:output-channel @db/!app-db)]
+    (.appendLine channel message)
+    (when *show-when-said?*
+      (.show channel true))))
+
+(defn say-error [message]
+  (say (str "ERROR: " message)))
+
+(defn say-result
+  ([result]
+   (say-result nil result))
+  ([message result]
+   (let [prefix (if (empty? message)
+                  "=> "
+                  (str message "\n=> "))]
+     (.append ^js (:output-channel @db/!app-db) prefix)
+     (say (with-out-str (pprint/pprint result))))))
