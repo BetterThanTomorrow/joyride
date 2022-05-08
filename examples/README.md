@@ -64,3 +64,18 @@ the default Windows comment keyboard shortcut.
 Yes, you can script Joyride with Joyride. See the [Joyride API docs](../doc/api.md) for more about this.
 
 Example script: [`.joyride/scripts/joyride_api.cljs`](.joyride/scripts/joyride_api.cljs)
+
+## Opening a file
+
+The [open_document.cljs](.joyride/scripts/open_document.cljs) script asks if you want to open one of the examples and then opens a random `.cljs` file from the `scripts` folder.
+
+Joyride API used:
+
+* [`promesa.core`](https://funcool.github.io/promesa/latest/user-guide.html)
+
+[VS Code APIs](https://code.visualstudio.com/api/references/vscode-api) used:
+
+* `vscode/window.showInformationMessage`
+* `vscode/workspace.findFiles`
+* `vscode/workspace.openTextDocument`
+* `vscode/window.showTextDocument`
