@@ -1,17 +1,8 @@
 (ns ignore-form
   (:require ["vscode" :as vsode]
+            [joyride.core :as joyride]
             [promesa.core :as p]
             [z-joylib.editor-utils :as eu]))
-
-(def f *file*)
-(defonce run-main? true)
-
-(comment
-  ;; Loading this in the REPL w/o evaluating `main`:
-  (defonce run-main? false)  ; <- First evaluate this
-  (ns-unmap *ns* 'run-main?) ; <- Evaluate this when you are done
-                             ;    or want to test-run the script
-  )
 
 (defn main []
   (p/let [editor ^js vscode/window.activeTextEditor
@@ -26,9 +17,5 @@
       (p/do! (eu/delete-range! editor range-before-insert-position))
       (p/do! (eu/insert-text!+ "#_" editor insert-position)))))
 
-(when run-main?
+(when (= (joyride/get-invoked-script) joyride/*file*)
   (main))
-
-(comment  
-  (main)
-  )

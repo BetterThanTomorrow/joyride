@@ -29,6 +29,11 @@ the following namespaces:
 #### `joyride.core`
 
 - `*file*`: dynamic var representing the currently executing file
+- `get-invoked-script`: function returning the absolute path of the invoked script when running as a script. Otherwise returns `nil`. Together with `*file*` this can be used to create a guard that avoids running certain code when you load a file in the REPL:
+  ```clojure
+  (when (= (joyride/get-invoked-script) joyride/*file*)
+    (main))
+  ```
 - `get-extension-context`: function returning the Joyride [extension context](https://code.visualstudio.com/api/references/vscode-api#ExtensionContext) object
 
 NB: While using `*file*` bare works, it will probably stop working soon. Always use it from `joyride.core`, e.g.:
