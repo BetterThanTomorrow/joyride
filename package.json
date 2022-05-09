@@ -112,7 +112,6 @@
     "prewatch": "npm run clean",
     "compile": "npx shadow-cljs compile :extension",
     "release": "npx shadow-cljs release :extension",
-    "publish": "bb script/publish.clj",
     "vscode:prepublish": "npm run clean && npm run release"
   },
   "dependencies": {
