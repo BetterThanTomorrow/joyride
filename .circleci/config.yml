@@ -250,7 +250,7 @@ jobs:
   #  steps:
   #    - add_ssh_keys:
   #        fingerprints:
-  #          - "d1:06:ff:c3:58:59:68:6e:a3:2f:69:1d:e2:94:7c:14"
+  #          - "a8:5d:72:81:42:fc:ae:be:89:ca:c7:5a:91:c1:96:fb"
   #    - checkout
   #    - run:
   #        name: Update system package lists
@@ -275,7 +275,7 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "d1:06:ff:c3:58:59:68:6e:a3:2f:69:1d:e2:94:7c:14"
+            - "a8:5d:72:81:42:fc:ae:be:89:ca:c7:5a:91:c1:96:fb"
       - checkout
       - run:
           name: Bump dev version
