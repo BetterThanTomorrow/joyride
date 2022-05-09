@@ -4,6 +4,7 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.8] - 2022-05-09
 - [Enable guarding things from evaluation when loading file in the repl ](https://github.com/BetterThanTomorrow/joyride/issues/4)
 - [Don't automatically show the Joyride output channel when scripts run](https://github.com/BetterThanTomorrow/joyride/issues/36)
 - [Remove `joyride.core/get-` prefixes](https://github.com/BetterThanTomorrow/joyride/issues/42)
