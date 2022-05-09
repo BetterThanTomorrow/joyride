@@ -3,7 +3,7 @@
   "displayName": "Joyride",
   "description": "Joyride VS Code with Clojure! Makes your editor scriptable. Powered by SCI, the Small Clojure Interpreter.",
   "icon": "assets/joyride.png",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "publisher": "betterthantomorrow",
   "author": {
     "name": "Better Than Tomorrow",
@@ -112,6 +112,7 @@
     "prewatch": "npm run clean",
     "compile": "npx shadow-cljs compile :extension",
     "release": "npx shadow-cljs release :extension",
+    "publish": "bb script/publish.clj",
     "vscode:prepublish": "npm run clean && npm run release"
   },
   "dependencies": {
