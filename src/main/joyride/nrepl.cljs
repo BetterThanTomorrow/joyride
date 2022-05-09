@@ -44,10 +44,9 @@
       (debug "response" response))
     (handler request response)))
 
-(defn eval-ctx-mw [handler {:keys [sci-last-error sci-ctx-atom]}]
+(defn eval-ctx-mw [handler {:keys [sci-ctx-atom]}]
   (fn [request send-fn]
     (handler (assoc request
-                    :sci-last-error sci-last-error
                     :sci-ctx-atom sci-ctx-atom)
              send-fn)))
 
@@ -67,7 +66,7 @@
             "status" ["done"]}))
 
 
-(defn do-handle-eval [{:keys [ns code sci-last-error _sci-ctx-atom _load-file?] :as request} send-fn]
+(defn do-handle-eval [{:keys [ns code _sci-ctx-atom _load-file?] :as request} send-fn]
   (sci/with-bindings
     {sci/ns ns
      sci/print-length @sci/print-length
@@ -78,11 +77,14 @@
                                       (fn [s]
                                         (send-fn request {"out" s}))))
     (try (let [v (jsci/eval-string code)]
+           (sci/alter-var-root sci/*3 (constantly @sci/*2))
+           (sci/alter-var-root sci/*2 (constantly @sci/*1))
+           (sci/alter-var-root sci/*1 (constantly v))
            (send-fn request {"value" (pr-str v)
                              "ns" (str @sci/ns)})
            (send-fn request {"status" ["done"]}))
          (catch :default e
-           (sci/alter-var-root sci-last-error (constantly e))
+           (sci/alter-var-root sci/*e (constantly e))
            (let [data (ex-data e)]
              (when-let [message (or (:message data) (.-message e))]
                (send-fn request {"err" (str message "\n")}))
@@ -211,7 +213,6 @@
                          (.-log_level ^Object opts)
                          (:log_level opts))
                        "info")
-        sci-last-error (sci/new-var '*e nil {:ns (sci/create-ns 'clojure.core)})
         ctx-atom jsci/!ctx
         #_#_on-exit (js/require "signal-exit")]
     
@@ -227,8 +228,7 @@
     (p/create
      (fn [resolve _reject]
        (let [server (node-net/createServer
-                     (partial on-connect {:sci-ctx-atom ctx-atom
-                                          :sci-last-error sci-last-error}))]
+                     (partial on-connect {:sci-ctx-atom ctx-atom}))]
          (swap! !db assoc ::server server)
          (p/do
            (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning true))

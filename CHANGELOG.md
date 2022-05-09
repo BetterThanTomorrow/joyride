@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Add `*1`, `*2`, `*3`, and `*e` REPL variables](https://github.com/BetterThanTomorrow/joyride/issues/43)
+
 ## [0.0.7] - 2022-05-06
 
 - [Activation scripts](https://github.com/BetterThanTomorrow/joyride/issues/8)
