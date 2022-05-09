@@ -4,6 +4,9 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Enable guarding things from evaluation when loading file in the repl ](https://github.com/BetterThanTomorrow/joyride/issues/4)
+- [Don't automatically show the Joyride output channel when scripts run](https://github.com/BetterThanTomorrow/joyride/issues/36)
+- [Remove `joyride.core/get-` prefixes](https://github.com/BetterThanTomorrow/joyride/issues/42)
 - [Add `*1`, `*2`, `*3`, and `*e` REPL variables](https://github.com/BetterThanTomorrow/joyride/issues/43)
 
 ## [0.0.7] - 2022-05-06
