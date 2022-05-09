@@ -68,9 +68,13 @@ the default Windows comment keyboard shortcut.
 
 ## Joyride API
 
-Yes, you can script Joyride with Joyride. See the [Joyride API docs](../doc/api.md) for more about this.
+Joyride comes with the `joyride.core` namespace, giving you access to things as the extension context, the Joyride output channel, and some info about the evaluation environment.
+
+And, you can also script Joyride with Joyride using its Extension API.
 
 Example script: [`.joyride/scripts/joyride_api.cljs`](.joyride/scripts/joyride_api.cljs)
+
+See also: the [Joyride API docs](../doc/api.md)
 
 ## Opening a file
 

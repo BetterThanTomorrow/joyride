@@ -47,7 +47,7 @@
 (def ^{:dynamic true
        :doc "Should the Joyride output channel be revealed after `say`?
              Default: `true`"}
-  *show-when-said?* true)
+  *show-when-said?* false)
 
 (defn say [message]
   (let [channel ^js (:output-channel @db/!app-db)]
