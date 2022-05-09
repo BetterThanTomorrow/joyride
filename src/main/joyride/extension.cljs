@@ -88,15 +88,16 @@
 
 (def api (jsify {:startNReplServer start-nrepl-server+
                  :getContextValue (fn [k]
-                                    (when-contexts/get-context k))}))
+                                    (when-contexts/context k))}))
 
 (defn ^:export activate [^js context]
   (when context
-    (reset! db/!app-db {:output-channel (vscode/window.createOutputChannel "Joyride")
-                 :extension-context context
-                 :disposables []})
-    (utils/say "🟢 Joyride VS Code with Clojure. 🚗")
-    (p/-> (life-cycle/maybe-run-init-script+ run-user-script+ 
+    (swap! db/!app-db assoc
+           :output-channel (vscode/window.createOutputChannel "Joyride")
+           :extension-context context)
+    (binding [utils/*show-when-said?* true]
+      (utils/say "🟢 Joyride VS Code with Clojure. 🚗"))
+    (p/-> (life-cycle/maybe-run-init-script+ run-user-script+
                                              (:user life-cycle/init-scripts))
           (p/then
            (fn [_result]

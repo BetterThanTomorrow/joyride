@@ -1,6 +1,7 @@
 (ns joyride-api
   (:require ["vscode" :as vscode]
-            [promesa.core :as p]))
+            [promesa.core :as p]
+            [joyride.core :as joyride]))
 
 (def joyrideExt (vscode/extensions.getExtension "betterthantomorrow.joyride"))
 (def joyApi (.-exports joyrideExt))
@@ -33,10 +34,30 @@
 (comment
   ;; Joyride scripts can also reach the Joyride extension
   ;; through `joyride.core`
-  (require '[joyride.core :as joyride])
-  (require '[clojure.repl :refer [doc]])
-  (-> (joyride/get-extension-context)
+  (-> (joyride/extension-context)
       .-extension
       .-exports)
-  (doc joyride/get-extension-context)
+  (require '[clojure.repl :refer [doc]])
+  (doc joyride/extension-context)
   )
+
+;; in addition to the extension context, joyride.core also has:
+;; * *file*             - the absolute path of the file where an
+;;                        evaluation takes place
+;; * invoked-script - the absolute path of a script being run
+;;                        `nil` in other execution contexts
+;; * output-channel - Joyride's output channel
+
+(doto (joyride/output-channel)
+  (.show true)
+  (.append "Writing to the ")
+  (.appendLine "Joyride output channel.")
+  (.appendLine (str "Joyride extension path: "
+                    (-> (joyride/extension-context)
+                        .-extension
+                        .-extensionPath)))
+  (.appendLine (str "joyride/*file*: " joyride/*file*))
+  (.appendLine (str "Invoked script: " (joyride/invoked-script)))
+  (.appendLine "🎉"))
+
+;; Try both invoking this file as a script, and loading it in the REPL

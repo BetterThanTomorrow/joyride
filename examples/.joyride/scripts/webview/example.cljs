@@ -16,7 +16,7 @@
           html (.decode (js/TextDecoder. "utf-8") data)]
     (set! (.. panel -webview -html) (str html))))
 
-(when (= (joyride/get-invoked-script) joyride/*file*)
+(when (= (joyride/invoked-script) joyride/*file*)
   (main))
 
 ;; live demo here: https://twitter.com/borkdude/status/1519607386218053632

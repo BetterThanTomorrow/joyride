@@ -11,7 +11,7 @@
 (comment
   j/*file*
 
-  (def ext-ctx (joyride/get-extension-context))
+  (def ext-ctx (joyride/extension-context))
   (.-extensionPath ext-ctx)
   )
 

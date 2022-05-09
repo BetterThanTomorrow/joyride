@@ -103,12 +103,16 @@ See the [examples](./examples) for examples including:
 * Calva Structural Editing enhancements
 * Opening and showing project files
 * Workspace activation script
+* The Joyride Extension API
+* The `joyride.core` namespace
 
 ## Support and feedback
 
 You'll find us in the `#joyride` channel on the [Clojurians Slack](http://clojurians.net)
 
 ## News
+
+* Show HN: https://news.ycombinator.com/item?id=31203024#31206003
 
 ### Twitter
 

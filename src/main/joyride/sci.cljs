@@ -13,54 +13,45 @@
 
 (def joyride-ns (sci/create-ns 'joyride.core nil))
 
-(defn get-extension-context
-  "Returns the Joyride extension context object.
-   See: https://code.visualstudio.com/api/references/vscode-api#ExtensionContext"
-  []
-  (:extension-context @db/!app-db))
-
-(defn get-invoked-script
-  "Returns the absolute path of theinvoked script when the evaluation is made
-   through *Run Script*, otherwise returns `nil`."
-  []
-  (:invoked-script @db/!app-db))
-
 (defn ns->path [namespace]
   (-> (str namespace)
       (munge)
       (str/replace  "." "/")
       (str ".cljs")))
 
-(def !ctx (volatile!
-           (sci/init {:classes {'js goog/global
-                                :allow :all}
-                      :namespaces (assoc (:namespaces pconfig/config)
-                                         'joyride.core {'*file* sci/file
-                                                        'get-extension-context (sci/copy-var get-extension-context joyride-ns)
-                                                        'get-invoked-script (sci/copy-var get-invoked-script joyride-ns)})
-                      :load-fn (fn [{:keys [namespace opts]}]
-                                 (cond
-                                   (symbol? namespace)
-                                   {:source
-                                    (let [path (ns->path namespace)]
-                                      (str
-                                       (fs/readFileSync
-                                        (path/join
-                                         (utils/workspace-root)
-                                         workspace-scripts-path
-                                         path))))}
-                                   (string? namespace) ;; node built-in or npm library
-                                   (if (= "vscode" namespace)
-                                     (do (sci/add-class! @!ctx 'vscode vscode)
-                                         (sci/add-import! @!ctx (symbol (str @sci/ns)) 'vscode (:as opts))
-                                         {:handled true})
-                                     (let [mod (js/require namespace)
-                                           ns-sym (symbol namespace)]
-                                       (sci/add-class! @!ctx ns-sym mod)
-                                       (sci/add-import! @!ctx (symbol (str @sci/ns)) ns-sym
-                                                        (or (:as opts)
-                                                            ns-sym))
-                                       {:handled true}))))})))
+(def !ctx
+  (volatile!
+   (sci/init {:classes {'js goog/global
+                        :allow :all}
+              :namespaces (assoc
+                           (:namespaces pconfig/config)
+                           'joyride.core {'*file* sci/file
+                                          'extension-context (sci/copy-var db/extension-context joyride-ns)
+                                          'invoked-script (sci/copy-var db/invoked-script joyride-ns)
+                                          'output-channel (sci/copy-var db/output-channel joyride-ns)})
+              :load-fn (fn [{:keys [namespace opts]}]
+                         (cond
+                           (symbol? namespace)
+                           {:source
+                            (let [path (ns->path namespace)]
+                              (str
+                               (fs/readFileSync
+                                (path/join
+                                 (utils/workspace-root)
+                                 workspace-scripts-path
+                                 path))))}
+                           (string? namespace) ;; node built-in or npm library
+                           (if (= "vscode" namespace)
+                             (do (sci/add-class! @!ctx 'vscode vscode)
+                                 (sci/add-import! @!ctx (symbol (str @sci/ns)) 'vscode (:as opts))
+                                 {:handled true})
+                             (let [mod (js/require namespace)
+                                   ns-sym (symbol namespace)]
+                               (sci/add-class! @!ctx ns-sym mod)
+                               (sci/add-import! @!ctx (symbol (str @sci/ns)) ns-sym
+                                                (or (:as opts)
+                                                    ns-sym))
+                               {:handled true}))))})))
 
 (def !last-ns (volatile! @sci/ns))
 

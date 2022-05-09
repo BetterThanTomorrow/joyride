@@ -7,6 +7,8 @@ The Joyride API consist of:
    * Included clojure library namespaces
 1. The Joyride *Extension API*
 
+Give the [joyride_api.cljs](../examples/.joyride/scripts/joyride_api.cljs) example a spin, why don't ya!
+
 Please note that Joyride's *Extension API* is also available to *Joyride scripts*.
 
 ## Scripting API
@@ -28,27 +30,42 @@ the following namespaces:
 
 #### `joyride.core`
 
-- `*file*`: dynamic var representing the currently executing file
-- `get-invoked-script`: function returning the absolute path of the invoked script when running as a script. Otherwise returns `nil`. Together with `*file*` this can be used to create a guard that avoids running certain code when you load a file in the REPL:
+- `*file*`: dynamic var holding the absolute path of file where the current evaluation is taking place
+- `invoked-script`: function returning the absolute path of the invoked script when running as a script. Otherwise returns `nil`. Together with `*file*` this can be used to create a guard that avoids running certain code when you load a file in the REPL:
   ```clojure
-  (when (= (joyride/get-invoked-script) joyride/*file*)
+  (when (= (joyride/invoked-script) joyride/*file*)
     (main))
   ```
-- `get-extension-context`: function returning the Joyride [extension context](https://code.visualstudio.com/api/references/vscode-api#ExtensionContext) object
+- `extension-context`: function returning the Joyride [ExtensionContext](https://code.visualstudio.com/api/references/vscode-api#ExtensionContext) instance
+- `output-channel`: function returning the Joyride [OutputChannel](https://code.visualstudio.com/api/references/vscode-api#OutputChannel) instance
 
-NB: While using `*file*` bare works, it will probably stop working soon. Always use it from `joyride.core`, e.g.:
+Here's a snippet from the [joyride_api.cljs](../examples/.joyride/scripts/joyride_api.cljs) example.
 
 ```clojure
 (ns your-awesome-script
-  (:require [joyride.core :refer [*file*]]
-            ...))
+  (:require [joyride.core :as joyride]
+            ...)
+
+(doto (joyride/output-channel)
+  (.show true)
+  (.append "Writing to the ")
+  (.appendLine "Joyride output channel.")
+  (.appendLine (str "Joyride extension path: "
+                    (-> (joyride/extension-context)
+                        .-extension
+                        .-extensionPath)))
+  (.appendLine (str "joyride/*file*: " joyride/*file*))
+  (.appendLine (str "Invoked script: " (joyride/invoked-script)))
+  (.appendLine "🎉"))
 ```
+
+**NB**: Currently, using bar `*file*` works. But it will probably stop working soon. Always use it from `joyride.core`.
 
 #### promesa.core
 
 See [promesa docs](https://cljdoc.org/d/funcool/promesa/6.0.2/doc/user-guide).
 
-**``**: `p/->>`, `p/->`, `p/all`, `p/any`, `p/catch`, `p/chain`, `p/create`, `p/deferred`, `p/delay`, `p/do`, `p/do`, `p/done`, `p/finally`, `p/let`, `p/map`, `p/mapcat`, `p/pending`, `p/promise`, `p/promise`, `p/race`, `p/rejected`, `p/rejected`, `p/resolved`, `p/resolved`, `p/run`, `p/then`, `p/thenable`, `p/with`, and `p/wrap`
+**``**: `p/->>`, `p/->`, `p/all`, `p/any`, `p/catch`, `p/chain`, `p/create`, `p/deferred`, `p/delay`, `p/do`, `p/do!`, `p/done?`, `p/finally`, `p/let`, `p/map`, `p/mapcat`, `p/pending`, `p/promise`, `p/promise?`, `p/race`, `p/rejected`, `p/rejected?`, `p/resolved`, `p/resolved?`, `p/run!`, `p/then`, `p/thenable?`, `p/with`, and `p/wrap`
 
 ### Possibly coming additions
 
