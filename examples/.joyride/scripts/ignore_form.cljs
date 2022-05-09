@@ -17,5 +17,5 @@
       (p/do! (eu/delete-range! editor range-before-insert-position))
       (p/do! (eu/insert-text!+ "#_" editor insert-position)))))
 
-(when (= (joyride/get-invoked-script) joyride/*file*)
+(when (= (joyride/invoked-script) joyride/*file*)
   (main))

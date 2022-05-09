@@ -26,9 +26,9 @@
               :namespaces (assoc
                            (:namespaces pconfig/config)
                            'joyride.core {'*file* sci/file
-                                          'get-extension-context (sci/copy-var db/get-extension-context joyride-ns)
-                                          'get-invoked-script (sci/copy-var db/get-invoked-script joyride-ns)
-                                          'get-output-channel (sci/copy-var db/get-output-channel joyride-ns)})
+                                          'extension-context (sci/copy-var db/extension-context joyride-ns)
+                                          'invoked-script (sci/copy-var db/invoked-script joyride-ns)
+                                          'output-channel (sci/copy-var db/output-channel joyride-ns)})
               :load-fn (fn [{:keys [namespace opts]}]
                          (cond
                            (symbol? namespace)

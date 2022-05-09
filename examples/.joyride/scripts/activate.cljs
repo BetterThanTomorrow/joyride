@@ -18,7 +18,7 @@
 ;; Joyride extension is deactivated.
 (defn- push-disposable [disposable]
   (swap! !db update :disposables conj disposable)
-  (-> (joyride/get-extension-context)
+  (-> (joyride/extension-context)
       .-subscriptions
       (.push disposable)))
 
@@ -35,5 +35,5 @@
                "document opened:" 
                (.-fileName doc))))))
 
-(when (= (joyride/get-invoked-script) joyride/*file*)
+(when (= (joyride/invoked-script) joyride/*file*)
   (my-main))

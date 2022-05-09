@@ -13,7 +13,7 @@
     ;; send an initial command to it
     (.sendText terminal "npx nbb")))
 
-(when (= (joyride/get-invoked-script) joyride/*file*)
+(when (= (joyride/invoked-script) joyride/*file*)
   (main))
 
 ;; see live demo here:

@@ -88,7 +88,7 @@
 
 (def api (jsify {:startNReplServer start-nrepl-server+
                  :getContextValue (fn [k]
-                                    (when-contexts/get-context k))}))
+                                    (when-contexts/context k))}))
 
 (defn ^:export activate [^js context]
   (when context

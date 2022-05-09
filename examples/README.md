@@ -10,7 +10,7 @@ In the `.joyride/scripts` folder you'll find mostly small examples:
 
 A Workspace [activate.cljs] script that registers a `vscode/workspace.onDidOpenTextDocument` event handler. Demonstrates:
 
-* Using the `joyride.core/get-extension-context` to push disposables on its `subscriptions` array. Making VS Code dispose of them when Joyride is deactivated.
+* Using the `joyride.core/extension-context` to push disposables on its `subscriptions` array. Making VS Code dispose of them when Joyride is deactivated.
 * A re-runnable recipe to avoid re-registering the event handler. (By disposing it and then re-register.)
 
 ## Create a Webview

@@ -8,10 +8,10 @@
   (swap! !db assoc-in [:contexts k] v)
   (vscode/commands.executeCommand "setContext" (name k) v))
 
-(defn get-context [k]
+(defn context [k]
   (get-in @!db [:contexts (if (string? k)
                             (keyword (str "joyride.when-contexts/" k))
                             k)]))
 
 (comment
-  (get-context "joyride.isActive"))
+  (context "joyride.isActive"))

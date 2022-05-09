@@ -34,30 +34,30 @@
 (comment
   ;; Joyride scripts can also reach the Joyride extension
   ;; through `joyride.core`
-  (-> (joyride/get-extension-context)
+  (-> (joyride/extension-context)
       .-extension
       .-exports)
   (require '[clojure.repl :refer [doc]])
-  (doc joyride/get-extension-context)
+  (doc joyride/extension-context)
   )
 
 ;; in addition to the extension context, joyride.core also has:
 ;; * *file*             - the absolute path of the file where an
 ;;                        evaluation takes place
-;; * get-invoked-script - the absolute path of a script being run
+;; * invoked-script - the absolute path of a script being run
 ;;                        `nil` in other execution contexts
-;; * get-output-channel - Joyride's output channel
+;; * output-channel - Joyride's output channel
 
-(doto (joyride/get-output-channel)
+(doto (joyride/output-channel)
   (.show true)
   (.append "Writing to the ")
   (.appendLine "Joyride output channel.")
   (.appendLine (str "Joyride extension path: "
-                    (-> (joyride/get-extension-context)
+                    (-> (joyride/extension-context)
                         .-extension
                         .-extensionPath)))
   (.appendLine (str "joyride/*file*: " joyride/*file*))
-  (.appendLine (str "Invoked script: " (joyride/get-invoked-script)))
+  (.appendLine (str "Invoked script: " (joyride/invoked-script)))
   (.appendLine "🎉"))
 
 ;; Try both invoking this file as a script, and loading it in the REPL

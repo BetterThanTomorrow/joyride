@@ -18,5 +18,5 @@
                     "No" :no
                     :none)))))
 
-(when (= (joyride/get-invoked-script) joyride/*file*)
+(when (= (joyride/invoked-script) joyride/*file*)
   (my-main))

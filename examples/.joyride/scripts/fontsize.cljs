@@ -7,7 +7,7 @@
       (.update "editor.fontSize" pts true))
   nil)
 
-(when (= (joyride/get-invoked-script) joyride/*file*)
+(when (= (joyride/invoked-script) joyride/*file*)
   (set-global-fontsize 12))
 
 ;; live demo here: https://twitter.com/borkdude/status/1519709769157775360

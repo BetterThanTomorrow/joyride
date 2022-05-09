@@ -31,13 +31,13 @@ the following namespaces:
 #### `joyride.core`
 
 - `*file*`: dynamic var holding the absolute path of file where the current evaluation is taking place
-- `get-invoked-script`: function returning the absolute path of the invoked script when running as a script. Otherwise returns `nil`. Together with `*file*` this can be used to create a guard that avoids running certain code when you load a file in the REPL:
+- `invoked-script`: function returning the absolute path of the invoked script when running as a script. Otherwise returns `nil`. Together with `*file*` this can be used to create a guard that avoids running certain code when you load a file in the REPL:
   ```clojure
-  (when (= (joyride/get-invoked-script) joyride/*file*)
+  (when (= (joyride/invoked-script) joyride/*file*)
     (main))
   ```
-- `get-extension-context`: function returning the Joyride [ExtensionContext](https://code.visualstudio.com/api/references/vscode-api#ExtensionContext) instance
-- `get-output-channel`: function returning the Joyride [OutputChannel](https://code.visualstudio.com/api/references/vscode-api#OutputChannel) instance
+- `extension-context`: function returning the Joyride [ExtensionContext](https://code.visualstudio.com/api/references/vscode-api#ExtensionContext) instance
+- `output-channel`: function returning the Joyride [OutputChannel](https://code.visualstudio.com/api/references/vscode-api#OutputChannel) instance
 
 Here's a snippet from the [joyride_api.cljs](../examples/.joyride/scripts/joyride_api.cljs) example.
 
@@ -46,16 +46,16 @@ Here's a snippet from the [joyride_api.cljs](../examples/.joyride/scripts/joyrid
   (:require [joyride.core :as joyride]
             ...)
 
-(doto (joyride/get-output-channel)
+(doto (joyride/output-channel)
   (.show true)
   (.append "Writing to the ")
   (.appendLine "Joyride output channel.")
   (.appendLine (str "Joyride extension path: "
-                    (-> (joyride/get-extension-context)
+                    (-> (joyride/extension-context)
                         .-extension
                         .-extensionPath)))
   (.appendLine (str "joyride/*file*: " joyride/*file*))
-  (.appendLine (str "Invoked script: " (joyride/get-invoked-script)))
+  (.appendLine (str "Invoked script: " (joyride/invoked-script)))
   (.appendLine "🎉"))
 ```
 

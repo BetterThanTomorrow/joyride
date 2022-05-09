@@ -197,7 +197,7 @@
                     (vscode/workspace.fs.delete uri)))))))
 
 (defn server-running? []
-  (when-contexts/get-context ::when-contexts/joyride.isNReplServerRunning))
+  (when-contexts/context ::when-contexts/joyride.isNReplServerRunning))
 
 (defn- start-server'+
   "Start nRepl server. Accepts options either as JS object or Clojure map."
