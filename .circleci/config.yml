@@ -282,7 +282,7 @@ jobs:
           command: |
             git config --global user.email $GITHUB_USER_EMAIL
             git config --global user.name $GITHUB_USER_NAME
-            git checkout ${CIRCLE_BRANCH}
+            git checkout master
             npm set git-tag-version false && npm version patch
             git add .
             git commit -m "Bring on version $(node -p "require('./package').version")!"
