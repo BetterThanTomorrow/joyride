@@ -1,0 +1,396 @@
+version: 2
+jobs:
+  checkout:
+    docker:
+      - image: cimg/openjdk:17.0.1-node
+    working_directory: ~/joyride
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - checkout:
+          path: ~/joyride
+      - restore_cache:
+          name: Restore dependencies
+          key: npm-{{ checksum "package.json" }}-cljs-{{ checksum "deps.edn" }}
+      - run:
+          name: Install node_modules
+          command: cp package.json /tmp && npm install && cp /tmp/package.json .
+      - run:
+          name: "Create build workspace"
+          command: mkdir /tmp/build
+      - run:
+          name: Copy build
+          command: |
+            cp -r . /tmp/build
+      - save_cache:
+          name: Save dependencies
+          key: npm-{{ checksum "package.json" }}-cljs-{{ checksum "deps.edn" }}
+          paths:
+            - ./node_modules
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - build
+  build:
+    docker:
+      - image: cimg/openjdk:17.0.1-node
+    working_directory: ~/joyride
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Restore build
+          command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
+      - run:
+          name: Install Clojure
+          command: |
+            wget -nc https://download.clojure.org/install/linux-install-1.10.3.943.sh
+            chmod +x linux-install-1.10.3.943.sh
+            sudo ./linux-install-1.10.3.943.sh
+      - run:
+          name: Install CLJS dependencies
+          command: npx shadow-cljs classpath
+      - run:
+          name: "Create artifacts workspace"
+          command: mkdir /tmp/artifacts
+      - run:
+          name: Tamper Joyride version if not release versioned
+          command: |
+            VERSION=$(node -p 'require("./package.json").version')
+            TAG_VERSION=NO-TAG
+            if [[ "${CIRCLE_TAG}" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]
+            then
+              TAG_VERSION=${BASH_REMATCH[1]}
+              echo 'No version tampering because this is a release tag'
+            else
+              COMMIT=${CIRCLE_SHA1:0:8}
+              if [[  "${CIRCLE_TAG}" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-(.*) ]]
+              then
+                TAG_VERSION=${BASH_REMATCH[1]}
+                TAG_TITLE=${BASH_REMATCH[2]}
+                PRERELEASE=${TAG_TITLE}-${COMMIT}
+              else
+                BRANCH=${CIRCLE_BRANCH//[^[:alnum:]]/-}
+                PRERELEASE=${BRANCH}-${COMMIT}
+              fi
+              echo "Append prerelease to version: -${PRERELEASE}"
+              npx json -I -f package.json -e 'this.version=this.version.replace(/$/,"-'${PRERELEASE}'")'
+            fi
+            if [ ${TAG_VERSION} = NO-TAG -o "${TAG_VERSION}" = "${VERSION}" ]
+            then
+              VERSION=$(node -p 'require("./package.json").version')
+              echo "Using version: ${VERSION}"
+            else
+              echo >&2 "FATAL! Version missmatch between package.json and tag. Aborting."
+              exit 1
+            fi
+      - run:
+          name: Package vsix
+          command: |
+            if [[ "${CIRCLE_TAG}" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]
+            then
+              echo "Packaging as release"
+              PACKAGE_CMD="vsce package --githubBranch master"
+            else
+              echo "Packaging as pre-release"
+              PACKAGE_CMD="vsce package --pre-release"
+            fi
+            npx ${PACKAGE_CMD}
+      - run:
+          name: Copy vsix
+          command: |
+            cp *.vsix /tmp/artifacts/
+      - run:
+          name: Copy build
+          command: |
+            cp -r out /tmp/build
+            cp  package.json /tmp/build
+      - save_cache:
+          name: Save dependencies
+          key: npm-{{ checksum "package.json" }}-cljs-{{ checksum "deps.edn" }}
+          paths:
+            - ./node_modules
+            - ~/.m2
+      - store_artifacts:
+          path: /tmp/artifacts
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - artifacts
+            - build
+            - env
+  #test-cljslib:
+  #  docker:
+  #    - image: circleci/node:latest
+  #  working_directory: ~/joyride
+  #  steps:
+  #    - attach_workspace:
+  #        at: /tmp
+  #    - run:
+  #        name: Restore build
+  #        command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
+  #    - run:
+  #        name: Run CLJS Tests
+  #        command: npm run calva-lib-test
+  #    - store_test_results:
+  #        path: ~/joyride/junit
+  #test-integration:
+  #  docker:
+  #    - image: circleci/clojure:openjdk-11-tools-deps-bullseye-node-browsers-legacy
+  #  working_directory: ~/joyride
+  #  steps:
+  #    - attach_workspace:
+  #        at: /tmp
+  #    - run:
+  #        name: Restore build
+  #        command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
+  #    - run:
+  #        name: Compile Extension Tests
+  #        command: npm run compile-test
+  #    - run:
+  #        name: Run Extension Tests
+  #        command: npm run integration-test
+  #    - store_test_results:
+  #        path: ~/joyride/junit
+  github-release:
+    docker:
+      - image: cibuilds/github:0.10
+    working_directory: ~/joyride
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Restore build
+          command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            EXTRA_RELEASE_OPTIONS=""
+            if [[ "${CIRCLE_TAG}" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]
+            then
+              echo "Publishing GitHub Release: ${CIRCLE_TAG}"
+            else
+              echo "Publishing GitHub Prerelease: ${CIRCLE_TAG}"
+              EXTRA_RELEASE_OPTIONS=-prerelease
+            fi
+            [[ "${CIRCLE_TAG}" =~ ^v([0-9]+\.[0-9]+\.[0-9]+) ]]
+            TAG_VERSION=${BASH_REMATCH[1]}
+            BODY=$(awk '/^## \['${TAG_VERSION}'\]/, started && /^##/ { started=1; if ($0 !~ /(^#|^\s*$)/) { gsub(/["$]/, "\\\\&"); print } }' CHANGELOG.md)
+            echo Changes: "\n" $BODY
+            if [ "${IS_LOCAL}" = YES ]
+            then
+              GHR_CMD=echo
+            else
+              GHR_CMD=ghr
+            fi
+            ${GHR_CMD} -t ${GITHUB_TOKEN} ${EXTRA_RELEASE_OPTIONS} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -b "${BODY}" -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} /tmp/artifacts/
+  marketplace-publish:
+    docker:
+      - image: circleci/node:latest
+    working_directory: ~/joyride
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Restore build
+          command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
+      - run:
+          name: Publish to the marketplace
+          command: |
+            VSCE_CMD="vsce publish --packagePath /tmp/artifacts/joyride-$(node -p 'require("./package.json").version').vsix -p ${PUBLISH_TOKEN}"
+            if [ "${IS_LOCAL}" = YES ]
+            then
+              echo "Dry npx ${VSCE_CMD}"
+            else
+              npx ${VSCE_CMD}
+            fi
+  marketplace-preview-publish:
+    docker:
+      - image: circleci/node:latest
+    working_directory: ~/joyride
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Restore build
+          command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
+      - run:
+          name: Publish to the marketplace
+          command: |
+            VSCE_CMD="vsce publish --pre-release --packagePath /tmp/artifacts/joyride-$(node -p 'require("./package.json").version').vsix -p ${PUBLISH_TOKEN}"
+            if [ "${IS_LOCAL}" = YES ]
+            then
+              echo "Dry npx ${VSCE_CMD}"
+            else
+              npx ${VSCE_CMD}
+            fi
+  open-vsx-publish:
+    docker:
+      - image: circleci/node:latest
+    working_directory: ~/joyride
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Restore build
+          command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
+      - run:
+          name: Publish to Open VSX
+          command: |
+            OVSX_CMD="ovsx publish /tmp/artifacts/joyride-$(node -p 'require("./package.json").version').vsix --pat ${OVSX_PUBLISH_TOKEN}"
+            if [ "${IS_LOCAL}" = YES ]
+            then
+              echo "Dry npx ${OVSX_CMD}"
+            else
+              npx ${OVSX_CMD}
+            fi
+  #deploy-docs:
+  #  docker:
+  #    - image: cimg/python:3.8-node
+  #  steps:
+  #    - add_ssh_keys:
+  #        fingerprints:
+  #          - "a8:5d:72:81:42:fc:ae:be:89:ca:c7:5a:91:c1:96:fb"
+  #    - checkout
+  #    - run:
+  #        name: Update system package lists
+  #        command: sudo apt-get update
+  #    - run:
+  #        name: Install mkdocs-materials insiders dependencies
+  #        command: |
+  #          sudo apt-get install libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
+  #    - run:
+  #        name: Install mkdocs and mkdocs-material
+  #        command: |
+  #          pip install mkdocs
+  #          pip install git+https://${GITHUB_MKDOCS_MATERIAL_TOKEN}@github.com/squidfunk/mkdocs-material-insiders.git
+  #    - run:
+  #        name: Deploy docs
+  #        command: |
+  #          git checkout published
+  #          mkdocs gh-deploy --config-file mkdocs.insiders.yml --message "[skip ci]" --strict --clean
+  bump-version:
+    docker:
+      - image: cimg/node:15.8
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "a8:5d:72:81:42:fc:ae:be:89:ca:c7:5a:91:c1:96:fb"
+      - checkout
+      - run:
+          name: Bump dev version
+          command: |
+            git config --global user.email $GITHUB_USER_EMAIL
+            git config --global user.name $GITHUB_USER_NAME
+            git checkout master
+            npm set git-tag-version false && npm version patch
+            git add .
+            git commit -m "Bring on version $(node -p "require('./package').version")!"
+            git push origin HEAD
+workflows:
+  version: 2
+  #calva-io-build:
+  #  jobs:
+  #    - deploy-docs:
+  #        filters:
+  #          branches:
+  #            only: published
+  #        context: Joyride
+  # We have two Calva build workflows, because for some reason the tag filter need to be on all jobs...
+  build-test:
+    jobs:
+      - checkout:
+          filters:
+            tags:
+              ignore: /^v\d+\.\d+\.\d+-?.*/
+      - build:
+          requires:
+            - checkout
+      #- test-cljslib:
+      #    requires:
+      #      - build
+      #- test-integration:
+      #    requires:
+      #      - build
+      #- marketplace-preview-publish:
+      #    requires:
+      #      - prettier-check
+      #      - eslint-check
+      #      - test-grammar
+      #      - test-cljslib
+      #      - test-integration
+      #      - test-ts-unit
+      #    filters:
+      #      branches:
+      #        only: disabled # dev (disabled for now because https://github.com/microsoft/vsmarketplace/issues/310)
+      #    context: Joyride
+  release-publish:
+    jobs:
+      - checkout:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+-?.*/
+      - build:
+          requires:
+            - checkout
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+-?.*/
+      #- test-cljslib:
+      #    requires:
+      #      - build
+      #    filters:
+      #      branches:
+      #        ignore: /.*/
+      #      tags:
+      #        only: /^v\d+\.\d+\.\d+-?.*/
+      #- test-integration:
+      #    requires:
+      #      - build
+      #    filters:
+      #      branches:
+      #        ignore: /.*/
+      #      tags:
+      #        only: /^v\d+\.\d+\.\d+-?.*/
+      - github-release:
+          requires:
+            - build
+            #- test-cljslib
+            #- test-integration
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+-?.*/
+          #context: Joyride
+      - marketplace-publish:
+          requires:
+            - github-release
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+          #context: Joyride
+      - open-vsx-publish:
+          requires:
+            - github-release
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+          #context: Joyride
+      - bump-version:
+          requires:
+            - marketplace-publish
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+$/
+          #context: Joyride
