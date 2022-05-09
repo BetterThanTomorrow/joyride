@@ -366,7 +366,7 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v\d+\.\d+\.\d+-?.*/
-          context: Joyride
+          #context: Joyride
       - marketplace-publish:
           requires:
             - github-release
@@ -375,7 +375,7 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v\d+\.\d+\.\d+$/
-          context: Joyride
+          #context: Joyride
       - open-vsx-publish:
           requires:
             - github-release
@@ -384,7 +384,7 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v\d+\.\d+\.\d+$/
-          context: Joyride
+          #context: Joyride
       - bump-version:
           requires:
             - marketplace-publish
@@ -393,4 +393,4 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v\d+\.\d+\.\d+$/
-          context: Joyride
+          #context: Joyride
