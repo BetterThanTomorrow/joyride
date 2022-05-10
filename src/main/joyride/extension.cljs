@@ -42,11 +42,9 @@
 
 (defn run-script+
   ([title base-path scripts-path]
-   (p/let [picked-script (show-script-picker+ title
-                                              base-path
-                                              scripts-path)
-           script-path (:relative-path picked-script)]
-     (run-script+ title base-path scripts-path script-path)))
+   (p/let [picked-script (show-script-picker+ title base-path scripts-path)]
+     (when picked-script
+       (run-script+ title base-path scripts-path (:relative-path picked-script)))))
   ([title base-path scripts-path script-path]
    (-> (p/let [abs-path (path/join base-path scripts-path script-path)
                script-uri (vscode/Uri.file abs-path)
