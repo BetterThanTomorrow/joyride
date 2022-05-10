@@ -55,9 +55,7 @@
        (p/handle (fn [result error]
                    (swap! db/!app-db assoc :invoked-script nil)
                    (if error
-                     (do
-                       (utils/say-error (str title " Failed: " script-path " " (.-message error)))
-                       (js/console.error title "Failed: " script-path (.-message error) error))
+                     (utils/say-error (str title " Failed: " script-path " " (.-message error)))
                      (do (utils/say-result (str script-path " evaluated.") result)
                          result)))))))
 
