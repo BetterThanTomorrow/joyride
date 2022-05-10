@@ -27,10 +27,7 @@
                 data (vscode/workspace.fs.readFile uri)
                 decoder (js/TextDecoder. "utf-8")
                 code (.decode decoder data)]
-          code)
-        (p/catch
-            (fn [e]
-              (js/console.error "Reading file failed: " (.-message e)))))))
+          code))))
 
 (defn workspace-root []
   vscode/workspace.rootPath)
