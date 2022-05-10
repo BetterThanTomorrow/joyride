@@ -51,6 +51,24 @@
             ]
         },
         {
+            "name": "Launch web Joyride in playground/hello-joyride folder",
+            "type": "pwa-extensionHost",
+            "debugWebWorkerHost": true,
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceRoot}",
+                "${workspaceFolder}/playground/hello-joyride",
+                "--extensionDevelopmentKind=web",
+            ],
+            "stopOnEntry": false,
+            "sourceMaps": true,
+            "env": {},
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ]
+        },
+        {
             "name": "Launch in examples folder",
             "type": "extensionHost",
             "request": "launch",

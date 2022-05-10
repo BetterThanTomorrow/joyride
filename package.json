@@ -51,6 +51,7 @@
     "onStartupFinished"
   ],
   "main": "./extension.js",
+  "browser": ".out/joyride.js",
   "contributes": {
     "commands": [
       {
