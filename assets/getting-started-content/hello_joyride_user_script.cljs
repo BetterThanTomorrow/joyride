@@ -11,14 +11,13 @@
 ;; for how to do that. (And more)
 
 (defn my-main []
-  (p/-> (vscode/window.showInformationMessage "Hello World from a Joyride User script. Do you want to open the Joyride examples page in your browser" "Yes" "No")
-        (p/then (fn [choice]
-                  (case choice
-                    "Yes" (vscode/env.openExternal (vscode/Uri.parse "https://github.com/BetterThanTomorrow/joyride/tree/master/examples"))
-                    "No" (doto (joyride/output-channel)
-                           (.show true)
-                           (.appendLine "Well, that page is here, if you change your mind:\n  https://github.com/BetterThanTomorrow/joyride/tree/master/examples"))
-                    :none)))))
+  (p/let [choice (vscode/window.showInformationMessage "Hello World from a Joyride User script. Do you want to open the Joyride examples page in your browser" "Yes" "No")]
+    (case choice
+      "Yes" (vscode/env.openExternal (vscode/Uri.parse "https://github.com/BetterThanTomorrow/joyride/tree/master/examples"))
+      "No" (doto (joyride/output-channel)
+             (.show true)
+             (.appendLine "Well, that page is here, if you change your mind:\n  https://github.com/BetterThanTomorrow/joyride/tree/master/examples"))
+      (println "¯\\_(ツ)_/¯"))))
 
 ;; You probably also want to install the Calva VS Code Extension.
 ;; New to Calva and/or Clojure? Use the Calva command:

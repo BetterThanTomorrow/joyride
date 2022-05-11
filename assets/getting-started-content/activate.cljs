@@ -25,13 +25,12 @@
       (+ 1)
       inc)
 
-  (p/-> (vscode/window.showInformationMessage "Be a Joyrider 🎸" "Yes" "Of course!")
-        ((fn [choice]
-           (if choice
-             (.appendLine (joyride/output-channel)
-                          (str "You choose: " choice " 🎉"))
-             (.appendLine (joyride/output-channel)
-                          "You just closed it? 😭"))))))
+  (p/let [choice (vscode/window.showInformationMessage "Be a Joyrider 🎸" "Yes" "Of course!")]
+    (if choice
+      (.appendLine (joyride/output-channel)
+                   (str "You choose: " choice " 🎉"))
+      (.appendLine (joyride/output-channel)
+                   "You just closed it? 😭"))))
 
 
 ;; This following code is why you see the Joyride output channel
