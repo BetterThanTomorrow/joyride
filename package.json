@@ -43,6 +43,7 @@
     }
   ],
   "activationEvents": [
+    "*",
     "onCommand:joyride.runCode",
     "onCommand:joyride.runUserScript",
     "onCommand:joyride.runWorkspaceScript",
@@ -112,9 +113,12 @@
     "prewatch": "npm run clean",
     "compile": "npx shadow-cljs compile :extension",
     "release": "npx shadow-cljs release :extension",
+    "package": "npx vsce package --allow-star-activation",
     "vscode:prepublish": "npm run clean && npm run release"
   },
   "dependencies": {
+    "fdir": "^5.2.0",
+    "picomatch": "^2.3.1",
     "vsce": "^2.7.0"
   },
   "devDependencies": {

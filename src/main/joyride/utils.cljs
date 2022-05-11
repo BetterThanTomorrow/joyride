@@ -1,5 +1,6 @@
 (ns joyride.utils
-  (:require ["vscode" :as vscode]
+  (:require ["fdir" :refer [fdir]]
+            ["vscode" :as vscode]
             [clojure.pprint :as pprint]
             [clojure.string :as str]
             [joyride.db :as db]
@@ -11,13 +12,16 @@
 (defn cljify [js-thing]
   (js->clj js-thing :keywordize-keys true))
 
-(defn path-exists?+ [path]
-  (-> (p/let [uri (vscode/Uri.file path)]
-        (vscode/workspace.fs.stat uri)
-        true)
-      (p/catch
-       (fn [_e]
-         false))))
+(defn path-or-uri-exists?+ [path-or-uri]
+  (-> (p/let [uri (if (= (type "") (type path-or-uri)) 
+                    (vscode/Uri.file path-or-uri)
+                    path-or-uri)
+              _stat (vscode/workspace.fs.stat uri)])
+      (p/handle
+       (fn [_r, e]
+         (if e
+           false
+           true)))))
 
 (defn vscode-read-uri+ [^js uri-or-path]
   (let [uri (if (string? uri-or-path)
@@ -46,14 +50,20 @@
              Default: `true`"}
   *show-when-said?* false)
 
-(defn say [message]
+(defn sayln [message]
   (let [channel ^js (:output-channel @db/!app-db)]
     (.appendLine channel message)
     (when *show-when-said?*
       (.show channel true))))
 
+(defn say [message]
+  (let [channel ^js (:output-channel @db/!app-db)]
+    (.append channel message)
+    (when *show-when-said?*
+      (.show channel true))))
+
 (defn say-error [message]
-  (say (str "ERROR: " message)))
+  (sayln (str "ERROR: " message)))
 
 (defn say-result
   ([result]
@@ -63,4 +73,24 @@
                   "=> "
                   (str message "\n=> "))]
      (.append ^js (:output-channel @db/!app-db) prefix)
-     (say (with-out-str (pprint/pprint result))))))
+     (sayln (with-out-str (pprint/pprint result))))))
+
+(defn extension-path []
+  (-> ^js (:extension-context @db/!app-db)
+      (.-extensionPath)))
+
+(defonce glob-er (fdir.))
+
+(defn find-fs-files+
+  "Returns Uris for files on the filesystem in `crawl-path` matching `glob`.
+   NB: Not remote friendly! Is not using `vscode/workspace` API."
+  [crawl-path glob]
+  (-> glob-er
+      (.withBasePath)
+      (.glob glob)
+      (.crawl crawl-path)
+      (.withPromise)
+      (p/then (fn [files]
+                (->> (cljify files)
+                     (map #(vscode/Uri.file %))
+                     (sort-by #(.-fsPath ^js %)))))))
