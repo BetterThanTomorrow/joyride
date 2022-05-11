@@ -3,6 +3,7 @@
             ["vscode" :as vscode]
             [joyride.config :as conf]
             [joyride.db :as db]
+            [joyride.getting-started :as getting-started]
             [joyride.life-cycle :as life-cycle]
             [joyride.nrepl :as nrepl]
             [joyride.sci :as jsci]
@@ -91,15 +92,21 @@
   (when context
     (swap! db/!app-db assoc
            :output-channel (vscode/window.createOutputChannel "Joyride")
-           :extension-context context)
-    (binding [utils/*show-when-said?* true]
-      (utils/say "🟢 Joyride VS Code with Clojure. 🚗"))
-    (p/-> (life-cycle/maybe-run-init-script+ run-user-script+
-                                             (:user life-cycle/init-scripts))
-          (p/then
-           (fn [_result]
-             (life-cycle/maybe-run-init-script+ run-workspace-script+
-                                                (:workspace life-cycle/init-scripts))))))
+           :extension-context context
+           :workspace-root-path vscode/workspace.rootPath)
+    (-> (getting-started/maybe-create-user-content+)
+        (p/catch
+         (fn [e]
+           (js/console.error "Joyride activate error" e)))
+        (p/then
+         (fn [_r]
+           (p/do! (life-cycle/maybe-run-init-script+ run-user-script+
+                                                     (:user life-cycle/init-scripts))
+                  (when vscode/workspace.rootPath
+                    (life-cycle/maybe-run-init-script+ run-workspace-script+
+                                                       (:workspace life-cycle/init-scripts)))
+                  (utils/say "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
+
   (let [{:keys [extension-context]} @db/!app-db]
     (register-command! extension-context "joyride.runCode" #'run-code)
     (register-command! extension-context "joyride.runWorkspaceScript" #'run-workspace-script+)
