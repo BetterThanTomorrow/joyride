@@ -105,7 +105,7 @@
                   (when vscode/workspace.rootPath
                     (life-cycle/maybe-run-init-script+ run-workspace-script+
                                                        (:workspace life-cycle/init-scripts)))
-                  (utils/say "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
+                  (utils/sayln "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
 
   (let [{:keys [extension-context]} @db/!app-db]
     (register-command! extension-context "joyride.runCode" #'run-code)
