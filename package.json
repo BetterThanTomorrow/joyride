@@ -117,7 +117,8 @@
     "vscode:prepublish": "npm run clean && npm run release"
   },
   "dependencies": {
-    "fast-glob": "^3.2.11",
+    "fdir": "^5.2.0",
+    "picomatch": "^2.3.1",
     "vsce": "^2.7.0"
   },
   "devDependencies": {

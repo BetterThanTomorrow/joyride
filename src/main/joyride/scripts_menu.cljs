@@ -1,8 +1,7 @@
 (ns joyride.scripts-menu
-  (:require ["fast-glob" :as fast-glob]
-            ["path" :as path]
+  (:require ["path" :as path]
             ["vscode" :as vscode]
-            [joyride.utils :refer [cljify jsify]]
+            [joyride.utils :as utils :refer [cljify jsify]]
             [promesa.core :as p]))
 
 (defn find-script-uris+
@@ -19,10 +18,9 @@
                                cljify
                                (sort-by #(.-fsPath ^js %)))]
       (jsify script-uris))
-    (p/let [glob (path/join base-path script-folder-path "**" "*.cljs")
-            script-uris (p/->> (fast-glob glob #js {:dot true})
-                               (map #(vscode/Uri.file %))
-                               (sort-by #(.-fsPath ^js %)))]
+    (p/let [crawl-path (path/join base-path script-folder-path)
+            glob "**/*.cljs"
+            script-uris (utils/find-fs-files+ crawl-path glob)]
       (jsify script-uris))))
 
 (defn strip-abs-scripts-path [abs-scripts-path abs-path]

@@ -1,5 +1,6 @@
 (ns joyride.utils
-  (:require ["vscode" :as vscode]
+  (:require ["fdir" :refer [fdir]]
+            ["vscode" :as vscode]
             [clojure.pprint :as pprint]
             [clojure.string :as str]
             [joyride.db :as db]
@@ -77,3 +78,19 @@
 (defn extension-path []
   (-> ^js (:extension-context @db/!app-db)
       (.-extensionPath)))
+
+(defonce glob-er (fdir.))
+
+(defn find-fs-files+
+  "Returns Uris for files on the filesystem in `crawl-path` matching `glob`.
+   NB: Not remote friendly! Is not using `vscode/workspace` API."
+  [crawl-path glob]
+  (-> glob-er
+      (.withBasePath)
+      (.glob glob)
+      (.crawl crawl-path)
+      (.withPromise)
+      (p/then (fn [files]
+                (->> (cljify files)
+                     (map #(vscode/Uri.file %))
+                     (sort-by #(.-fsPath ^js %)))))))
