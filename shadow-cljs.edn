@@ -3,7 +3,7 @@
  {:extension {:target :node-library
               :js-options {:js-provider :shadow
                            :keep-native-requires true
-                           :keep-as-require #{"vscode"}}
+                           :keep-as-require #{"vscode" "fast-glob"}}
               :compiler-options {:infer-externs :auto}
               :output-dir "out/js"
               :output-to "out/joyride.js"

@@ -1,26 +1,29 @@
 (ns joyride.scripts-menu
-  (:require ["path" :as path]
+  (:require ["fast-glob" :as fast-glob]
+            ["path" :as path]
             ["vscode" :as vscode]
-            [joyride.config :as conf]
-            [joyride.utils :refer [jsify cljify]]
+            [joyride.utils :refer [cljify jsify]]
             [promesa.core :as p]))
 
-(defn find-script-uris+ [base-path script-folder-path]
-  (let [glob (vscode/RelativePattern. base-path (path/join script-folder-path "**" "*.cljs"))]
-    (p/let [script-uris (p/->> (vscode/workspace.findFiles glob)
+(defn find-script-uris+
+  "Returns a Promise that resolves to JS array of `vscode.Uri`s
+   for the scripts files found in `base-path`/`script-folder-path`
+   
+   Will use `vscode/workspace` API for it if there is a workspace
+   root, otherwise it uses direct filesystem access. (Probably means
+   it is only Remote friendly in the case with a workspace root.)"
+  [base-path script-folder-path]
+  (if vscode/workspace.rootPath
+    (p/let [glob (vscode/RelativePattern. base-path (path/join script-folder-path "**" "*.cljs"))
+            script-uris (p/->> (vscode/workspace.findFiles glob)
                                cljify
                                (sort-by #(.-fsPath ^js %)))]
+      (jsify script-uris))
+    (p/let [glob (path/join base-path script-folder-path "**" "*.cljs")
+            script-uris (p/->> (fast-glob glob #js {:dot true})
+                               (map #(vscode/Uri.file %))
+                               (sort-by #(.-fsPath ^js %)))]
       (jsify script-uris))))
-
-(comment
-  (let [uris (find-script-uris+ vscode/workspace.rootPath conf/workspace-scripts-path)]
-    (def uris uris)
-    uris)
-
-  (let [uris (find-script-uris+ conf/user-config-path conf/user-scripts-path)]
-    (def uris uris)
-    uris)
-  (def glob (path/join conf/user-scripts-path "**" "*.cljs")))
 
 (defn strip-abs-scripts-path [abs-scripts-path abs-path]
   (subs abs-path (count (str abs-scripts-path path/sep))))

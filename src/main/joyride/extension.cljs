@@ -91,7 +91,8 @@
   (when context
     (swap! db/!app-db assoc
            :output-channel (vscode/window.createOutputChannel "Joyride")
-           :extension-context context)
+           :extension-context context
+           :workspace-root-path vscode/workspace.rootPath)
     (binding [utils/*show-when-said?* true]
       (utils/say "🟢 Joyride VS Code with Clojure. 🚗💨"))
     (p/-> (life-cycle/maybe-run-init-script+ run-user-script+

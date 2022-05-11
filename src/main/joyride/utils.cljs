@@ -12,12 +12,13 @@
   (js->clj js-thing :keywordize-keys true))
 
 (defn path-exists?+ [path]
-  (-> (p/let [uri (vscode/Uri.file path)]
-        (vscode/workspace.fs.stat uri)
-        true)
-      (p/catch
-       (fn [_e]
-         false))))
+  (-> (p/let [uri (vscode/Uri.file path)
+              stat (vscode/workspace.fs.stat uri)])
+      (p/handle
+       (fn [_r, e]
+         (if e
+           false
+           true)))))
 
 (defn vscode-read-uri+ [^js uri-or-path]
   (let [uri (if (string? uri-or-path)

@@ -13,8 +13,10 @@
 (def workspace-init-script "activate.cljs")
 (def workspace-init-script-path (path/join conf/workspace-scripts-path
                                            workspace-init-script))
-(def workspace-init-script-abs-path (path/join vscode/workspace.rootPath
-                                               workspace-init-script-path))
+(defn workspace-init-script-abs-path []
+  (when-let [abs-scripts-path (conf/workspace-abs-scripts-path)]
+   (path/join abs-scripts-path
+              workspace-init-script)))
 
 (def init-scripts {:user {:label "User activate"
                           :script user-init-script
