@@ -113,6 +113,7 @@
     "prewatch": "npm run clean",
     "compile": "npx shadow-cljs compile :extension",
     "release": "npx shadow-cljs release :extension",
+    "package": "npx vsce package --allow-star-activation",
     "vscode:prepublish": "npm run clean && npm run release"
   },
   "dependencies": {
