@@ -93,7 +93,7 @@
            :output-channel (vscode/window.createOutputChannel "Joyride")
            :extension-context context)
     (binding [utils/*show-when-said?* true]
-      (utils/say "🟢 Joyride VS Code with Clojure. 🚗"))
+      (utils/say "🟢 Joyride VS Code with Clojure. 🚗💨"))
     (p/-> (life-cycle/maybe-run-init-script+ run-user-script+
                                              (:user life-cycle/init-scripts))
           (p/then
