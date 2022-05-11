@@ -1,6 +1,5 @@
 (ns joyride.life-cycle
   (:require ["path" :as path]
-            ["vscode" :as vscode]
             [joyride.config :as conf]
             [joyride.utils :as utils]
             [promesa.core :as p]))
@@ -29,10 +28,10 @@
 
 (defn maybe-run-init-script+ [run-fn {:keys [label script script-path script-abs-path]}]
   (utils/say (str label " script: " script-path))
-  (-> (utils/path-exists?+ script-abs-path)
+  (-> (utils/path-or-uri-exists?+ script-abs-path)
       (p/then (fn [exists?]
                 (if exists?
                   (do
-                    (utils/say (str "  Running..."))
+                    (utils/sayln (str ".  Running..."))
                     (run-fn script))
-                  (utils/say (str "  No " label " script present")))))))
+                  (utils/sayln (str ".  No " label " script present")))))))

@@ -43,6 +43,7 @@
     }
   ],
   "activationEvents": [
+    "*",
     "onCommand:joyride.runCode",
     "onCommand:joyride.runUserScript",
     "onCommand:joyride.runWorkspaceScript",

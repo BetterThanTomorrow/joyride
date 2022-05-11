@@ -11,9 +11,11 @@
 (defn cljify [js-thing]
   (js->clj js-thing :keywordize-keys true))
 
-(defn path-exists?+ [path]
-  (-> (p/let [uri (vscode/Uri.file path)
-              stat (vscode/workspace.fs.stat uri)])
+(defn path-or-uri-exists?+ [path-or-uri]
+  (-> (p/let [uri (if (= (type "") (type path-or-uri)) 
+                    (vscode/Uri.file path-or-uri)
+                    path-or-uri)
+              _stat (vscode/workspace.fs.stat uri)])
       (p/handle
        (fn [_r, e]
          (if e
@@ -47,14 +49,20 @@
              Default: `true`"}
   *show-when-said?* false)
 
-(defn say [message]
+(defn sayln [message]
   (let [channel ^js (:output-channel @db/!app-db)]
     (.appendLine channel message)
     (when *show-when-said?*
       (.show channel true))))
 
+(defn say [message]
+  (let [channel ^js (:output-channel @db/!app-db)]
+    (.append channel message)
+    (when *show-when-said?*
+      (.show channel true))))
+
 (defn say-error [message]
-  (say (str "ERROR: " message)))
+  (sayln (str "ERROR: " message)))
 
 (defn say-result
   ([result]
@@ -64,4 +72,8 @@
                   "=> "
                   (str message "\n=> "))]
      (.append ^js (:output-channel @db/!app-db) prefix)
-     (say (with-out-str (pprint/pprint result))))))
+     (sayln (with-out-str (pprint/pprint result))))))
+
+(defn extension-path []
+  (-> ^js (:extension-context @db/!app-db)
+      (.-extensionPath)))
