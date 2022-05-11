@@ -7,6 +7,8 @@ Changes to Joyride
 - [Error when dismissing the scripts menu without selecting anything](https://github.com/BetterThanTomorrow/joyride/issues/24)
 - Fix: [Better error report when a script isn't found](https://github.com/BetterThanTomorrow/joyride/issues/40)
 - Fix: [Joyride throws an error when activated in a window with no folder](https://github.com/BetterThanTomorrow/joyride/issues/51)
+- [Create example user scripts if they are not present](https://github.com/BetterThanTomorrow/joyride/issues/52)
+- [Don't unconditionally show the Joyride output channel on start](https://github.com/BetterThanTomorrow/joyride/issues/46)
 
 ## [0.0.8] - 2022-05-09
 
