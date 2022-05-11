@@ -8,6 +8,9 @@
 ;; place for you to initialize things. E.g. install event handlers,
 ;; print motivational messages, or whatever.
 
+;; You can run this and other User scripts with the command:
+;;   *Joyride: Run User Script*
+
 (comment
   ;; Use Calva to start the Joyride REPL and connect it. Then
   ;; evaluate some code in this Rich comment block. Or just write
@@ -22,13 +25,13 @@
       (+ 1)
       inc)
 
-  (-> (vscode/window.showInformationMessage "Be a Joyrider 🎸" "Yes" "Of course!")
-      (p/then (fn [choice]
-                (if choice
-                  (.appendLine (joyride/output-channel)
-                               (str "You choose: " choice " 🎉"))
-                  (.appendLine (joyride/output-channel)
-                               "You just closed it? 😭"))))))
+  (p/-> (vscode/window.showInformationMessage "Be a Joyrider 🎸" "Yes" "Of course!")
+        ((fn [choice]
+           (if choice
+             (.appendLine (joyride/output-channel)
+                          (str "You choose: " choice " 🎉"))
+             (.appendLine (joyride/output-channel)
+                          "You just closed it? 😭"))))))
 
 
 ;; This following code is why you see the Joyride output channel

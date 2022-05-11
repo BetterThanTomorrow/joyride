@@ -14,7 +14,13 @@ You are entering a construction yard. Things are going to change and break your 
 
 Your feedback is highly welcome!
 
-## Quickest Start - Run some Code
+## Quickest Start 1 - Run a User Script
+
+Install Joyride. It will run a sample `activate.cljs` User script. You can use this script as a base for init/activation stuff of your VS Code environment.
+
+Joyride installs a "regular” User script as well. You can run either of these with the command: **Joyride: Run User Script**.
+
+## Quickest Start 2 - Run some Code
 
 1. Bring up the VS Code Command Palette (`cmd/ctrl+shift+p`)
 2. Execute **Joyride: Run Clojure Code**
