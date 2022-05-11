@@ -69,6 +69,7 @@
 (def pretty-print-fns-map
   {"clojure.core/prn" prn
    "clojure.pprint/pprint" pp/pprint
+   "cljs.pprint/pprint" pp/pprint
    "cider.nrepl.pprint/pprint" pp/pprint})
 
 (defn format-value [nrepl-pprint pprint-options value]
