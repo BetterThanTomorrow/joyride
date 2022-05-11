@@ -5,6 +5,7 @@ Changes to Joyride
 ## [Unreleased]
 
 - [Error when dismissing the scripts menu without selecting anything](https://github.com/BetterThanTomorrow/joyride/issues/24)
+- [nrepl: support pprinting eval results](https://github.com/BetterThanTomorrow/joyride/issues/49)
 
 ## [0.0.8] - 2022-05-09
 
