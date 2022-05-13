@@ -44,9 +44,10 @@
        file-infos))
 
 (defn- show-script-picker'+
-  [title file-infos]
-  (p/let [menu-items (jsify (file-info->menu-item file-infos))
-          script-info (vscode/window.showQuickPick menu-items #js {:title title})]
+  [title file-infos more-menu-items]
+  (p/let [file-items (into [] (file-info->menu-item file-infos))
+          menu-items (conj file-items more-menu-items)
+          script-info (vscode/window.showQuickPick (jsify menu-items) #js {:title title})]
     (cljify script-info)))
 
 (defn show-script-picker+
@@ -54,13 +55,9 @@
    Returns the picked item as a map with keys:
    `:uri`, `:absolute-path`, `:relative-path`
    Where `:relative-path` is relative to the `base-path`"
-  [title base-path scripts-path]
+  [{:keys [title more-menu-items]} base-path scripts-path]
   (-> (p/let [script-uris (find-script-uris+ base-path scripts-path)
               abs-scripts-path (path/join base-path scripts-path)
               file-infos (script-uris->file-infos+ abs-scripts-path script-uris)
-              picked-script (show-script-picker'+ title file-infos)]
-        picked-script)
-      (p/handle (fn [result error]
-                  (if error
-                    (js/console.error title "Failed:" (.-message error))
-                    result)))))
+              picked-script (show-script-picker'+ title file-infos more-menu-items)]
+        picked-script)))

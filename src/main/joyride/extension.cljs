@@ -41,11 +41,19 @@
                                      :defaultUri default-uri
                                      :openLabel "Open script"}))
 
+(defn handle-script-menu-selection+ 
+  [{:keys [title] :as menu-conf} script-fn+ base-path scripts-path]
+  (p/let [pick (show-script-picker+ menu-conf base-path scripts-path)]
+     (when pick
+       (let [relative-path (:relative-path pick)
+             function (:function pick)]
+         (cond
+           relative-path (script-fn+ title base-path scripts-path relative-path)
+           function (function))))))
+
 (defn run-script+
-  ([title base-path scripts-path]
-   (p/let [picked-script (show-script-picker+ title base-path scripts-path)]
-     (when picked-script
-       (run-script+ title base-path scripts-path (:relative-path picked-script)))))
+  ([menu-conf base-path scripts-path]
+   (handle-script-menu-selection+ menu-conf run-script+ base-path scripts-path))
   ([title base-path scripts-path script-path]
    (-> (p/let [abs-path (path/join base-path scripts-path script-path)
                script-uri (vscode/Uri.file abs-path)
@@ -62,10 +70,8 @@
                          result)))))))
 
 (defn open-script+
-  ([title base-path scripts-path]
-   (p/let [picked-script (show-script-picker+ title base-path scripts-path)]
-     (when picked-script
-       (open-script+ title base-path scripts-path (:relative-path picked-script)))))
+  ([menu-conf base-path scripts-path]
+   (handle-script-menu-selection+ menu-conf open-script+ base-path scripts-path))
   ([title base-path scripts-path script-path]
    (-> (p/let [abs-path (path/join base-path scripts-path script-path)
                script-uri (vscode/Uri.file abs-path)]
@@ -76,37 +82,52 @@
                   (binding [utils/*show-when-said?* true]
                     (utils/say-error (str title " Failed: " script-path " " (.-message error)))))))))
 
-(defn run-or-open-workspace-script-args [run-or-open]
-  [(str run-or-open "Workspace Script")
+(defn run-or-open-workspace-script-args [menu-conf-or-title]
+  [menu-conf-or-title
    vscode/workspace.rootPath
    conf/workspace-scripts-path])
 
-(defn run-or-open-user-script-args [run-or-open]
-  [(str run-or-open "User Script")
+(defn run-or-open-user-script-args [menu-conf-or-title]
+  [menu-conf-or-title
    conf/user-config-path
    conf/user-scripts-path])
 
+(declare open-user-script+)
+(declare open-workspace-script+)
+
 (defn run-workspace-script+
   ([]
-   (apply run-script+ (run-or-open-workspace-script-args "Run")))
+   (apply run-script+ (run-or-open-workspace-script-args
+                       {:title "Run Workspace Script"
+                        :more-menu-items {:label "Open Workspace Script"
+                                          :function open-workspace-script+}})))
   ([script]
    (apply run-script+ (conj (run-or-open-workspace-script-args "Run") script))))
 
 (defn run-user-script+
   ([]
-   (apply run-script+ (run-or-open-user-script-args "Run")))
+   (apply run-script+ (run-or-open-user-script-args
+                       {:title "Run User Script"
+                         :more-menu-items {:label "Open User Script"
+                                           :function open-user-script+}})))
   ([script]
    (apply run-script+ (conj (run-or-open-user-script-args "Run") script))))
 
 (defn open-workspace-script+
   ([]
-   (apply open-script+ (run-or-open-workspace-script-args "Open")))
+   (apply open-script+ (run-or-open-workspace-script-args 
+                        {:title "Open Workspace Script"
+                         :more-menu-items {:label "Run Workspace Script"
+                                           :function run-workspace-script+}})))
   ([script]
    (apply open-script+ (conj (run-or-open-workspace-script-args "Open") script))))
 
 (defn open-user-script+
   ([]
-   (apply open-script+ (run-or-open-user-script-args "Open")))
+   (apply open-script+ (run-or-open-user-script-args
+                        {:title "Open User Script"
+                         :more-menu-items {:label "Run User Script"
+                                           :function run-user-script+}})))
   ([script]
    (apply open-script+ (conj (run-or-open-user-script-args "Open") script))))
 
