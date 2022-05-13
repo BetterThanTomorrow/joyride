@@ -14,11 +14,25 @@ You are entering a construction yard. Things are going to change and break your 
 
 Your feedback is highly welcome!
 
+## User and Workspace scripts
+
+Joyride supports User and Workspace scripts:
+
+* _User_ scripts: `<user home>/.config/joyride/scripts`
+* _Workspace_ scripts: `<workspace root>.joyride/scripts`
+
+You can run or open the scripts using commands provided (search the command palette for **Joyride**):
+
+* **Joyride Run User Script...**, default keybinding `ctrl+shift+,`
+* **Joyride Open User Script...**
+* **Joyride Run Workspace Script...**, default keybinding `ctrl+shift+.`
+* **Joyride Open Workspace Script...**
+
 ## Quickest Start 1 - Run a User Script
 
 Install Joyride. It will run a sample `activate.cljs` User script. You can use this script as a base for init/activation stuff of your VS Code environment.
 
-Joyride installs a "regular” User script as well. You can run either of these with the command: **Joyride: Run User Script**.
+Joyride installs a "regular” User script as well. You can run either of these with the commands mentioned above.
 
 ## Quickest Start 2 - Run some Code
 

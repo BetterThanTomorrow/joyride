@@ -61,25 +61,54 @@
                      (do (utils/say-result (str script-path " evaluated.") result)
                          result)))))))
 
-(def run-workspace-script-args ["Run Workspace Script"
-                                vscode/workspace.rootPath
-                                conf/workspace-scripts-path])
+(defn open-script+
+  ([title base-path scripts-path]
+   (p/let [picked-script (show-script-picker+ title base-path scripts-path)]
+     (when picked-script
+       (open-script+ title base-path scripts-path (:relative-path picked-script)))))
+  ([title base-path scripts-path script-path]
+   (-> (p/let [abs-path (path/join base-path scripts-path script-path)
+               script-uri (vscode/Uri.file abs-path)]
+         (p/-> (vscode/workspace.openTextDocument script-uri)
+               (vscode/window.showTextDocument
+                #js {:preview false, :preserveFocus false})))
+       (p/catch (fn [error]
+                  (binding [utils/*show-when-said?* true]
+                    (utils/say-error (str title " Failed: " script-path " " (.-message error)))))))))
+
+(defn run-or-open-workspace-script-args [run-or-open]
+  [(str run-or-open "Workspace Script")
+   vscode/workspace.rootPath
+   conf/workspace-scripts-path])
+
+(defn run-or-open-user-script-args [run-or-open]
+  [(str run-or-open "User Script")
+   conf/user-config-path
+   conf/user-scripts-path])
 
 (defn run-workspace-script+
   ([]
-   (apply run-script+ run-workspace-script-args))
+   (apply run-script+ (run-or-open-workspace-script-args "Run")))
   ([script]
-   (apply run-script+ (conj run-workspace-script-args script))))
-
-(def run-user-script-args ["Run User Script"
-                           conf/user-config-path
-                           conf/user-scripts-path])
+   (apply run-script+ (conj (run-or-open-workspace-script-args "Run") script))))
 
 (defn run-user-script+
   ([]
-   (apply run-script+ run-user-script-args))
+   (apply run-script+ (run-or-open-user-script-args "Run")))
   ([script]
-   (apply run-script+ (conj run-user-script-args script))))
+   (apply run-script+ (conj (run-or-open-user-script-args "Run") script))))
+
+(defn open-workspace-script+
+  ([]
+   (apply open-script+ (run-or-open-workspace-script-args "Open")))
+  ([script]
+   (apply open-script+ (conj (run-or-open-workspace-script-args "Open") script))))
+
+(defn open-user-script+
+  ([]
+   (apply open-script+ (run-or-open-user-script-args "Open")))
+  ([script]
+   (apply open-script+ (conj (run-or-open-user-script-args "Open") script))))
 
 (defn start-nrepl-server+ [root-path]
   (nrepl/start-server+ {:root-path (or root-path vscode/workspace.rootPath)}))
@@ -111,6 +140,8 @@
     (register-command! extension-context "joyride.runCode" #'run-code)
     (register-command! extension-context "joyride.runWorkspaceScript" #'run-workspace-script+)
     (register-command! extension-context "joyride.runUserScript" #'run-user-script+)
+    (register-command! extension-context "joyride.openWorkspaceScript" #'open-workspace-script+)
+    (register-command! extension-context "joyride.openUserScript" #'open-user-script+)
     (register-command! extension-context "joyride.startNReplServer" #'start-nrepl-server+)
     (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server)
     (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)

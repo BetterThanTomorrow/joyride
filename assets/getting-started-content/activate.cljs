@@ -39,7 +39,9 @@
 (doto (joyride/output-channel)
   (.show true) ;; specifically this line. It shows the channel.
   (.appendLine "Welcome Joyrider! This is your User activation script speaking.")
-  (.appendLine "Tired of this message popping up? It's the script doing it. Edit it away!"))
+  (.appendLine "Tired of this message popping up? It's the script doing it. Edit it away!")
+  (.appendLine "Hint: There is a command: **Open User Script...**")
+  )
 
 "🎉"
 
