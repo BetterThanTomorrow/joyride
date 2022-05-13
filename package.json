@@ -127,6 +127,7 @@
     "vscode:prepublish": "npm run clean && npm run release"
   },
   "dependencies": {
+    "@vscode/codicons": "^0.0.30",
     "fdir": "^5.2.0",
     "picomatch": "^2.3.1",
     "vsce": "^2.7.0"
