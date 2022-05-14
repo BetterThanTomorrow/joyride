@@ -28,7 +28,12 @@
             script-uris (utils/find-fs-files+ crawl-path glob)]
       (jsify script-uris))))
 
-(defn strip-abs-scripts-path [abs-scripts-path abs-path]
+(defn strip-abs-scripts-path 
+  "Strips the `scripts` path away from an absolute path to a script.
+   I.e. everything from the root up to, and including the `scripts`
+   directory for the section (User or Workspace) in question.
+   Used for the label in the scripts menus."
+  [abs-scripts-path abs-path]
   (subs abs-path (count (str abs-scripts-path path/sep))))
 
 (defn script-uri->file-info [abs-scripts-path ^js uri]
