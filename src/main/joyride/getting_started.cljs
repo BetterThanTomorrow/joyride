@@ -65,3 +65,10 @@
     (when-not activate-exists?+
       (fn [] 
         (apply (partial create-content-file+ activate-dest-uri) section-and-subpath)))))
+
+(defn maybe-create-workspace-hello-fn+ []
+  (p/let [section-and-subpath (workspace-hello-uri-section-and-subpath)
+          [hello-dest-uri hello-exists?+] (dest-uri-uri-exists?+ section-and-subpath)]
+    (when-not hello-exists?+
+      (fn [] 
+        (apply (partial create-content-file+ hello-dest-uri) section-and-subpath)))))
