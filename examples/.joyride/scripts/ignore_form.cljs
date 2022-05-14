@@ -1,5 +1,5 @@
 (ns ignore-form
-  (:require ["vscode" :as vsode]
+  (:require ["vscode" :as vscode]
             [joyride.core :as joyride]
             [promesa.core :as p]
             [z-joylib.editor-utils :as eu]))

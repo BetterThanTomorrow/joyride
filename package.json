@@ -56,17 +56,27 @@
     "commands": [
       {
         "command": "joyride.runCode",
-        "title": "Run Clojure Code",
+        "title": "Run Clojure Code...",
         "category": "Joyride"
       },
       {
         "command": "joyride.runUserScript",
-        "title": "Run User Script",
+        "title": "Run User Script...",
         "category": "Joyride"
       },
       {
         "command": "joyride.runWorkspaceScript",
-        "title": "Run Workspace Script",
+        "title": "Run Workspace Script...",
+        "category": "Joyride"
+      },
+      {
+        "command": "joyride.openUserScript",
+        "title": "Open User Script...",
+        "category": "Joyride"
+      },
+      {
+        "command": "joyride.openWorkspaceScript",
+        "title": "Open Workspace Script...",
         "category": "Joyride"
       },
       {
@@ -117,6 +127,7 @@
     "vscode:prepublish": "npm run clean && npm run release"
   },
   "dependencies": {
+    "@vscode/codicons": "^0.0.30",
     "fdir": "^5.2.0",
     "picomatch": "^2.3.1",
     "vsce": "^2.7.0"
