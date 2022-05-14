@@ -143,22 +143,22 @@
 (def open-workspace-script-menu-item (function-menu-item
                                       {:label "Open Workspace Script..."
                                        :icon "go-to-file"
-                                       :function open-workspace-script+}))
+                                       :function #'open-workspace-script+}))
 
 (def open-user-script-menu-item (function-menu-item
                                  {:label "Open User Script..."
                                   :icon "go-to-file"
-                                  :function open-user-script+}))
+                                  :function #'open-user-script+}))
 
 (def run-workspace-script-menu-item (function-menu-item
                                      {:label "Run Workspace Script..."
                                       :icon "play"
-                                      :function run-workspace-script+}))
+                                      :function #'run-workspace-script+}))
 
 (def run-user-script-menu-item (function-menu-item
                                 {:label "Run User Script..."
                                  :icon "play"
-                                 :function run-user-script+}))
+                                 :function #'run-user-script+}))
 
 (defn workspace-menu-conf+ [title more-menu-items create-activate-fn create-hello-fn]
   (p/let [script-uris (cljify (find-script-uris+ (:workspace-root-path @db/!app-db)
