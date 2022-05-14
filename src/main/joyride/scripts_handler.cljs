@@ -4,6 +4,7 @@
             [joyride.config :as conf]
             [joyride.constants :as const]
             [joyride.db :as db]
+            [joyride.getting-started :as getting-started]
             [joyride.sci :as jsci]
             [joyride.utils :as utils :refer [cljify jsify]]
             [promesa.core :as p]
@@ -75,8 +76,9 @@
         picked-script)))
 
 (defn handle-script-menu-selection+
-  [{:keys [title] :as menu-conf} script-fn+ base-path scripts-path]
-  (p/let [pick (show-script-picker+ menu-conf base-path scripts-path)]
+  [menu-conf+ script-fn+ base-path scripts-path]
+  (p/let [{:keys [title] :as menu-conf} menu-conf+
+          pick (show-script-picker+ menu-conf base-path scripts-path)]
     (when pick
       (let [relative-path (:relative-path pick)
             function (:function pick)]
@@ -85,8 +87,8 @@
           function (function))))))
 
 (defn run-script+
-  ([menu-conf base-path scripts-path]
-   (handle-script-menu-selection+ menu-conf run-script+ base-path scripts-path))
+  ([menu-conf+ base-path scripts-path]
+   (handle-script-menu-selection+ menu-conf+ run-script+ base-path scripts-path))
   ([title base-path scripts-path script-path]
    (-> (p/let [abs-path (path/join base-path scripts-path script-path)
                script-uri (vscode/Uri.file abs-path)
@@ -103,8 +105,8 @@
                          result)))))))
 
 (defn open-script+
-  ([menu-conf base-path scripts-path]
-   (handle-script-menu-selection+ menu-conf open-script+ base-path scripts-path))
+  ([menu-conf+ base-path scripts-path]
+   (handle-script-menu-selection+ menu-conf+ open-script+ base-path scripts-path))
   ([title base-path scripts-path script-path]
    (-> (p/let [abs-path (path/join base-path scripts-path script-path)
                script-uri (vscode/Uri.file abs-path)]
@@ -115,9 +117,9 @@
                   (binding [utils/*show-when-said?* true]
                     (utils/say-error (str title " Failed: " script-path " " (.-message error)))))))))
 
-(defn run-or-open-workspace-script-args [menu-conf-or-title]
-  [menu-conf-or-title
-   vscode/workspace.rootPath
+(defn run-or-open-workspace-script-args [menu-conf-or-title+]
+  [menu-conf-or-title+
+   (:workspace-root-path @db/!app-db)
    conf/workspace-scripts-path])
 
 (defn run-or-open-user-script-args [menu-conf-or-title]
@@ -178,10 +180,17 @@
 
 (defn open-workspace-script+
   ([]
-   (apply open-script+ (run-or-open-workspace-script-args
-                        {:title "Open Workspace Script"
-                         :more-menu-items [run-workspace-script-menu-item
-                                           open-user-script-menu-item]})))
+   (apply open-script+
+          (run-or-open-workspace-script-args
+           (p/let [create-fn+ (getting-started/maybe-create-workspace-activate-fn+)]
+             {:title "Open Workspace Script"
+              :more-menu-items (cond-> [run-workspace-script-menu-item
+                                        open-user-script-menu-item]
+                                 create-fn+
+                                 (conj {:label (menu-label-with-icon
+                                                "Create Workspace activate.cljs"
+                                                "plus")
+                                        :function create-fn+}))}))))
   ([script]
    (apply open-script+ (conj (run-or-open-workspace-script-args "Open") script))))
 
