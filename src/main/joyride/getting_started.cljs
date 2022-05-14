@@ -59,16 +59,21 @@
     (when-not hello-exists?+ 
       (apply (partial create-content-file+ hello-dest-uri) section-and-subpath))))
 
+(defn create-and-open-content-file+ [content-file-uri section-and-subpath]
+  (fn []
+    (p/do (apply (partial create-content-file+ content-file-uri) section-and-subpath)
+          (p/-> (vscode/workspace.openTextDocument content-file-uri)
+                (vscode/window.showTextDocument
+                 #js {:preview false, :preserveFocus false})))))
+
 (defn maybe-create-workspace-activate-fn+ []
   (p/let [section-and-subpath (workspace-activate-uri-section-and-subpath)
           [activate-dest-uri activate-exists?+] (dest-uri-uri-exists?+ section-and-subpath)]
     (when-not activate-exists?+
-      (fn [] 
-        (apply (partial create-content-file+ activate-dest-uri) section-and-subpath)))))
+      (create-and-open-content-file+ activate-dest-uri section-and-subpath))))
 
 (defn maybe-create-workspace-hello-fn+ []
   (p/let [section-and-subpath (workspace-hello-uri-section-and-subpath)
           [hello-dest-uri hello-exists?+] (dest-uri-uri-exists?+ section-and-subpath)]
     (when-not hello-exists?+
-      (fn [] 
-        (apply (partial create-content-file+ hello-dest-uri) section-and-subpath)))))
+      (create-and-open-content-file+ hello-dest-uri section-and-subpath))))
