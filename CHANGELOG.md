@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Add `my-lib` example to Getting Started user content](https://github.com/BetterThanTomorrow/joyride/issues/63)
+
 ## [0.0.10] - 2022-05-15
 
 - [Make it easy to open scripts for editing](https://github.com/BetterThanTomorrow/joyride/issues/56)

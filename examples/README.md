@@ -90,3 +90,48 @@ Joyride API used:
 * `vscode/workspace.findFiles`
 * `vscode/workspace.openTextDocument`
 * `vscode/window.showTextDocument`
+
+## Restarting clojure-lsp
+
+NB: _This example is included as **Getting started** User scripts content. See your user scripts, or `assets/getting-started-content/user/my_lib.cljs` in this repository._
+
+A somewhat frequent feature request on Calva is a command for restarting clojure-lsp. It can be implemented in several ways, including:
+
+1. Define a `joyride.runCode` keyboard shortcut with the code to stop and start clojure-lsp
+2. Make a Joyride script
+3. Define a function in a namespace that you know is required and call the function from a `joyride.runCode` keyboard shortcut
+
+The third way is probably the most scalable/easiest to maintain:
+
+Have a User script `my_lib.cljs` with this content:
+
+```clojure
+(ns my-lib
+  (:require ["vscode" :as vscode]
+            [promesa.core :as p]))
+
+(defn restart-clojure-lsp []
+  (p/do (vscode/commands.executeCommand "calva.clojureLsp.stop")
+        (vscode/commands.executeCommand "calva.clojureLsp.start")))
+```
+
+Make sure it is required from User `activate.cljs`:
+
+```clojure
+(ns activate
+  (:require ...
+            [my-lib]
+            ...))
+```
+
+You can then have this in `keybindings.json`
+
+```json
+    {
+        "key": "<some-keyboard-shortcut>",
+        "command": "joyride.runCode",
+        "args": "(my-lib/restart-clojure-lsp)"
+    },
+```
+
+Please be inspired to add functions to your `my-lib` namespace (and to rename it, if you fancy) to give yourself commands that VS Code and/or some extension is lacking.
