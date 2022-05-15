@@ -4,8 +4,7 @@
             ["vscode" :as vscode]
             [clojure.string :as str]
             [joyride.db :as db]
-            [joyride.config :refer [workspace-scripts-path]]
-            [joyride.utils :as utils]
+            [joyride.config :as conf]
             [sci-configs.funcool.promesa :as pconfig]
             [sci.core :as sci]))
 
@@ -18,6 +17,19 @@
       (munge)
       (str/replace  "." "/")
       (str ".cljs")))
+
+(defn source-script-by-ns [namespace]
+  (let [ns-path (ns->path namespace)
+        path-if-exists (fn [search-path]
+                         (let [file-path (path/join search-path ns-path)]
+                           (when (fs/existsSync file-path)
+                             file-path)))
+        ;; workspace first, then user - the and is a nil check for no workspace
+        path-to-load (first (keep #(and % (path-if-exists %))
+                                  [(conf/workspace-abs-scripts-path) (conf/user-abs-scripts-path)]))]
+    (when path-to-load
+      {:file ns-path
+       :source (str (fs/readFileSync path-to-load))})))
 
 (def !ctx
   (volatile!
@@ -32,14 +44,7 @@
               :load-fn (fn [{:keys [namespace opts]}]
                          (cond
                            (symbol? namespace)
-                           {:source
-                            (let [path (ns->path namespace)]
-                              (str
-                               (fs/readFileSync
-                                (path/join
-                                 (utils/workspace-root)
-                                 workspace-scripts-path
-                                 path))))}
+                           (source-script-by-ns namespace)
                            (string? namespace) ;; node built-in or npm library
                            (if (= "vscode" namespace)
                              (do (sci/add-class! @!ctx 'vscode vscode)
