@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.10] - 2022-05-15
+
 - [Make it easy to open scripts for editing](https://github.com/BetterThanTomorrow/joyride/issues/56)
 - [Add Workspace script menu items for creating getting started content](https://github.com/BetterThanTomorrow/joyride/issues/57)
 
