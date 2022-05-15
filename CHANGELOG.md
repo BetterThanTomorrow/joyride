@@ -4,6 +4,7 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: [`(require)` does not load ns from user script dir](https://github.com/BetterThanTomorrow/joyride/issues/38)
 - [Add `my-lib` example to Getting Started user content](https://github.com/BetterThanTomorrow/joyride/issues/63)
 
 ## [0.0.10] - 2022-05-15
