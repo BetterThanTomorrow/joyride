@@ -34,6 +34,11 @@
    "user"
    "hello_joyride_user_script.cljs"])
 
+(defn user-my-lib-uri-section-and-subpath []
+  [(conf/user-abs-scripts-path)
+   "user"
+   "my_lib.cljs"])
+
 (defn workspace-activate-uri-section-and-subpath []
   [(conf/workspace-abs-scripts-path)
    "workspace"
@@ -57,7 +62,11 @@
   (p/let [section-and-subpath (user-hello-uri-section-and-subpath)
           [hello-dest-uri hello-exists?+] (dest-uri-uri-exists?+ section-and-subpath)]
     (when-not hello-exists?+ 
-      (apply (partial create-content-file+ hello-dest-uri) section-and-subpath))))
+      (apply (partial create-content-file+ hello-dest-uri) section-and-subpath)))
+  (p/let [section-and-subpath (user-my-lib-uri-section-and-subpath)
+          [my-lib-dest-uri my-lib-exists?+] (dest-uri-uri-exists?+ section-and-subpath)]
+    (when-not my-lib-exists?+ 
+      (apply (partial create-content-file+ my-lib-dest-uri) section-and-subpath))))
 
 (defn create-and-open-content-file+ [content-file-uri section-and-subpath]
   (fn []
