@@ -58,10 +58,10 @@
         (p/then
          (fn [_r]
            (p/do! (life-cycle/maybe-run-init-script+ scripts-handler/run-user-script+
-                                                     (:user life-cycle/init-scripts))
+                                                     (:user (life-cycle/init-scripts)))
                   (when vscode/workspace.rootPath
                     (life-cycle/maybe-run-init-script+ scripts-handler/run-workspace-script+
-                                                       (:workspace life-cycle/init-scripts)))
+                                                       (:workspace (life-cycle/init-scripts))))
                   (utils/sayln "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
 
   (let [{:keys [extension-context]} @db/!app-db]
