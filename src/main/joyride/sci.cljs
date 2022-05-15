@@ -4,8 +4,7 @@
             ["vscode" :as vscode]
             [clojure.string :as str]
             [joyride.db :as db]
-            [joyride.config :refer [workspace-abs-scripts-path user-abs-scripts-path]]
-            [joyride.utils :as utils]
+            [joyride.config :as conf]
             [sci-configs.funcool.promesa :as pconfig]
             [sci.core :as sci]))
 
@@ -27,7 +26,7 @@
                              file-path)))
         ;; workspace first, then user - the and is a nil check for no workspace
         path-to-load (first (keep #(and % (path-if-exists %))
-                                  [(workspace-abs-scripts-path) (user-abs-scripts-path)]))]
+                                  [(conf/workspace-abs-scripts-path) (conf/user-abs-scripts-path)]))]
     (when path-to-load
       {:file ns-path
        :source (str (fs/readFileSync path-to-load))})))
