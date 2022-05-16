@@ -2,7 +2,7 @@
 
 Demonstrating some ways to [Joyride VS Code](https://marketplace.visualstudio.com/items?itemName=betterthantomorrow.joyride).
 
-<img src="../assets/joyride-logo.header.png" width=500></img>
+<img src="../assets/joyride-logo-header.png" width=600></img>
 
 In the `.joyride/scripts` folder you'll find mostly small examples:
 
