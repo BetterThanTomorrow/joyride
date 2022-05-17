@@ -44,7 +44,7 @@ Here's a snippet from the [joyride_api.cljs](../examples/.joyride/scripts/joyrid
 ```clojure
 (ns your-awesome-script
   (:require [joyride.core :as joyride]
-            ...)
+            ...))
 
 (doto (joyride/output-channel)
   (.show true)
