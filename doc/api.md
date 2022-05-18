@@ -28,6 +28,8 @@ In addition to `clojure.core`, `clojure.set`, `clojure.edn`, `clojure.string`,
 `clojure.walk`, `clojure.data`, Joyride exposes
 the following namespaces:
 
+Lacking some particular library? Please consider contributing to [babashka/sci.configs](https://github.com/babashka/sci.configs)!
+
 #### `joyride.core`
 
 - `*file*`: dynamic var holding the absolute path of file where the current evaluation is taking place
@@ -65,7 +67,56 @@ Here's a snippet from the [joyride_api.cljs](../examples/.joyride/scripts/joyrid
 
 See [promesa docs](https://cljdoc.org/d/funcool/promesa/6.0.2/doc/user-guide).
 
-**``**: `p/->>`, `p/->`, `p/all`, `p/any`, `p/catch`, `p/chain`, `p/create`, `p/deferred`, `p/delay`, `p/do`, `p/do!`, `p/done?`, `p/finally`, `p/let`, `p/map`, `p/mapcat`, `p/pending`, `p/promise`, `p/promise?`, `p/race`, `p/rejected`, `p/rejected?`, `p/resolved`, `p/resolved?`, `p/run!`, `p/then`, `p/thenable?`, `p/with`, and `p/wrap`
+- `p/*loop-run-fn*`
+- `p/->`
+- `p/->>`
+- `p/TimeoutException`
+- `p/all`
+- `p/any`
+- `p/as->`
+- `p/bind`
+- `p/cancel!`
+- `p/cancelled?`
+- `p/catch`
+- `p/catch'`
+- `p/chain`
+- `p/chain'`
+- `p/create`
+- `p/deferred`
+- `p/deferred?`
+- `p/delay`
+- `p/do`
+- `p/do!`
+- `p/done?`
+- `p/err`
+- `p/error`
+- `p/finally`
+- `p/future`
+- `p/handle`
+- `p/let`
+- `p/loop`
+- `p/map`
+- `p/mapcat`
+- `p/pending?`
+- `p/plet`
+- `p/promise`
+- `p/promise?`
+- `p/promisify`
+- `p/race`
+- `p/recur`
+- `p/reject!`
+- `p/rejected`
+- `p/rejected?`
+- `p/resolve!`
+- `p/resolved`
+- `p/resolved?`
+- `p/run!`
+- `p/then`
+- `p/then'`
+- `p/thenable?`
+- `p/timeout`
+- `p/with-redefs`
+- `p/wrap`
 
 ### Possibly coming additions
 
