@@ -6,5 +6,7 @@
         {:git/url "https://github.com/babashka/sci"
          :git/sha "07e21bdab3c1365f7b2a06377e1c56fa09e95a15"}
         org.babashka/sci-configs
+        #_{:local/root "../sci.configs"}
         {:git/url "https://github.com/babashka/sci-configs"
-         :git/sha "d197da2413bd8e4e5c43159620ddfe4286c731ba"}}}
+         :git/sha "fcd367c6a6115c5c4e41f3a08ee5a8d5b3387a18"}}
+ :aliases {:dev {}}}

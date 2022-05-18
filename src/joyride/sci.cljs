@@ -5,7 +5,7 @@
             [clojure.string :as str]
             [joyride.db :as db]
             [joyride.config :as conf]
-            [sci-configs.funcool.promesa :as pconfig]
+            [sci.configs.funcool.promesa :as pconfig]
             [sci.core :as sci]))
 
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
