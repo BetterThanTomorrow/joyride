@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Enable access to more `promesa.core` vars](https://github.com/BetterThanTomorrow/joyride/issues/68)
+
 ## [0.0.11] - 2022-05-15
 
 - Fix: [`(require)` does not load ns from user script dir](https://github.com/BetterThanTomorrow/joyride/issues/38)
