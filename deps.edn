@@ -1,4 +1,4 @@
-{:paths ["src/main" "src/test"]
+{:paths ["src"]
  :deps {funcool/promesa {:mvn/version "8.0.450"}
         thheller/shadow-cljs {:mvn/version "2.18.0"}
         org.babashka/sci
