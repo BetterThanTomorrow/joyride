@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.12] - 2022-05-18
+
 - [Enable access to more `promesa.core` vars](https://github.com/BetterThanTomorrow/joyride/issues/68)
 
 ## [0.0.11] - 2022-05-15
