@@ -1,14 +1,14 @@
 (ns joyride-api
   (:require ["vscode" :as vscode]
+            ["ext://betterthantomorrow.joyride" :as joy-api]
             [promesa.core :as p]
             [joyride.core :as joyride]))
 
 (def joyrideExt (vscode/extensions.getExtension "betterthantomorrow.joyride"))
-(def joyApi (.-exports joyrideExt))
 
 (comment
   ;; Starting the nREPL server
-  (-> (.startNReplServer joyApi)
+  (-> (joy-api/startNReplServer)
       (p/catch (fn [e] (println (.-message e) e))))
   ;; (Oh, yes, it's already started, of course.)
   ;; Try first stopping the server? That will not help,
@@ -18,13 +18,13 @@
 
 (comment
   ;; Getting contexts
-  (.getContextValue joyApi "joyride.isNReplServerRunning")
-  
+  (joy-api/getContextValue "joyride.isNReplServerRunning")
+
   ;; Non-Joyride context keys returns `nil`
-  (.getContextValue joyApi "foo.bar")
+  (joy-api/getContextValue "foo.bar")
 
   ;; NB: Use the extension instance for this!
-  (.getContextValue joyApi "joyride.isActive")
+  (joy-api/getContextValue "joyride.isActive")
   ;; Like so:
   (.-isActive joyrideExt)
   ;; (Not that it matters, you can't deactivate Joyride,
@@ -38,8 +38,7 @@
       .-extension
       .-exports)
   (require '[clojure.repl :refer [doc]])
-  (doc joyride/extension-context)
-  )
+  (doc joyride/extension-context))
 
 ;; in addition to the extension context, joyride.core also has:
 ;; * *file*             - the absolute path of the file where an
