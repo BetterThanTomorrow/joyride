@@ -32,15 +32,15 @@
       {:file ns-path
        :source (str (fs/readFileSync path-to-load))})))
 
-
 (defn- active-extension? [namespace]
-  (let [[extension-name _module-name] (str/split namespace #"\$")
-        extension (vscode/extensions.getExtension extension-name)]
-    (and extension
-         (.-isActive extension))))
+  (when (.startsWith namespace ".")
+    (let [[extension-name _module-name] (str/split (subs namespace 1) #"\$")
+          extension (vscode/extensions.getExtension extension-name)]
+      (and extension
+           (.-isActive extension)))))
 
 (defn- extension-module [namespace]
-  (let [[extension-name module-name] (str/split namespace #"\$")
+  (let [[extension-name module-name] (str/split (subs namespace 1) #"\$")
         extension (vscode/extensions.getExtension extension-name)]
     (when extension
       (when-let [exports (.-exports extension)]
