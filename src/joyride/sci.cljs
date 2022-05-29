@@ -44,22 +44,10 @@
         extension (vscode/extensions.getExtension extension-name)]
     (when extension
       (when-let [exports (.-exports extension)]
-        [module-name
-         (if module-name
-           (let [path (str/split module-name #"\.")]
-             (apply gobject/getValueByKeys exports path))
-           exports)]))))
-
-(comment
-  (js-keys extension)
-  (re-find #"^.*(?=\$)" "betterthantomorrow.calva$v0")
-  (let [[extension module] (str/split "betterthantomorrow.calva$v0" #"\$")]
-    [extension module])
-  (extension-module "betterthantomorrow.calva$v0")
-  (extension-module "borkdude.clj-kondo")
-  (extension-module "redhat.vscode-yaml")
-  (extension-module "sysoev.stylus")
-  )
+        (if module-name
+          (let [path (str/split module-name #"\.")]
+            (apply gobject/getValueByKeys exports path))
+          exports)))))
 
 (def !ctx
   (volatile!
@@ -76,16 +64,24 @@
                            (symbol? namespace)
                            (source-script-by-ns namespace)
                            (string? namespace) ;; node built-in or npm library
-                           (cond 
+                           (cond
                              (= "vscode" namespace)
                              (do (sci/add-class! @!ctx 'vscode vscode)
                                  (sci/add-import! @!ctx (symbol (str @sci/ns)) 'vscode (:as opts))
                                  {:handled true})
 
                              (active-extension? namespace)
-                             (let [[module-name module] (extension-module namespace)]
+                             (let [module (extension-module namespace)
+                                   ns-sym (symbol (str @sci/ns))
+                                   refer (:refer opts)]
                                (sci/add-class! @!ctx (symbol namespace) module)
-                               (sci/add-import! @!ctx (symbol (str @sci/ns)) (symbol namespace) (:as opts))
+                               (sci/add-import! @!ctx ns-sym (symbol namespace) (:as opts))
+                               (when refer
+                                 (doseq [sym refer]
+                                   (let [prop (gobject/get module sym)
+                                         sub-sym (symbol (str ns-sym "$" sym))]
+                                     (sci/add-class! @!ctx sub-sym prop)
+                                     (sci/add-import! @!ctx ns-sym sub-sym sym))))
                                {:handled true})
 
                              :else
