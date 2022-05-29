@@ -46,8 +46,8 @@
       (when-let [exports (.-exports extension)]
         [module-name
          (if module-name
-           (let [path (str/split module-name #"\.")]
-             (apply gobject/getValueByKeys exports path))
+           (let [path (.split module-name ".")]
+             (gobject/getValueByKeys exports path))
            exports)]))))
 
 (def !ctx
