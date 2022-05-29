@@ -22,7 +22,33 @@ You can make some code run when Joyride activates, by naming the scripts `activa
 
 Look at the [Activation example](../examples/.joyride/scripts/activate.cljs) script for a way to use this, and for a way to make the script re-runnable.
 
-### Namespaces
+### NPM modules
+
+TBD.
+
+### VS Code, and Extension ”namespaces”
+
+Joyride exposes its `vscode` module for scripts to consume. You require it like so:
+
+```clojure
+(ns joyride-api
+  (:require ...
+            ["vscode" :as vscode]
+            ...))
+```
+
+VS Code Extensions that export an API can be required using the `ext://` prefix followed by the extension identifier. For instance, to require [Calva's Extension API](https://calva.io/api/) use `"ext://betterthantomorrow.calva"`. Optionally you can specify any submodules in the exported API by suffixing the namespace with a `$` followed by the dotted path of the submodule. You can also `refer` objects in the API and submodules. Like so:
+
+```clojure
+(ns z-joylib.calva-api
+  (:require ...
+            ["ext://betterthantomorrow.calva$v0" :as calva :refer [repl ranges]])
+            ...)
+
+(def current-form-text (second (ranges.currentForm)))
+```
+
+### ClojureScript Namespaces
 
 In addition to `clojure.core`, `clojure.set`, `clojure.edn`, `clojure.string`,
 `clojure.walk`, `clojure.data`, Joyride exposes
