@@ -12,6 +12,9 @@
         document (.-document editor)]
     document))
 
+(defn current-selection-text []
+  (.getText (current-document) (current-selection)))
+
 (defn insert-text!+ 
   ([^js text]
    (insert-text!+ text vscode/window.activeTextEditor (.-active (current-selection))))
