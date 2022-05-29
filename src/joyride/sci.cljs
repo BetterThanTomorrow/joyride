@@ -3,6 +3,7 @@
             ["path" :as path]
             ["vscode" :as vscode]
             [clojure.string :as str]
+            [goog.object :as gobject]
             [joyride.db :as db]
             [joyride.config :as conf]
             [sci.configs.funcool.promesa :as pconfig]
@@ -31,6 +32,35 @@
       {:file ns-path
        :source (str (fs/readFileSync path-to-load))})))
 
+
+(defn- active-extension? [namespace]
+  (let [[extension-name _module-name] (str/split namespace #"\$")
+        extension (vscode/extensions.getExtension extension-name)]
+    (and extension
+         (.-isActive extension))))
+
+(defn- extension-module [namespace]
+  (let [[extension-name module-name] (str/split namespace #"\$")
+        extension (vscode/extensions.getExtension extension-name)]
+    (when extension
+      (when-let [exports (.-exports extension)]
+        [module-name
+         (if module-name
+           (let [path (str/split module-name #"\.")]
+             (apply gobject/getValueByKeys exports path))
+           exports)]))))
+
+(comment
+  (js-keys extension)
+  (re-find #"^.*(?=\$)" "betterthantomorrow.calva$v0")
+  (let [[extension module] (str/split "betterthantomorrow.calva$v0" #"\$")]
+    [extension module])
+  (extension-module "betterthantomorrow.calva$v0")
+  (extension-module "borkdude.clj-kondo")
+  (extension-module "redhat.vscode-yaml")
+  (extension-module "sysoev.stylus")
+  )
+
 (def !ctx
   (volatile!
    (sci/init {:classes {'js goog/global
@@ -46,10 +76,19 @@
                            (symbol? namespace)
                            (source-script-by-ns namespace)
                            (string? namespace) ;; node built-in or npm library
-                           (if (= "vscode" namespace)
+                           (cond 
+                             (= "vscode" namespace)
                              (do (sci/add-class! @!ctx 'vscode vscode)
                                  (sci/add-import! @!ctx (symbol (str @sci/ns)) 'vscode (:as opts))
                                  {:handled true})
+
+                             (active-extension? namespace)
+                             (let [[module-name module] (extension-module namespace)]
+                               (sci/add-class! @!ctx (symbol namespace) module)
+                               (sci/add-import! @!ctx (symbol (str @sci/ns)) (symbol namespace) (:as opts))
+                               {:handled true})
+
+                             :else
                              (let [mod (js/require namespace)
                                    ns-sym (symbol namespace)]
                                (sci/add-class! @!ctx ns-sym mod)
