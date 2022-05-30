@@ -39,13 +39,13 @@
 
 (defn- active-extension? [namespace]
   (when (.startsWith namespace extension-namespace-prefix)
-    (let [[extension-name _module-name] (str/split (extract-extension-name namespace) #"\$")
+    (let [[extension-name _module-name] (.split (extract-extension-name namespace) "$")
           extension (vscode/extensions.getExtension extension-name)]
       (and extension
            (.-isActive extension)))))
 
 (defn- extension-module [namespace]
-  (let [[extension-name module-name] (str/split (extract-extension-name namespace) #"\$")
+  (let [[extension-name module-name] (.split (extract-extension-name namespace) "$")
         extension (vscode/extensions.getExtension extension-name)]
     (when extension
       (when-let [exports (.-exports extension)]
