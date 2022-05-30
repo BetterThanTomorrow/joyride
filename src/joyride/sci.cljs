@@ -49,10 +49,9 @@
         extension (vscode/extensions.getExtension extension-name)]
     (when extension
       (when-let [exports (.-exports extension)]
-        [module-name
-         (if module-name
-           (gobject/getValueByKeys exports (.split module-name "."))
-           exports)]))))
+        (if module-name
+          (gobject/getValueByKeys exports (.split module-name "."))
+          exports)))))
 
 (def !ctx
   (volatile!
@@ -76,17 +75,18 @@
                                  {:handled true})
 
                              (active-extension? namespace)
-                             (let [[module-name module] (extension-module namespace)
-                                   ns-sym (symbol (str @sci/ns))
+                             (let [module (extension-module namespace)
+                                   munged-ns (symbol (munge namespace))
+                                   sci-ns (symbol (str @sci/ns))
                                    refer (:refer opts)]
-                               (sci/add-class! @!ctx (symbol namespace) module)
-                               (sci/add-import! @!ctx ns-sym (symbol namespace) (:as opts))
+                               (sci/add-class! @!ctx munged-ns module)
+                               (sci/add-import! @!ctx sci-ns munged-ns (:as opts))
                                (when refer
                                  (doseq [sym refer]
                                    (let [prop (gobject/get module sym)
-                                         sub-sym (symbol (str ns-sym "$" module-name "$" sym))]
+                                         sub-sym (symbol (str munged-ns "$" sym))]
                                      (sci/add-class! @!ctx sub-sym prop)
-                                     (sci/add-import! @!ctx ns-sym sub-sym sym))))
+                                     (sci/add-import! @!ctx sci-ns sub-sym sym))))
                                {:handled true})
 
                              :else
