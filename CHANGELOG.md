@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.13] - 2022-05-30
+
 - [Less boilerplate-y require of APIs from VS Code extensions](https://github.com/BetterThanTomorrow/joyride/issues/71)
 
 ## [0.0.12] - 2022-05-18
