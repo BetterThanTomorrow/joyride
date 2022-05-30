@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Less boilerplate-y require of APIs from VS Code extensions](https://github.com/BetterThanTomorrow/joyride/issues/71)
+
 ## [0.0.12] - 2022-05-18
 
 - [Enable access to more `promesa.core` vars](https://github.com/BetterThanTomorrow/joyride/issues/68)

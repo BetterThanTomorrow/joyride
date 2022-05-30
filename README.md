@@ -8,6 +8,8 @@ https://user-images.githubusercontent.com/30010/165934412-ffeb5729-07be-4aa5-b29
 
 Joyride is Powered by [SCI](https://github.com/babashka/sci) (Small Clojure Interpreter).
 
+See [doc/api.md](https://github.com/BetterThanTomorrow/joyride/blob/master/doc/api.md) for documentation about the Joyride API.
+
 ## WIP
 
 You are entering a construction yard. Things are going to change and break your configs while we are searching for good APIs and UI/Ux.
