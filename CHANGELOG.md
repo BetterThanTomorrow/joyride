@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.14] - 2022-05-31
+
 - Add some logging when Joyride starts and finishes activating
 
 ## [0.0.13] - 2022-05-30
