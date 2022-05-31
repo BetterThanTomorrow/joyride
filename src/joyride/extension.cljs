@@ -46,23 +46,13 @@
                                     (when-contexts/context k))}))
 
 (defn ^:export activate [^js context]
+  (js/console.info "Joyride activate START")
+  
   (when context
     (swap! db/!app-db assoc
            :output-channel (vscode/window.createOutputChannel "Joyride")
            :extension-context context
-           :workspace-root-path vscode/workspace.rootPath)
-    (-> (getting-started/maybe-create-user-content+)
-        (p/catch
-         (fn [e]
-           (js/console.error "Joyride activate error" e)))
-        (p/then
-         (fn [_r]
-           (p/do! (life-cycle/maybe-run-init-script+ scripts-handler/run-user-script+
-                                                     (:user (life-cycle/init-scripts)))
-                  (when vscode/workspace.rootPath
-                    (life-cycle/maybe-run-init-script+ scripts-handler/run-workspace-script+
-                                                       (:workspace (life-cycle/init-scripts))))
-                  (utils/sayln "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
+           :workspace-root-path vscode/workspace.rootPath))
 
   (let [{:keys [extension-context]} @db/!app-db]
     (register-command! extension-context "joyride.runCode" #'run-code)
@@ -75,6 +65,23 @@
     (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
     (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)
     (when-contexts/set-context! ::when-contexts/joyride.isActive true)
+
+    (when context
+      (-> (getting-started/maybe-create-user-content+)
+          (p/catch
+           (fn [e]
+             (js/console.error "Joyride activate error" e)))
+          (p/then
+           (fn [_r]
+             (p/do! (life-cycle/maybe-run-init-script+ scripts-handler/run-user-script+
+                                                       (:user (life-cycle/init-scripts)))
+                    (when vscode/workspace.rootPath
+                      (life-cycle/maybe-run-init-script+ scripts-handler/run-workspace-script+
+                                                         (:workspace (life-cycle/init-scripts))))
+                    (utils/sayln "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
+    
+    (js/console.info "Joyride activate END")
+    
     api))
 
 (defn ^:export deactivate []
