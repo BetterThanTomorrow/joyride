@@ -1,7 +1,7 @@
 {
   "name": "joyride",
   "displayName": "Joyride",
-  "description": "Joyride VS Code with Clojure! Makes your editor scriptable. Powered by SCI, the Small Clojure Interpreter.",
+  "description": "Making VS Code hackable. (A bit like Emacs with ELisp.) Powered by SCI, the Small Clojure Interpreter.",
   "icon": "assets/joyride.png",
   "version": "0.0.14",
   "publisher": "betterthantomorrow",
@@ -21,15 +21,15 @@
     "Other"
   ],
   "keywords": [
+    "Emacs",
     "vscode",
     "script",
     "clojure",
     "sci",
     "hackable",
     "scripting",
-    "repl",
-    "automation",
-    "emacs"
+    "REPL",
+    "automation"
   ],
   "galleryBanner": {
     "color": "#344D81",
