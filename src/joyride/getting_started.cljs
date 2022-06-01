@@ -27,7 +27,7 @@
 (defn user-activate-uri-section-and-subpath []
   [(conf/user-abs-scripts-path)
    "user"
-   "activate.cljs"])
+   "user_activate.cljs"])
 
 (defn user-hello-uri-section-and-subpath []
   [(conf/user-abs-scripts-path)
@@ -42,7 +42,7 @@
 (defn workspace-activate-uri-section-and-subpath []
   [(conf/workspace-abs-scripts-path)
    "workspace"
-   "activate.cljs"])
+   "workspace_activate.cljs"])
 
 (defn workspace-hello-uri-section-and-subpath []
   [(conf/workspace-abs-scripts-path)

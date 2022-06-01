@@ -174,7 +174,7 @@
     {:title title
      :more-menu-items (cond-> []
                         create-activate-fn (conj {:label (menu-label-with-icon
-                                                          "Create Workspace activate.cljs"
+                                                          "Create Workspace workspace_activate.cljs"
                                                           "plus")
                                                   :function create-activate-fn})
                         create-hello-script? (conj {:label (menu-label-with-icon
