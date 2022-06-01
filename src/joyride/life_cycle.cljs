@@ -4,12 +4,12 @@
             [joyride.utils :as utils]
             [promesa.core :as p]))
 
-(def user-init-script "activate.cljs")
+(def user-init-script "user_activate.cljs")
 (def user-init-script-path (path/join conf/user-config-path
                                       conf/user-scripts-path
                                       user-init-script))
 
-(def workspace-init-script "activate.cljs")
+(def workspace-init-script "workspace_activate.cljs")
 (def workspace-init-script-path (path/join conf/workspace-scripts-path
                                            workspace-init-script))
 (defn workspace-init-script-abs-path []
@@ -23,7 +23,7 @@
           :script-path user-init-script-path
           :script-abs-path user-init-script-path}
    :workspace {:label "Workspace activate"
-               :script user-init-script
+               :script workspace-init-script
                :script-path workspace-init-script-path
                :script-abs-path (workspace-init-script-abs-path)}})
 

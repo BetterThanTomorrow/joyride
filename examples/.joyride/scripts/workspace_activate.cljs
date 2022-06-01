@@ -1,4 +1,4 @@
-(ns activate
+(ns workspace-activate
   (:require [joyride.core :as joyride]
             ["vscode" :as vscode]))
 
@@ -23,16 +23,16 @@
       (.push disposable)))
 
 (defn- my-main []
-  (println "Hello World, from Workspace activate.cljs script")
+  (println "Hello World, from my-main workspace_activate.cljs script")
   (clear-disposables!)
   (push-disposable
    ;; It might surprise you to see how often and when this happens,
    ;; and when it doesn't happen.
    (vscode/workspace.onDidOpenTextDocument
     (fn [doc]
-      (println "[Joyride example]" 
-               (.-languageId doc) 
-               "document opened:" 
+      (println "[Joyride example]"
+               (.-languageId doc)
+               "document opened:"
                (.-fileName doc))))))
 
 (when (= (joyride/invoked-script) joyride/*file*)

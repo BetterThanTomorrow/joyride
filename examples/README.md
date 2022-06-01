@@ -10,7 +10,7 @@ In the `.joyride/scripts` folder you'll find mostly small examples:
 
 One for the Workspace and one on he User level:
 
-### User `activate.cljs`
+### `user_activate.cljs`
 
 A User [activate.cljs](/assets/getting-started-content/user/activate.cljs) script that shows:
 
@@ -20,7 +20,7 @@ A User [activate.cljs](/assets/getting-started-content/user/activate.cljs) scrip
 
 **NB**: This script will be automatically insstalled for you if you do not have a User `activate.cljs` script already.
 
-### Workspace `activate.cljs`
+### `workspace_activate.cljs`
 
 A Workspace [activate.cljs](/examples/.joyride/scripts/activate.cljs) script that registers a `vscode/workspace.onDidOpenTextDocument` event handler. Demonstrates:
 

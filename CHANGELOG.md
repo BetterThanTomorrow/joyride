@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Use separate namespaces for user and workspace activation scripts](https://github.com/BetterThanTomorrow/joyride/issues/73)
+
 ## [0.0.14] - 2022-05-31
 
 - Add some logging when Joyride starts and finishes activating

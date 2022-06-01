@@ -1,4 +1,4 @@
-(ns activate
+(ns user-activate
   (:require ["vscode" :as vscode]
             [promesa.core :as p]
             [joyride.core :as joyride]))
@@ -48,29 +48,29 @@
 ;;; MARK activate.cljs skeleton
 
 ;; Keep tally on VS Code disposables we register
-(defonce !user_db (atom {:disposables []}))
+(defonce !db (atom {:disposables []}))
 
 ;; To make the activation script re-runnable we dispose of
 ;; event handlers and such that we might have registered
 ;; in previous runs.
-(defn- user-clear-disposables! []
+(defn- clear-disposables! []
   (run! (fn [disposable]
           (.dispose disposable))
-        (:disposables @!user_db))
-  (swap! !user_db assoc :disposables []))
+        (:disposables @!db))
+  (swap! !db assoc :disposables []))
 
 ;; Pushing the disposables on the extension context's
 ;; subscriptions will make VS Code dispose of them when the
 ;; Joyride extension is deactivated.
-(defn- user-push-disposable! [disposable]
-  (swap! !user_db update :disposables conj disposable)
+(defn- push-disposable! [disposable]
+  (swap! !db update :disposables conj disposable)
   (-> (joyride/extension-context)
       .-subscriptions
       (.push disposable)))
 
-(defn- user-main []
-  (println "Hello World, from my-main in user activate.cljs script")
-  (user-clear-disposables!) ;; Any disposables add with `push-disposable!`
+(defn- my-main []
+  (println "Hello World, from my-main in user_activate.cljs script")
+  (clear-disposables!) ;; Any disposables add with `push-disposable!`
                        ;; will be cleared now. You can push them anew.
 
   ;;; MARK require VS Code extensions
@@ -98,12 +98,12 @@
                 ;; Registering a symbols provider
                 #_(require '[z-joylib.clojure-symbols :as clojure-symbols])
                 ;; Entering the Gilardi scenario. https://technomancy.us/143
-                #_(user-push-disposable! ((resolve 'clojure-symbols/register-provider!)))))
+                #_(push-disposable! ((resolve 'clojure-symbols/register-provider!)))))
       (p/catch (fn [error]
                  (vscode/window.showErrorMessage (str "Requiring Calva failed: " error))))))
 
 (when (= (joyride/invoked-script) joyride/*file*)
-  (user-main))
+  (my-main))
 
 "🎉"
 
