@@ -6,9 +6,23 @@ Demonstrating some ways to [Joyride VS Code](https://marketplace.visualstudio.co
 
 In the `.joyride/scripts` folder you'll find mostly small examples:
 
-## Activation script
+## Activation scripts
 
-A Workspace [activate.cljs] script that registers a `vscode/workspace.onDidOpenTextDocument` event handler. Demonstrates:
+One for the Workspace and one on he User level:
+
+### User `activate.cljs`
+
+A User [activate.cljs](/assets/getting-started-content/user/activate.cljs) script that shows:
+
+* How to write to, _and show_, the Joyride output channel. 
+* A re-runnable recipe for registering VS Code disposables as with the Workspace `activate.cljs` example.
+* A way to safely require VS Code extensions from `activate.cljs` scripts, where the extensions might yet not be activated.
+
+**NB**: This script will be automatically insstalled for you if you do not have a User `activate.cljs` script already.
+
+### Workspace `activate.cljs`
+
+A Workspace [activate.cljs](/examples/.joyride/scripts/activate.cljs) script that registers a `vscode/workspace.onDidOpenTextDocument` event handler. Demonstrates:
 
 * Using the `joyride.core/extension-context` to push disposables on its `subscriptions` array. Making VS Code dispose of them when Joyride is deactivated.
 * A re-runnable recipe to avoid re-registering the event handler. (By disposing it and then re-register.)
