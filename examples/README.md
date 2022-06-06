@@ -165,6 +165,8 @@ Example shortcut definition:
 
 (Or use the default find-in-file shortcut if you fancy.)
 
+https://user-images.githubusercontent.com/30010/172149989-69e87313-afeb-44fc-a71d-417a439dac32.mp4
+
 ### Restarting clojure-lsp
 
 A somewhat frequent feature request on Calva is a command for restarting clojure-lsp. It can be implemented in several with this function:
