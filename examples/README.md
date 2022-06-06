@@ -105,9 +105,58 @@ Joyride API used:
 * `vscode/workspace.openTextDocument`
 * `vscode/window.showTextDocument`
 
-## Restarting clojure-lsp
+## Build your own Joyride library
 
-NB: _This example is included as **Getting started** User scripts content. See your user scripts, or `assets/getting-started-content/user/my_lib.cljs` in this repository._
+Adding commands to your workflow can be implemented in several ways, including:
+
+1. Define a `joyride.runCode` keyboard shortcut with some code.
+2. Make a Joyride script, optionally binding a keyboard shortcut to it
+3. Define a function in a namespace that you know is required and call the function from a `joyride.runCode` keyboard shortcut.
+
+You will probably be using all three ways. And even combos of them. Here we'll explore the third option a bit.
+
+Start with creating a User script `my_lib.cljs` with this content:
+
+```clojure
+(ns my-lib
+  (:require ["vscode" :as vscode]
+            [promesa.core :as p]))
+```
+
+Then some examples. NB: _These example are included as **Getting started** User scripts content. See your user scripts, or `assets/getting-started-content/user/my_lib.cljs` in this repository._
+
+## Find-in-file with regexp toggled on
+
+VS Code does not provide a way to reliably start a find-in-file with regular expressions toggled on. You can add a function to your `my-lib` namespace that does it. Like this one:
+
+```clojure
+(defn find-with-regex-on []
+  (let [selection vscode/window.activeTextEditor.selection
+        selectedText (vscode/window.activeTextEditor.document.getText selection)
+        regexp-chars (js/RegExp. #"[.?+*^$\\|(){}[\]]" "g")
+        newline-chars (js/RegExp. #"\n" "g")
+        escapedText (-> selectedText
+                        (.replace regexp-chars "\\$&")
+                        (.replace newline-chars "\\n?$&"))]
+    (vscode/commands.executeCommand "editor.actions.findWithArgs" #js {:isRegex true
+                                                                       :searchString escapedText})))
+```
+
+This function takes care of escaping regular expression characters in the selected text as well as prepending newline characters with `\n?` which mysteriously makes VS Code enable multiline regexp search.
+
+Example shortcut definition:
+
+```json
+    {
+        "key": "cmd+ctrl+alt+f",
+        "command": "joyride.runCode",
+        "args": "(my-lib/find-with-regex-on)",
+    },
+```
+
+(Or use the default find-in-file shortcut if you fancy.)
+
+## Restarting clojure-lsp
 
 A somewhat frequent feature request on Calva is a command for restarting clojure-lsp. It can be implemented in several ways, including:
 
