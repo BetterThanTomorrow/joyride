@@ -14,7 +14,8 @@
 
 (defn find-with-regex-on []
   (let [selection vscode/window.activeTextEditor.selection
-        selectedText (vscode/window.activeTextEditor.document.getText selection)
+        document vscode/window.activeTextEditor.document
+        selectedText (.getText document selection)
         regexp-chars (js/RegExp. #"[.?+*^$\\|(){}[\]]" "g")
         newline-chars (js/RegExp. #"\n" "g")
         escapedText (-> selectedText
