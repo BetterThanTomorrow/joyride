@@ -6,6 +6,7 @@
             [goog.object :as gobject]
             [joyride.db :as db]
             [joyride.config :as conf]
+            [sci.configs.clojure.test :as ct-config]
             [sci.configs.funcool.promesa :as pconfig]
             [sci.core :as sci]))
 
@@ -57,12 +58,13 @@
   (volatile!
    (sci/init {:classes {'js goog/global
                         :allow :all}
-              :namespaces (assoc
+              :namespaces (merge
                            (:namespaces pconfig/config)
-                           'joyride.core {'*file* sci/file
-                                          'extension-context (sci/copy-var db/extension-context joyride-ns)
-                                          'invoked-script (sci/copy-var db/invoked-script joyride-ns)
-                                          'output-channel (sci/copy-var db/output-channel joyride-ns)})
+                           (:namespaces ct-config/config)
+                           {'joyride.core {'*file* sci/file
+                                           'extension-context (sci/copy-var db/extension-context joyride-ns)
+                                           'invoked-script (sci/copy-var db/invoked-script joyride-ns)
+                                           'output-channel (sci/copy-var db/output-channel joyride-ns)}})
               :load-fn (fn [{:keys [ns libname opts]}]
                          (cond
                            (symbol? libname)
