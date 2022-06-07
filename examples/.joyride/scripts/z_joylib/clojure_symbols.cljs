@@ -1,6 +1,5 @@
 (ns z-joylib.clojure-symbols
   (:require ["vscode" :as vscode]
-            ["ext://betterthantomorrow.calva$v0.vscode" :refer [registerDocumentSymbolProvider]]
             [joyride.core :as joyride]))
 
 ;; Finds `MARK`ers in the files and creates navigational symbols for them
@@ -39,4 +38,4 @@
   #js {"provideDocumentSymbols" provide-symbols})
 
 (defn register-provider! []
-  (registerDocumentSymbolProvider "clojure" symbol-provider))
+  (vscode/languages.registerDocumentSymbolProvider "clojure" symbol-provider))
