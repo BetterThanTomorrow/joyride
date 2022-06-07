@@ -77,8 +77,13 @@
   (require '[my-lib])
 
   ;;; MARK Registering a symbols provider
-  ;; Entering the Gilardi scenario. https://technomancy.us/143
-  #_(push-disposable! ((requiring-resolve 'clojure-symbols/register-provider!)))
+  ;; Install z_joylib/clojure_symbols.cljs (with your User or 
+  ;; Workspace scripts) from:
+  ;; https://github.com/BetterThanTomorrow/joyride/tree/master/examples
+  ;; Then un-ignore
+  #_(push-disposable! ((requiring-resolve 'z-joylib.clojure-symbols/register-provider!)))
+  ;; See the Gilardi scenario, about the requiring-resolve:
+  ;; https://technomancy.us/143
 
   ;;; MARK require VS Code extensions
   ;; In an activation.cljs script it can't be guaranteed that a
