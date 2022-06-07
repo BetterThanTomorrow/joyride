@@ -78,13 +78,9 @@
 (defn handle-script-menu-selection+
   [menu-conf+ script-fn+ base-path scripts-path]
   (p/let [{:keys [title] :as menu-conf} menu-conf+
-          pick (show-script-picker+ menu-conf base-path scripts-path)]
-    (when pick
-      (let [relative-path (:relative-path pick)
-            function (:function pick)]
-        (cond
-          relative-path (script-fn+ title base-path scripts-path relative-path)
-          function (function))))))
+          {:keys [relative-path function]} (show-script-picker+ menu-conf base-path scripts-path)]
+    (cond relative-path (script-fn+ title base-path scripts-path relative-path)
+          function      (function))))
 
 (defn run-script+
   ([menu-conf+ base-path scripts-path]

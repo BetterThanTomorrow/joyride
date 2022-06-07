@@ -46,12 +46,12 @@
 
 (defn- extension-module [namespace]
   (let [[extension-name module-name] (.split (extract-extension-name namespace) "$")
-        extension (vscode/extensions.getExtension extension-name)]
-    (when extension
-      (when-let [exports (.-exports extension)]
-        (if module-name
-          (gobject/getValueByKeys exports (.split module-name "."))
-          exports)))))
+        exports (some-> extension-name
+                        vscode/extensions.getExtension
+                        .-exports)]
+    (when exports
+      (cond-> exports
+        module-name (gobject/getValueByKeys (.split module-name "."))))))
 
 (def !ctx
   (volatile!
