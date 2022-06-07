@@ -1,7 +1,7 @@
 (ns user-activate
   (:require ["vscode" :as vscode]
-            [promesa.core :as p]
-            [joyride.core :as joyride]))
+            [joyride.core :as joyride]
+            [promesa.core :as p]))
 
 ;; This is the Joyride User `activate.cljs` script. It will run
 ;; as the first thing when Joyride is activated, making it a good
@@ -42,8 +42,8 @@
   (.show true) ;; specifically this line. It shows the channel.
   (.appendLine "Welcome Joyrider! This is your User activation script speaking.")
   (.appendLine "Tired of this message popping up? It's the script doing it. Edit it away!")
-  (.appendLine "Hint: There is a command: **Open User Script...**")
-  )
+  (.appendLine "Hint: There is a command: **Open User Script...**"))
+  
 
 ;;; MARK activate.cljs skeleton
 
@@ -73,15 +73,23 @@
   (clear-disposables!) ;; Any disposables add with `push-disposable!`
                        ;; will be cleared now. You can push them anew.
 
+  ;;; MARK require my-lib
+  (require '[my-lib])
+
+  ;;; MARK Registering a symbols provider
+  ;; Entering the Gilardi scenario. https://technomancy.us/143
+  #_(push-disposable! ((requiring-resolve 'clojure-symbols/register-provider!)))
+
   ;;; MARK require VS Code extensions
   ;; In an activation.cljs script it can't be guaranteed that a
   ;; particular extension is active, so we can't safely `(:require ..)`
   ;; in the `ns` form. Here's what you can do instead, using Calva
   ;; as the example. To try it for real, copy the example scripts from:
   ;; https://github.com/BetterThanTomorrow/joyride/tree/master/examples 
-  ;; Then un-ignore the forms in the promise handler and run
+  ;; Then un-ignore the below form and run
   ;;   *Joyride; Run User Script* -> activate.cljs
   ;; (Or reload the VS Code window.)
+  #_ ; <- remove this to un-ignore
   (-> (vscode/extensions.getExtension "betterthantomorrow.calva")
       ;; Force the Calva extension to activate 
       (.activate)
@@ -90,15 +98,10 @@
                 (.appendLine (joyride/output-channel) "Calva activated. Requiring dependent namespaces.")
                 ;; In `my-lib` and  `z-joylib.calva-api` the Calva extension
                 ;; is required, which will work fine since now Calva is active.
-                #_(require '[my-lib])
-                #_(require '[z-joylib.calva-api])
+                (require '[z-joylib.calva-api])
                 ;; Code in your keybindings can now use the `my-lib` and/or
                 ;; `z-joylib.calva-api` namespace(s)
-
-                ;; Registering a symbols provider
-                #_(require '[z-joylib.clojure-symbols :as clojure-symbols])
-                ;; Entering the Gilardi scenario. https://technomancy.us/143
-                #_(push-disposable! ((resolve 'clojure-symbols/register-provider!)))))
+                ))
       (p/catch (fn [error]
                  (vscode/window.showErrorMessage (str "Requiring Calva failed: " error))))))
 
