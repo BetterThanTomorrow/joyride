@@ -4,9 +4,9 @@
         org.babashka/sci
         #_{:local/root "../babashka/sci"}
         {:git/url "https://github.com/babashka/sci"
-         :git/sha "d328a778a5f5a4bc1ed309d99d09fc53da3ebe29"}
+         :git/sha "cb1a3034039cb87f49c6eaeefee0de56e4585b09"}
         org.babashka/sci.configs
         #_{:local/root "../sci.configs"}
         {:git/url "https://github.com/babashka/sci.configs"
-         :git/sha "5291969469cf72e786e68fbfeba17553cea67e0d"}}
+         :git/sha "ad08af20dac3542e35574745d1c7a628521f2c40"}}
  :aliases {:dev {}}}
