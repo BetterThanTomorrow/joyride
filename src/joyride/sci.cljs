@@ -1,13 +1,15 @@
 (ns joyride.sci
-  (:require ["fs" :as fs]
-            ["path" :as path]
-            ["vscode" :as vscode]
-            [clojure.string :as str]
-            [goog.object :as gobject]
-            [joyride.db :as db]
-            [joyride.config :as conf]
-            [sci.configs.funcool.promesa :as pconfig]
-            [sci.core :as sci]))
+  (:require
+   ["fs" :as fs]
+   ["path" :as path]
+   ["vscode" :as vscode]
+   [clojure.string :as str]
+   [goog.object :as gobject]
+   [joyride.config :as conf]
+   [joyride.db :as db]
+   [sci.configs.cljs.test :as cljs-test-config]
+   [sci.configs.funcool.promesa :as promesa-config]
+   [sci.core :as sci]))
 
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
 
@@ -57,12 +59,13 @@
   (volatile!
    (sci/init {:classes {'js goog/global
                         :allow :all}
-              :namespaces (assoc
-                           (:namespaces pconfig/config)
-                           'joyride.core {'*file* sci/file
-                                          'extension-context (sci/copy-var db/extension-context joyride-ns)
-                                          'invoked-script (sci/copy-var db/invoked-script joyride-ns)
-                                          'output-channel (sci/copy-var db/output-channel joyride-ns)})
+              :namespaces {'cljs.test cljs-test-config/cljs-test-namespace
+                           'promesa.core promesa-config/promesa-namespace
+                           'joyride.core
+                           {'*file* sci/file
+                            'extension-context (sci/copy-var db/extension-context joyride-ns)
+                            'invoked-script (sci/copy-var db/invoked-script joyride-ns)
+                            'output-channel (sci/copy-var db/output-channel joyride-ns)}}
               :load-fn (fn [{:keys [ns libname opts]}]
                          (cond
                            (symbol? libname)
