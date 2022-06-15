@@ -3,7 +3,7 @@
 The Joyride API consist of:
 
 1. The Joyride *Scripting API*
-   * Scripting life-cycle management
+   * Scripting lifecycle management
    * Included clojure library namespaces
 1. The Joyride *Extension API*
 
@@ -13,7 +13,7 @@ Please note that Joyride's *Extension API* is also available to *Joyride scripts
 
 ## Scripting API
 
-### Scripting life-cycle
+### Scripting lifecycle
 
 You can make some code run when Joyride activates, by naming the scripts `activate.cljs`. The activations script will be run in the order:
 
@@ -51,7 +51,7 @@ VS Code Extensions that export an API can be required using the `ext://` prefix 
 ### ClojureScript Namespaces
 
 In addition to `clojure.core`, `clojure.set`, `clojure.edn`, `clojure.string`,
-`clojure.walk`, `clojure.data`, Joyride exposes
+`clojure.walk`, `clojure.data`, `cljs.test`, Joyride exposes
 the following namespaces:
 
 Lacking some particular library? Please consider contributing to [babashka/sci.configs](https://github.com/babashka/sci.configs)!

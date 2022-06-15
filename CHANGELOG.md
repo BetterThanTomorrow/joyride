@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Include `cljs.test`](https://github.com/BetterThanTomorrow/joyride/issues/76)
+
 ## [0.0.15] - 2022-06-01
 
 - [Use separate namespaces for user and workspace activation scripts](https://github.com/BetterThanTomorrow/joyride/issues/73)

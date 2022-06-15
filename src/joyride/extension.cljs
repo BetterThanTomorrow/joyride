@@ -2,7 +2,7 @@
   (:require ["vscode" :as vscode]
             [joyride.db :as db]
             [joyride.getting-started :as getting-started]
-            [joyride.life-cycle :as life-cycle]
+            [joyride.lifecycle :as life-cycle]
             [joyride.nrepl :as nrepl]
             [joyride.sci :as jsci]
             [joyride.scripts-handler :as scripts-handler]
@@ -42,8 +42,7 @@
   (nrepl/start-server+ {:root-path (or root-path vscode/workspace.rootPath)}))
 
 (def api (jsify {:startNReplServer start-nrepl-server+
-                 :getContextValue (fn [k]
-                                    (when-contexts/context k))}))
+                 :getContextValue when-contexts/context}))
 
 (defn ^:export activate [^js context]
   (js/console.info "Joyride activate START")
@@ -79,9 +78,7 @@
                       (life-cycle/maybe-run-init-script+ scripts-handler/run-workspace-script+
                                                          (:workspace (life-cycle/init-scripts))))
                     (utils/sayln "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
-    
     (js/console.info "Joyride activate END")
-    
     api))
 
 (defn ^:export deactivate []

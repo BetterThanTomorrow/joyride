@@ -1,4 +1,4 @@
-(ns joyride.life-cycle
+(ns joyride.lifecycle
   (:require ["path" :as path]
             [joyride.config :as conf]
             [joyride.utils :as utils]
