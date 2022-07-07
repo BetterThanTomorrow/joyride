@@ -10,12 +10,9 @@
            {:git/url "https://github.com/babashka/sci.configs"
             :git/sha "ad08af20dac3542e35574745d1c7a628521f2c40"}}
  :aliases {:dev         {}
-           :test        {:extra-deps  {lambdaisland/kaocha {:mvn/version "1.60.945"}}
-                         :extra-paths ["tests/integration" "tests/unit"]
-                         :main-opts   ["-m" "kaocha.runner"]}
-           :unit        {:extra-deps  {lambdaisland/kaocha {:mvn/version "1.60.945"}}
-                         :extra-paths ["tests/unit"]
-                         :main-opts   ["-m" "kaocha.runner"]}
-           :integration {:extra-deps  {lambdaisland/kaocha {:mvn/version "1.60.945"}}
-                         :extra-paths ["tests/integration"]
-                         :main-opts   ["-m" "kaocha.runner"]}}}
+           :unit        {:extra-deps  {com.lambdaisland/kaocha-cljs {:mvn/version "1.2.123"}}
+                         :extra-paths ["test/unit"]
+                         :main-opts   ["-m" "kaocha.runner" "unit"]}
+           :integration {:extra-deps  {com.lambdaisland/kaocha-cljs {:mvn/version "1.2.123"}}
+                         :extra-paths ["test/integration"]
+                         :main-opts   ["-m" "kaocha.runner" "integration"]}}}

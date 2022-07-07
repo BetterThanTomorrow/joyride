@@ -134,6 +134,7 @@
   },
   "devDependencies": {
     "rimraf": "^3.0.2",
-    "shadow-cljs": "^2.18.0"
+    "shadow-cljs": "^2.18.0",
+    "ws": "^8.8.0"
   }
 }

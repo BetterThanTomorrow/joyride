@@ -1,1 +1,7 @@
-#kaocha/v1 {:kaocha/reporter [kaocha.report/documentation]}
+#kaocha/v1 {:kaocha/reporter [kaocha.report/documentation]
+            :tests           [{:id         :unit
+                               :type       :kaocha.type/cljs
+                               :test-paths ["test/unit"]}
+                              {:id         :integration
+                               :type       :kaocha.type/cljs
+                               :test-paths ["test/integration"]}]}
