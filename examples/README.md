@@ -22,7 +22,7 @@ A User [activate.cljs](/assets/getting-started-content/user/activate.cljs) scrip
 
 ### `workspace_activate.cljs`
 
-A Workspace [activate.cljs](/examples/.joyride/scripts/activate.cljs) script that registers a `vscode/workspace.onDidOpenTextDocument` event handler. Demonstrates:
+A Workspace [activate.cljs](/examples/.joyride/scripts/workspace_activate.cljs) script that registers a `vscode/workspace.onDidOpenTextDocument` event handler. Demonstrates:
 
 * Using the `joyride.core/extension-context` to push disposables on its `subscriptions` array. Making VS Code dispose of them when Joyride is deactivated.
 * A re-runnable recipe to avoid re-registering the event handler. (By disposing it and then re-register.)
