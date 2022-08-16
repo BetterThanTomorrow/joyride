@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.16] - 2022-08-16
+
 - [Include `cljs.test`](https://github.com/BetterThanTomorrow/joyride/issues/76)
 - Fix: [Joyride starts Calva even when not in a Clojure(script) workspace](https://github.com/BetterThanTomorrow/joyride/issues/84)
 
