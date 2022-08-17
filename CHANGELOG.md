@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: [v0.0.16 is broken, no script using `promesa.protocols` works](https://github.com/BetterThanTomorrow/joyride/issues/85)
+
 ## [0.0.16] - 2022-08-16
 
 - [Include `cljs.test`](https://github.com/BetterThanTomorrow/joyride/issues/76)
