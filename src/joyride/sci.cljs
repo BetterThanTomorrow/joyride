@@ -61,6 +61,7 @@
                         :allow :all}
               :namespaces {'cljs.test cljs-test-config/cljs-test-namespace
                            'promesa.core promesa-config/promesa-namespace
+                           'promesa.protocols promesa-config/promesa-protocols-namespace
                            'joyride.core
                            {'*file* sci/file
                             'extension-context (sci/copy-var db/extension-context joyride-ns)
