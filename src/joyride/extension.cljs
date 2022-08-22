@@ -16,10 +16,10 @@
     (.push (.-subscriptions context) disposable)))
 
 (defn- clear-disposables! []
-  (swap! db/!app-db assoc :disposables [])
-  (p/run! (fn [^js disposable]
+  (run! (fn [^js disposable]
             (.dispose disposable))
-          (:disposables @db/!app-db)))
+          (:disposables @db/!app-db))
+  (swap! db/!app-db assoc :disposables []))
 
 (defn run-code
   ([]
