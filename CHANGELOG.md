@@ -3,6 +3,7 @@
 Changes to Joyride
 
 ## [Unreleased]
+- Fix: [Not disposing of disposables on dev reload](https://github.com/BetterThanTomorrow/joyride/issues/87)
 
 ## [0.0.17] - 2022-08-17
 
