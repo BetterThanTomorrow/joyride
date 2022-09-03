@@ -21,7 +21,7 @@ Your feedback is highly welcome!
 Joyride supports User and Workspace scripts:
 
 * _User_ scripts: `<user home>/.config/joyride/scripts`
-* _Workspace_ scripts: `<workspace root>.joyride/scripts`
+* _Workspace_ scripts: `<workspace root>/.joyride/scripts`
 
 You can run or open the scripts using commands provided (search the command palette for **Joyride**):
 
@@ -44,7 +44,7 @@ Joyride installs a "regular” User script as well. You can run either of these 
 2. Execute **Joyride: Run Clojure Code**
 3. Type in some code into the prompt, e.g.
     ```clojure
-    (require '["vscode" :as vscode]) (vscode/window.showInformationMessage "Hello World!")`
+    (require '["vscode" :as vscode]) (vscode/window.showInformationMessage "Hello World!")
     ```
 4. Submit
 
@@ -79,7 +79,7 @@ The demo ”project” used here is only a directory with this file `hello_joyri
 Joyride lets you bind keyboard shortcuts to its User and Workspace scripts.
 
 * User Scripts: `<user home>/.config/joyride/scripts`
-* Workspace scripts: `<workspace root>.joyride/scripts`
+* Workspace scripts: `<workspace root>/.joyride/scripts`
 
 Let's go with a Workspace script:
 
