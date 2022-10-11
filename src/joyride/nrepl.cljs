@@ -140,7 +140,8 @@
     (do-handle-eval (assoc request
                            :code file
                            :load-file? true
-                           :ns @sci/ns)
+                           :ns @sci/ns
+                           :file file-path)
                     send-fn)))
 
 
