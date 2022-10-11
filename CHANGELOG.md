@@ -4,6 +4,9 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.18] - 2022-10-11
+
+- [Support loading modules from npm](https://github.com/BetterThanTomorrow/joyride/issues/92)
 - Fix: [Not disposing of disposables on dev reload](https://github.com/BetterThanTomorrow/joyride/issues/87)
 
 ## [0.0.17] - 2022-08-17
