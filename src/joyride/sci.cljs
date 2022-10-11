@@ -72,8 +72,7 @@
                            {'*file* sci/file
                             'extension-context (sci/copy-var db/extension-context joyride-ns)
                             'invoked-script (sci/copy-var db/invoked-script joyride-ns)
-                            'output-channel (sci/copy-var db/output-channel joyride-ns)
-                            'require js/require}}
+                            'output-channel (sci/copy-var db/output-channel joyride-ns)}}
               :ns-aliases {'clojure.test 'cljs.test}
               :load-fn (fn [{:keys [ns libname opts]}]
                          (cond
