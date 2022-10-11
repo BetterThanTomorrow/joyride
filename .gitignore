@@ -25,3 +25,4 @@ node_modules
 .portal
 examples/.joyride/.calva
 examples/.vscode
+examples/.calva

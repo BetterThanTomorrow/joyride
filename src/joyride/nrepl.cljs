@@ -85,11 +85,12 @@
         (pr-str value)))
     (pr-str value)))
 
-(defn do-handle-eval [{:keys [ns code _sci-ctx-atom _load-file?] :as request} send-fn]
+(defn do-handle-eval [{:keys [ns code _sci-ctx-atom _load-file? file] :as request} send-fn]
   (sci/with-bindings
     {sci/ns ns
      sci/print-length @sci/print-length
-     sci/print-newline true}
+     sci/print-newline true
+     sci/file (or file @sci/file)}
     ;; we alter-var-root this because the print-fn may go out of scope in case
     ;; of returned delays
     (sci/alter-var-root sci/print-fn (constantly
@@ -139,7 +140,8 @@
     (do-handle-eval (assoc request
                            :code file
                            :load-file? true
-                           :ns @sci/ns)
+                           :ns @sci/ns
+                           :file file-path)
                     send-fn)))
 
 
