@@ -2,6 +2,7 @@
   (:require
    ["fs" :as fs]
    ["path" :as path]
+   ["module" :as module]
    ["vscode" :as vscode]
    [clojure.string :as str]
    [goog.object :as gobject]
@@ -55,6 +56,11 @@
           (gobject/getValueByKeys exports (.split module-name "."))
           exports)))))
 
+(defn require* [from-script lib]
+  (let [req (module/createRequire (path/resolve (or from-script "./script.cljs")))
+        resolved (.resolve req lib)]
+    (js/require resolved)))
+
 (def !ctx
   (volatile!
    (sci/init {:classes {'js goog/global
@@ -66,7 +72,8 @@
                            {'*file* sci/file
                             'extension-context (sci/copy-var db/extension-context joyride-ns)
                             'invoked-script (sci/copy-var db/invoked-script joyride-ns)
-                            'output-channel (sci/copy-var db/output-channel joyride-ns)}}
+                            'output-channel (sci/copy-var db/output-channel joyride-ns)
+                            'require js/require}}
               :ns-aliases {'clojure.test 'cljs.test}
               :load-fn (fn [{:keys [ns libname opts]}]
                          (cond
@@ -94,7 +101,7 @@
                                {:handled true})
 
                              :else
-                             (let [mod (js/require libname)
+                             (let [mod (require* @sci/file libname)
                                    ns-sym (symbol libname)]
                                (sci/add-class! @!ctx ns-sym mod)
                                (sci/add-import! @!ctx ns ns-sym
