@@ -5,6 +5,7 @@
    ["module" :as module]
    ["vscode" :as vscode]
    [clojure.string :as str]
+   [clojure.zip]
    [goog.object :as gobject]
    [joyride.config :as conf]
    [joyride.db :as db]
@@ -61,11 +62,20 @@
         resolved (.resolve req lib)]
     (js/require resolved)))
 
+(def zns (sci/create-ns 'clojure.zip nil))
+
+(def zip-namespace
+  (sci/copy-ns clojure.zip zns))
+
+(def core-namespace (sci/create-ns 'clojure.core nil))
+
 (def !ctx
   (volatile!
    (sci/init {:classes {'js goog/global
                         :allow :all}
-              :namespaces {'cljs.test cljs-test-config/cljs-test-namespace
+              :namespaces {'clojure.core {'IFn (sci/copy-var IFn core-namespace)}
+                           'clojure.zip zip-namespace
+                           'cljs.test cljs-test-config/cljs-test-namespace
                            'promesa.core promesa-config/promesa-namespace
                            'promesa.protocols promesa-config/promesa-protocols-namespace
                            'joyride.core
