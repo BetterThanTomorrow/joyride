@@ -4,6 +4,11 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.19] - 2022-10-15
+
+- [Add `clojure.zip`](https://github.com/BetterThanTomorrow/joyride/issues/93)
+- [Add examples for using npm dependencies](https://github.com/BetterThanTomorrow/joyride/issues/94)
+
 ## [0.0.18] - 2022-10-11
 
 - [Support loading modules from npm](https://github.com/BetterThanTomorrow/joyride/issues/92)
