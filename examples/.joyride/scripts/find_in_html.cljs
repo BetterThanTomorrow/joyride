@@ -1,4 +1,4 @@
-(ns parse-html
+(ns find-in-html
   (:require ["posthtml-parser" :as parser]
             [z-joylib.hickory.select :as hs]))
 (comment

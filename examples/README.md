@@ -187,6 +187,38 @@ You can then have this in `keybindings.json`
     },
 ```
 
+### npm packages
+
+You can use packages from `npm` in your Joyride scripts. There's an example of this, using [posthtml-parser]() in 
+[html_to_hiccup.cljs](.joyride/scripts/html_to_hiccup.cljs)
+
+![assets/joyride-html2hiccup.png](assets/joyride-html2hiccup.png)
+
+To use a package from npm, Joyride needs to find it somewhere in the path from the using script and up to the system root. Some directories to consider for your Joyride `node_modules` are `~/.config/joyride` and `<workspace-root>/.joyride`. Sometimes the workspace root makes sense. To try this particular example you can:
+
+0. Have the Joyride repo check out, say in a folder named `joyride`
+1. `$ cd joyride/examples`
+2. `$ npm init -y`
+3. `$ npm i`
+4. `code exmaples`
+5. Issue the command: **Calva: Start a Joyride REPL and Connect**
+6. Open `.joyride/scripts/html_to_hiccup.cljs` and **Calva: Load/Evaluate Current File**
+7. Place the cursor somewhere in the `(-> ...)` form and **Calva: Evaluate Top Level Form**
+
+This example also uses [clojure.walk](https://clojuredocs.org/clojure.walk/postwalk). ([Somewhat unecessary according to some](https://twitter.com/borkdude/status/1581022161082322944), but there certainly are occations when it can be put to great use.)
+
+### clojure.zip
+
+clojure.walk is wonderful, and so is [clojure.zip](https://clojuredocs.org/clojure.zip! See [zippers.cljs](.joyride/scripts/zippers.cljs)
+
+![](assets/joyride-clojure-zip.png)
+
+### Hickory
+
+[Hickory](https://github.com/clj-commons/hickory) is not included with Joyride, but that doesn't mean you can't use it! In [](.joyride/scripts/z_joylib/hickory) there is the slighly (very slightly) modified source of `hickory.select` as well as the unmodified source of `hickory.zip`. This makes the [find-in-html](.joyride/scripts/find_in_html.cljs) possible. (See [npm packages](#npm-packages) about the `npm` dependency.)
+
+![](assets/joyride-parse-html-hickory-select.png)
+
 ### Your example here?
 
 Please be inspired to add functions to your `my-lib` namespace (and to rename it, if you fancy) to give yourself commands that VS Code and/or some extension is lacking. And please consider contributing to the examples published here.
