@@ -189,7 +189,7 @@ You can then have this in `keybindings.json`
 
 ### npm packages
 
-You can use packages from `npm` in your Joyride scripts. There's an example of this, using [posthtml-parser]() in 
+You can use packages from `npm` in your Joyride scripts. There's an example of this, using [posthtml-parser](https://github.com/posthtml/posthtml-parser) in 
 [html_to_hiccup.cljs](.joyride/scripts/html_to_hiccup.cljs)
 
 ![assets/joyride-html2hiccup.png](assets/joyride-html2hiccup.png)
@@ -209,7 +209,7 @@ This example also uses [clojure.walk](https://clojuredocs.org/clojure.walk/postw
 
 ### clojure.zip
 
-clojure.walk is wonderful, and so is [clojure.zip](https://clojuredocs.org/clojure.zip! See [zippers.cljs](.joyride/scripts/zippers.cljs)
+clojure.walk is wonderful, and so is [clojure.zip](https://clojuredocs.org/clojure.zip)! See [zippers.cljs](.joyride/scripts/zippers.cljs)
 
 ![](assets/joyride-clojure-zip.png)
 

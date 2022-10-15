@@ -129,6 +129,10 @@ See the [examples](./examples) for examples including:
 * Workspace activation script
 * The Joyride Extension API
 * The `joyride.core` namespace
+* Using `npm` dependencies (The wonderful [posthtml-parser](https://github.com/posthtml/posthtml-parser) in this case)
+* Using [clojure.zip](https://clojuredocs.org/clojure.zip)
+* Using [Hickory](https://github.com/clj-commons/hickory) (well, `hickory.select`, at least)
+
 
 ## Support and feedback
 
