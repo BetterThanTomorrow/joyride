@@ -113,6 +113,7 @@ See [promesa docs](https://cljdoc.org/d/funcool/promesa/6.0.2/doc/user-guide).
 - `p/delay`
 - `p/do`
 - `p/do!`
+- `p/doseq`
 - `p/done?`
 - `p/err`
 - `p/error`
