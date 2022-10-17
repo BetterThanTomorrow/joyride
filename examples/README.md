@@ -45,9 +45,9 @@ Create a Terminal, send text to it and show it.
 
 ## Fontsize
 
-`.joyride/scripts/fontsize.cljs`
+[.joyride/scripts/fontsize.cljs](.joyride/scripts/fontsize.cljs)
 
-Manipulates the editor font size.
+Manipulates the editor font size. **NB: This changes the *global/User* font size, and if you have configured `editor.fontSize` in the *Workspace*, nothing will appear to happen, you might be in for a surprise when opening other workspaces.**
 
 Live demo: https://twitter.com/borkdude/status/1519709769157775360
 
