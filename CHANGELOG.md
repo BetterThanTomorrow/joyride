@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Bump SCI dependency](https://github.com/BetterThanTomorrow/joyride/pull/97)
+
 ## [0.0.19] - 2022-10-15
 
 - [Add `clojure.zip`](https://github.com/BetterThanTomorrow/joyride/issues/93)
