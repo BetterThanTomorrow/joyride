@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.20] - 2022-10-18
+
 - [Bump SCI dependency](https://github.com/BetterThanTomorrow/joyride/pull/97)
 
 ## [0.0.19] - 2022-10-15
