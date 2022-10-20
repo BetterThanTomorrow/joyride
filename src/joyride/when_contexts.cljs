@@ -2,7 +2,7 @@
   (:require ["vscode" :as vscode]))
 
 (defonce ^:private !db (atom {:contexts {::joyride.isActive false
-                                     ::joyride.isNReplServerRunning false}}))
+                                         ::joyride.isNReplServerRunning false}}))
 
 (defn set-context! [k v]
   (swap! !db assoc-in [:contexts k] v)
