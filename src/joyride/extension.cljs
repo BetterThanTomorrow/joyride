@@ -30,8 +30,14 @@
      (when input
        (run-code input))))
   ([code]
-   (p/let [result (jsci/eval-string code)]
-     (utils/say-result result))))
+   (-> (p/let [result (jsci/eval-string code)]
+         (utils/say-result result)
+         result)
+       (p/catch (fn [e]
+                  (throw (js/Error.
+                          (ex-message e)
+                          (clj->js
+                           {:cause (ex-data e)}))))))))
 
 (defn choose-file [default-uri]
   (vscode/window.showOpenDialog #js {:canSelectMany false
