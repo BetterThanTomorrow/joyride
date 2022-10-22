@@ -31,14 +31,12 @@
        (run-code input))))
   ([code]
    (-> (p/let [result (jsci/eval-string code)]
+         ;; Maybe we should skip printing here?
          (utils/say-result result)
          result)
        (p/catch (fn [e]
-                  (throw (js/Error.
-                          (ex-message e)
-                          (clj->js
-                           {:cause {:cljs-error e
-                                    :data (ex-data e)}}))))))))
+                  (utils/say-error (str (ex-message e) "\n  " (ex-data e)))
+                  (throw e))))))
 
 (defn choose-file [default-uri]
   (vscode/window.showOpenDialog #js {:canSelectMany false
