@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Return results from `runCode` command](https://github.com/BetterThanTomorrow/joyride/issues/98)
+
 ## [0.0.20] - 2022-10-18
 
 - [Bump SCI dependency](https://github.com/BetterThanTomorrow/joyride/pull/97)

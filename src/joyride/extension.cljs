@@ -21,17 +21,22 @@
           (:disposables @db/!app-db))
   (swap! db/!app-db assoc :disposables []))
 
-(defn run-code
+(defn run-code+
   ([]
    (p/let [input (vscode/window.showInputBox #js {:title "Run Code"
                                                   ;; "(require '[\"vscode\" :as vscode]) (vscode/window.showInformationMessage \"Hello World!\" [\"Hi there\"])"
                                                   :placeHolder "(inc 41)"
                                                   :prompt "Enter some code to be evaluated"})]
      (when input
-       (run-code input))))
+       (run-code+ input))))
   ([code]
-   (p/let [result (jsci/eval-string code)]
-     (utils/say-result result))))
+   (-> (p/let [result (jsci/eval-string code)]
+         ;; Maybe we should skip printing here?
+         (utils/say-result result)
+         result)
+       (p/catch (fn [e]
+                  (utils/say-error (str (ex-message e) "\n  " (ex-data e)))
+                  (throw e))))))
 
 (defn choose-file [default-uri]
   (vscode/window.showOpenDialog #js {:canSelectMany false
@@ -42,7 +47,8 @@
   (nrepl/start-server+ {:root-path (or root-path vscode/workspace.rootPath)}))
 
 (def api (jsify {:startNReplServer start-nrepl-server+
-                 :getContextValue when-contexts/context}))
+                 :getContextValue when-contexts/context
+                 :runCode run-code+}))
 
 (defn ^:export activate [^js context]
   (js/console.info "Joyride activate START")
@@ -54,7 +60,7 @@
            :workspace-root-path vscode/workspace.rootPath))
 
   (let [{:keys [extension-context]} @db/!app-db]
-    (register-command! extension-context "joyride.runCode" #'run-code)
+    (register-command! extension-context "joyride.runCode" #'run-code+)
     (register-command! extension-context "joyride.runWorkspaceScript" #'scripts-handler/run-workspace-script+)
     (register-command! extension-context "joyride.runUserScript" #'scripts-handler/run-user-script+)
     (register-command! extension-context "joyride.openWorkspaceScript" #'scripts-handler/open-workspace-script+)
