@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.21] - 2022-10-22
+
 - [Return results from `runCode` command](https://github.com/BetterThanTomorrow/joyride/issues/98)
 
 ## [0.0.20] - 2022-10-18
