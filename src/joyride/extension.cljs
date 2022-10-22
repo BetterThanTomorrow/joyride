@@ -37,7 +37,8 @@
                   (throw (js/Error.
                           (ex-message e)
                           (clj->js
-                           {:cause (ex-data e)}))))))))
+                           {:cause {:cljs-error e
+                                    :data (ex-data e)}}))))))))
 
 (defn choose-file [default-uri]
   (vscode/window.showOpenDialog #js {:canSelectMany false
