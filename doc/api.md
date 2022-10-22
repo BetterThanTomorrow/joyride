@@ -3,6 +3,9 @@
 The Joyride API consist of:
 
 1. The Joyride *Extension API*
+   * `exports`
+   * Extension commands
+   * `when` clause context
 1. The Joyride *Scripting API*
    * Scripting lifecycle management
    * Included clojure library namespaces
