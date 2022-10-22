@@ -2,10 +2,10 @@
 
 The Joyride API consist of:
 
+1. The Joyride *Extension API*
 1. The Joyride *Scripting API*
    * Scripting lifecycle management
    * Included clojure library namespaces
-1. The Joyride *Extension API*
 
 Give the [joyride_api.cljs](../examples/.joyride/scripts/joyride_api.cljs) example a spin, why don't ya!
 
@@ -151,10 +151,49 @@ We want to add `clojure.test` and `clojure.pprint` as well in the near future. H
 
 ## Extension API
 
-Joyride's Extension API has two parts:
+Joyride's Extension API has these parts:
 
-1. [`when` clauses contexts](https://code.visualstudio.com/api/references/when-clause-contexts)
 1. The `exports` map/object on the activated [extension](https://code.visualstudio.com/api/references/vscode-api#extensions) instance.
+1. The Joyride extension commands.
+1. [`when` clauses contexts](https://code.visualstudio.com/api/references/when-clause-contexts)
+
+### `exports`
+
+When the Joyride extension has activated it has the following API:
+
+* `joyride.runCode`
+  * Evaluates the the string provided and returns a promise with the result.
+* `startNReplServer [project-root-path]`
+   * Returns a promise resolving to the port where the nREPL server started
+   * `project-root-path` is optional, defaulting to `vscode/workspace.rootPath`
+* `getContextValue context-key`
+   * Returns the value of a Joyride [`when` clause context](#when-clause-context)
+   * Returns undefined for non-existing `context-key`s
+
+Note that `runCode` will return the ClojureScript results. And if an error occurs it will be a ClojureScript error. This means that if you are consuming the API from JavaScript/TypeScript you will need to convert the results, as well as any error. You can use Joyride's ClojureScript (SCI) interpreter for this:
+
+``` js
+const toJS = await vscode.commands.executeCommand('joyride.runCode', "clj->js");
+const exData = await vscode.commands.executeCommand('joyride.runCode', "ex-data");
+
+const r = vscode.commands.executeCommand('joyride.runCode', "{:a (some-fn)}")
+  .catch(e => vscode.windiow.showErrorMessage(JSON.stringify(toJS(exData(e)))));
+
+if (r) {
+  const js_r = await toJS(r);
+  vscode.window.showInformationMessage(js_r);
+}
+```
+
+### Extension commands
+
+Select Joyride from the VS Code Extension pane to see which commands it provides. The commands you'll probably use the most are:
+
+* `joyride.runCode`
+* `joyride.runUserScript`
+* `joyride.runWorkspaceScript`
+
+The same note about ClojureScript applias for the `joyride.runCode` command as for the corresponding API export, mentioned above.
 
 ### `when` clause context
 
@@ -164,14 +203,3 @@ The following contexts are available for users of Joyride when binding commands 
 * `joyride.isNReplServerRunning`, `boolean` - Whether the Joyride nREPL server is running or not
 
 If your script needs access to these contexts, use the `getContextValue` function from the [Joyride `exports`](#exports) API.
-
-### `exports`
-
-When the Joyride extension has activated it has the following API:
-
-* `startNReplServer [project-root-path]`
-   * Returns a promise resolving to the port where the nREPL server started
-   * `project-root-path` is optional, defaulting to `vscode/workspace.rootPath`
-* `getContextValue context-key`
-   * Returns the value of a Joyride [`when` clause context](#when-clause-context)
-   * Returns undefined for non-existing `context-key`s
