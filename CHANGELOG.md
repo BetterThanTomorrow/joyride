@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: [Run Workspace Script and Run User Script has the same default keybindings](https://github.com/BetterThanTomorrow/joyride/issues/100)
+
 ## [0.0.21] - 2022-10-22
 
 - [Return results from `runCode` command](https://github.com/BetterThanTomorrow/joyride/issues/98)
