@@ -109,7 +109,7 @@
       },
       {
         "command": "joyride.runUserScript",
-        "key": "ctrl+shift+,"
+        "key": "ctrl+shift+."
       },
       {
         "command": "joyride.runWorkspaceScript",
