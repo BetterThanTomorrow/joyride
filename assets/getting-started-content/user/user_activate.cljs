@@ -103,7 +103,7 @@
                 (.appendLine (joyride/output-channel) "Calva activated. Requiring dependent namespaces.")
                 ;; In `my-lib` and  `z-joylib.calva-api` the Calva extension
                 ;; is required, which will work fine since now Calva is active.
-                (require '[z-joylib.calva-api])
+                (require '[z-joylib.calva-api] :reload)
                 ;; Code in your keybindings can now use the `my-lib` and/or
                 ;; `z-joylib.calva-api` namespace(s)
                 ))
