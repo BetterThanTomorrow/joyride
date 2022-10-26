@@ -134,6 +134,12 @@ Make sure it is required from User `activate.cljs`:
 
 Here are some `my-lib` examples. NB: _These examples are included as **Getting started** User scripts content. See your user scripts, or `assets/getting-started-content/user/my_lib.cljs` in this repository._
 
+### Lookup current symbol in Clojuredocs
+
+See [.joyride/scripts/clojuredocs.cljs](.joyride/scripts/clojuredocs.cljs) for @seancorfield's script for looking up the current symbol on [clojuredocs.org](https://clojuredocs.org).
+
+Note that Calva has several facilites for looking up things in Clojuredocs, but if you like to have it in an inline browser view, you can have it with this script.
+
 ### Find-in-file with regexp toggled on
 
 VS Code does not provide a way to reliably start a find-in-file with regular expressions toggled on. You can add a function to your `my-lib` namespace that does it. Like this one:
@@ -186,6 +192,8 @@ You can then have this in `keybindings.json`
         "args": "(my-lib/restart-clojure-lsp)"
     },
 ```
+
+**NB**: This particular hack is not needed any longer as Calva now has this command built in.
 
 ### npm packages
 
