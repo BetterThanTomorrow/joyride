@@ -138,6 +138,16 @@ Here are some `my-lib` examples. NB: _These examples are included as **Getting s
 
 See [.joyride/scripts/clojuredocs.cljs](.joyride/scripts/clojuredocs.cljs) for @seancorfield's script for looking up the current symbol on [clojuredocs.org](https://clojuredocs.org).
 
+If you require that script in your [User activation.cljs](#user_activatecljs), you can then define a keyboard shortcut like so for easy lookup:
+
+``` json
+    {
+        "command": "joyride.runCode",
+        "args": "(clojuredocs/lookup-current-form-or-selection)",
+        "key": "ctrl+alt+c d",
+    }
+```
+
 Note that Calva has several facilites for looking up things in Clojuredocs, but if you like to have it in an inline browser view, you can have it with this script.
 
 ### Find-in-file with regexp toggled on
