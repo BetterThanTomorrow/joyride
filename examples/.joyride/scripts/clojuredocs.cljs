@@ -2,8 +2,7 @@
   (:require ["ext://betterthantomorrow.calva$v0" :refer [ranges]]
             ["vscode" :as vscode]
             [clojure.string :as string]
-            [joyride.core :as joyride]
-            [promesa.core :as p]))
+            [joyride.core :as joyride]))
 
 (defn clojuredocs-url [symbol-string]
   (let [qualified-symbol-string (some->> symbol-string
