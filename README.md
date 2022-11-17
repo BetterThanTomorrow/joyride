@@ -1,6 +1,6 @@
 # Making VS Code Hackable
 
-Modify your editor by executing ClojureScript code in your REPL and/or run scripts via keyboard shortcuts you choose. The Visual Studio Code API, as well as the APIs of its extensions, are at your command!
+Modify your editor while it is running by executing ClojureScript code via the Joyride REPL and/or run scripts via keyboard shortcuts you choose. The Visual Studio Code API, as well as the APIs of its extensions, are at your command!
 
 https://user-images.githubusercontent.com/30010/165934412-ffeb5729-07be-4aa5-b291-ad991d2f9f6c.mp4
 
@@ -9,10 +9,6 @@ https://user-images.githubusercontent.com/30010/165934412-ffeb5729-07be-4aa5-b29
 Joyride is Powered by [SCI](https://github.com/babashka/sci) (Small Clojure Interpreter).
 
 See [doc/api.md](https://github.com/BetterThanTomorrow/joyride/blob/master/doc/api.md) for documentation about the Joyride API.
-
-## WIP
-
-You are entering a construction yard. Things are going to change and break your configs while we are searching for good APIs and UI/Ux.
 
 Your feedback is highly welcome!
 
@@ -51,7 +47,13 @@ Joyride installs a "regular” User script as well. You can run either of these 
 
 ## Quick Start - Start the REPL
 
-While developing Joyride scripts you should of course do it leveraging Interactive Programming (see [this video](https://www.youtube.com/watch?v=d0K1oaFGvuQ) demonstrating it). With Calva it is very quick to start a Joyride REPL and connect Calva to it. This video demonstrates starting from scratch, including installing Joyride.
+While developing Joyride scripts you should of course do it leveraging Interactive Programming (see [this video](https://www.youtube.com/watch?v=d0K1oaFGvuQ) demonstrating it).
+
+### nRepl Server
+
+Joyride has an [nRepl](https://nrepl.org) server and commands for starting and stopping it. By default, the server will be bound to `127.0.0.1` on an available port. The host address can be configured via the setting `joyride.nReplHostAddress`. Then connect your nREPl client (Calva, Clojure CLI, or whatever.)
+
+Speaking of Calva. It has a command for starting the Joyride nRepl server and connect to it in one go. This video demonstrates starting from scratch, including installing Joyride.
 
 https://user-images.githubusercontent.com/30010/167246562-24638f12-120b-48e9-893a-7408d5beeb77.mp4
 
