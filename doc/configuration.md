@@ -2,7 +2,7 @@
 
 VS Code settings to configure Joyride.
 
-* `joyride.nReplHostAddress`, the host address to bind the nRepl server to
+* `joyride.nreplHostAddress`, the host address to bind the nREPL server to
 
 ## User and Workspace scripts
 

@@ -57,7 +57,7 @@
       {
         "title": "Joyride",
         "properties": {
-          "joyride.nReplHostAddress": {
+          "joyride.nreplHostAddress": {
             "type": "string",
             "default": "127.0.0.1",
             "markdownDescription": "The host address to use for the nREPL server."

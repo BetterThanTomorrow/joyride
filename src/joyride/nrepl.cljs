@@ -225,7 +225,7 @@
   (when-contexts/context ::when-contexts/joyride.isNReplServerRunning))
 
 (defn- start-server'+
-  "Start nRepl server. Accepts options either as JS object or Clojure map."
+  "Start nREPL server. Accepts options either as JS object or Clojure map."
   [js-or-clj-opts]
   (let [opts (cljify js-or-clj-opts)
         port (or (:port opts)
@@ -251,7 +251,7 @@
     (p/create
      (fn [resolve _reject]
        (let [nrepl-host-address (-> (vscode/workspace.getConfiguration "joyride")
-                                    (.get "nReplHostAddress"))]
+                                    (.get "nreplHostAddress"))]
          (if (< 0 (node-net/isIP nrepl-host-address))
            (let [server (node-net/createServer
                          (partial on-connect {:sci-ctx-atom ctx-atom}))]
@@ -278,8 +278,8 @@
                   (fn [e]
                     (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning false)
                     (.close server)
-                    (error "Problems with the nRepl server connection:" e))))
-           (error "Invalid host address, check setting `joyride.nReplHostAddress`")))))))
+                    (error "Problems with the nREPL server connection:" e))))
+           (error "Invalid host address, check setting `joyride.nreplHostAddress`")))))))
 
 (defn start-server+ [opts]
   (if-not (server-running?)

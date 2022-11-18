@@ -49,11 +49,11 @@ Joyride installs a "regular” User script as well. You can run either of these 
 
 While developing Joyride scripts you should of course do it leveraging Interactive Programming (see [this video](https://www.youtube.com/watch?v=d0K1oaFGvuQ) demonstrating it).
 
-### nRepl Server
+### nREPL Server
 
-Joyride has an [nRepl](https://nrepl.org) server and commands for starting and stopping it. By default, the server will be bound to `127.0.0.1` on an available port. The host address can be configured via the setting `joyride.nReplHostAddress`. Then connect your nREPl client (Calva, Clojure CLI, or whatever.)
+Joyride has an [nREPL](https://nrepl.org) server and commands for starting and stopping it. By default, the server will be bound to `127.0.0.1` on an available port. The host address can be configured via the setting `joyride.nreplHostAddress`. Then connect your nREPl client (Calva, Clojure CLI, or whatever.)
 
-Speaking of Calva. It has a command for starting the Joyride nRepl server and connect to it in one go. This video demonstrates starting from scratch, including installing Joyride.
+Speaking of Calva. It has a command for starting the Joyride nREPL server and connect to it in one go. This video demonstrates starting from scratch, including installing Joyride.
 
 https://user-images.githubusercontent.com/30010/167246562-24638f12-120b-48e9-893a-7408d5beeb77.mp4
 
