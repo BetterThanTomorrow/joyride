@@ -61,7 +61,6 @@
 
   (let [{:keys [extension-context]} @db/!app-db]
     (register-command! extension-context "joyride.runCode" #'run-code+)
-    #_(register-command! extension-context "joyride.runSelectedCode" #'run-selected-code+)
     (register-command! extension-context "joyride.runWorkspaceScript" #'scripts-handler/run-workspace-script+)
     (register-command! extension-context "joyride.runUserScript" #'scripts-handler/run-user-script+)
     (register-command! extension-context "joyride.openWorkspaceScript" #'scripts-handler/open-workspace-script+)
