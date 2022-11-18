@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.22] - 2022-11-18
+
 - [Make nREPL host address configurable](https://github.com/BetterThanTomorrow/joyride/issues/102)
 - New default keyboard shortcut bindings:
   - `joyride.runCode`: `ctrl+alt+j space`
