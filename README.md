@@ -21,9 +21,9 @@ Joyride supports User and Workspace scripts:
 
 You can run or open the scripts using commands provided (search the command palette for **Joyride**):
 
-* **Joyride Run User Script...**, default keybinding `ctrl+shift+,`
+* **Joyride Run User Script...**, default keybinding `ctrl+alt+j u`
 * **Joyride Open User Script...**
-* **Joyride Run Workspace Script...**, default keybinding `ctrl+shift+.`
+* **Joyride Run Workspace Script...**, default keybinding `ctrl+alt+j w`
 * **Joyride Open Workspace Script...**
 
 **Note, about namespaces**: Joyride effectively has a classpath that is `user:workspace`. A file `<User scripts dir>/foo_bar.cljs`, will establish/use a namespace `foo-bar`. As will a file `<Workspace scripts dir>/foo_bar.cljs`. Any symbols in these files will be shared/overwritten, as the files are loaded and reloaded. There are probably ways to use this as a power. Please treat it as a super power, because you might also hurt yourself with it.
