@@ -117,15 +117,15 @@
     "keybindings": [
       {
         "command": "joyride.runCode",
-        "key": "ctrl+shift+alt+space"
+        "key": "ctrl+alt+j space"
       },
       {
         "command": "joyride.runUserScript",
-        "key": "ctrl+shift+."
+        "key": "ctrl+alt+j u"
       },
       {
         "command": "joyride.runWorkspaceScript",
-        "key": "ctrl+shift+,"
+        "key": "ctrl+alt+j w"
       }
     ]
   },

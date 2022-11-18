@@ -5,7 +5,12 @@ Changes to Joyride
 ## [Unreleased]
 
 - [Make nREPL host address configurable](https://github.com/BetterThanTomorrow/joyride/issues/102)
-- Fix: [Run Workspace Script and Run User Script has the same default keybindings](https://github.com/BetterThanTomorrow/joyride/issues/100)
+- New default keyboard shortcut bindings:
+  - `joyride.runCode`: `ctrl+alt+j space`
+  - `joyride.runUserScript`: `ctrl+alt+j u`
+  - `joyride.runWorkspaceScript`: `ctrl+alt+j w`
+  - Fixes: [Default key bindings for running scripts are weird on Swedish keyboard layouts](https://github.com/BetterThanTomorrow/joyride/issues/104)
+  - Fixes: [Run Workspace Script and Run User Script has the same default keybindings](https://github.com/BetterThanTomorrow/joyride/issues/100)
 
 ## [0.0.21] - 2022-10-22
 
