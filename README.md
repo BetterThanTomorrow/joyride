@@ -28,22 +28,26 @@ You can run or open the scripts using commands provided (search the command pale
 
 **Note, about namespaces**: Joyride effectively has a classpath that is `user:workspace`. A file `<User scripts dir>/foo_bar.cljs`, will establish/use a namespace `foo-bar`. As will a file `<Workspace scripts dir>/foo_bar.cljs`. Any symbols in these files will be shared/overwritten, as the files are loaded and reloaded. There are probably ways to use this as a power. Please treat it as a super power, because you might also hurt yourself with it.
 
-## Quickest Start 1 - Run a User Script
+## Quickest Start 1 - Install Joyride
 
-Install Joyride. It will run a sample `activate.cljs` User script. You can use this script as a base for init/activation stuff of your VS Code environment.
+Installing Joyride will also install, and run, a sample `user_activate.cljs` User script. You can use this script as a base for init/activation stuff of your VS Code environment.
 
 Joyride installs a "regular” User script as well. You can run either of these with the commands mentioned above.
 
 ## Quickest Start 2 - Run some Code
 
 1. Bring up the VS Code Command Palette (`cmd/ctrl+shift+p`)
-2. Execute **Joyride: Run Clojure Code**
+2. Execute **Joyride: Run Clojure Code...**
 3. Type in some code into the prompt, e.g.
     ```clojure
     (require '["vscode" :as vscode]) (vscode/window.showInformationMessage "Hello World!")
     ```
 4. Submit
 
+## Quickest Start 3 - Evaluate the selection
+
+1. Select some code (e.g. the code some lines above in this markdown file, even if in Preview.)
+2. Execute **Joyride: Evaluate Selection**, (<kbd>ctrl</kbd>+<kbd>alt</kbd>+<kbd>j</kbd>, <kbd>enter</kbd>)
 
 ## Quick Start - Start the REPL
 

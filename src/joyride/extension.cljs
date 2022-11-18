@@ -38,6 +38,19 @@
                   (utils/say-error (str (ex-message e) "\n  " (ex-data e)))
                   (throw e))))))
 
+(defn evaluate-selection+
+  "Evaluates the selection by first copying it to the clipboard and reading it from there.
+   Restores the original clipboard content after reading it from the clipboard.
+   The reason to do it like this is that it will work regardless of where text i selected.
+   Also in Markdown previews or terminal, or QuickPick prompts, or anywhere."
+  [] 
+  (p/let [original-clipboard-text (vscode/env.clipboard.readText)
+          _ (vscode/commands.executeCommand "editor.action.clipboardCopyAction")
+          selected-text (vscode/env.clipboard.readText)
+          _ (vscode/env.clipboard.writeText original-clipboard-text)]
+    (when (not-empty selected-text)
+      (run-code+ selected-text))))
+
 (defn choose-file [default-uri]
   (vscode/window.showOpenDialog #js {:canSelectMany false
                                      :defaultUri default-uri
@@ -61,6 +74,7 @@
 
   (let [{:keys [extension-context]} @db/!app-db]
     (register-command! extension-context "joyride.runCode" #'run-code+)
+    (register-command! extension-context "joyride.evaluateSelection" #'evaluate-selection+)
     (register-command! extension-context "joyride.runWorkspaceScript" #'scripts-handler/run-workspace-script+)
     (register-command! extension-context "joyride.runUserScript" #'scripts-handler/run-user-script+)
     (register-command! extension-context "joyride.openWorkspaceScript" #'scripts-handler/open-workspace-script+)

@@ -45,6 +45,7 @@
   "activationEvents": [
     "*",
     "onCommand:joyride.runCode",
+    "onCommand:joyride.evaluateSelection",
     "onCommand:joyride.runUserScript",
     "onCommand:joyride.runWorkspaceScript",
     "onCommand:joyride.startNReplServer",
@@ -69,6 +70,11 @@
       {
         "command": "joyride.runCode",
         "title": "Run Clojure Code...",
+        "category": "Joyride"
+      },
+      {
+        "command": "joyride.evaluateSelection",
+        "title": "Evaluate Selection",
         "category": "Joyride"
       },
       {
@@ -118,6 +124,10 @@
       {
         "command": "joyride.runCode",
         "key": "ctrl+alt+j space"
+      },
+      {
+        "command": "joyride.evaluateSelection",
+        "key": "ctrl+alt+j enter"
       },
       {
         "command": "joyride.runUserScript",
