@@ -9,7 +9,7 @@
    [joyride.when-contexts :as when-contexts]
    [joyride.repl-utils :as repl-utils :refer [the-sci-ns]]
    [joyride.sci :as jsci]
-   [joyride.utils :refer [info warn cljify]]
+   [joyride.utils :refer [info warn error cljify]]
    [promesa.core :as p]
    [sci.core :as sci]
    [clojure.pprint :as pp]))
@@ -225,7 +225,7 @@
   (when-contexts/context ::when-contexts/joyride.isNReplServerRunning))
 
 (defn- start-server'+
-  "Start nRepl server. Accepts options either as JS object or Clojure map."
+  "Start nREPL server. Accepts options either as JS object or Clojure map."
   [js-or-clj-opts]
   (let [opts (cljify js-or-clj-opts)
         port (or (:port opts)
@@ -250,26 +250,36 @@
 
     (p/create
      (fn [resolve _reject]
-       (let [server (node-net/createServer
-                     (partial on-connect {:sci-ctx-atom ctx-atom}))]
-         (swap! !db assoc ::server server)
-         (p/do
-           (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning true))
-         (.listen server
-                  port
-                  "127.0.0.1" ;; default for now
-                  (fn []
-                    (let [addr (-> server (.address))
-                          port (-> addr .-port)
-                          host (-> addr .-address)]
-                      (info "nREPL server started on port" port "on host"
-                            (str host "- nrepl://" host ":" port))
-                      (-> (vscode/workspace.fs.writeFile (port-file-uri root-path)
-                                                         (-> (new js/TextEncoder) (.encode (str port))))
-                          (p/handle (fn [_result error]
-                                      (resolve port)
-                                      (when error
-                                        (info "Could not write port file" error)))))))))))))
+       (let [nrepl-host-address (-> (vscode/workspace.getConfiguration "joyride")
+                                    (.get "nreplHostAddress"))]
+         (if (< 0 (node-net/isIP nrepl-host-address))
+           (let [server (node-net/createServer
+                         (partial on-connect {:sci-ctx-atom ctx-atom}))]
+             (swap! !db assoc ::server server)
+             (p/do
+               (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning true))
+             (.listen server
+                      port
+                      nrepl-host-address
+                      (fn []
+                        (let [addr (-> server (.address))
+                              port (-> addr .-port)
+                              host (-> addr .-address)]
+                          (info "nREPL server started on port" port "on host"
+                                (str host "- nrepl://" host ":" port))
+                          (-> (vscode/workspace.fs.writeFile
+                               (port-file-uri root-path)
+                               (-> (new js/TextEncoder) (.encode (str port))))
+                              (p/handle (fn [_result error]
+                                          (resolve port)
+                                          (when error
+                                            (warn "Could not write port file" error))))))))
+             (.on server "error"
+                  (fn [e]
+                    (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning false)
+                    (.close server)
+                    (error "Problems with the nREPL server connection:" e))))
+           (error "Invalid host address, check setting `joyride.nreplHostAddress`")))))))
 
 (defn start-server+ [opts]
   (if-not (server-running?)

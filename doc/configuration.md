@@ -2,9 +2,11 @@
 
 VS Code settings to configure Joyride.
 
-There is no configuration. 😀
+* `joyride.nreplHostAddress`, the host address to bind the nREPL server to
 
-There are some conventions, though. Joyride looks for scripts in:
+## User and Workspace scripts
+
+Joyride looks for scripts in:
 
 * User scripts: `<user home>/.config/joyride/scripts/**/*.cljs`
 * Workspace scripts: `.joyride/scripts/**/*.cljs`
@@ -13,6 +15,8 @@ The scripts are displayed in menus accessible via the commands:
 
 * **Joyride: Run User Script**, default keybinding `ctrl+shift+,`
 * **Joyride: Run Workspace Script**, default keybinding `ctrl+shift+.`
+
+## Keyboard shortcuts
 
 You can configure keyboard shortcuts to the commands `joyride.runUserScript`, and `joyride.runWorkspaceScript` giving them a script as an argument.
 
