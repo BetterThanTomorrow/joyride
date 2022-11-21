@@ -57,12 +57,6 @@
          (run-code+ selected-text))))
    100))
 
-(comment
-  (p/let [_ (vscode/commands.executeCommand "editor.action.clipboardCopyAction")
-          selected-text (vscode/env.clipboard.readText)]
-    (def selected-text selected-text))
-  )
-
 (defn choose-file [default-uri]
   (vscode/window.showOpenDialog #js {:canSelectMany false
                                      :defaultUri default-uri
