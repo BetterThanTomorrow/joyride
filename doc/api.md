@@ -62,6 +62,7 @@ if (r) {
 Select Joyride from the VS Code Extension pane to see which commands it provides. The commands you'll probably use the most are:
 
 * `joyride.runCode`
+* `joyride.evaluatSelection `
 * `joyride.runUserScript`
 * `joyride.runWorkspaceScript`
 
