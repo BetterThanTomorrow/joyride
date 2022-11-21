@@ -120,7 +120,7 @@ VS Code Extensions that export an API can be required using the `ext://` prefix 
 ### ClojureScript Namespaces
 
 In addition to `clojure.core`, `clojure.set`, `clojure.edn`, `clojure.string`,
-`clojure.walk`, `clojure.data`, `cljs.test`, Joyride exposes
+`clojure.walk`, `clojure.data`, `cljs.test`, and `clojure.zip`, Joyride exposes
 the following namespaces:
 
 Lacking some particular library? Please consider contributing to [babashka/sci.configs](https://github.com/babashka/sci.configs)!
