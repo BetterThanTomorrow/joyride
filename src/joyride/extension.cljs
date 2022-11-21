@@ -16,10 +16,11 @@
     (.push (.-subscriptions context) disposable)))
 
 (defn- clear-disposables! []
-  (run! (fn [^js disposable]
-            (.dispose disposable))
-          (:disposables @db/!app-db))
-  (swap! db/!app-db assoc :disposables []))
+  (-> (p/run! (fn [^js disposable]
+                (.dispose disposable))
+              (:disposables @db/!app-db))
+      (.then (fn []
+               (swap! db/!app-db assoc :disposables [])))))
 
 (defn run-code+
   ([]
@@ -108,12 +109,14 @@
   (clear-disposables!))
 
 (defn before [done]
+  (js/console.log "shadow-cljs before reloading joyride")
   (-> (clear-disposables!)
       (p/then done)))
 
 (defn after []
   (info "shadow-cljs reloaded Joyride")
-  (js/console.log "shadow-cljs Reloaded"))
+  (js/console.log "shadow-cljs Reloaded Joyride")
+  (activate nil))
 
 (comment
   (def ba (before after)))
