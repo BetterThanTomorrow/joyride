@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.23] - 2022-11-22
+
 - [Add ”Evaluate Selection” command](https://github.com/BetterThanTomorrow/joyride/issues/106)
 
 ## [0.0.22] - 2022-11-18
