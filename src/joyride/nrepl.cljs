@@ -67,11 +67,7 @@
             "status" ["done"]}))
 
 (def pretty-print-fns-map
-  {"clojure.core/pr" pr
-   "clojure.core/prn" prn
-   "clojure.pprint/pprint" pp/write
-   "cljs.pprint/pprint" pp/write
-   "cider.nrepl.pprint/pprint" pp/write})
+  {"cider.nrepl.pprint/pprint" pp/write})
 
 (defn format-value [nrepl-pprint pprint-options value]
   (if nrepl-pprint
@@ -82,7 +78,7 @@
                   pp/*print-right-margin* right-margin]
           (with-out-str (pprint-fn value))))
       (do
-        (debug "Pretty-Printing is only supported for clojure.core/pr[n] and clojure.pprint/pprint.")
+        (debug "Pretty-Printing is only supported for cider.nrepl.pprint/pprint")
         (pr-str value)))
     (pr-str value)))
 
