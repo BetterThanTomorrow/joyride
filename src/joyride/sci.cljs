@@ -1,8 +1,8 @@
 (ns joyride.sci
   (:require
    ["fs" :as fs]
-   ["path" :as path]
    ["module" :as module]
+   ["path" :as path]
    ["vscode" :as vscode]
    [clojure.string :as str]
    [clojure.zip]
@@ -13,7 +13,9 @@
    [sci.configs.funcool.promesa :as promesa-config]
    [sci.core :as sci]))
 
+(sci/enable-unrestricted-access!) ;; allows mutating and set!-ing all vars from inside SCI
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
+(sci/alter-var-root sci/print-err-fn (constantly *print-err-fn*))
 
 (def joyride-ns (sci/create-ns 'joyride.core nil))
 
