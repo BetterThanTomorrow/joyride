@@ -4,7 +4,7 @@
         org.babashka/sci
         #_{:local/root "../babashka/sci"}
         {:git/url "https://github.com/babashka/sci"
-         :git/sha "05c738b481f56aa77c2f8355aae4ce77aff2344b"}
+         :git/sha "b4c51fd5a0cedf19f1804c9bef1301ffb4e73bf0"}
         org.babashka/sci.configs
         #_{:local/root "../sci.configs"}
         {:git/url "https://github.com/babashka/sci.configs"
