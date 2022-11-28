@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.26] - 2022-11-28
+
 - Fix [v0.0.25 starts an nREPL server that Calva can't connect to](https://github.com/BetterThanTomorrow/joyride/issues/110)
 
 ## [0.0.25] - 2022-11-28
