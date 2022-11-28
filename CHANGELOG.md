@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: [The nREPL server adds an extra newline to pretty printed results](https://github.com/BetterThanTomorrow/joyride/issues/108)
+
 ## [0.0.23] - 2022-11-22
 
 - [Add ”Evaluate Selection” command](https://github.com/BetterThanTomorrow/joyride/issues/106)

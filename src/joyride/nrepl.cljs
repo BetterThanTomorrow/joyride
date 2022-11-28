@@ -4,7 +4,6 @@
    ["net" :as node-net]
    ["path" :as path]
    ["vscode" :as vscode]
-   [clojure.string :as str]
    [joyride.bencode :refer [encode decode-all]]
    [joyride.when-contexts :as when-contexts]
    [joyride.repl-utils :as repl-utils :refer [the-sci-ns]]
@@ -12,7 +11,8 @@
    [joyride.utils :refer [info warn error cljify]]
    [promesa.core :as p]
    [sci.core :as sci]
-   [clojure.pprint :as pp]))
+   [clojure.pprint :as pp]
+   [clojure.string :as string]))
 
 (defonce !db (atom {::log-messages? false
                     ::server nil
@@ -67,21 +67,18 @@
             "status" ["done"]}))
 
 (def pretty-print-fns-map
-  {"clojure.core/prn" prn
-   "clojure.pprint/pprint" pp/pprint
-   "cljs.pprint/pprint" pp/pprint
-   "cider.nrepl.pprint/pprint" pp/pprint})
+  {"cider.nrepl.pprint/pprint" pp/write})
 
 (defn format-value [nrepl-pprint pprint-options value]
   (if nrepl-pprint
-    (if-let [pprint-fn (pretty-print-fns-map nrepl-pprint)]
+    (if-let [pprint-fn (pretty-print-fns-map nrepl-pprint)] 
       (let [{:keys [right-margin length level]} pprint-options]
         (binding [*print-length* length
                   *print-level* level
                   pp/*print-right-margin* right-margin]
           (with-out-str (pprint-fn value))))
       (do
-        (debug "Pretty-Printing is only supported for clojure.core/prn and clojure.pprint/pprint.")
+        (debug "Pretty-Printing is only supported for cider.nrepl.pprint/pprint")
         (pr-str value)))
     (pr-str value)))
 
@@ -199,7 +196,7 @@
                           s)
                         data)
                  [requests unprocessed] (decode-all data :keywordize-keys true)]
-             (when (not (str/blank? unprocessed))
+             (when (not (string/blank? unprocessed))
                (reset! pending unprocessed))
              (doseq [request requests]
                (handler request response-handler))))))
