@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.25] - 2022-11-28
+
 - Update SCI for performance improvements
 
 ## [0.0.24] - 2022-11-28
