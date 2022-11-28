@@ -3,7 +3,7 @@
   "displayName": "Joyride",
   "description": "Making VS Code hackable. (A bit like Emacs with ELisp.) Powered by SCI, the Small Clojure Interpreter.",
   "icon": "assets/joyride.png",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "publisher": "betterthantomorrow",
   "author": {
     "name": "Better Than Tomorrow",
