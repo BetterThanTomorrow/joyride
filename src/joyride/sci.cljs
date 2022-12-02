@@ -75,7 +75,10 @@
   (volatile!
    (sci/init {:classes {'js goog/global
                         :allow :all}
-              :namespaces {'clojure.core {'IFn (sci/copy-var IFn core-namespace)}
+              :namespaces {'clojure.core {'IFn (sci/copy-var IFn core-namespace)
+                                          'tap> (sci/copy-var tap> core-namespace)
+                                          'add-tap (sci/copy-var remove-tap core-namespace)
+                                          'remove-tap (sci/copy-var remove-tap core-namespace)}
                            'clojure.zip zip-namespace
                            'cljs.test cljs-test-config/cljs-test-namespace
                            'promesa.core promesa-config/promesa-namespace
