@@ -1,10 +1,10 @@
-(ns z-joylib.hickory.select
+(ns hickory.select
   "Functions to query hickory-format HTML data.
 
    See clojure.zip for more information on zippers, locs, nodes, next, etc."
   (:require [clojure.zip :as zip]
             [clojure.string :as string]
-            [z-joylib.hickory.zip :as hzip])
+            [hickory.zip :as hzip])
   #_#?(:clj
      (:import clojure.lang.IFn))
   (:refer-clojure :exclude [and or not class]))

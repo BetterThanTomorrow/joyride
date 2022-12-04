@@ -33,7 +33,10 @@
                              file-path)))
         ;; workspace first, then user - the and is a nil check for no workspace
         path-to-load (first (keep #(and % (path-if-exists %))
-                                  [(conf/workspace-abs-scripts-path) (conf/user-abs-scripts-path)]))]
+                                  [(conf/workspace-abs-src-path)
+                                   (conf/workspace-abs-scripts-path)
+                                   (conf/user-abs-src-path)
+                                   (conf/user-abs-scripts-path)]))]
     (when path-to-load
       {:file ns-path
        :source (str (fs/readFileSync path-to-load))})))

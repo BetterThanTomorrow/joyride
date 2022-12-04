@@ -1,5 +1,5 @@
-(ns z-joylib.editor-utils
-  (:require ["vscode" :as vsode]
+(ns util.editor
+  (:require ["vscode" :as vscode]
             [promesa.core :as p]))
 
 (defn current-selection []

@@ -1,11 +1,11 @@
-(ns z-joylib.clojure-symbols
+(ns clojure-symbols
   (:require ["vscode" :as vscode]
             [joyride.core :as joyride]))
 
 ;; Finds `MARK`ers in the files and creates navigational symbols for them
 ;; Adapted from an example by https://github.com/maxrothman
 
-(.appendLine (joyride/output-channel) "z-joylib.clojure-symbols loading...")
+(.appendLine (joyride/output-channel) "clojure-symbols loading...")
 
 (defn- line-seq [document]
   (map #(.lineAt document %) (range (.-lineCount document))))

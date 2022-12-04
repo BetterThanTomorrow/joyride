@@ -1,6 +1,6 @@
 (ns find-in-html
   (:require ["posthtml-parser" :as parser]
-            [z-joylib.hickory.select :as hs]))
+            [hickory.select :as hs]))
 (comment
   (-> "<div>
        <label class=\"hw\">hello</label>

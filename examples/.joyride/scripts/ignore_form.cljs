@@ -2,7 +2,7 @@
   (:require ["vscode" :as vscode]
             [joyride.core :as joyride]
             [promesa.core :as p]
-            [z-joylib.editor-utils :as eu]))
+            [util.editor :as eu]))
 
 (defn main []
   (p/let [editor ^js vscode/window.activeTextEditor

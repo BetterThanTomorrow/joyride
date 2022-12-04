@@ -12,6 +12,11 @@
   []
   (path/join user-config-path user-scripts-path))
 
+(defn user-abs-src-path
+  "Returns the absolute path to the User src directory"
+  []
+  (path/join user-config-path "joyride" "src"))
+
 (def workspace-scripts-path (path/join ".joyride" "scripts"))
 
 (defn workspace-abs-scripts-path
@@ -20,3 +25,9 @@
   []
   (when-let [workspace-root (:workspace-root-path @db/!app-db)]
     (path/join workspace-root workspace-scripts-path)))
+
+(defn workspace-abs-src-path
+  "Returns the absolute path to the WOrkspace src directory"
+  []
+  (when-let [workspace-root (:workspace-root-path @db/!app-db)]
+    (path/join workspace-root (path/join ".joyride" "src"))))
