@@ -47,15 +47,16 @@
   []
   ; Delay needed when run from the command palette
   ; lest the command palette is active when the copy is performed
-  (js/setTimeout
-   (fn []
-     (p/let [original-clipboard-text (vscode/env.clipboard.readText)
-             _ (vscode/commands.executeCommand "editor.action.clipboardCopyAction")
-             selected-text (vscode/env.clipboard.readText)
-             _ (vscode/env.clipboard.writeText original-clipboard-text)]
-       (when (not-empty selected-text)
-         (run-code+ selected-text))))
-   100))
+  (p/do
+    (p/create
+     (fn [resolve _reject]
+       (js/setTimeout resolve 200)))
+    (p/let [original-clipboard-text (vscode/env.clipboard.readText)
+            _ (vscode/commands.executeCommand "editor.action.clipboardCopyAction")
+            selected-text (vscode/env.clipboard.readText)
+            _ (vscode/env.clipboard.writeText original-clipboard-text)]
+      (when (not-empty selected-text)
+        (run-code+ selected-text)))))
 
 (defn choose-file [default-uri]
   (vscode/window.showOpenDialog #js {:canSelectMany false
