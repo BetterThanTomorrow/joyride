@@ -1,4 +1,4 @@
-(ns z-joylib.hickory.zip
+(ns hickory.zip
   (:require [clojure.zip :as zip]))
 
 ;;

@@ -83,6 +83,17 @@ If your script needs access to these contexts, use the `getContextValue` functio
 
 ## Scripting API
 
+### The Joyride classpath
+
+Joyride has a fixed ”classpath” (the paths where it looks for roots to your Joyride code source files). It searches these directories in this order:
+
+1. `<workspace-root>/.joyride/src`
+1. `<workspace-root>/.joyride/scripts`
+1. `<user-home>/.config/joyride/src`
+1. `<user-home>/.config/joyride/scripts`
+
+The first file found will be used.
+
 ### Scripting lifecycle
 
 You can make some code run when Joyride activates, by naming the scripts `activate.cljs`. The activations script will be run in the order:

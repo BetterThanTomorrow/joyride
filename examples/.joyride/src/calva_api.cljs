@@ -1,9 +1,9 @@
-(ns z-joylib.calva-api
+(ns calva-api
   (:require ["vscode" :as vscode]
             ["ext://betterthantomorrow.calva$v0" :as calva]
             [joyride.core :as joyride]
             [promesa.core :as p]
-            [z-joylib.editor-utils :as editor-utils]))
+            [util.editor :as editor-utils]))
 
 (def oc (joyride.core/output-channel))
 
@@ -43,16 +43,11 @@
 ;;  {
 ;;      "key": "cmd+ctrl+enter",
 ;;      "command": "joyride.runCode",
-;;      "args": "(z-joylib.calva-api/joyride-eval-current-form)",
+;;      "args": "(calva-api/joyride-eval-current-form)",
 ;;  },
 ;;  {
 ;;      "key": "cmd+alt+enter",
 ;;      "command": "joyride.runCode",
-;;      "args": "(z-joylib.calva-api/joyride-eval-top-level-form)",
+;;      "args": "(calva-api/joyride-eval-top-level-form)",
 ;;  },
 
-;; Convenience function making it easier to restart clojure-lsp
-
-(defn restart-clojure-lsp []
-  (p/do (vscode/commands.executeCommand "calva.clojureLsp.stop")
-        (vscode/commands.executeCommand "calva.clojureLsp.start")))

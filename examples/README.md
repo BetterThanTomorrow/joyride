@@ -183,27 +183,14 @@ Example shortcut definition:
 
 https://user-images.githubusercontent.com/30010/172149989-69e87313-afeb-44fc-a71d-417a439dac32.mp4
 
-### Restarting clojure-lsp
+### Workspace file system
 
-A somewhat frequent feature request on Calva is a command for restarting clojure-lsp. It can be implemented in several with this function:
+The [.joyride/scripts/ws.cljs](.joyride/scripts/ws.cljs) script shows two things:
 
-```clojure
-(defn restart-clojure-lsp []
-  (p/do (vscode/commands.executeCommand "calva.clojureLsp.stop")
-        (vscode/commands.executeCommand "calva.clojureLsp.start")))
-```
+1. How to find the current workspace root (or the first workspace folder, really)
+2. How to read the contents of a file in the workspace
 
-You can then have this in `keybindings.json`
-
-```json
-    {
-        "key": "<some-keyboard-shortcut>",
-        "command": "joyride.runCode",
-        "args": "(my-lib/restart-clojure-lsp)"
-    },
-```
-
-**NB**: This particular hack is not needed any longer as Calva now has this command built in.
+Both examples use a utility script: [.joyride/src/util/workspace.cljs](.joyride/src/util/workspace.cljs)
 
 ### npm packages
 
@@ -233,7 +220,7 @@ clojure.walk is wonderful, and so is [clojure.zip](https://clojuredocs.org/cloju
 
 ### Hickory
 
-[Hickory](https://github.com/clj-commons/hickory) is not included with Joyride, but that doesn't mean you can't use it! In [](.joyride/scripts/z_joylib/hickory) there is the slighly (very slightly) modified source of `hickory.select` as well as the unmodified source of `hickory.zip`. This makes the [find-in-html](.joyride/scripts/find_in_html.cljs) possible. (See [npm packages](#npm-packages) about the `npm` dependency.)
+[Hickory](https://github.com/clj-commons/hickory) is not included with Joyride, but that doesn't mean you can't use it! In [](.joyride/src/hickory) there is the slighly (very slightly) modified source of `hickory.select` as well as the unmodified source of `hickory.zip`. This makes the [find-in-html](.joyride/scripts/find_in_html.cljs) possible. (See [npm packages](#npm-packages) about the `npm` dependency.)
 
 ![](assets/joyride-parse-html-hickory-select.png)
 
