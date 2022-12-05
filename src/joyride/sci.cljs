@@ -64,6 +64,10 @@
 
 (defn require* [from-script lib]
   (let [req (module/createRequire (path/resolve (or from-script "./script.cljs")))
+        lib-path (if (path/isAbsolute lib) 
+                   lib
+                   (path/resolve (path/dirname from-script) lib))
+        _ (aset (.-cache req) lib-path js/undefined)
         resolved (.resolve req lib)]
     (js/require resolved)))
 
