@@ -105,7 +105,15 @@ Look at the [Activation example](../examples/.joyride/scripts/activate.cljs) scr
 
 ### NPM modules
 
-TBD.
+To use npm modules these need to be installed in the path somewhere in the path from where the script using it resides, to the root of the filessystem. Consider using `<user-home>/.config/joyride` and `<ws-root>/.joyride`. (`yarn` or `npm i` both work, Joyride doesn't care, it looks for stuff in `node_modules`).
+
+See [examples/.joyride/scripts/html_to_hiccup.cljs](examples/.joyride/scripts/html_to_hiccup.cljs) for an example.
+
+The modules you use need to be in CommonJS format.
+
+### JavaScript files
+
+You can require JavaScript files (CommonJS) from your scripts by using absolute or relative paths to the JS files. The code in these files are reloaded when you re-require them from Clojure code. See [Examples Requiring JavaScript Files](../examples/README.md#requiring-javascript-files) for an example.
 
 ### VS Code, and Extension ”namespaces”
 
