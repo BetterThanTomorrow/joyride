@@ -62,12 +62,12 @@
           (gobject/getValueByKeys exports (.split module-name "."))
           exports)))))
 
-(defn require* [from-script lib]
+(defn require* [from-script lib {:keys [reload]}]
   (let [req (module/createRequire (path/resolve (or from-script "./script.cljs")))
         lib-path (if (path/isAbsolute lib) 
                    lib
                    (path/resolve (path/dirname from-script) lib))
-        _ (aset (.-cache req) lib-path js/undefined)
+        _ (when reload (aset (.-cache req) lib-path js/undefined))
         resolved (.resolve req lib)]
     (js/require resolved)))
 
@@ -119,7 +119,7 @@
                                {:handled true})
 
                              :else
-                             (let [mod (require* @sci/file libname)
+                             (let [mod (require* @sci/file libname opts)
                                    ns-sym (symbol libname)]
                                (sci/add-class! @!ctx ns-sym mod)
                                (sci/add-import! @!ctx ns ns-sym

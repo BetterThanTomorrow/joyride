@@ -200,12 +200,14 @@ You can use code written in JavaScript (or compiled to JavaScript) with Joyride 
 
 ```clojure
 (ns require-js-file
-  (:require ["../src/hello-world.js" :as hello-world]))
+  (:require ["../src/hello-world.js" :as hello-world] :reload))
 ```
 
 It can then use the exports from [.joyride/src/hello-world.js](.joyride/src/hello-world.js).
 
-This means you can write your scripts using JavaScript if you like, using only a small glue script written in Clojure, that require the JS code. The JavaScript code is reloaded when you run the Clojure glue script, so you can even enjoy some interactive programming this way. (Or a lot, if you utilize Clojure a bit more than just relaying over to a JavaScript script.)
+This means you can write your scripts using JavaScript if you like, using only a small glue script written in Clojure, that require the JS code.
+
+By adding the `:reload` option to the require, the JavaScript code is reloaded when you run/evaluate the Clojure glue code, so you can enjoy some interactive programming this way. For when you have JavasScript code that will stay stable, skip the `:reload` option.
 
 ### npm packages
 
