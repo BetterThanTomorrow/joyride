@@ -5,6 +5,7 @@ Changes to Joyride
 ## [Unreleased]
 
 - [Add `src` sub User and Workspace directories to the classpath](https://github.com/BetterThanTomorrow/joyride/issues/115)
+- [Feature request: Enable requiring JavaScript files](https://github.com/BetterThanTomorrow/joyride/issues/117)
 
 ## [0.0.26] - 2022-11-28
 

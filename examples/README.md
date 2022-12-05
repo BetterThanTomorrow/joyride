@@ -192,6 +192,23 @@ The [.joyride/scripts/ws.cljs](.joyride/scripts/ws.cljs) script shows two things
 
 Both examples use a utility script: [.joyride/src/util/workspace.cljs](.joyride/src/util/workspace.cljs)
 
+### requiring JavaScript files
+
+You can use code written in JavaScript (or compiled to JavaScript) with Joyride by using absolute or relative paths to these scripts in your requires.
+
+[.joyride/scripts/require_js_file.cljs](.joyride/scripts/require_js_file.cljs) does this, using an ns-form require that looks like so:
+
+```clojure
+(ns require-js-file
+  (:require ["../src/hello-world.js" :as hello-world] :reload))
+```
+
+It can then use the exports from [.joyride/src/hello-world.js](.joyride/src/hello-world.js).
+
+This means you can write your scripts using JavaScript if you like, using only a small glue script written in Clojure, that require the JS code.
+
+By adding the `:reload` option to the require, the JavaScript code is reloaded when you run/evaluate the Clojure glue code, so you can enjoy some interactive programming this way. For when you have JavasScript code that will stay stable, skip the `:reload` option.
+
 ### npm packages
 
 You can use packages from `npm` in your Joyride scripts. There's an example of this, using [posthtml-parser](https://github.com/posthtml/posthtml-parser) in 

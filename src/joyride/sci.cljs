@@ -62,9 +62,11 @@
           (gobject/getValueByKeys exports (.split module-name "."))
           exports)))))
 
-(defn require* [from-script lib]
-  (let [req (module/createRequire (path/resolve (or from-script "./script.cljs")))
+(defn require* [from-script lib {:keys [reload]}]
+  (let [req (module/createRequire (path/resolve (or from-script "./script.cljs"))) 
         resolved (.resolve req lib)]
+    (when reload
+      (aset (.-cache req) resolved js/undefined))
     (js/require resolved)))
 
 (def zns (sci/create-ns 'clojure.zip nil))
@@ -115,7 +117,7 @@
                                {:handled true})
 
                              :else
-                             (let [mod (require* @sci/file libname)
+                             (let [mod (require* @sci/file libname opts)
                                    ns-sym (symbol libname)]
                                (sci/add-class! @!ctx ns-sym mod)
                                (sci/add-import! @!ctx ns ns-sym

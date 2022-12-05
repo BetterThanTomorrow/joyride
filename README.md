@@ -8,6 +8,8 @@ https://user-images.githubusercontent.com/30010/165934412-ffeb5729-07be-4aa5-b29
 
 Joyride is Powered by [SCI](https://github.com/babashka/sci) (Small Clojure Interpreter).
 
+The default language of Joyride is [Clojure](https://clojure.org), but you can also use JavaScript for hacking your VS Code environment.
+
 See [doc/api.md](https://github.com/BetterThanTomorrow/joyride/blob/master/doc/api.md) for documentation about the Joyride API.
 
 Your feedback is highly welcome!
