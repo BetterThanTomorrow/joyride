@@ -63,15 +63,10 @@
           exports)))))
 
 (defn require* [from-script lib {:keys [reload]}]
-  (let [req (module/createRequire (path/resolve (or from-script "./script.cljs")))
-        lib-path (if (.startsWith lib ".")
-                   (path/resolve (path/dirname from-script) lib)
-                   lib)
-        ; Invalidate cache only for js-files
-        _ (when (and reload
-                     (path/isAbsolute lib-path)) 
-            (aset (.-cache req) lib-path js/undefined))
+  (let [req (module/createRequire (path/resolve (or from-script "./script.cljs"))) 
         resolved (.resolve req lib)]
+    (when reload
+      (aset (.-cache req) resolved js/undefined))
     (js/require resolved)))
 
 (def zns (sci/create-ns 'clojure.zip nil))
