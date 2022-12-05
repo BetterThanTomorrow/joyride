@@ -64,10 +64,13 @@
 
 (defn require* [from-script lib {:keys [reload]}]
   (let [req (module/createRequire (path/resolve (or from-script "./script.cljs")))
-        lib-path (if (path/isAbsolute lib) 
-                   lib
-                   (path/resolve (path/dirname from-script) lib))
-        _ (when reload (aset (.-cache req) lib-path js/undefined))
+        lib-path (if (.startsWith lib ".")
+                   (path/resolve (path/dirname from-script) lib)
+                   lib)
+        ; Invalidate cache only for js-files
+        _ (when (and reload
+                     (path/isAbsolute lib-path)) 
+            (aset (.-cache req) lib-path js/undefined))
         resolved (.resolve req lib)]
     (js/require resolved)))
 
