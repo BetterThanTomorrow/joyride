@@ -111,6 +111,8 @@ See [examples/.joyride/scripts/html_to_hiccup.cljs](examples/.joyride/scripts/ht
 
 The modules you use need to be in CommonJS format.
 
+Unlike with [JavaScript file requires](#javascript-files), requiring and npm module in a require form using the `:reload` option, will have no effect.
+
 ### JavaScript files
 
 You can require JavaScript files (CommonJS) from your scripts by using absolute or relative paths to the JS files. Like in JS, relative paths need to start with a `.` to separate them from node module requires. If you provide the `:reload` option to the require form, the code in these files are reloaded when you re-require them from Clojure code. See [Examples Requiring JavaScript Files](../examples/README.md#requiring-javascript-files) for an example.
