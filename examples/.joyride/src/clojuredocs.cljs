@@ -4,7 +4,16 @@
             [clojure.string :as string]
             [clojure.edn :as edn]
             [joyride.core :as joyride]
-            [promesa.core :as p]))
+            [promesa.core :as p]
+            [clojure.string :as s]))
+
+;; To use this un-ignore the relevant part in `user_activate.cljs`
+;; Then register a keyboard shortcut something like this:
+;;     {
+;;         "command": "joyride.runCode",
+;;         "args": "(clojuredocs/lookup-current-form-or-selection)",
+;;         "key": "ctrl+alt+c d",
+;;     },
 
 (defn resolve-in-repl [symbol-string]
   (-> (p/let [result (repl.evaluateCode

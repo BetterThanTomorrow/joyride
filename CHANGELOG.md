@@ -4,6 +4,9 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Document how to provide implementations of vscode/node interfaces](https://github.com/BetterThanTomorrow/joyride/issues/119)
+- Add Hover Provider example
+
 ## [0.0.27] - 2022-12-06
 
 - [Add `src` sub User and Workspace directories to the classpath](https://github.com/BetterThanTomorrow/joyride/issues/115)

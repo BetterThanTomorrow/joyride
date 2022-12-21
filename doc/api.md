@@ -131,13 +131,33 @@ Joyride exposes its `vscode` module for scripts to consume. You require it like 
 VS Code Extensions that export an API can be required using the `ext://` prefix followed by the extension identifier. For instance, to require [Calva's Extension API](https://calva.io/api/) use `"ext://betterthantomorrow.calva"`. Optionally you can specify any submodules in the exported API by suffixing the namespace with a `$` followed by the dotted path of the submodule. You can also `refer` objects in the API and submodules. Like so:
 
 ```clojure
-(ns z-joylib.calva-api
+(ns calva-api
   (:require ...
             ["ext://betterthantomorrow.calva$v0" :as calva :refer [repl ranges]])
             ...)
 
 (def current-form-text (second (ranges.currentForm)))
 ```
+
+### VS Code and Node.js interfaces
+
+This does not work in Joyride SCI:
+
+```
+(deftype Foo []
+             Object
+  (bar [x y] ...))
+```
+
+Do this instead:
+
+```
+#js {:bar (fn [x y] ...)}
+```
+
+The latter should not be instantiated. Just be used wherever an instance is expected.
+
+See [examples/.joyride/src/problem_hover.cljs](examples/.joyride/src/problem_hover.cljs) for an example. (Used from the [user_activate.cljs template](assets/getting-started-content/user/user_activate.cljs))
 
 ### ClojureScript Namespaces
 
@@ -238,6 +258,6 @@ See [promesa docs](https://cljdoc.org/d/funcool/promesa/6.0.2/doc/user-guide).
 
 ### Possibly coming additions
 
-We want to add `clojure.test` and `clojure.pprint` as well in the near future. How near/if depends on things like how much time we can spend on it, and how easy/hard it will be to port this over from [nbb](https://github.com/babashka/nbb).
+We want to add `clojure.pprint` as well in the near future. How near/if depends on things like how much time we can spend on it, and how easy/hard it will be to port this over from [nbb](https://github.com/babashka/nbb).
 
 

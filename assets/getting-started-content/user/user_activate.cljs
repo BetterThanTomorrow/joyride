@@ -11,7 +11,7 @@
 ;; You can run this and other User scripts with the command:
 ;;   *Joyride: Run User Script*
 
-;;; MARK REPL practice
+;;; REPL practice
 (comment
   ;; Use Calva to start the Joyride REPL and connect it. The command:
   ;;   *Calva: Start Joyride REPL and Connect*
@@ -34,7 +34,7 @@
       (.appendLine (joyride/output-channel)
                    "You just closed it? 😭"))))
 
-;;; MARK Output channel pop-up
+;;; Output channel pop-up
 ;; This following code is why you see the Joyride output channel
 ;; on startup.
 
@@ -43,9 +43,9 @@
   (.appendLine "Welcome Joyrider! This is your User activation script speaking.")
   (.appendLine "Tired of this message popping up? It's the script doing it. Edit it away!")
   (.appendLine "Hint: There is a command: **Open User Script...**"))
-  
 
-;;; MARK activate.cljs skeleton
+
+;;; user_activate.cljs skeleton
 
 ;; Keep tally on VS Code disposables we register
 (defonce !db (atom {:disposables []}))
@@ -68,47 +68,51 @@
       .-subscriptions
       (.push disposable)))
 
+(defn- register-problem-hover []
+  (push-disposable! (#_{:clj-kondo/ignore [:unresolved-symbol]}
+                     (requiring-resolve 'problem-hover/register-diagnostics-handler!)))
+  (p/do
+    (.appendLine (joyride/output-channel) "Problem Hover Provider: Waiting a bit to register (to get to be topmost hover)...")
+    (p/delay 5000)
+    (push-disposable! (#_{:clj-kondo/ignore [:unresolved-symbol]}
+                       (requiring-resolve 'problem-hover/register-provider!)))
+    (.appendLine (joyride/output-channel) "Problem Hover Provider: Registered!")))
+
 (defn- my-main []
   (println "Hello World, from my-main in user_activate.cljs script")
   (clear-disposables!) ;; Any disposables add with `push-disposable!`
                        ;; will be cleared now. You can push them anew.
 
-  ;;; MARK require my-lib
+  ;; To register a diagnostics hover item above the fold, un-ignore this:
+  #_(register-problem-hover)
+
+  ;;; require my-lib
   (require '[my-lib])
 
-  ;;; MARK Registering a symbols provider
-  ;; Install z_joylib/clojure_symbols.cljs (with your User or 
-  ;; Workspace scripts) from:
-  ;; https://github.com/BetterThanTomorrow/joyride/tree/master/examples
-  ;; Then un-ignore
-  #_(push-disposable! ((requiring-resolve 'z-joylib.clojure-symbols/register-provider!)))
-  ;; See the Gilardi scenario, about the requiring-resolve:
-  ;; https://technomancy.us/143
-
-  ;;; MARK require VS Code extensions
+  ;;; require VS Code extensions
   ;; In an activation.cljs script it can't be guaranteed that a
   ;; particular extension is active, so we can't safely `(:require ..)`
   ;; in the `ns` form. Here's what you can do instead, using Calva
   ;; as the example. To try it for real, copy the example scripts from:
   ;; https://github.com/BetterThanTomorrow/joyride/tree/master/examples 
   ;; Then un-ignore the below form and run
-  ;;   *Joyride; Run User Script* -> activate.cljs
+  ;;   *Joyride; Run User Script* -> user_activate.cljs
   ;; (Or reload the VS Code window.)
-  #_ ; <- remove this to un-ignore
-  (-> (vscode/extensions.getExtension "betterthantomorrow.calva")
+  #_(-> (vscode/extensions.getExtension "betterthantomorrow.calva")
       ;; Force the Calva extension to activate 
-      (.activate)
+        (.activate)
       ;; The promise will resolve with the extension's API as the result
-      (p/then (fn [_api]
-                (.appendLine (joyride/output-channel) "Calva activated. Requiring dependent namespaces.")
-                ;; In `my-lib` and  `z-joylib.calva-api` the Calva extension
+        (p/then (fn [_api]
+                  (.appendLine (joyride/output-channel) "Calva activated. Requiring dependent namespaces.")
+                ;; In `my-lib` and  `calva-api` the Calva extension
                 ;; is required, which will work fine since now Calva is active.
-                (require '[z-joylib.calva-api])
+                  (require '[calva-api])
+                  (require '[clojuredocs])
                 ;; Code in your keybindings can now use the `my-lib` and/or
-                ;; `z-joylib.calva-api` namespace(s)
-                ))
-      (p/catch (fn [error]
-                 (vscode/window.showErrorMessage (str "Requiring Calva failed: " error))))))
+                ;; `calva-api` namespace(s)
+                  ))
+        (p/catch (fn [error]
+                   (vscode/window.showErrorMessage (str "Requiring Calva failed: " error))))))
 
 (when (= (joyride/invoked-script) joyride/*file*)
   (my-main))
@@ -117,3 +121,8 @@
 
 ;; For more examples see:
 ;;   https://github.com/BetterThanTomorrow/joyride/tree/master/examples
+
+(comment
+  (js-keys (second (:disposables @!db)))
+  :rcf)
+
