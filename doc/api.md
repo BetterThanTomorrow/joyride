@@ -256,8 +256,5 @@ See [promesa docs](https://cljdoc.org/d/funcool/promesa/6.0.2/doc/user-guide).
 - `p/with-redefs`
 - `p/wrap`
 
-### Possibly coming additions
-
-We want to add `clojure.pprint` as well in the near future. How near/if depends on things like how much time we can spend on it, and how easy/hard it will be to port this over from [nbb](https://github.com/babashka/nbb).
 
 

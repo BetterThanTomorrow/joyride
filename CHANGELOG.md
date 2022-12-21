@@ -6,6 +6,8 @@ Changes to Joyride
 
 - [Document how to provide implementations of vscode/node interfaces](https://github.com/BetterThanTomorrow/joyride/issues/119)
 - Add Hover Provider example
+- [Upgrade to latest SCI](https://github.com/BetterThanTomorrow/joyride/issues/121)
+- [Add `cljs.pprint`](https://github.com/BetterThanTomorrow/joyride/issues/122)
 
 ## [0.0.27] - 2022-12-06
 
