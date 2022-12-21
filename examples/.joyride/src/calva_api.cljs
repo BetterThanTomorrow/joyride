@@ -51,3 +51,15 @@
 ;;      "args": "(calva-api/joyride-eval-top-level-form)",
 ;;  },
 
+;; Ignore the current (enclosing) form
+
+(defn ignore-current-form []
+  (p/let [[range text] (calva/ranges.currentEnclosingForm)]
+    (calva/editor.replace vscode/window.activeTextEditor range (str "#_" text))))
+
+;; Bind something like so:
+;;     {
+;;         "command": "joyride.runCode",
+;;         "args": "(calva-api/ignore-current-form)",
+;;         "key": "ctrl+alt+c i",
+;;     },
