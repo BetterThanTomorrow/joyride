@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.28] - 2022-12-21
+
 - [Document how to provide implementations of vscode/node interfaces](https://github.com/BetterThanTomorrow/joyride/issues/119)
 - Add Hover Provider example
 - [Upgrade to latest SCI](https://github.com/BetterThanTomorrow/joyride/issues/121)
