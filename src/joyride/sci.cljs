@@ -10,6 +10,7 @@
    [joyride.config :as conf]
    [joyride.db :as db]
    [sci.configs.cljs.test :as cljs-test-config]
+   [sci.configs.cljs.pprint :as cljs-pprint-config]
    [sci.configs.funcool.promesa :as promesa-config]
    [sci.core :as sci]))
 
@@ -83,6 +84,7 @@
               :namespaces {'clojure.core {'IFn (sci/copy-var IFn core-namespace)}
                            'clojure.zip zip-namespace
                            'cljs.test cljs-test-config/cljs-test-namespace
+                           'cljs.pprint cljs-pprint-config/cljs-pprint-namespace
                            'promesa.core promesa-config/promesa-namespace
                            'promesa.protocols promesa-config/promesa-protocols-namespace
                            'joyride.core
