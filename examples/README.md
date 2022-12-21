@@ -27,6 +27,12 @@ A Workspace [activate.cljs](/examples/.joyride/scripts/workspace_activate.cljs) 
 * Using the `joyride.core/extension-context` to push disposables on its `subscriptions` array. Making VS Code dispose of them when Joyride is deactivated.
 * A re-runnable recipe to avoid re-registering the event handler. (By disposing it and then re-register.)
 
+## Create a Hover Provider
+
+In [examples/.joyride/src/problem_hover.cljs](examples/.joyride/src/problem_hover.cljs) there's a Hover Provider which can be activated from the template [user_activate.cljs](#user_activatecljs). It creates an extra Diagnostics item in the hover. It is registered after a significant delay (5 seconds) to make sure this hover item goes at the very top of the hover
+
+It's a workaround for this issue on Calva: https://github.com/BetterThanTomorrow/calva/issues/2001
+
 ## Create a Webview
 
 `webview/example.cljs`
