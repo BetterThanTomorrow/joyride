@@ -1,10 +1,13 @@
 # Joyride Examples
 
-Demonstrating some ways to [Joyride VS Code](https://marketplace.visualstudio.com/items?itemName=betterthantomorrow.joyride).
+Demonstrating some ways to [Joyride VS Code](https://marketplace.visualstudio.com/items?itemName=betterthantomorrow.joyride). You'll find the examples in the [examples/.joyride](./examples/.joyride) folder of this repository.
 
-<img src="../assets/joyride-logo-header.png" width=600></img>
+See also: [Joyride @ London Clojurians, Nov 29 2022](https://github.com/PEZ/london-clojurians-joyride)
 
-In the `.joyride/scripts` folder you'll find mostly small examples:
+[![](https://raw.githubusercontent.com/PEZ/london-clojurians-joyride/master/etc/London%20Clojurians%20Video%20Image.png)](https://www.youtube.com/watch?v=ObjIR08t3lg)
+
+* The [meetup](https://www.meetup.com/london-clojurians/events/286030325/) was about how to hack [Visual Studio Code](https://code.visualstudio.com/) like it was [Emacs](https://www.gnu.org/software/emacs/), using the VS Code Extension [Joyride](https://marketplace.visualstudio.com/items?itemName=betterthantomorrow.joyride).
+* Recording: https://www.youtube.com/watch?v=ObjIR08t3lg
 
 ## Activation scripts
 
