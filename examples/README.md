@@ -29,7 +29,9 @@ A Workspace [activate.cljs](/examples/.joyride/scripts/workspace_activate.cljs) 
 
 ## Create a Hover Provider
 
-In [examples/.joyride/src/problem_hover.cljs](examples/.joyride/src/problem_hover.cljs) there's a Hover Provider which can be activated from the template [user_activate.cljs](#user_activatecljs). It creates an extra Diagnostics item in the hover. It is registered after a significant delay (5 seconds) to make sure this hover item goes at the very top of the hover
+In [examples/.joyride/src/problem_hover.cljs](examples/.joyride/src/problem_hover.cljs) there's a Hover Provider which can be activated from the template [user_activate.cljs](#user_activatecljs). It creates an extra Diagnostics item in the hover. It is registered after a significant delay (5 seconds) to make sure this hover item goes at the very top of the hover. Looks like so:
+
+![image](https://user-images.githubusercontent.com/30010/209091150-65b139f7-83be-44d6-9099-d0aa1ed6afd4.png)
 
 It's a workaround for this issue on Calva: https://github.com/BetterThanTomorrow/calva/issues/2001
 
