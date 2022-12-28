@@ -129,7 +129,7 @@ jobs:
       - run:
           name: Restore build
           command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
-      - run: sudo apt-get update && sudo apt-get install libnss3-dev
+      - run: sudo apt-get update && sudo apt-get install libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libgtk-3-0 libgbm-dev
       - run:
           name: Run Extension Tests
           command: npm run integration-test
