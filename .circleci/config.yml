@@ -129,7 +129,7 @@ jobs:
       - run:
           name: Restore build
           command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
-      - run: sudo apt-get install libnss
+      - run: sudo apt-get update && sudo apt-get install libnss
       - run:
           name: Run Extension Tests
           command: npm run integration-test
