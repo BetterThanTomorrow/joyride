@@ -1,7 +1,6 @@
 (ns integration-test.index
   (:require [cljs.test]
-            [promesa.core :as p]
-            ["vscode" :as vscode]))
+            [promesa.core :as p]))
 
 (def !results (atom {:fail 0
                      :error 0}))
@@ -25,12 +24,13 @@
 (defn run-all-tests []
   (p/create (fn [resolve, reject]
               (p/do!
-               ;; Only way I found to wait for the promise and check something from the namespace
-               (vscode/commands.executeCommand "joyride.runWorkspaceScript" "a_ws_script.cljs")
-               (p/delay 1000) ; This waits both for the above workspace script and for workspace_activate.cljs
-                              ; to run
+               (p/delay 1000) ; This waits for workspace_activate.cljs to run
                (require '[integration-test.workspace-activate-test])
+
+               ;; This fails when accessing integration-test.run-a-ws-script-test/symbol-1
+               ;; if required from the ns form
                (require '[integration-test.run-a-ws-script-test])
+
                (cljs.test/run-tests 'integration-test.workspace-activate-test)
                (cljs.test/run-tests 'integration-test.run-a-ws-script-test)
                
