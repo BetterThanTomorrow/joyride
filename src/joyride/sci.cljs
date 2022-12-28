@@ -12,7 +12,8 @@
    [sci.configs.cljs.test :as cljs-test-config]
    [sci.configs.cljs.pprint :as cljs-pprint-config]
    [sci.configs.funcool.promesa :as promesa-config]
-   [sci.core :as sci]))
+   [sci.core :as sci]
+   [sci.ctx-store :as store]))
 
 (sci/enable-unrestricted-access!) ;; allows mutating and set!-ing all vars from inside SCI
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
@@ -79,53 +80,54 @@
 
 (def !ctx
   (volatile!
-   (sci/init {:classes {'js goog/global
-                        :allow :all}
-              :namespaces {'clojure.core {'IFn (sci/copy-var IFn core-namespace)}
-                           'clojure.zip zip-namespace
-                           'cljs.test cljs-test-config/cljs-test-namespace
-                           'cljs.pprint cljs-pprint-config/cljs-pprint-namespace
-                           'promesa.core promesa-config/promesa-namespace
-                           'promesa.protocols promesa-config/promesa-protocols-namespace
-                           'joyride.core
-                           {'*file* sci/file
-                            'extension-context (sci/copy-var db/extension-context joyride-ns)
-                            'invoked-script (sci/copy-var db/invoked-script joyride-ns)
-                            'output-channel (sci/copy-var db/output-channel joyride-ns)}}
-              :ns-aliases {'clojure.test 'cljs.test}
-              :load-fn (fn [{:keys [ns libname opts]}]
-                         (cond
-                           (symbol? libname)
-                           (source-script-by-ns libname)
-                           (string? libname) ;; node built-in or npm library
-                           (cond
-                             (= "vscode" libname)
-                             (do (sci/add-class! @!ctx 'vscode vscode)
-                                 (sci/add-import! @!ctx ns 'vscode (:as opts))
-                                 {:handled true})
+   (store/reset-ctx!
+    (sci/init {:classes {'js goog/global
+                         :allow :all}
+               :namespaces {'clojure.core {'IFn (sci/copy-var IFn core-namespace)}
+                            'clojure.zip zip-namespace
+                            'cljs.test cljs-test-config/cljs-test-namespace
+                            'cljs.pprint cljs-pprint-config/cljs-pprint-namespace
+                            'promesa.core promesa-config/promesa-namespace
+                            'promesa.protocols promesa-config/promesa-protocols-namespace
+                            'joyride.core
+                            {'*file* sci/file
+                             'extension-context (sci/copy-var db/extension-context joyride-ns)
+                             'invoked-script (sci/copy-var db/invoked-script joyride-ns)
+                             'output-channel (sci/copy-var db/output-channel joyride-ns)}}
+               :ns-aliases {'clojure.test 'cljs.test}
+               :load-fn (fn [{:keys [ns libname opts]}]
+                          (cond
+                            (symbol? libname)
+                            (source-script-by-ns libname)
+                            (string? libname) ;; node built-in or npm library
+                            (cond
+                              (= "vscode" libname)
+                              (do (sci/add-class! @!ctx 'vscode vscode)
+                                  (sci/add-import! @!ctx ns 'vscode (:as opts))
+                                  {:handled true})
 
-                             (active-extension? libname)
-                             (let [module (extension-module libname)
-                                   munged-ns (symbol (munge libname))
-                                   refer (:refer opts)]
-                               (sci/add-class! @!ctx munged-ns module)
-                               (sci/add-import! @!ctx ns munged-ns (:as opts))
-                               (when refer
-                                 (doseq [sym refer]
-                                   (let [prop (gobject/get module sym)
-                                         sub-sym (symbol (str munged-ns "$" sym))]
-                                     (sci/add-class! @!ctx sub-sym prop)
-                                     (sci/add-import! @!ctx ns sub-sym sym))))
-                               {:handled true})
+                              (active-extension? libname)
+                              (let [module (extension-module libname)
+                                    munged-ns (symbol (munge libname))
+                                    refer (:refer opts)]
+                                (sci/add-class! @!ctx munged-ns module)
+                                (sci/add-import! @!ctx ns munged-ns (:as opts))
+                                (when refer
+                                  (doseq [sym refer]
+                                    (let [prop (gobject/get module sym)
+                                          sub-sym (symbol (str munged-ns "$" sym))]
+                                      (sci/add-class! @!ctx sub-sym prop)
+                                      (sci/add-import! @!ctx ns sub-sym sym))))
+                                {:handled true})
 
-                             :else
-                             (let [mod (require* @sci/file libname opts)
-                                   ns-sym (symbol libname)]
-                               (sci/add-class! @!ctx ns-sym mod)
-                               (sci/add-import! @!ctx ns ns-sym
-                                                (or (:as opts)
-                                                    ns-sym))
-                               {:handled true}))))})))
+                              :else
+                              (let [mod (require* @sci/file libname opts)
+                                    ns-sym (symbol libname)]
+                                (sci/add-class! @!ctx ns-sym mod)
+                                (sci/add-import! @!ctx ns ns-sym
+                                                 (or (:as opts)
+                                                     ns-sym))
+                                {:handled true}))))}))))
 
 (def !last-ns (volatile! @sci/ns))
 
