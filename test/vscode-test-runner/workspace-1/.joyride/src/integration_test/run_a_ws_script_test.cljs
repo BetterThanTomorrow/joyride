@@ -8,6 +8,6 @@
     ;; TODO: This doesn't work, 0 assertions
     (async done
            (p/let [result (vscode/commands.executeCommand "joyride.runWorkspaceScript" "a_ws_script.cljs")]
-             (is (= :a-ws-script-2
+             (is (= :a-ws-script
                     result))
              (done)))))
