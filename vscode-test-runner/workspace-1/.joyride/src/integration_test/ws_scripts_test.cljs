@@ -1,4 +1,4 @@
-(ns integration-test.run-a-ws-script-test
+(ns integration-test.ws-scripts-test
   (:require [cljs.test :refer [deftest testing is async]]
             [promesa.core :as p]
             ["vscode" :as vscode]))

@@ -29,10 +29,10 @@
 
                ;; This fails when accessing integration-test.run-a-ws-script-test/symbol-1
                ;; if required from the ns form
-               (require '[integration-test.run-a-ws-script-test])
+               (require '[integration-test.ws-scripts-test])
 
                (cljs.test/run-tests 'integration-test.workspace-activate-test)
-               (cljs.test/run-tests 'integration-test.run-a-ws-script-test)
+               (cljs.test/run-tests 'integration-test.ws-scripts-test)
                
                ;; Running only matching namespaces fails
                ;; Error: Doesn't support name: user-activate 
