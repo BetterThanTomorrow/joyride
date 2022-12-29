@@ -129,15 +129,17 @@ jobs:
       - run:
           name: Restore build
           command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
-      #- run: sudo apt-get update && sudo apt-get install libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libgtk-3-0 libgbm-dev
       - run:
           name: Apt install missing dependencies
           command: sudo apt update && sudo apt install -y libnss3
       - run:
           name: Run Extension Tests
           command: npm run integration-test
-      - store_test_results:
-          path: ~/joyride/junit
+      - save_cache:
+          name: Save dependencies
+          key: npm-{{ checksum "package.json" }}-cljs-{{ checksum "deps.edn" }}
+          paths:
+            - .vscode-test
   github-release:
     docker:
       - image: cibuilds/github:0.10
