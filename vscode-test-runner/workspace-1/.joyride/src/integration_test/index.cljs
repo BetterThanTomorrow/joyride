@@ -32,8 +32,8 @@
                (require '[integration-test.ws-scripts-test])
                #_(require '[integration-test.npm-test])
 
-               (cljs.test/run-tests 'integration-test.workspace-activate-test)
-               (cljs.test/run-tests 'integration-test.ws-scripts-test)
+               (cljs.test/run-tests 'integration-test.workspace-activate-test
+                                    'integration-test.ws-scripts-test)
                #_(cljs.test/run-tests 'integration-test.npm-test)
                
                ;; Running only matching namespaces fails
