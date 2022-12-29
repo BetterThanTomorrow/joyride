@@ -126,12 +126,12 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp
-      - restore_cache:
-          name: Restore dependencies (VS Code install, Joyride workspace node_modules)
-          key: npm-{{ checksum "vscode-test-runner/workspace-1/package.json" }}
       - run:
           name: Restore build
           command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
+      - restore_cache:
+          name: Restore dependencies (VS Code install, Joyride workspace node_modules)
+          key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
       - run:
           name: Apt install missing dependencies
           command: sudo apt update && sudo apt install -y libnss3
@@ -140,7 +140,7 @@ jobs:
           command: npm run integration-test
       - save_cache:
           name: Save dependencies (VS Code install, Joyride workspace node_modules)
-          key: npm-{{ checksum "vscode-test-runner/workspace-1/package.json" }}
+          key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
           paths:
             - .vscode-test/extensions
             - .vscode-test/vscode-linux-x64-insiders
