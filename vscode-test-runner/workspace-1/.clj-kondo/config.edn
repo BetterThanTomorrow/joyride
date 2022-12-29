@@ -1,0 +1,1 @@
+{:lint-as {promesa.core/let clojure.core/let}}
