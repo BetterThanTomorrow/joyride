@@ -126,6 +126,9 @@ jobs:
     steps:
       - attach_workspace:
           at: /tmp
+      - restore_cache:
+          name: Restore dependencies (VS Code install, Joyride workspace node_modules)
+          key: npm-{{ checksum "vscode-test-runner/workspace-1/package.json" }}
       - run:
           name: Restore build
           command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
@@ -136,10 +139,12 @@ jobs:
           name: Run Extension Tests
           command: npm run integration-test
       - save_cache:
-          name: Save dependencies
-          key: npm-{{ checksum "package.json" }}-cljs-{{ checksum "deps.edn" }}
+          name: Save dependencies (VS Code install, Joyride workspace node_modules)
+          key: npm-{{ checksum "vscode-test-runner/workspace-1/package.json" }}
           paths:
-            - .vscode-test
+            - .vscode-test/extensions
+            - .vscode-test/vscode-linux-x64-insiders
+            - ./vscode-test-runner/workspace-1/node_modules
   github-release:
     docker:
       - image: cibuilds/github:0.10
