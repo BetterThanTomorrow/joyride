@@ -4,6 +4,9 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix [Error `No context found` when evaluating `is` form](https://github.com/BetterThanTomorrow/joyride/issues/124)
+- [Add e2e testing](https://github.com/BetterThanTomorrow/joyride/issues/125)
+
 ## [0.0.28] - 2022-12-21
 
 - [Document how to provide implementations of vscode/node interfaces](https://github.com/BetterThanTomorrow/joyride/issues/119)

@@ -26,3 +26,5 @@ node_modules
 examples/.joyride/.calva
 examples/.vscode
 examples/.calva
+
+.vscode-test/

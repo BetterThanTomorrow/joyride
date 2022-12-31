@@ -11,6 +11,7 @@
    [joyride.utils :refer [info warn error cljify]]
    [promesa.core :as p]
    [sci.core :as sci]
+   [sci.ctx-store :as store]
    [clojure.pprint :as pp]
    [clojure.string :as string]))
 
@@ -233,7 +234,7 @@
                          (.-log_level ^Object opts)
                          (:log_level opts))
                        "info")
-        ctx-atom jsci/!ctx
+        ctx-atom (store/get-ctx)
         #_#_on-exit (js/require "signal-exit")]
     
     (swap! !db assoc ::root-path root-path)

@@ -119,39 +119,32 @@ jobs:
             - artifacts
             - build
             - env
-  #test-cljslib:
-  #  docker:
-  #    - image: circleci/node:latest
-  #  working_directory: ~/joyride
-  #  steps:
-  #    - attach_workspace:
-  #        at: /tmp
-  #    - run:
-  #        name: Restore build
-  #        command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
-  #    - run:
-  #        name: Run CLJS Tests
-  #        command: npm run calva-lib-test
-  #    - store_test_results:
-  #        path: ~/joyride/junit
-  #test-integration:
-  #  docker:
-  #    - image: circleci/clojure:openjdk-11-tools-deps-bullseye-node-browsers-legacy
-  #  working_directory: ~/joyride
-  #  steps:
-  #    - attach_workspace:
-  #        at: /tmp
-  #    - run:
-  #        name: Restore build
-  #        command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
-  #    - run:
-  #        name: Compile Extension Tests
-  #        command: npm run compile-test
-  #    - run:
-  #        name: Run Extension Tests
-  #        command: npm run integration-test
-  #    - store_test_results:
-  #        path: ~/joyride/junit
+  test-integration:
+    docker:
+      - image: cimg/clojure:1.11-browsers
+    working_directory: ~/joyride
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Restore build
+          command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
+      - restore_cache:
+          name: Restore dependencies (VS Code install, Joyride workspace node_modules)
+          key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
+      - run:
+          name: Apt install missing dependencies
+          command: sudo apt update && sudo apt install -y libnss3
+      - run:
+          name: Run Extension Tests
+          command: npm run integration-test
+      - save_cache:
+          name: Save dependencies (VS Code install, Joyride workspace node_modules)
+          key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
+          paths:
+            - .vscode-test/extensions
+            - .vscode-test/vscode-linux-x64-insiders
+            - ./vscode-test-runner/workspace-1/node_modules
   github-release:
     docker:
       - image: cibuilds/github:0.10
@@ -244,31 +237,6 @@ jobs:
             else
               npx ${OVSX_CMD}
             fi
-  #deploy-docs:
-  #  docker:
-  #    - image: cimg/python:3.8-node
-  #  steps:
-  #    - add_ssh_keys:
-  #        fingerprints:
-  #          - "a8:5d:72:81:42:fc:ae:be:89:ca:c7:5a:91:c1:96:fb"
-  #    - checkout
-  #    - run:
-  #        name: Update system package lists
-  #        command: sudo apt-get update
-  #    - run:
-  #        name: Install mkdocs-materials insiders dependencies
-  #        command: |
-  #          sudo apt-get install libcairo2-dev libfreetype6-dev libffi-dev libjpeg-dev libpng-dev libz-dev
-  #    - run:
-  #        name: Install mkdocs and mkdocs-material
-  #        command: |
-  #          pip install mkdocs
-  #          pip install git+https://${GITHUB_MKDOCS_MATERIAL_TOKEN}@github.com/squidfunk/mkdocs-material-insiders.git
-  #    - run:
-  #        name: Deploy docs
-  #        command: |
-  #          git checkout published
-  #          mkdocs gh-deploy --config-file mkdocs.insiders.yml --message "[skip ci]" --strict --clean
   bump-version:
     docker:
       - image: cimg/node:15.8
@@ -289,14 +257,6 @@ jobs:
             git push origin HEAD
 workflows:
   version: 2
-  #calva-io-build:
-  #  jobs:
-  #    - deploy-docs:
-  #        filters:
-  #          branches:
-  #            only: published
-  #        context: Joyride
-  # We have two Calva build workflows, because for some reason the tag filter need to be on all jobs...
   build-test:
     jobs:
       - checkout:
@@ -309,21 +269,9 @@ workflows:
       #- test-cljslib:
       #    requires:
       #      - build
-      #- test-integration:
-      #    requires:
-      #      - build
-      #- marketplace-preview-publish:
-      #    requires:
-      #      - prettier-check
-      #      - eslint-check
-      #      - test-grammar
-      #      - test-cljslib
-      #      - test-integration
-      #      - test-ts-unit
-      #    filters:
-      #      branches:
-      #        only: disabled # dev (disabled for now because https://github.com/microsoft/vsmarketplace/issues/310)
-      #    context: Joyride
+      - test-integration:
+          requires:
+            - build
   release-publish:
     jobs:
       - checkout:
@@ -348,19 +296,19 @@ workflows:
       #        ignore: /.*/
       #      tags:
       #        only: /^v\d+\.\d+\.\d+-?.*/
-      #- test-integration:
-      #    requires:
-      #      - build
-      #    filters:
-      #      branches:
-      #        ignore: /.*/
-      #      tags:
-      #        only: /^v\d+\.\d+\.\d+-?.*/
+      - test-integration:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+-?.*/
       - github-release:
           requires:
             - build
             #- test-cljslib
-            #- test-integration
+            - test-integration
           filters:
             branches:
               ignore: /.*/
