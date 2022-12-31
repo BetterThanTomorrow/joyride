@@ -29,20 +29,27 @@
       (p/resolve! running true)
       (p/reject! running true))))
 
+(defn- run-when-ws-activated [tries]
+  (if (:ws-activated? @db/!state)
+    (do
+      (println "Runner: Workspace activated, running tests")
+      (require '[integration-test.workspace-activate-test])
+      (require '[integration-test.ws-scripts-test])
+      #_(require '[integration-test.require-js-test])
+      #_ (require '[integration-test.npm-test])
+      (cljs.test/run-tests 'integration-test.workspace-activate-test
+                           'integration-test.ws-scripts-test
+                           #_'integration-test.require-js-test
+                           #_'integration-test.npm-test))
+    (do
+      (println "Runner: Workspace not activated yet, tries: " tries "- trying again in a jiffy")
+      (js/setTimeout #(run-when-ws-activated (inc tries)) 10))))
+
 (defn run-all-tests []
-  (let [ws-activate-waiter (p/deferred)
-        running (p/deferred)]
+  (let [running (p/deferred)]
     (swap! db/!state assoc
-           :ws-activate-waiter ws-activate-waiter
            :running running)
-    (.then ws-activate-waiter (fn []
-                                (println "Runner: ws-activate-waiter promise resolved, running tests")
-                                (require '[integration-test.workspace-activate-test])
-                                (require '[integration-test.ws-scripts-test])
-                                #_(require '[integration-test.npm-test])
-                                (cljs.test/run-tests 'integration-test.workspace-activate-test
-                                                     'integration-test.ws-scripts-test
-                                                     #_'integration-test.npm-test)))
+    (run-when-ws-activated 1)
     running))
 
 (comment
