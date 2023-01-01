@@ -121,7 +121,7 @@
                              {:handled true})
 
                            :else
-                           (let [mod (require* ns  libname opts)
+                           (let [mod (require* ns libname opts)
                                  ns-sym (symbol libname)]
                              (sci/add-class! (store/get-ctx) ns-sym mod)
                              (sci/add-import! (store/get-ctx) ns ns-sym
