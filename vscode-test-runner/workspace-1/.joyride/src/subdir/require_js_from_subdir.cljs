@@ -1,4 +1,4 @@
-(ns sub-dir.require-js
+(ns subdir.require-js-from-subdir
   (:require ["../js-file.js" :as js-file]))
 
 (defn hello []

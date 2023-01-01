@@ -4,8 +4,7 @@
             [promesa.core :as p]))
 
 (defmethod cljs.test/report [:cljs.test/default :begin-test-var] [m]
-  (println "===" (-> m :var meta :name))
-  (println))
+  (println "===" (-> m :var meta :name)))
 
 (def old-fail (get-method cljs.test/report [:cljs.test/default :fail]))
 
@@ -35,11 +34,11 @@
       (println "Runner: Workspace activated, running tests")
       (require '[integration-test.workspace-activate-test])
       (require '[integration-test.ws-scripts-test])
-      #_(require '[integration-test.require-js-test])
+      (require '[integration-test.require-js-test])
       #_ (require '[integration-test.npm-test])
       (cljs.test/run-tests 'integration-test.workspace-activate-test
                            'integration-test.ws-scripts-test
-                           #_'integration-test.require-js-test
+                           'integration-test.require-js-test
                            #_'integration-test.npm-test))
     (do
       (println "Runner: Workspace not activated yet, tries: " tries "- trying again in a jiffy")
