@@ -1,12 +1,12 @@
 (ns integration-test.npm-test
   (:require [cljs.test :refer [deftest testing is]]
-            ["random-animal-name" :as random-animal-name]))
+            ["color-convert" :as convert]))
 
 
 (deftest npm
-  (testing "Yields a random animal name"
-    (is (not= "Hungry @pappapez"
-              (random-animal-name)))))
+  (testing "Can use required npm module"
+    (is (= "7B2D43"
+           (convert/rgb.hex 123 45 67)))))
 
 
 
