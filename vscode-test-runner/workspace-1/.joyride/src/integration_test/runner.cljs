@@ -6,6 +6,12 @@
 (defmethod cljs.test/report [:cljs.test/default :begin-test-var] [m]
   (println "===" (-> m :var meta :name)))
 
+(def old-pass (get-method cljs.test/report [:cljs.test/default :pass]))
+
+(defmethod cljs.test/report [:cljs.test/default :pass] [m]
+  (old-pass m)
+  (swap! db/!state update :pass inc))
+
 (def old-fail (get-method cljs.test/report [:cljs.test/default :fail]))
 
 (defmethod cljs.test/report [:cljs.test/default :fail] [m]
@@ -23,7 +29,7 @@
 (defmethod cljs.test/report [:cljs.test/default :end-run-tests] [m]
   (old-end-run-tests m)
   (let [{:keys [running fail error]} @db/!state]
-    (println "Runner: tests run, results:" (select-keys  @db/!state [:fail :error]))
+    (println "Runner: tests run, results:" (select-keys  @db/!state [:pass :fail :error]))
     (if (zero? (+ fail error))
       (p/resolve! running true)
       (p/reject! running true))))
