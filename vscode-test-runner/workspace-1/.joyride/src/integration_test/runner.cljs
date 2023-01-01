@@ -41,11 +41,11 @@
       (require '[integration-test.workspace-activate-test])
       (require '[integration-test.ws-scripts-test])
       (require '[integration-test.require-js-test])
-      #_ (require '[integration-test.npm-test])
+      (require '[integration-test.npm-test])
       (cljs.test/run-tests 'integration-test.workspace-activate-test
                            'integration-test.ws-scripts-test
                            'integration-test.require-js-test
-                           #_'integration-test.npm-test))
+                           'integration-test.npm-test))
     (do
       (println "Runner: Workspace not activated yet, tries: " tries "- trying again in a jiffy")
       (js/setTimeout #(run-when-ws-activated (inc tries)) 10))))
