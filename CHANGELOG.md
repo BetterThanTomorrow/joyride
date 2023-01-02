@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.29] - 2023-01-02
+
 - Fix [Error `No context found` when evaluating `is` form](https://github.com/BetterThanTomorrow/joyride/issues/124)
 - [Add e2e testing](https://github.com/BetterThanTomorrow/joyride/issues/125)
 - Fix [Requiring a script that require a js file fails](https://github.com/BetterThanTomorrow/joyride/issues/128)
