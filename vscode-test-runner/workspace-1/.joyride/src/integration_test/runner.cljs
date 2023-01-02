@@ -4,31 +4,30 @@
             [promesa.core :as p]))
 
 (defmethod cljs.test/report [:cljs.test/default :begin-test-var] [m]
-  (print "=== BEGIN" (-> m :var meta :name)) " ")
+  (js/process.stdout.write (str "=== " (-> m :var meta :name) " ")))
 
 (defmethod cljs.test/report [:cljs.test/default :end-test-var] [m]
-  (println "\n=== END" (-> m :var meta :name))
-  (println))
+  (js/process.stdout.write " ===\n"))
 
 (def old-pass (get-method cljs.test/report [:cljs.test/default :pass]))
 
 (defmethod cljs.test/report [:cljs.test/default :pass] [m]
   (old-pass m)
-  (print "✅")
+  (js/process.stdout.write "✅")
   (swap! db/!state update :pass inc))
 
 (def old-fail (get-method cljs.test/report [:cljs.test/default :fail]))
 
 (defmethod cljs.test/report [:cljs.test/default :fail] [m]
   (old-fail m)
-  (print "❌")
+  (js/process.stdout.write "❌")
   (swap! db/!state update :fail inc))
 
 (def old-error (get-method cljs.test/report [:cljs.test/default :fail]))
 
 (defmethod cljs.test/report [:cljs.test/default :error] [m]
   (old-error m)
-  (print "🚫")
+  (js/process.stdout.write "🚫")
   (swap! db/!state update :error inc))
 
 (def old-end-run-tests (get-method cljs.test/report [:cljs.test/default :end-run-tests]))
