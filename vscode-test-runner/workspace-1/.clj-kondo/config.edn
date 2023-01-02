@@ -1,1 +1,2 @@
-{:lint-as {promesa.core/let clojure.core/let}}
+{:lint-as {promesa.core/let clojure.core/let
+           integration-test.macros/deftest-async clojure.test/deftest}}

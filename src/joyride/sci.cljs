@@ -41,6 +41,7 @@
                                    (conf/user-abs-scripts-path)]))]
     (when path-to-load
       {:file ns-path
+       :path-to-load path-to-load
        :source (str (fs/readFileSync path-to-load))})))
 
 (def ^:private extension-namespace-prefix "ext://")
@@ -64,8 +65,9 @@
           (gobject/getValueByKeys exports (.split module-name "."))
           exports)))))
 
-(defn require* [from-script lib {:keys [reload]}]
-  (let [req (module/createRequire (path/resolve (or from-script "./script.cljs"))) 
+(defn require* [from-ns lib {:keys [reload]}]
+  (let [from-path (:path-to-load (source-script-by-ns from-ns))
+        req (module/createRequire (path/resolve (or from-path "./script.cljs"))) 
         resolved (.resolve req lib)]
     (when reload
       (aset (.-cache req) resolved js/undefined))
@@ -119,7 +121,7 @@
                              {:handled true})
 
                            :else
-                           (let [mod (require* @sci/file libname opts)
+                           (let [mod (require* ns libname opts)
                                  ns-sym (symbol libname)]
                              (sci/add-class! (store/get-ctx) ns-sym mod)
                              (sci/add-import! (store/get-ctx) ns ns-sym

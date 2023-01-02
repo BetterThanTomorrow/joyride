@@ -4,19 +4,30 @@
             [promesa.core :as p]))
 
 (defmethod cljs.test/report [:cljs.test/default :begin-test-var] [m]
-  (println "===" (-> m :var meta :name))
-  (println))
+  (js/process.stdout.write (str "=== " (-> m :var meta :name) " ")))
+
+(defmethod cljs.test/report [:cljs.test/default :end-test-var] [m]
+  (js/process.stdout.write " ===\n"))
+
+(def old-pass (get-method cljs.test/report [:cljs.test/default :pass]))
+
+(defmethod cljs.test/report [:cljs.test/default :pass] [m]
+  (old-pass m)
+  (js/process.stdout.write "✅")
+  (swap! db/!state update :pass inc))
 
 (def old-fail (get-method cljs.test/report [:cljs.test/default :fail]))
 
 (defmethod cljs.test/report [:cljs.test/default :fail] [m]
   (old-fail m)
+  (js/process.stdout.write "❌")
   (swap! db/!state update :fail inc))
 
 (def old-error (get-method cljs.test/report [:cljs.test/default :fail]))
 
 (defmethod cljs.test/report [:cljs.test/default :error] [m]
   (old-error m)
+  (js/process.stdout.write "🚫")
   (swap! db/!state update :error inc))
 
 (def old-end-run-tests (get-method cljs.test/report [:cljs.test/default :end-run-tests]))
@@ -24,25 +35,32 @@
 (defmethod cljs.test/report [:cljs.test/default :end-run-tests] [m]
   (old-end-run-tests m)
   (let [{:keys [running fail error]} @db/!state]
-    (println "Runner: tests run, results:" (select-keys  @db/!state [:fail :error]))
+    (println "Runner: tests run, results:" (select-keys  @db/!state [:pass :fail :error]))
     (if (zero? (+ fail error))
       (p/resolve! running true)
       (p/reject! running true))))
 
+(defn- run-when-ws-activated [tries]
+  (if (:ws-activated? @db/!state)
+    (do
+      (println "Runner: Workspace activated, running tests")
+      (require '[integration-test.workspace-activate-test])
+      (require '[integration-test.ws-scripts-test])
+      (require '[integration-test.require-js-test])
+      (require '[integration-test.npm-test])
+      (cljs.test/run-tests 'integration-test.workspace-activate-test
+                           'integration-test.ws-scripts-test
+                           'integration-test.require-js-test
+                           'integration-test.npm-test))
+    (do
+      (println "Runner: Workspace not activated yet, tries: " tries "- trying again in a jiffy")
+      (js/setTimeout #(run-when-ws-activated (inc tries)) 10))))
+
 (defn run-all-tests []
-  (let [ws-activate-waiter (p/deferred)
-        running (p/deferred)]
+  (let [running (p/deferred)]
     (swap! db/!state assoc
-           :ws-activate-waiter ws-activate-waiter
            :running running)
-    (.then ws-activate-waiter (fn []
-                                (println "Runner: ws-activate-waiter promise resolved, running tests")
-                                (require '[integration-test.workspace-activate-test])
-                                (require '[integration-test.ws-scripts-test])
-                                #_(require '[integration-test.npm-test])
-                                (cljs.test/run-tests 'integration-test.workspace-activate-test
-                                                     'integration-test.ws-scripts-test
-                                                     #_'integration-test.npm-test)))
+    (run-when-ws-activated 1)
     running))
 
 (comment

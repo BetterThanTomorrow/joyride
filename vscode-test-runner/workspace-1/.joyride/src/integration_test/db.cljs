@@ -1,9 +1,9 @@
 (ns integration-test.db
-  (:require [cljs.test]
-            [promesa.core :as p]))
+  (:require [cljs.test]))
 
 (def !state (atom {:running nil
-                   :ws-activate-waiter nil
+                   :ws-activated? false
+                   :pass 0
                    :fail 0
                    :error 0}))
 
