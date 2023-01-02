@@ -306,8 +306,6 @@ workflows:
               only: /^v\d+\.\d+\.\d+-?.*/
       - github-release:
           requires:
-            - build
-            #- test-cljslib
             - test-integration
           filters:
             branches:
