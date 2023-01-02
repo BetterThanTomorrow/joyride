@@ -9,7 +9,7 @@
   (testing "Can require js file directly"
     (is (= 42
            js-file/fortytwo)))
-  (testing "Can require cljs from subdir which requires  js file"
+  (testing "Can require cljs from subdir which requires js file"
     (is (= 42
            require-subdir-cljs-requiring-js/fortytwo))))
 
