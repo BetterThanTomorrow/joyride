@@ -18,21 +18,21 @@
     (async done
            (p/let [script-result (vscode/commands.executeCommand "joyride.runWorkspaceScript" "require_js_script.cljs")]
              (is (= 42
-                    script-result)))
-           (done))))
+                    script-result))
+             (done)))))
 
 (deftest script-require-cljs-requiring-js
   (testing "Requires js file from script requiring a cljs namespace"
     (async done
            (p/let [script-result (vscode/commands.executeCommand "joyride.runWorkspaceScript" "require_cljs_requiring_js_script.cljs")]
              (is (= 42
-                    script-result)))
-           (done))))
+                    script-result))
+             (done)))))
 
 (deftest script-require-cljs-requiring-js-from-subdir
   (testing "Requires js file from script requiring a cljs namespace in a subdir from the js file"
     (async done
            (p/let [script-result (vscode/commands.executeCommand "joyride.runWorkspaceScript" "require_cljs_requiring_js_from_subdir_script.cljs")]
              (is (= 42
-                    script-result)))
-           (done))))
+                    script-result))
+             (done)))))
