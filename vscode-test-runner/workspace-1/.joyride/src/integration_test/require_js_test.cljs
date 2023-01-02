@@ -2,12 +2,16 @@
   (:require [cljs.test :refer [deftest testing is async]]
             [promesa.core :as p]
             ["../js-file" :as js-file]
+            [require-subdir-cljs-requiring-js]
             ["vscode" :as vscode]))
 
 (deftest require-js-file
   (testing "Can require js file directly"
     (is (= 42
-           js-file/fortytwo))))
+           js-file/fortytwo)))
+  (testing "Can require cljs from subdir which requires  js file"
+    (is (= 42
+           require-subdir-cljs-requiring-js/fortytwo))))
 
 (deftest script-require-js
   (testing "Requires js file from script"
