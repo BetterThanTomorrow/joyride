@@ -99,13 +99,13 @@
       (let [answer (read)]
         (when-not (= "YES" answer)
           (println "Aborting publish.")
-          (System/exit 0)))
-      (if (empty? unreleased-changelog-text)
-        (publish)
-        (let [updated-changelog-text (new-changelog-text changelog-text
-                                                         unreleased-header-re
-                                                         joyride-version)]
-          (spit changelog-filename updated-changelog-text)
-          (commit-changelog changelog-filename
-                            (str "Add changelog section for v" joyride-version " [skip ci]"))
-          (publish))))))
+          (System/exit 0))))
+    (if (empty? unreleased-changelog-text)
+      (publish)
+      (let [updated-changelog-text (new-changelog-text changelog-text
+                                                       unreleased-header-re
+                                                       joyride-version)]
+        (spit changelog-filename updated-changelog-text)
+        (commit-changelog changelog-filename
+                          (str "Add changelog section for v" joyride-version " [skip ci]"))
+        (publish)))))
