@@ -10,6 +10,12 @@
       (is (= :a-ws-script
              result)))))
 
+(deftest-async run-a-ws-javascript-script-dashes
+  (testing "Runs a workspace script written in JavaScript, named with dash separators"
+    (p/let [result (vscode/commands.executeCommand "joyride.runWorkspaceScript" "a-ws-script.js")]
+      (is (= 42
+             (.-fortytwo result))))))
+
 (deftest-async run-a-ws-javascript-script-underscores
   (testing "Runs a workspace script written in JavaScript, named with undercore separators"
     (p/let [result (vscode/commands.executeCommand "joyride.runWorkspaceScript" "a_ws_script.js")]
