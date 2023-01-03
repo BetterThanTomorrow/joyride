@@ -66,7 +66,10 @@
           exports)))))
 
 (defn require* [from-ns lib {:keys [reload]}]
-  (let [from-path (:path-to-load (source-script-by-ns from-ns))
+  (def lib lib)
+  (let [from-path (if (.startsWith lib "/")
+                    ""
+                    (:path-to-load (source-script-by-ns from-ns)))
         req (module/createRequire (path/resolve (or from-path "./script.cljs"))) 
         resolved (.resolve req lib)]
     (when reload

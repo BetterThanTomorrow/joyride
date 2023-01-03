@@ -19,7 +19,7 @@
    it is only Remote friendly in the case with a workspace root.)"
   [base-path script-folder-path]
   (if vscode/workspace.rootPath
-    (p/let [glob (vscode/RelativePattern. base-path (path/join script-folder-path "**" "*.cljs"))
+    (p/let [glob (vscode/RelativePattern. base-path (path/join script-folder-path "**" "*.{cljs,js}"))
             script-uris (p/->> (vscode/workspace.findFiles glob)
                                cljify
                                (sort-by #(.-fsPath ^js %)))]
@@ -86,13 +86,18 @@
           relative-path (script-fn+ title base-path scripts-path relative-path)
           function (function))))))
 
+(defn- cljs-snippet-requiring-js [abs-path]
+  (str "(js/require \"" abs-path "\")"))
+
 (defn run-script+
   ([menu-conf+ base-path scripts-path]
    (handle-script-menu-selection+ menu-conf+ run-script+ base-path scripts-path))
   ([title base-path scripts-path script-path]
    (-> (p/let [abs-path (path/join base-path scripts-path script-path)
                script-uri (vscode/Uri.file abs-path)
-               code (utils/vscode-read-uri+ script-uri)]
+               code (if (.endsWith script-path ".js")
+                      (cljs-snippet-requiring-js abs-path)
+                      (utils/vscode-read-uri+ script-uri))]
          (swap! db/!app-db assoc :invoked-script abs-path)
          (sci/with-bindings {sci/file abs-path}
            (jsci/eval-string code)))
