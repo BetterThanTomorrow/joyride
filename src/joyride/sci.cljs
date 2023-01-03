@@ -66,7 +66,6 @@
           exports)))))
 
 (defn require* [from-ns lib {:keys [reload]}]
-  (def lib lib)
   (let [from-path (if (.startsWith lib "/")
                     ""
                     (:path-to-load (source-script-by-ns from-ns)))
