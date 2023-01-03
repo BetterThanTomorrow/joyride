@@ -81,7 +81,8 @@
 (def core-namespace (sci/create-ns 'clojure.core nil))
 
 (store/reset-ctx!
- (sci/init {:classes {'js goog/global
+ (sci/init {:classes {'js (doto goog/global
+                            (aset "require" js/require))
                       :allow :all}
             :namespaces {'clojure.core {'IFn (sci/copy-var IFn core-namespace)}
                          'clojure.zip zip-namespace
