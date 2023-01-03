@@ -1,8 +1,10 @@
-# Change Log
+# Changelog
 
 Changes to Joyride
 
 ## [Unreleased]
+
+- Fix [Allow `js/require` to be used in joyride](https://github.com/BetterThanTomorrow/joyride/issues/134)
 
 ## [0.0.29] - 2023-01-02
 
