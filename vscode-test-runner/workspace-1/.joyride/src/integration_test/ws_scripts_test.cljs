@@ -1,13 +1,23 @@
 (ns integration-test.ws-scripts-test
-  (:require [cljs.test :refer [deftest testing is async]]
+  (:require [cljs.test :refer [testing is]]
+            [integration-test.macros :refer [deftest-async]]
             [promesa.core :as p]
             ["vscode" :as vscode]))
 
-(deftest run-a-ws-script
+(deftest-async run-a-ws-script
   (testing "Runs a workspace script"
-    ;; TODO: This doesn't work, 0 assertions
-    (async done
-           (p/let [result (vscode/commands.executeCommand "joyride.runWorkspaceScript" "a_ws_script.cljs")]
-             (is (= :a-ws-script
-                    result))
-             (done)))))
+    (p/let [result (vscode/commands.executeCommand "joyride.runWorkspaceScript" "a_ws_script.cljs")]
+      (is (= :a-ws-script
+             result)))))
+
+(deftest-async run-a-ws-javascript-script-dashes
+  (testing "Runs a workspace script written in JavaScript, named with dash separators"
+    (p/let [result (vscode/commands.executeCommand "joyride.runWorkspaceScript" "a-ws-script.js")]
+      (is (= 42
+             (.-fortytwo result))))))
+
+(deftest-async run-a-ws-javascript-script-underscores
+  (testing "Runs a workspace script written in JavaScript, named with undercore separators"
+    (p/let [result (vscode/commands.executeCommand "joyride.runWorkspaceScript" "a_ws_script.js")]
+      (is (= 42
+             (.-fortytwo result))))))
