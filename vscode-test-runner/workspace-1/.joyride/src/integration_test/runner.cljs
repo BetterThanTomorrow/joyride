@@ -46,11 +46,13 @@
     (do
       (println "Runner: Workspace activated, running tests")
       (require '[integration-test.user-activate-test])
+      (require '[integration-test.user-scripts-test])
       (require '[integration-test.workspace-activate-test])
       (require '[integration-test.ws-scripts-test])
       (require '[integration-test.require-js-test])
       (require '[integration-test.npm-test])
       (cljs.test/run-tests 'integration-test.user-activate-test
+                           'integration-test.user-scripts-test
                            'integration-test.workspace-activate-test
                            'integration-test.ws-scripts-test
                            'integration-test.require-js-test
