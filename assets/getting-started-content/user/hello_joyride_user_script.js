@@ -22,7 +22,5 @@ const showHelloMessage = async () => {
 hello();
 showHelloMessage();
 
-exports = {
-  hello,
-  showHelloMessage,
-}
+exports.hello = hello;
+exports.showHelloMessage = showHelloMessage;
