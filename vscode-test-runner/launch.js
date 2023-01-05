@@ -1,5 +1,32 @@
 const path = require("path");
+const process = require("process");
+const os = require("os");
+const fs = require("fs");
 const { runTests } = require('@vscode/test-electron');
+
+function init() {
+  return new Promise((resolve, reject) => {
+    try {
+      const USER_CONFIG_PATH_KEY = "VSCODE_JOYRIDE_USER_CONFIG_PATH";
+      if (!process.env[USER_CONFIG_PATH_KEY]) {
+        const tmpConfigPath = path.join(
+          os.tmpdir(),
+          "vscode-test-runner-joyride",
+          "user-config"
+        );
+        if (fs.existsSync(tmpConfigPath)) {
+          fs.rmSync(tmpConfigPath, { recursive: true });
+        }
+        fs.mkdirSync(tmpConfigPath, { recursive: true });
+        process.env[USER_CONFIG_PATH_KEY] = tmpConfigPath;
+        console.info(`USER_CONFIG_PATH: ${process.env[USER_CONFIG_PATH_KEY]}`);
+      }
+      resolve();
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
 
 async function main() {
   try {
@@ -27,4 +54,8 @@ async function main() {
   }
 }
 
-void main();
+void init().then(() => main())
+  .catch((error) => {
+    console.error('Failed to initialize test running environment:', error);
+    process.exit(1);
+  });

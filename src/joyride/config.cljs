@@ -1,9 +1,11 @@
 (ns joyride.config
   (:require ["os" :as os]
             ["path" :as path]
+            ["process" :as process]
             [joyride.db :as db]))
 
-(def user-config-path (path/join (os/homedir) ".config"))
+(def user-config-path (or (aget process/env "VSCODE_JOYRIDE_USER_CONFIG_PATH") 
+                          (path/join (os/homedir) ".config")))
 (def user-scripts-path (path/join "joyride" "scripts"))
 
 (defn user-abs-scripts-path 
