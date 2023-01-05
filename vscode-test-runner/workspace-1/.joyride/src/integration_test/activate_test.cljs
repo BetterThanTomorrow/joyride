@@ -1,18 +1,28 @@
-(ns integration-test.workspace-activate-test
+(ns integration-test.activate-test
   (:require [cljs.test :refer [deftest testing is]]
             ["path" :as path]))
 
-(deftest ws-activate 
+(deftest user-activate 
+  (testing "User activation script is required"
+    (is #_{:clj-kondo/ignore [:unresolved-namespace]}
+     (= #'user-activate/!db
+        ((ns-publics 'user-activate) '!db))))
+  
+  (testing "my-lib is required"
+    (is (seq
+         (ns-publics 'my-lib)))))
+
+(deftest ws-activate
   (testing "Workspace activation script defines a symbol"
     (is (= :symbol-1
            #_{:clj-kondo/ignore [:unresolved-namespace]}
            workspace-activate/symbol-1)))
-  
+
   (testing "Workspace activation script defines a function"
     (is (= :fn-1
            #_{:clj-kondo/ignore [:unresolved-namespace]}
            (workspace-activate/fn-1))))
-  
+
   (testing "Workspace activation script finds workspace root"
     (is (= "workspace-1"
            #_{:clj-kondo/ignore [:unresolved-namespace]}
