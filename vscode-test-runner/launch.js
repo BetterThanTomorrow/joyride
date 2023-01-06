@@ -47,9 +47,14 @@ async function main() {
       extensionDevelopmentPath,
       extensionTestsPath,
       launchArgs,
-    });
+    }).then((_result) => {
+      console.info('Tests finished');
+    }).catch((err) => {
+      console.error('Tests finished:', err);
+      process.exit(1);
+    });  
   } catch (err) {
-    console.error('Failed to run tests');
+    console.error('Failed to run tests:', err);
     process.exit(1);
   }
 }
