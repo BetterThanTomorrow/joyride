@@ -1,5 +1,32 @@
 const path = require("path");
+const process = require("process");
+const os = require("os");
+const fs = require("fs");
 const { runTests } = require('@vscode/test-electron');
+
+function init() {
+  return new Promise((resolve, reject) => {
+    try {
+      const USER_CONFIG_PATH_KEY = "VSCODE_JOYRIDE_USER_CONFIG_PATH";
+      if (!process.env[USER_CONFIG_PATH_KEY]) {
+        const tmpConfigPath = path.join(
+          os.tmpdir(),
+          "vscode-test-runner-joyride",
+          "user-config"
+        );
+        if (fs.existsSync(tmpConfigPath)) {
+          fs.rmSync(tmpConfigPath, { recursive: true });
+        }
+        fs.mkdirSync(tmpConfigPath, { recursive: true });
+        process.env[USER_CONFIG_PATH_KEY] = tmpConfigPath;
+        console.info(`USER_CONFIG_PATH: ${process.env[USER_CONFIG_PATH_KEY]}`);
+      }
+      resolve();
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
 
 async function main() {
   try {
@@ -20,11 +47,20 @@ async function main() {
       extensionDevelopmentPath,
       extensionTestsPath,
       launchArgs,
-    });
+    }).then((_result) => {
+      console.info('Tests finished');
+    }).catch((err) => {
+      console.error('Tests finished:', err);
+      process.exit(1);
+    });  
   } catch (err) {
-    console.error('Failed to run tests');
+    console.error('Failed to run tests:', err);
     process.exit(1);
   }
 }
 
-void main();
+void init().then(() => main())
+  .catch((error) => {
+    console.error('Failed to initialize test running environment:', error);
+    process.exit(1);
+  });

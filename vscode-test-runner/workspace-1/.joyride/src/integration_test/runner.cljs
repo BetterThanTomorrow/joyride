@@ -34,22 +34,28 @@
 
 (defmethod cljs.test/report [:cljs.test/default :end-run-tests] [m]
   (old-end-run-tests m)
-  (let [{:keys [running fail error]} @db/!state]
+  (let [{:keys [running pass fail error]} @db/!state
+        passed-minimum-threshold 20
+        fail-reason (cond 
+                      (> 0 (+ fail error)) "FAILURE: Some tests failed or errored"
+                      (< pass passed-minimum-threshold) (str "FAILURE: Less than " passed-minimum-threshold " assertions passed")
+                      :else nil)]
     (println "Runner: tests run, results:" (select-keys  @db/!state [:pass :fail :error]))
-    (if (zero? (+ fail error))
-      (p/resolve! running true)
-      (p/reject! running true))))
+    (if fail-reason
+      (p/reject! running fail-reason)
+      (p/resolve! running true))))
 
+;; We rely on that the user_activate.cljs script is run before workspace_activate.cljs
 (defn- run-when-ws-activated [tries]
   (if (:ws-activated? @db/!state)
     (do
       (println "Runner: Workspace activated, running tests")
-      (require '[integration-test.workspace-activate-test])
-      (require '[integration-test.ws-scripts-test])
+      (require '[integration-test.activate-test])
+      (require '[integration-test.scripts-test])
       (require '[integration-test.require-js-test])
       (require '[integration-test.npm-test])
-      (cljs.test/run-tests 'integration-test.workspace-activate-test
-                           'integration-test.ws-scripts-test
+      (cljs.test/run-tests 'integration-test.activate-test
+                           'integration-test.scripts-test
                            'integration-test.require-js-test
                            'integration-test.npm-test))
     (do

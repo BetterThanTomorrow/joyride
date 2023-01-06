@@ -5,7 +5,10 @@ Changes to Joyride
 ## [Unreleased]
 
 - [Enable using JS files as user and workspace scripts](https://github.com/BetterThanTomorrow/joyride/issues/132)
-- Fix [Allow `js/require` to be used in joyride](https://github.com/BetterThanTomorrow/joyride/issues/134)
+- Fix: [Allow `js/require` to be used in joyride](https://github.com/BetterThanTomorrow/joyride/issues/134)
+- Dev internals: [Add basic e2e tests for user scripts](https://github.com/BetterThanTomorrow/joyride/issues/136)
+- Dev internals: [Ensure that Joyride's `cljs.test` actually runs tests](https://github.com/BetterThanTomorrow/joyride/issues/138)
+- Fix: [Default user content places `my_lib.cljs` in `scripts` folder, should be in `src` folder](https://github.com/BetterThanTomorrow/joyride/issues/139)
 
 ## [0.0.29] - 2023-01-02
 
