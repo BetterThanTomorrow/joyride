@@ -26,8 +26,9 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "--extensionDevelopmentPath=${workspaceRoot}"
-            ],
+                "--extensionDevelopmentPath=${workspaceRoot}",
+                "--folder-uri=${workspaceRoot}/vscode-test-runner/workspace-1"
+             ],
             "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": [
