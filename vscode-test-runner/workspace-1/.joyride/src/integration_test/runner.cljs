@@ -37,7 +37,7 @@
   (let [{:keys [running pass fail error]} @db/!state
         passed-minimum-threshold 20
         fail-reason (cond 
-                      (> 0 (+ fail error)) "FAILURE: Some tests failed or errored"
+                      (< 0 (+ fail error)) "FAILURE: Some tests failed or errored"
                       (< pass passed-minimum-threshold) (str "FAILURE: Less than " passed-minimum-threshold " assertions passed")
                       :else nil)]
     (println "Runner: tests run, results:" (select-keys  @db/!state [:pass :fail :error]))
