@@ -5,6 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch Tests",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "--disable-extensions",
+                "--extensionDevelopmentPath=${workspaceRoot}",
+                "--extensionTestsPath=${workspaceRoot}/vscode-test-runner/runTests.js",
+                "--folder-uri=${workspaceRoot}/vscode-test-runner/workspace-1"
+            ],
+            //"sourceMaps": true,
+            //"outFiles": [
+            //    "${workspaceFolder}/out/**/*.js"
+            //]
+        },
+        {
             "name": "Launch Extension",
             "type": "extensionHost",
             "request": "launch",
