@@ -28,7 +28,7 @@ You can run or open the scripts using commands provided (search the command pale
 * **Joyride Run Workspace Script...**, default keybinding `ctrl+alt+j w`
 * **Joyride Open Workspace Script...**
 
-**Note, about Clojure namespaces**: Fore ClojureScript Joyride effectively has a classpath that is `user:workspace`. A file `<User scripts dir>/foo_bar.cljs`, will establish/use a namespace `foo-bar`. As will a file `<Workspace scripts dir>/foo_bar.cljs`. Any symbols in these files will be shared/overwritten, as the files are loaded and reloaded. There are probably ways to use this as a power. Please treat it as a super power, because you might also hurt yourself with it.
+**Note, about Clojure namespaces**: Used with ClojureScript, Joyride effectively has a classpath that is `user/scripts:user/src:workspace/scripts:workspace/src`. A file `<User scripts dir>/foo_bar.cljs`, will establish/use a namespace `foo-bar`. As will a file `<Workspace scripts dir>/foo_bar.cljs`. Any symbols in these files will be shared/overwritten, as the files are loaded and reloaded. There are probably ways to use this as a power. Please treat it as a super power, because you might also hurt yourself with it.
 
 ## Quickest Start - Start Here - Install Joyride
 
