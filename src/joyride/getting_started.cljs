@@ -35,11 +35,13 @@
       (apply (partial create-content-file+ activate-dest-uri) section-and-subpath))))
 
 (defn maybe-create-user-content+ []
-  (maybe-create-content+ [(conf/user-abs-scripts-path) "user" "user_activate.cljs"])
-  (maybe-create-content+ [(conf/user-abs-scripts-path) "user" "hello_joyride_user_script.cljs"])
-  (maybe-create-content+ [(conf/user-abs-scripts-path) "user" "hello_joyride_user_script.js"])
-  (maybe-create-content+ [(conf/user-abs-src-path) "user" "problem_hover.cljs"])
-  (maybe-create-content+ [(conf/user-abs-src-path) "user" "my_lib.cljs"]))
+  (p/let [[_ user-activate-exists?] (dest-uri-uri-exists?+ [(conf/user-abs-scripts-path) "user" "user_activate.cljs"])]
+    (when-not user-activate-exists?
+      (maybe-create-content+ [(conf/user-abs-scripts-path) "user" "user_activate.cljs"])
+      (maybe-create-content+ [(conf/user-abs-scripts-path) "user" "hello_joyride_user_script.cljs"])
+      (maybe-create-content+ [(conf/user-abs-scripts-path) "user" "hello_joyride_user_script.js"])
+      (maybe-create-content+ [(conf/user-abs-src-path) "user" "problem_hover.cljs"])
+      (maybe-create-content+ [(conf/user-abs-src-path) "user" "my_lib.cljs"]))))
 
 (defn create-and-open-content-file+ [content-file-uri section-and-subpath]
   (fn []
