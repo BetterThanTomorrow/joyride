@@ -6,4 +6,4 @@ Please answer the following questions and leave the below in as part of your PR.
 
 - [ ] This PR contains a [test](https://github.com/BetterThanTomorrow/joyride/tree/master/vscode-test-runner/workspace-1/.joyride/src/integration_test) to prevent against future regressions
 
-- [ ] I have updated the [CHANGELOG.md](https://github.com/BetterThanTomorrow/joyride/blob/master/CHANGELOG.md) file with a description of the addressed issue.
+- [ ] I have updated the **\[Unreleased\]** section of the [CHANGELOG.md](https://github.com/BetterThanTomorrow/joyride/blob/master/CHANGELOG.md) file with a link to the addressed issue.
