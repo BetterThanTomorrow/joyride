@@ -48,20 +48,39 @@ You can also run tests from the [development](#development) extension host. Howe
 
 ## Development
 
+We assume you are using [Calva](https://marketplace.visualstudio.com/items?itemName=betterthantomorrow.calva).
+
 0. `npm i`
 1. In VS Code, **Tasks: Run Build Task**: <kbd>cmd/ctrl+shift+b</kbd>.
    - This starts the nREPL server
    - Wait for shadow-cljs to signal that building is done.
 1. Start the extension in debug mode: <kbd>F5</kbd>
+   - This starts the Extension Development Host
+1. In the extension development host, issue the command **Calva: Start Joyride REPL and Connect**
 1. Back in the Joyride project window: Connect the REPL to the nREPL server and the shadow-cljs build `:extension`
 
-By default, the debug extension host session opens up [the integration testing project](vscode-test-runner/workspace-1/), which is part of this repository/project. (See [Tests](#tests) for more on the tests.) This makes it easy to test Joyride with relevant sample content, manually, or via integration test code. It also means that content you create or change there can be committed back to the repository. Please note that we want any Joyride content in this integration test project's `script` and `src` directories to be consumed by integration tests, so if you think some content should be added, please also add integration tests for it.
+### About the two VS Code windows
 
-When the Joyride project directory is open in VS Code, you will recognize this window by it's title bar, and the default extension host window is also recognizable this way.
+When the Joyride project directory is open in VS Code, you will recognize this window by it's title bar, and the default Extension Development Host window is also recognizable this way.
 
 ![Joyride Development Exension Host](assets/joyride-development-windows.png)
 
-In this screenshot the Joyride project window, with a Joyride-red title bar, is behind the extension host window, with a Joyride-yellow title bar. (The status bar of the Joyride window is also red, because VS Code highlights it for being the window where the debug session is spawned and controlled from. It might be some other color on your machine, depending on what theme you use.)
+In this screenshot the Joyride project window, with a Joyride-red title bar, is behind the extension development host window, with a Joyride-yellow title bar. (The status bar of the Joyride window is also red, because VS Code highlights it for being the window where the debug session is spawned and controlled from. It might be some other color on your machine, depending on what theme you use.)
+
+### About the REPLs
+
+You will have two REPLs.
+
+1. One REPL in the Joyride project window
+   - For developing Joyride itself.
+   - This is a shadow-cljs REPL and the Joyride extension will hot reload as you save files (or you can just load changes in the REPL to update the extension).
+1. Another REPL in the Extension Development Host window
+   - This is the REPL of your Joyride under development.
+   - This REPL will not hot reload anything based on files saved, you'll have to load changes in the REPL manually.
+
+### About the default Extension Development project
+
+By default, the debug extension host session opens up [the integration testing project](vscode-test-runner/workspace-1/), which is part of this repository/project. (See [Tests](#tests) for more on the tests.) This makes it easy to test Joyride with relevant sample content, manually, or via integration test code. It also means that content you create or change there can be committed back to the repository. Please note that we want any Joyride content in this integration test project's `script` and `src` directories to be consumed by integration tests, so if you think some content should be added, please also add integration tests for it.
 
 ## Feedback welcome
 
