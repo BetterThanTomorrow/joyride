@@ -5,9 +5,11 @@
 Before writing any code, please create an issue first that describes the problem
 you are trying to solve with alternatives that you have considered. A little bit
 of prior communication can save a lot of time on coding. Keep the problem as
-small as possible. If there are two problems, make two issues. We discuss the
-issue and if we reach an agreement on the approach, it's time to move on to a
-PR.
+small as possible. If there are two problems, make two issues. If the problem
+statement isn't clear, it's better to start with a
+[Discussion](https://github.com/BetterThanTomorrow/joyride/discussions). When we
+collectively agree on the problem and solution direction, it's time to move on
+to a PR.
 
 ## PR
 
