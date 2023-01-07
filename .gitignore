@@ -1,6 +1,5 @@
 # vs code
 *.vsix
-.vscode/settings.json
 
 # Dependency directories
 node_modules

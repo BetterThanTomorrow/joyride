@@ -1,0 +1,16 @@
+{
+  "cSpell.words": [
+    "cljify",
+    "jsci",
+    "jsify",
+    "Scriptable"
+  ],
+  "calva.fmt.configPath": "cljfmt.edn",
+  "workbench.colorCustomizations": {
+    "sash.hoverBorder": "#19A5FF",
+    "titleBar.activeBackground": "#F00C18",
+    "titleBar.activeForeground": "#eeeeee",
+    "titleBar.inactiveBackground": "#F00C18cc",
+    "titleBar.inactiveForeground": "#eeeeeecc"
+  },
+}
