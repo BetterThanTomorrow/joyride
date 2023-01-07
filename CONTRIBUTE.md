@@ -1,15 +1,20 @@
 # Contribute
 
+A great way to help the Joyride project is to be part of spreading the word about it. Please consider blogging, tweeting, publishing video content, etcetera, about this way to configure VS Code.
+
+If you want to contribute to the quality and/or feature set of Joyride, helping us identify room for improvement is very welcome! If you want to contribute code, that is also highly appreciated. Please read below how we approach improvements to Joyride.
+
 ## Issue
 
 Before writing any code, please create an issue first that describes the problem
 you are trying to solve with alternatives that you have considered. A little bit
 of prior communication can save a lot of time on coding. Keep the problem as
-small as possible. If there are two problems, make two issues. If the problem
-statement isn't clear, it's better to start with a
-[Discussion](https://github.com/BetterThanTomorrow/joyride/discussions). When we
+small as possible. If there are two problems, make two issues. When we
 collectively agree on the problem and solution direction, it's time to move on
 to a PR.
+
+If the problem statement isn't clear, it's better to start with a
+[Discussion](https://github.com/BetterThanTomorrow/joyride/discussions).
 
 ## PR
 
