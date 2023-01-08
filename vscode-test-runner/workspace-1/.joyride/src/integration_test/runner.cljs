@@ -36,7 +36,7 @@
   (old-end-run-tests m)
   (let [{:keys [running pass fail error]} @db/!state
         passed-minimum-threshold 20
-        fail-reason (cond 
+        fail-reason (cond
                       (< 0 (+ fail error)) "FAILURE: Some tests failed or errored"
                       (< pass passed-minimum-threshold) (str "FAILURE: Less than " passed-minimum-threshold " assertions passed")
                       :else nil)]
@@ -49,14 +49,16 @@
 (defn- run-when-ws-activated [tries]
   (if (:ws-activated? @db/!state)
     (do
-      (println "Runner: Workspace activated, running tests")
+      (println "Runner: Workspace activated, running tests...")
       (require '[integration-test.activate-test])
       (require '[integration-test.scripts-test])
       (require '[integration-test.require-js-test])
+      (require '[integration-test.require-extension-test])
       (require '[integration-test.npm-test])
       (cljs.test/run-tests 'integration-test.activate-test
                            'integration-test.scripts-test
                            'integration-test.require-js-test
+                           'integration-test.require-extension-test
                            'integration-test.npm-test))
     (do
       (println "Runner: Workspace not activated yet, tries: " tries "- trying again in a jiffy")

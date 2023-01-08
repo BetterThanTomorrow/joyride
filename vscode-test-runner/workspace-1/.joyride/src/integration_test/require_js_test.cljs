@@ -1,5 +1,5 @@
 (ns integration-test.require-js-test
-  (:require [cljs.test :refer [deftest testing is async]]
+  (:require [cljs.test :refer [deftest testing is]]
             [promesa.core :as p]
             ["../js-file" :as js-file]
             [require-subdir-cljs-requiring-js]
