@@ -55,11 +55,13 @@
       (require '[integration-test.require-js-test])
       (require '[integration-test.require-extension-test])
       (require '[integration-test.npm-test])
+      (require '[integration-test.nrepl-test])
       (cljs.test/run-tests 'integration-test.activate-test
                            'integration-test.scripts-test
                            'integration-test.require-js-test
                            'integration-test.require-extension-test
-                           'integration-test.npm-test))
+                           'integration-test.npm-test
+                           'integration-test.nrepl-test))
     (do
       (println "Runner: Workspace not activated yet, tries: " tries "- trying again in a jiffy")
       (js/setTimeout #(run-when-ws-activated (inc tries)) 10))))
