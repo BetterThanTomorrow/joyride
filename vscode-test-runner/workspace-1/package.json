@@ -10,6 +10,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "color-convert": "^2.0.1"
+    "color-convert": "^2.0.1",
+    "nrepl-client": "^0.3.0"
   }
 }
