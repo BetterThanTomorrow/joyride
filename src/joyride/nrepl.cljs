@@ -287,23 +287,22 @@
       (p/rejected (js/Error. "The nREPL server is already running" {})))))
 
 (defn stop-server+ []
-  (debug "nREPL stop-server")
-  (p/do!
-   (p/create (fn [resolve _reject]
-               (if (server-running?)
-                 (let [server (::server @!db)]
-                   (.close server
-                           (fn []
-                             (swap! !db dissoc ::server)
-                             (p/do
-                               (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning false)
-                               (-> (remove-port-file (::root-path @!db))
-                                   (p/then (fn []
-                                             (swap! !db dissoc ::root-path)
-                                             (info "nREPL server stopped")
-                                             (resolve))))))))
-                 (do (info "There is no nREPL Server running")
-                     (resolve)))))))
+  (p/create (fn [resolve _reject]
+              (if (server-running?)
+                (let [server (::server @!db)]
+                  (debug "nREPL stop-server")
+                  (.close server
+                          (fn []
+                            (swap! !db dissoc ::server)
+                            (p/do
+                              (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning false)
+                              (-> (remove-port-file (::root-path @!db))
+                                  (p/then (fn []
+                                            (swap! !db dissoc ::root-path)
+                                            (info "nREPL server stopped")
+                                            (resolve))))))))
+                (do (info "There is no nREPL Server running")
+                    (resolve))))))
 
 (defn enable-message-logging! []
   (swap! !db ::log-messages? true))
