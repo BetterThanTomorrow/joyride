@@ -12,21 +12,21 @@
 (def old-pass (get-method cljs.test/report [:cljs.test/default :pass]))
 
 (defmethod cljs.test/report [:cljs.test/default :pass] [m]
-  (old-pass m)
+  (binding [*print-fn* js/process.stdout.write] (old-pass m)) 
   (js/process.stdout.write "✅")
   (swap! db/!state update :pass inc))
 
 (def old-fail (get-method cljs.test/report [:cljs.test/default :fail]))
 
 (defmethod cljs.test/report [:cljs.test/default :fail] [m]
-  (old-fail m)
+  (binding [*print-fn* js/process.stdout.write] (old-fail m))
   (js/process.stdout.write "❌")
   (swap! db/!state update :fail inc))
 
 (def old-error (get-method cljs.test/report [:cljs.test/default :fail]))
 
 (defmethod cljs.test/report [:cljs.test/default :error] [m]
-  (old-error m)
+  (binding [*print-fn* js/process.stdout.write] (old-error m))
   (js/process.stdout.write "🚫")
   (swap! db/!state update :error inc))
 
