@@ -37,17 +37,19 @@
 (def old-end-run-tests (get-method cljs.test/report [:cljs.test/default :end-run-tests]))
 
 (defmethod cljs.test/report [:cljs.test/default :end-run-tests] [m]
-  (old-end-run-tests m)
-  (let [{:keys [running pass fail error]} @db/!state
-        passed-minimum-threshold 20
-        fail-reason (cond
-                      (< 0 (+ fail error)) "FAILURE: Some tests failed or errored"
-                      (< pass passed-minimum-threshold) (str "FAILURE: Less than " passed-minimum-threshold " assertions passed")
-                      :else nil)]
-    (println "Runner: tests run, results:" (select-keys  @db/!state [:pass :fail :error]))
-    (if fail-reason
-      (p/reject! running fail-reason)
-      (p/resolve! running true))))
+  (binding [*print-fn* write]
+    ;; TODO: Figure out why the test result summary is not printed
+    (old-end-run-tests m)
+    (let [{:keys [running pass fail error]} @db/!state
+          passed-minimum-threshold 20
+          fail-reason (cond
+                        (< 0 (+ fail error)) "FAILURE: Some tests failed or errored"
+                        (< pass passed-minimum-threshold) (str "FAILURE: Less than " passed-minimum-threshold " assertions passed")
+                        :else nil)]
+      (println "Runner: tests run, results:" (select-keys  @db/!state [:pass :fail :error]))
+      (if fail-reason
+        (p/reject! running fail-reason)
+        (p/resolve! running true)))))
 
 ;; We rely on that the user_activate.cljs script is run before workspace_activate.cljs
 (defn- run-when-ws-activated [tries]
