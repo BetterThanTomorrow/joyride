@@ -69,7 +69,7 @@
                            ;; TODO: Figure out why this gives:
                            ;;         Error: The nREPL server is already running
                            ;;       when the eval test is run
-                           #_'integration-test.nrepl-start-stop-test
+                           'integration-test.nrepl-start-stop-test
                            'integration-test.nrepl-eval-test))
     (do
       (println "Runner: Workspace not activated yet, tries: " tries "- trying again in a jiffy")

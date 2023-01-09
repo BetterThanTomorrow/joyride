@@ -300,7 +300,7 @@
                                   (p/then (fn []
                                             (swap! !db dissoc ::root-path)
                                             (info "nREPL server stopped")
-                                            (resolve))))))))
+                                            (resolve server))))))))
                 (do (info "There is no nREPL Server running")
                     (resolve))))))
 
