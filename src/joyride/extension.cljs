@@ -87,7 +87,7 @@
     (register-command! extension-context "joyride.openWorkspaceScript" #'scripts-handler/open-workspace-script+)
     (register-command! extension-context "joyride.openUserScript" #'scripts-handler/open-user-script+)
     (register-command! extension-context "joyride.startNReplServer" #'start-nrepl-server+)
-    (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server)
+    (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server+)
     (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
     (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)
     (when-contexts/set-context! ::when-contexts/joyride.isActive true)
@@ -111,7 +111,7 @@
 (defn ^:export deactivate []
   (when-contexts/set-context! ::when-contexts/joyride.isActive false)
   (when (nrepl/server-running?)
-    (nrepl/stop-server))
+    (nrepl/stop-server+))
   (clear-disposables!))
 
 (defn before [done]

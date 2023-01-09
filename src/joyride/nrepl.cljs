@@ -286,21 +286,24 @@
       (info "The nREPL server is already running")
       (p/rejected (js/Error. "The nREPL server is already running" {})))))
 
-(defn stop-server []
+(defn stop-server+ []
   (debug "nREPL stop-server")
-  (if (server-running?)
-    (let [server (::server @!db)]
-      (.close server
-              (fn []
-                (swap! !db dissoc ::server)
-                (p/do
-                  (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning false))
-                (-> (remove-port-file (::root-path @!db))
-                    (p/then
-                     (fn []
-                       (swap! !db dissoc ::root-path)
-                       (info "nREPL server stopped")))))))
-    (info "There is no nREPL Server running")))
+  (p/do!
+   (p/create (fn [resolve _reject]
+               (if (server-running?)
+                 (let [server (::server @!db)]
+                   (.close server
+                           (fn []
+                             (swap! !db dissoc ::server)
+                             (p/do
+                               (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning false)
+                               (-> (remove-port-file (::root-path @!db))
+                                   (p/then (fn []
+                                             (swap! !db dissoc ::root-path)
+                                             (info "nREPL server stopped")
+                                             (resolve))))))))
+                 (do (info "There is no nREPL Server running")
+                     (resolve)))))))
 
 (defn enable-message-logging! []
   (swap! !db ::log-messages? true))
@@ -311,6 +314,6 @@
 (comment
   (-> (start-server+ {:root-path "/Users/pez/Projects/joyride/playground" #_"/hello-joyride"})
       (p/catch #(js/console.error %)))
-  (stop-server)
+  (stop-server+)
   (server-running?)
   )
