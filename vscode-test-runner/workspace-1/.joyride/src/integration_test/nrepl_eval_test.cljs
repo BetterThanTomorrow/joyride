@@ -47,11 +47,23 @@
                          answer))
                   (resolve))))))
 
-(deftest-async print-out
-  (testing "nRepl server prints to `:out`"
+(deftest-async client-print-out
+  (testing "nRepl server prints evaluated prints to `:out`"
     (p/create (fn [resolve _reject]
                 (p/let [messages (eval "(println 42)")
                         answer (from-nrepl-messages messages "out")]
                   (is (= "42\n"
                          answer))
                   (resolve))))))
+
+(deftest-async print-out
+  (testing "While the nRepl server is connected `println` prints to message stream `:out`"
+    (p/create (fn [resolve _reject]
+                ;; The nrepl-client seems to lack a way to get out-of-band prints
+                ;; we're using the raw Buffer, looking for our printed value in it
+                (.once client "data"
+                       (fn [data]
+                         (is (= (re-find #"printed 42" (.toString data))
+                                "printed 42"))
+                         (resolve)))
+                (println "printed 42")))))
