@@ -3,31 +3,34 @@
             [integration-test.db :as db]
             [promesa.core :as p]))
 
+(defn- write [& xs]
+  (apply js/process.stdout.write xs))
+
 (defmethod cljs.test/report [:cljs.test/default :begin-test-var] [m]
-  (js/process.stdout.write (str "=== " (-> m :var meta :name) " ")))
+  (js/process.stdout.write (str "===" (-> m :var meta :name) " ")))
 
 (defmethod cljs.test/report [:cljs.test/default :end-test-var] [m]
-  (js/process.stdout.write " ===\n"))
+  (write " ===\n"))
 
 (def old-pass (get-method cljs.test/report [:cljs.test/default :pass]))
 
 (defmethod cljs.test/report [:cljs.test/default :pass] [m]
-  (binding [*print-fn* js/process.stdout.write] (old-pass m)) 
-  (js/process.stdout.write "✅")
+  (binding [*print-fn* write] (old-pass m)) 
+  (write "✅")
   (swap! db/!state update :pass inc))
 
 (def old-fail (get-method cljs.test/report [:cljs.test/default :fail]))
 
 (defmethod cljs.test/report [:cljs.test/default :fail] [m]
-  (binding [*print-fn* js/process.stdout.write] (old-fail m))
-  (js/process.stdout.write "❌")
+  (binding [*print-fn* write] (old-fail m))
+  (write "❌")
   (swap! db/!state update :fail inc))
 
 (def old-error (get-method cljs.test/report [:cljs.test/default :fail]))
 
 (defmethod cljs.test/report [:cljs.test/default :error] [m]
-  (binding [*print-fn* js/process.stdout.write] (old-error m))
-  (js/process.stdout.write "🚫")
+  (binding [*print-fn* write] (old-error m))
+  (write "🚫")
   (swap! db/!state update :error inc))
 
 (def old-end-run-tests (get-method cljs.test/report [:cljs.test/default :end-run-tests]))
