@@ -1,13 +1,14 @@
 (ns integration-test.runner
-  (:require [cljs.test]
+  (:require [clojure.string :as string]
+            [cljs.test]
             [integration-test.db :as db]
             [promesa.core :as p]))
 
 (defn- write [& xs]
-  (apply js/process.stdout.write xs))
+  (js/process.stdout.write (string/join " " xs)))
 
 (defmethod cljs.test/report [:cljs.test/default :begin-test-var] [m]
-  (js/process.stdout.write (str "===" (-> m :var meta :name) " ")))
+  (write "===" (str (-> m :var meta :name) ": ")))
 
 (defmethod cljs.test/report [:cljs.test/default :end-test-var] [m]
   (write " ===\n"))
