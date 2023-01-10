@@ -287,6 +287,7 @@
       (p/rejected (js/Error. "The nREPL server is already running" {})))))
 
 (defn stop-server+ []
+  (sci/alter-var-root sci/print-fn (constantly *print-fn*))
   (p/create (fn [resolve _reject]
               (if (server-running?)
                 (let [server (::server @!db)]
