@@ -1,49 +1,54 @@
 (ns integration-test.runner
-  (:require [cljs.test]
+  (:require [clojure.string :as string]
+            [cljs.test]
             [integration-test.db :as db]
             [promesa.core :as p]))
 
+(defn- write [& xs]
+  (js/process.stdout.write (string/join " " xs)))
+
 (defmethod cljs.test/report [:cljs.test/default :begin-test-var] [m]
-  (js/process.stdout.write (str "=== " (-> m :var meta :name) " ")))
+  (write "===" (str (-> m :var meta :name) ": ")))
 
 (defmethod cljs.test/report [:cljs.test/default :end-test-var] [m]
-  (js/process.stdout.write " ===\n"))
+  (write " ===\n"))
 
 (def old-pass (get-method cljs.test/report [:cljs.test/default :pass]))
 
 (defmethod cljs.test/report [:cljs.test/default :pass] [m]
-  (old-pass m)
-  (js/process.stdout.write "✅")
+  (binding [*print-fn* write] (old-pass m)) 
+  (write "✅")
   (swap! db/!state update :pass inc))
 
 (def old-fail (get-method cljs.test/report [:cljs.test/default :fail]))
 
 (defmethod cljs.test/report [:cljs.test/default :fail] [m]
-  (old-fail m)
-  (js/process.stdout.write "❌")
+  (binding [*print-fn* write] (old-fail m))
+  (write "❌")
   (swap! db/!state update :fail inc))
 
 (def old-error (get-method cljs.test/report [:cljs.test/default :fail]))
 
 (defmethod cljs.test/report [:cljs.test/default :error] [m]
-  (old-error m)
-  (js/process.stdout.write "🚫")
+  (binding [*print-fn* write] (old-error m))
+  (write "🚫")
   (swap! db/!state update :error inc))
 
 (def old-end-run-tests (get-method cljs.test/report [:cljs.test/default :end-run-tests]))
 
 (defmethod cljs.test/report [:cljs.test/default :end-run-tests] [m]
-  (old-end-run-tests m)
-  (let [{:keys [running pass fail error]} @db/!state
-        passed-minimum-threshold 20
-        fail-reason (cond
-                      (< 0 (+ fail error)) "FAILURE: Some tests failed or errored"
-                      (< pass passed-minimum-threshold) (str "FAILURE: Less than " passed-minimum-threshold " assertions passed")
-                      :else nil)]
-    (println "Runner: tests run, results:" (select-keys  @db/!state [:pass :fail :error]))
-    (if fail-reason
-      (p/reject! running fail-reason)
-      (p/resolve! running true))))
+  (binding [*print-fn* write]
+    (old-end-run-tests m)
+    (let [{:keys [running pass fail error]} @db/!state
+          passed-minimum-threshold 20
+          fail-reason (cond
+                        (< 0 (+ fail error)) "FAILURE: Some tests failed or errored"
+                        (< pass passed-minimum-threshold) (str "FAILURE: Less than " passed-minimum-threshold " assertions passed")
+                        :else nil)]
+      (println "Runner: tests run, results:" (select-keys  @db/!state [:pass :fail :error]))
+      (if fail-reason
+        (p/reject! running fail-reason)
+        (p/resolve! running true)))))
 
 ;; We rely on that the user_activate.cljs script is run before workspace_activate.cljs
 (defn- run-when-ws-activated [tries]
@@ -55,11 +60,15 @@
       (require '[integration-test.require-js-test])
       (require '[integration-test.require-extension-test])
       (require '[integration-test.npm-test])
+      (require '[integration-test.nrepl-start-stop-test])
+      (require '[integration-test.nrepl-eval-test])
       (cljs.test/run-tests 'integration-test.activate-test
                            'integration-test.scripts-test
                            'integration-test.require-js-test
                            'integration-test.require-extension-test
-                           'integration-test.npm-test))
+                           'integration-test.npm-test
+                           'integration-test.nrepl-start-stop-test
+                           'integration-test.nrepl-eval-test))
     (do
       (println "Runner: Workspace not activated yet, tries: " tries "- trying again in a jiffy")
       (js/setTimeout #(run-when-ws-activated (inc tries)) 10))))
