@@ -38,7 +38,6 @@
 
 (defmethod cljs.test/report [:cljs.test/default :end-run-tests] [m]
   (binding [*print-fn* write]
-    ;; TODO: Figure out why the test result summary is not printed
     (old-end-run-tests m)
     (let [{:keys [running pass fail error]} @db/!state
           passed-minimum-threshold 20
@@ -68,9 +67,6 @@
                            'integration-test.require-js-test
                            'integration-test.require-extension-test
                            'integration-test.npm-test
-                           ;; TODO: Figure out why this gives:
-                           ;;         Error: The nREPL server is already running
-                           ;;       when the eval test is run
                            'integration-test.nrepl-start-stop-test
                            'integration-test.nrepl-eval-test))
     (do
