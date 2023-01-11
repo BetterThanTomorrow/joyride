@@ -287,23 +287,24 @@
       (p/rejected (js/Error. "The nREPL server is already running" {})))))
 
 (defn stop-server+ []
-  (sci/alter-var-root sci/print-fn (constantly *print-fn*))
-  (p/create (fn [resolve _reject]
-              (if (server-running?)
-                (let [server (::server @!db)]
-                  (debug "nREPL stop-server")
-                  (.close server
-                          (fn []
-                            (swap! !db dissoc ::server)
-                            (p/do
-                              (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning false)
-                              (-> (remove-port-file (::root-path @!db))
-                                  (p/then (fn []
-                                            (swap! !db dissoc ::root-path)
-                                            (info "nREPL server stopped")
-                                            (resolve server))))))))
-                (do (info "There is no nREPL Server running")
-                    (resolve))))))
+  (p/let [stopped+ (p/create (fn [resolve _reject]
+                               (if (server-running?)
+                                 (let [server (::server @!db)]
+                                   (debug "nREPL stop-server")
+                                   (.close server
+                                           (fn []
+                                             (swap! !db dissoc ::server)
+                                             (p/do
+                                               (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning false)
+                                               (-> (remove-port-file (::root-path @!db))
+                                                   (p/then (fn []
+                                                             (swap! !db dissoc ::root-path)
+                                                             (info "nREPL server stopped")
+                                                             (resolve server))))))))
+                                 (do (info "There is no nREPL Server running")
+                                     (resolve)))))]
+    (sci/alter-var-root sci/print-fn (constantly *print-fn*))
+    stopped+))
 
 (defn enable-message-logging! []
   (swap! !db ::log-messages? true))
