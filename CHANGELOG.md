@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: [Stopping nREPL server resolves without properly awaiting promises](https://github.com/BetterThanTomorrow/joyride/issues/146)
+
 ## [0.0.30] - 2023-01-06
 
 - [Enable using JS files as user and workspace scripts](https://github.com/BetterThanTomorrow/joyride/issues/132)
