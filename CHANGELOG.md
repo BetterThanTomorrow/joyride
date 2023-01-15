@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.31] - 2023-01-15
+
 - Fix: [Stopping nREPL server resolves without properly awaiting promises](https://github.com/BetterThanTomorrow/joyride/issues/146)
 
 ## [0.0.30] - 2023-01-06
