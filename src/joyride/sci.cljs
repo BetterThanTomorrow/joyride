@@ -9,6 +9,7 @@
    [goog.object :as gobject]
    [joyride.config :as conf]
    [joyride.db :as db]
+   [joyride.js-completer :as js-completer]
    [sci.configs.cljs.test :as cljs-test-config]
    [sci.configs.cljs.pprint :as cljs-pprint-config]
    [sci.configs.funcool.promesa :as promesa-config]
@@ -96,7 +97,8 @@
                          {'*file* sci/file
                           'extension-context (sci/copy-var db/extension-context joyride-ns)
                           'invoked-script (sci/copy-var db/invoked-script joyride-ns)
-                          'output-channel (sci/copy-var db/output-channel joyride-ns)}}
+                          'output-channel (sci/copy-var db/output-channel joyride-ns)
+                          'js-keys js-completer/js-keys+}}
             :ns-aliases {'clojure.test 'cljs.test}
             :load-fn (fn [{:keys [ns libname opts]}]
                        (cond

@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Make it easier to discover the full API of JavaScript objects/instances](https://github.com/BetterThanTomorrow/joyride/issues/147)
+
 ## [0.0.31] - 2023-01-15
 
 - Fix: [Stopping nREPL server resolves without properly awaiting promises](https://github.com/BetterThanTomorrow/joyride/issues/146)
