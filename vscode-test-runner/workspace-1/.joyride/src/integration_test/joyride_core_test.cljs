@@ -1,32 +1,36 @@
 (ns integration-test.joyride-core-test
-  (:require [cljs.test :refer [testing is]]
+  (:require [clojure.set]
+            [cljs.test :refer [deftest is testing]]
             [joyride.core :as joy]
-            [promesa.core :as p]
             ["ext://betterthantomorrow.joyride" :as ns-required-extension-api]
-            [integration-test.macros :refer [deftest-async]]
-            ["vscode" :as vscode]))
+            ["vscode" :as vscode]
+            ["../non-enumerable-props.js" :as non-enumerable]))
 
 #_{:clj-kondo/ignore [:duplicate-require]}
 (require '["ext://betterthantomorrow.joyride" :as top-level-required-extension-api])
 
-(deftest-async js-keys-of-ns-required-extension-api
+(deftest js-properties
+  (testing "keys of object with non-enumerable properties"
+    (let [non-enumerable-keys (joy/js-properties non-enumerable/obj)]
+      (is (every? (set non-enumerable-keys) #{"x" "y" "z"}))
+      (is (= "toString" 
+             (some #{"toString"} non-enumerable-keys)))))
   (testing "keys of ns-required extension"
-    (p/let [required-joy-api-keys (joy/js-keys ns-required-extension-api)]
-      (is (.includes required-joy-api-keys "toString")))))
-
-(deftest-async js-keys-of-top-level-required-extension-api
+    (let [required-joy-api-keys (joy/js-properties ns-required-extension-api)]
+      (is (= "toString" 
+             (some #{"toString"} required-joy-api-keys)))))
   (testing "keys of top-level required extension"
-    (p/let [required-joy-api-keys (joy/js-keys top-level-required-extension-api)]
-      (is (.includes required-joy-api-keys "toString")))))
-
-(deftest-async js-keys-of-extension
-  (testing "keys of vscode grabbed extension" 
-    (p/let [joy-ext (vscode/extensions.getExtension "betterthantomorrow.joyride")
-            joy-ext-keys (joy/js-keys joy-ext)]
-      (is (.includes joy-ext-keys "isActive")))))
+    (let [required-joy-api-keys (joy/js-properties top-level-required-extension-api)]
+      (is (= "toString"
+             (some #{"toString"} required-joy-api-keys)))))
+  (testing "keys of vscode grabbed extension"
+    (let [joy-ext (vscode/extensions.getExtension "betterthantomorrow.joyride")
+          joy-ext-keys (joy/js-properties joy-ext)]
+      (is (= "isActive"
+             (some #{"isActive"} joy-ext-keys))))))
 
 (comment
   ;; TODO: Is this a bug?
   (= #js []
-     (js-keys ns-required-extension-api))
-  :rcf)
+     (js-properties))
+  )

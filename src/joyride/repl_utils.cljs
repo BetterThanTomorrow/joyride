@@ -28,6 +28,25 @@
               (when (re-find pat (str sym-ns "/" sym-name))
                 [sym-ns (str sym-ns "/" sym-name)]))))))
 
+(defn- instance-completions [instance prefix]
+  (let [props (loop [obj instance
+                     props []]
+                (if obj
+                  (recur (js/Object.getPrototypeOf obj)
+                         (into props (js/Object.getOwnPropertyNames obj)))
+                  props))
+        completions (map (fn [k]
+                           [nil (str prefix k)]) props)]
+    completions))
+
+(defn instance-properties
+  "Returns properties of `instance`, attempting to correspond with what `node:repl.completer` would return."
+  [instance]
+  (->> (instance-completions instance nil)
+       (map second)
+       (remove #{"__lookupGetter__" "__defineSetter__"
+                 "__lookupSetter__" "__defineGetter__"})))
+
 (defn ns-imports->completions [sci-ctx-atom query-ns query]
   (let [ctx @sci-ctx-atom
         [_ns-part name-part] (str/split query #"/")
@@ -48,15 +67,7 @@
                                         (apply gobject/getValueByKeys resolved
                                                fields)])
                                      [(str query-ns "/") resolved])]
-        (let [props (loop [obj imported
-                           props []]
-                      (if obj
-                        (recur (js/Object.getPrototypeOf obj)
-                               (into props (js/Object.getOwnPropertyNames obj)))
-                        props))
-              completions (map (fn [k]
-                                 [nil (str prefix k)]) props)]
-          completions)))))
+        (instance-completions imported prefix)))))
 
 (defn handle-complete* [{ns-str :ns
                          :keys [sci-ctx-atom]
