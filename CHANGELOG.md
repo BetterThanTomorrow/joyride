@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.32] - 2023-01-16
+
 - [Make it easier to discover the full API of JavaScript objects/instances](https://github.com/BetterThanTomorrow/joyride/issues/147)
 
 ## [0.0.31] - 2023-01-15
