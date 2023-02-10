@@ -14,7 +14,10 @@
    [sci.configs.cljs.pprint :as cljs-pprint-config]
    [sci.configs.funcool.promesa :as promesa-config]
    [sci.core :as sci]
-   [sci.ctx-store :as store]))
+   [sci.ctx-store :as store]
+   [rewrite-clj.node]
+   [rewrite-clj.parser]
+   [rewrite-clj.zip]))
 
 (sci/enable-unrestricted-access!) ;; allows mutating and set!-ing all vars from inside SCI
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
@@ -81,7 +84,23 @@
 (def zip-namespace
   (sci/copy-ns clojure.zip zns))
 
+(def rzns (sci/create-ns 'rewrite-clj.zip))
+(def rewrite-clj-zip-ns (sci/copy-ns rewrite-clj.zip rzns))
+
+(def rpns (sci/create-ns 'rewrite-clj.parser))
+(def rewrite-clj-parser-ns (sci/copy-ns rewrite-clj.parser rpns))
+
+(def rnns (sci/create-ns 'rewrite-clj.node))
+(def rewrite-clj-node-ns (sci/copy-ns rewrite-clj.node rnns))
+
 (def core-namespace (sci/create-ns 'clojure.core nil))
+
+(def joyride-code
+  {'*file* sci/file
+   'extension-context (sci/copy-var db/extension-context joyride-ns)
+   'invoked-script (sci/copy-var db/invoked-script joyride-ns)
+   'output-channel (sci/copy-var db/output-channel joyride-ns)
+   'js-properties repl-utils/instance-properties})
 
 (store/reset-ctx!
  (sci/init {:classes {'js (doto goog/global
@@ -93,12 +112,10 @@
                          'cljs.pprint cljs-pprint-config/cljs-pprint-namespace
                          'promesa.core promesa-config/promesa-namespace
                          'promesa.protocols promesa-config/promesa-protocols-namespace
-                         'joyride.core
-                         {'*file* sci/file
-                          'extension-context (sci/copy-var db/extension-context joyride-ns)
-                          'invoked-script (sci/copy-var db/invoked-script joyride-ns)
-                          'output-channel (sci/copy-var db/output-channel joyride-ns)
-                          'js-properties repl-utils/instance-properties}}
+                         'joyride.core joyride-code
+                         'rewrite-clj.zip rewrite-clj-zip-ns
+                         'rewrite-clj.parser rewrite-clj-parser-ns
+                         'rewrite-clj.node rewrite-clj-node-ns}
             :ns-aliases {'clojure.test 'cljs.test}
             :load-fn (fn [{:keys [ns libname opts]}]
                        (cond
