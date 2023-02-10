@@ -19,14 +19,18 @@ const fakeVscodeNodeModulesDestDir = path.join(joyrideDir, '/out/node_modules');
 
 fs.cpSync(mockVscodeNodeModulesSrcDir, fakeVscodeNodeModulesDestDir, { recursive: true });
 
+const start = performance.now();
 require(joyrideJs); // First require is slower
+const end = performance.now();
+console.log("initial load joyride.js", end - start, "ms");
 delete require.cache[require.resolve(joyrideJs)];
+
 let totalTime = 0;
 for (let i = 0; i < runs; i++) {
-  start = performance.now();
+  const start = performance.now();
   require(joyrideJs);
-  end = performance.now();
-  time = end - start;
+  const end = performance.now();
+  const time = end - start;
   console.log("load joyride.js", time, "ms");
   totalTime += time;
   delete require.cache[require.resolve(joyrideJs)];
