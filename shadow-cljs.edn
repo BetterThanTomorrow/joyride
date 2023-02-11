@@ -1,12 +1,15 @@
 {:deps true
  :builds
- {:extension {:target :node-library
-              :js-options {:js-provider :shadow
+ {:extension {:target :esm
+              :js-options {:js-provider :import
                            :keep-native-requires true
-                           :keep-as-require #{"vscode"}}
+                           :keep-as-import #{"vscode"}}
               :compiler-options {:infer-externs :auto}
               :output-dir "out/js"
-              :output-to "out/joyride.js"
-              :exports {:activate joyride.extension/activate}
-              :devtools {:before-load-async joyride.extension/before
-                         :after-load joyride.extension/after}}}}
+              ;; :output-to "out/joyride.js"
+              :modules {:joyride {:entries [joyride.extension]
+                                  :exports {:activate joyride.extension/activate}}}
+              ;; :exports {:activate joyride.extension/activate}
+              #_#_:devtools {:before-load-async joyride.extension/before
+                             :after-load joyride.extension/after}
+              :build-hooks [(build/esbuild-pass)]}}}

@@ -162,6 +162,7 @@
   "devDependencies": {
     "@vscode/test-electron": "^2.2.1",
     "axios": "^1.1.2",
+    "esbuild": "^0.17.7",
     "moment": "^2.29.4",
     "rimraf": "^3.0.2",
     "shadow-cljs": "^2.18.0"

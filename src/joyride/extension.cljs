@@ -72,7 +72,6 @@
 
 (defn ^:export activate [^js context]
   (js/console.info "Joyride activate START")
-  
   (when context
     (swap! db/!app-db assoc
            :output-channel (vscode/window.createOutputChannel "Joyride")
