@@ -1,5 +1,6 @@
 (ns joyride.scripts-handler
-  (:require ["path" :as path]
+  (:require ["/joyride/vscode.js" :as vscode]
+            ["path" :as path]
             [joyride.config :as conf]
             [joyride.constants :as const]
             [joyride.db :as db]
@@ -10,19 +11,17 @@
             [sci.core :as sci]
             [clojure.string :as str]))
 
-(def vscode js/joyride_vscode)
-
 (defn find-script-uris+
-  "Returns a Promise that resolves to JS array of `vscode.Uri`s
+  "Returns a Promise that resolves to JS array of `vscode/Uri`s
    for the scripts files found in `base-path`/`script-folder-path`
    
-   Will use `vscode.workspace` API for it if there is a workspace
+   Will use `vscode/workspace` API for it if there is a workspace
    root, otherwise it uses direct filesystem access. (Probably means
    it is only Remote friendly in the case with a workspace root.)"
   [base-path script-folder-path]
-  (if vscode.workspace.rootPath
-    (p/let [glob (vscode.RelativePattern. base-path (path/join script-folder-path "**" "*.{cljs,js}"))
-            script-uris (p/->> (vscode.workspace.findFiles glob)
+  (if vscode/workspace.rootPath
+    (p/let [glob (vscode/RelativePattern. base-path (path/join script-folder-path "**" "*.{cljs,js}"))
+            script-uris (p/->> (vscode/workspace.findFiles glob)
                                cljify
                                (sort-by #(.-fsPath ^js %)))]
       (jsify script-uris))

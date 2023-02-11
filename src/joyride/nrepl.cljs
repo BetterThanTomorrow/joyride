@@ -3,6 +3,7 @@
   (:require
    ["net" :as node-net]
    ["path" :as path]
+   ["/joyride/vscode.js" :as vscode]
    [joyride.bencode :refer [encode decode-all]]
    [joyride.when-contexts :as when-contexts]
    [joyride.repl-utils :as repl-utils :refer [the-sci-ns]]
@@ -13,8 +14,6 @@
    [sci.ctx-store :as store]
    [clojure.pprint :as pp]
    [clojure.string :as string]))
-
-(def vscode js/joyride_vscode)
 
 (defonce !db (atom {::log-messages? false
                     ::server nil
@@ -209,16 +208,16 @@
            (debug "Connection closed")))))
 
 (defn port-file-uri [root-uri]
-  (vscode.Uri.file
+  (vscode/Uri.file
    (path/join root-uri ".joyride" ".nrepl-port")))
 
 (defn remove-port-file [^js path]
   (let [uri (port-file-uri path)]
     (-> uri
-        vscode.workspace.fs.stat
+        vscode/workspace.fs.stat
         (p/then (fn [stat]
                   (when stat
-                    (vscode.workspace.fs.delete uri)))))))
+                    (vscode/workspace.fs.delete uri)))))))
 
 (defn server-running? []
   (when-contexts/context ::when-contexts/joyride.isNReplServerRunning))
@@ -230,7 +229,7 @@
         port (or (:port opts)
                  0)
         root-path ^js (or (:root-path opts)
-                          vscode.workspace.rootPath)
+                          vscode/workspace.rootPath)
         _log_level (or (if (object? opts)
                          (.-log_level ^Object opts)
                          (:log_level opts))
@@ -249,7 +248,7 @@
 
     (p/create
      (fn [resolve _reject]
-       (let [nrepl-host-address (-> (vscode.workspace.getConfiguration "joyride")
+       (let [nrepl-host-address (-> (vscode/workspace.getConfiguration "joyride")
                                     (.get "nreplHostAddress"))]
          (if (< 0 (node-net/isIP nrepl-host-address))
            (let [server (node-net/createServer
@@ -266,7 +265,7 @@
                               host (-> addr .-address)]
                           (info "nREPL server started on port" port "on host"
                                 (str host "- nrepl://" host ":" port))
-                          (-> (vscode.workspace.fs.writeFile
+                          (-> (vscode/workspace.fs.writeFile
                                (port-file-uri root-path)
                                (-> (new js/TextEncoder) (.encode (str port))))
                               (p/handle (fn [_result error]
