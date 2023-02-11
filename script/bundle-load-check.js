@@ -1,9 +1,11 @@
+// Reports on the the size and the time it takes to load the joyride.js bundle.
+
 const fs = require("fs");
 const path = require("path");
 
 const joyrideDir = process.argv[2];
 if (!joyrideDir) {
-  console.error("Usage: node load-time.js <joyride-extension-dir>");
+  console.error("Usage: node bundle-load-check.js <joyride-extension-dir> [runs]");
   process.exit(1);
 }
 const runs = process.argv[3] || 10;
@@ -13,6 +15,8 @@ if (!fs.existsSync(joyrideJs)) {
   console.error("joyride.js not found, exiting");
   process.exit(1);
 }
+const stats = fs.statSync(joyrideJs)
+console.log("joyride.js bundle size", stats.size, "bytes");  
 
 const mockVscodeNodeModulesSrcDir = path.join(__dirname, "mock-vscode/node_modules");
 const fakeVscodeNodeModulesDestDir = path.join(joyrideDir, '/out/node_modules');
