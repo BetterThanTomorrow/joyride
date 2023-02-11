@@ -1,9 +1,10 @@
 globalThis.WebSocket = require("ws");
 globalThis.joyride_vscode = require("vscode")
+globalThis.joyride_require = require;
 
 function activate(context) {
   import("./out/js/joyride.js").then((joyride) => {
-    joyride.activate(context);
+    return joyride.activate(context);
   });
 }
 

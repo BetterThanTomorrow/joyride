@@ -36,7 +36,7 @@ async function main() {
 
     // The path to the extension test runner script
     // Passed to --extensionTestsPath
-    const extensionTestsPath = path.resolve(__dirname, 'runTests');
+    const extensionTestsPath = path.resolve(__dirname, 'runTests.cjs');
     const testWorkspace = path.resolve(__dirname, 'workspace-1');
 
     const launchArgs = [testWorkspace, '--disable-extensions', '--disable-workspace-trust'];

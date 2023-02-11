@@ -7,7 +7,8 @@
             [joyride.sci :as jsci]
             [joyride.utils :as utils :refer [cljify jsify]]
             [promesa.core :as p]
-            [sci.core :as sci]))
+            [sci.core :as sci]
+            [clojure.string :as str]))
 
 (def vscode js/joyride_vscode)
 
@@ -92,7 +93,7 @@
         (let [req (module/createRequire \"/\")
               resolved (.resolve req \"" abs-path "\")]
           (aset (.-cache req) resolved js/undefined)
-          (js/require resolved))"))
+          (req resolved))"))
 
 (defn run-script+
   ([menu-conf+ base-path scripts-path]
@@ -103,6 +104,7 @@
                code (if (.endsWith script-path ".js")
                       (cljs-snippet-requiring-js abs-path)
                       (utils/vscode-read-uri+ script-uri))]
+         #_(vscode.window.showInformationMessage (str code))
          (swap! db/!app-db assoc :invoked-script abs-path)
          (sci/with-bindings {sci/file abs-path}
            (jsci/eval-string code)))

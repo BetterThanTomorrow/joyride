@@ -152,7 +152,7 @@
     "package": "npx vsce package --allow-star-activation",
     "vscode:prepublish": "npm run clean && npm run release",
     "preintegration-test": "cd ./vscode-test-runner/workspace-1 && npm i",
-    "integration-test": "node ./vscode-test-runner/launch.js"
+    "integration-test": "node ./vscode-test-runner/launch.cjs"
   },
   "dependencies": {
     "@vscode/codicons": "^0.0.30",

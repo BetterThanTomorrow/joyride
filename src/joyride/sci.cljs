@@ -9,8 +9,8 @@
    [joyride.config :as conf]
    [joyride.db :as db]
    [joyride.repl-utils :as repl-utils]
-   [sci.configs.cljs.test :as cljs-test-config]
    [sci.configs.cljs.pprint :as cljs-pprint-config]
+   [sci.configs.cljs.test :as cljs-test-config]
    [sci.configs.funcool.promesa :as promesa-config]
    [sci.core :as sci]
    [sci.ctx-store :as store]))
@@ -26,7 +26,7 @@
 (defn ns->path [namespace]
   (-> (str namespace)
       (munge)
-      (str/replace  "." "/")
+      (str/replace "." "/")
       (str ".cljs")))
 
 (defn source-script-by-ns [namespace]
@@ -71,11 +71,11 @@
   (let [from-path (if (.startsWith lib "/")
                     ""
                     (:path-to-load (source-script-by-ns from-ns)))
-        req (module/createRequire (path/resolve (or from-path "./script.cljs"))) 
+        req (module/createRequire (path/resolve (or from-path "./script.cljs")))
         resolved (.resolve req lib)]
     (when reload
       (aset (.-cache req) resolved js/undefined))
-    #_(js/require resolved)))
+    (js/joyride_require resolved)))
 
 (def zns (sci/create-ns 'clojure.zip nil))
 
@@ -92,8 +92,7 @@
    'js-properties repl-utils/instance-properties})
 
 (store/reset-ctx!
- (sci/init {:classes {#_#_'js (doto goog/global
-                            (aset "require" js/require))
+ (sci/init {:classes {'js goog/global
                       :allow :all}
             :namespaces {'clojure.core {'IFn (sci/copy-var IFn core-namespace)}
                          'clojure.zip zip-namespace

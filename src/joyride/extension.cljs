@@ -25,10 +25,10 @@
 
 (defn run-code+
   ([]
-   (p/let [input (vscode.window.showInputBox #js {:title "Run Cod!!!!e"
+   (p/let [input (vscode.window.showInputBox #js {:title "Run Code"
                                                   ;; "(require '[\"vscode\" :as vscode]) (vscode/window.showInformationMessage \"Hello World!\" [\"Hi there\"])"
                                                   :placeHolder "(inc 42)"
-                                                  :prompt "Enter some code to be evaluated!!!!!!"})]
+                                                  :prompt "Enter some code to be evaluated"})]
      (when input
        (run-code+ input))))
   ([code]
