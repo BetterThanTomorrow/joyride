@@ -1,12 +1,13 @@
-(ns joyride.when-contexts
-  (:require ["vscode" :as vscode]))
+(ns joyride.when-contexts)
+
+(def vscode js/joyride_vscode)
 
 (defonce ^:private !db (atom {:contexts {::joyride.isActive false
                                          ::joyride.isNReplServerRunning false}}))
 
 (defn set-context! [k v]
   (swap! !db assoc-in [:contexts k] v)
-  (vscode/commands.executeCommand "setContext" (name k) v))
+  (vscode.commands.executeCommand "setContext" (name k) v))
 
 (defn context [k]
   (get-in @!db [:contexts (if (string? k)

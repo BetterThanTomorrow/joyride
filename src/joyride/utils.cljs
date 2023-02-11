@@ -1,10 +1,11 @@
 (ns joyride.utils
   (:require ["fdir" :refer [fdir]]
-            ["vscode" :as vscode]
             [clojure.pprint :as pprint]
             [clojure.string :as str]
             [joyride.db :as db]
             [promesa.core :as p]))
+
+(def vscode js/joyride_vscode)
 
 (defn jsify [clj-thing]
   (clj->js clj-thing))
@@ -14,9 +15,9 @@
 
 (defn path-or-uri-exists?+ [path-or-uri]
   (-> (p/let [uri (if (= (type "") (type path-or-uri)) 
-                    (vscode/Uri.file path-or-uri)
+                    (vscode.Uri.file path-or-uri)
                     path-or-uri)
-              _stat (vscode/workspace.fs.stat uri)])
+              _stat (vscode.workspace.fs.stat uri)])
       (p/handle
        (fn [_r, e]
          (if e
@@ -25,25 +26,25 @@
 
 (defn vscode-read-uri+ [^js uri-or-path]
   (let [uri (if (string? uri-or-path)
-              (vscode/Uri.file uri-or-path)
+              (vscode.Uri.file uri-or-path)
               uri-or-path)]
-    (-> (p/let [_ (vscode/workspace.fs.stat uri)
-                data (vscode/workspace.fs.readFile uri)
+    (-> (p/let [_ (vscode.workspace.fs.stat uri)
+                data (vscode.workspace.fs.readFile uri)
                 decoder (js/TextDecoder. "utf-8")
                 code (.decode decoder data)]
           code))))
 
 (defn workspace-root []
-  vscode/workspace.rootPath)
+  vscode.workspace.rootPath)
 
 (defn info [& xs]
-  (vscode/window.showInformationMessage (str/join " " (mapv str xs))))
+  (vscode.window.showInformationMessage (str/join " " (mapv str xs))))
 
 (defn warn [& xs]
-  (vscode/window.showWarningMessage (str/join " " (mapv str xs))))
+  (vscode.window.showWarningMessage (str/join " " (mapv str xs))))
 
 (defn error [& xs]
-  (vscode/window.showErrorMessage (str/join " " (mapv str xs))))
+  (vscode.window.showErrorMessage (str/join " " (mapv str xs))))
 
 (def ^{:dynamic true
        :doc "Should the Joyride output channel be revealed after `say`?
@@ -83,7 +84,7 @@
 
 (defn find-fs-files+
   "Returns Uris for files on the filesystem in `crawl-path` matching `glob`.
-   NB: Not remote friendly! Is not using `vscode/workspace` API."
+   NB: Not remote friendly! Is not using `vscode.workspace` API."
   [crawl-path glob]
   (-> glob-er
       (.withBasePath)
@@ -92,5 +93,5 @@
       (.withPromise)
       (p/then (fn [files]
                 (->> (cljify files)
-                     (map #(vscode/Uri.file %))
+                     (map #(vscode.Uri.file %))
                      (sort-by #(.-fsPath ^js %)))))))

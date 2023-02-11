@@ -3,7 +3,6 @@
    ["fs" :as fs]
    ["module" :as module]
    ["path" :as path]
-   ["vscode" :as vscode]
    [clojure.string :as str]
    [clojure.zip]
    [goog.object :as gobject]
@@ -15,6 +14,8 @@
    [sci.configs.funcool.promesa :as promesa-config]
    [sci.core :as sci]
    [sci.ctx-store :as store]))
+
+(def vscode js/joyride_vscode)
 
 (sci/enable-unrestricted-access!) ;; allows mutating and set!-ing all vars from inside SCI
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
@@ -53,13 +54,13 @@
 (defn- active-extension? [namespace]
   (when (.startsWith namespace extension-namespace-prefix)
     (let [[extension-name _module-name] (.split (extract-extension-name namespace) "$")
-          extension (vscode/extensions.getExtension extension-name)]
+          extension (vscode.extensions.getExtension extension-name)]
       (and extension
            (.-isActive extension)))))
 
 (defn- extension-module [namespace]
   (let [[extension-name module-name] (.split (extract-extension-name namespace) "$")
-        extension (vscode/extensions.getExtension extension-name)]
+        extension (vscode.extensions.getExtension extension-name)]
     (when extension
       (when-let [exports (.-exports extension)]
         (if module-name

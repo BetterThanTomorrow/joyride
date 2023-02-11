@@ -1,6 +1,5 @@
 (ns joyride.scripts-handler
   (:require ["path" :as path]
-            ["vscode" :as vscode]
             [joyride.config :as conf]
             [joyride.constants :as const]
             [joyride.db :as db]
@@ -10,17 +9,19 @@
             [promesa.core :as p]
             [sci.core :as sci]))
 
+(def vscode js/joyride_vscode)
+
 (defn find-script-uris+
   "Returns a Promise that resolves to JS array of `vscode.Uri`s
    for the scripts files found in `base-path`/`script-folder-path`
    
-   Will use `vscode/workspace` API for it if there is a workspace
+   Will use `vscode.workspace` API for it if there is a workspace
    root, otherwise it uses direct filesystem access. (Probably means
    it is only Remote friendly in the case with a workspace root.)"
   [base-path script-folder-path]
-  (if vscode/workspace.rootPath
-    (p/let [glob (vscode/RelativePattern. base-path (path/join script-folder-path "**" "*.{cljs,js}"))
-            script-uris (p/->> (vscode/workspace.findFiles glob)
+  (if vscode.workspace.rootPath
+    (p/let [glob (vscode.RelativePattern. base-path (path/join script-folder-path "**" "*.{cljs,js}"))
+            script-uris (p/->> (vscode.workspace.findFiles glob)
                                cljify
                                (sort-by #(.-fsPath ^js %)))]
       (jsify script-uris))
@@ -58,9 +59,9 @@
   [title file-infos more-menu-items]
   (p/let [file-items (into [] (file-info->menu-item file-infos))
           menu-items (into file-items
-                           (into [{:kind vscode/QuickPickItemKind.Separator}]
+                           (into [{:kind vscode.QuickPickItemKind.Separator}]
                                  more-menu-items))
-          script-info (vscode/window.showQuickPick (jsify menu-items) #js {:title title})]
+          script-info (vscode.window.showQuickPick (jsify menu-items) #js {:title title})]
     (cljify script-info)))
 
 (defn show-script-picker+
@@ -98,7 +99,7 @@
    (handle-script-menu-selection+ menu-conf+ run-script+ base-path scripts-path))
   ([title base-path scripts-path script-path]
    (-> (p/let [abs-path (path/join base-path scripts-path script-path)
-               script-uri (vscode/Uri.file abs-path)
+               script-uri (vscode.Uri.file abs-path)
                code (if (.endsWith script-path ".js")
                       (cljs-snippet-requiring-js abs-path)
                       (utils/vscode-read-uri+ script-uri))]
@@ -118,9 +119,9 @@
    (handle-script-menu-selection+ menu-conf+ open-script+ base-path scripts-path))
   ([title base-path scripts-path script-path]
    (-> (p/let [abs-path (path/join base-path scripts-path script-path)
-               script-uri (vscode/Uri.file abs-path)]
-         (p/-> (vscode/workspace.openTextDocument script-uri)
-               (vscode/window.showTextDocument
+               script-uri (vscode.Uri.file abs-path)]
+         (p/-> (vscode.workspace.openTextDocument script-uri)
+               (vscode.window.showTextDocument
                 #js {:preview false, :preserveFocus false})))
        (p/catch (fn [error]
                   (binding [utils/*show-when-said?* true]
