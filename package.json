@@ -55,7 +55,7 @@
     "workspaceContains:**/.joyride",
     "onStartupFinished"
   ],
-  "main": "./joyride.cjs",
+  "main": "./joyride.js",
   "type": "module",
   "contributes": {
     "configuration": [
