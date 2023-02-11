@@ -20,7 +20,7 @@ node_modules
 .calva/output-window/
 
 # Joyride
-/out/
+/dist/out/
 .portal
 examples/.joyride/.calva
 examples/.vscode

@@ -12,6 +12,5 @@
 !CHANGELOG.md
 !LICENSE.txt
 !joyride.js
-!joyride.cjs
-!out/js/joyride.js
-
+!dist/out/js/joyride.js
+!dist/package.json

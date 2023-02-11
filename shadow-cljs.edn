@@ -5,7 +5,7 @@
                            :keep-native-requires true
                            :keep-as-import #{"vscode"}}
               :compiler-options {:infer-externs :auto}
-              :output-dir "out/js"
+              :output-dir "dist/out/js"
               ;; :output-to "out/joyride.js"
               :modules {:joyride {:entries [joyride.extension]
                                   :exports {:activate joyride.extension/activate}}}
