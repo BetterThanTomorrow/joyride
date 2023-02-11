@@ -6,7 +6,7 @@
 (defn esbuild-pass
   {:shadow.build/stage :flush}
   [build-state]
-  (println "[:extension] bundling with esbuild")
+  #_#_#_#_(println "[:extension] bundling with esbuild")
   (when (= :dev (:shadow.build/mode build-state))
     (when-not @initial-compiled?
       (Thread/sleep 5000)
