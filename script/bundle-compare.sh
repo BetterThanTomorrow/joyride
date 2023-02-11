@@ -23,11 +23,11 @@ read -r ext1_size ext1_time <<< $(bundle_size_and_load_time "$extension1")
 read -r ext2_size ext2_time <<< $(bundle_size_and_load_time "$extension2")
 
 function report_size_and_load_time() {
-  printf "  1. %s\n     Size: %s bytes\n     Load time average: %.2f ms\n" "$1" "$2" "$3"
+  printf "  %d. %s\n     Size: %s bytes\n     Load time average: %.2f ms\n" "$1" "$2" "$3" "$4"
 }
 echo "Comparison of:"
-report_size_and_load_time "$extension1" "$ext1_size" "$ext1_time"
-report_size_and_load_time "$extension2" "$ext2_size" "$ext2_time"
+report_size_and_load_time 1 "$extension1" "$ext1_size" "$ext1_time"
+report_size_and_load_time 2 "$extension2" "$ext2_size" "$ext2_time"
 echo "Loaded the bundles $runs times each."
 
 size_diff=$(bc -le "$ext2_size - $ext1_size")
