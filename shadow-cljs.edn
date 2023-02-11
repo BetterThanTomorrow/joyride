@@ -10,6 +10,6 @@
               :modules {:joyride {:entries [joyride.extension]
                                   :exports {:activate joyride.extension/activate}}}
               ;; :exports {:activate joyride.extension/activate}
-              #_#_:devtools {:before-load-async joyride.extension/before
-                             :after-load joyride.extension/after}
+              :devtools {:before-load-async joyride.extension/before
+                         :after-load joyride.extension/after}
               :build-hooks [(build/esbuild-pass)]}}}
