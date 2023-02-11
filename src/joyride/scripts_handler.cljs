@@ -59,9 +59,9 @@
   [title file-infos more-menu-items]
   (p/let [file-items (into [] (file-info->menu-item file-infos))
           menu-items (into file-items
-                           (into [{:kind vscode.QuickPickItemKind.Separator}]
+                           (into [{:kind vscode/QuickPickItemKind.Separator}]
                                  more-menu-items))
-          script-info (vscode.window.showQuickPick (jsify menu-items) #js {:title title})]
+          script-info (vscode/window.showQuickPick (jsify menu-items) #js {:title title})]
     (cljify script-info)))
 
 (defn show-script-picker+
@@ -99,11 +99,11 @@
    (handle-script-menu-selection+ menu-conf+ run-script+ base-path scripts-path))
   ([title base-path scripts-path script-path]
    (-> (p/let [abs-path (path/join base-path scripts-path script-path)
-               script-uri (vscode.Uri.file abs-path)
+               script-uri (vscode/Uri.file abs-path)
                code (if (.endsWith script-path ".js")
                       (cljs-snippet-requiring-js abs-path)
                       (utils/vscode-read-uri+ script-uri))]
-         #_(vscode.window.showInformationMessage (str code))
+         #_(vscode/window.showInformationMessage (str code))
          (swap! db/!app-db assoc :invoked-script abs-path)
          (sci/with-bindings {sci/file abs-path}
            (jsci/eval-string code)))
@@ -120,9 +120,9 @@
    (handle-script-menu-selection+ menu-conf+ open-script+ base-path scripts-path))
   ([title base-path scripts-path script-path]
    (-> (p/let [abs-path (path/join base-path scripts-path script-path)
-               script-uri (vscode.Uri.file abs-path)]
-         (p/-> (vscode.workspace.openTextDocument script-uri)
-               (vscode.window.showTextDocument
+               script-uri (vscode/Uri.file abs-path)]
+         (p/-> (vscode/workspace.openTextDocument script-uri)
+               (vscode/window.showTextDocument
                 #js {:preview false, :preserveFocus false})))
        (p/catch (fn [error]
                   (binding [utils/*show-when-said?* true]
