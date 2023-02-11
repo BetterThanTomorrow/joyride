@@ -75,7 +75,7 @@
         resolved (.resolve req lib)]
     (when reload
       (aset (.-cache req) resolved js/undefined))
-    (js/require resolved)))
+    #_(js/require resolved)))
 
 (def zns (sci/create-ns 'clojure.zip nil))
 
@@ -92,7 +92,7 @@
    'js-properties repl-utils/instance-properties})
 
 (store/reset-ctx!
- (sci/init {:classes {'js (doto goog/global
+ (sci/init {:classes {#_#_'js (doto goog/global
                             (aset "require" js/require))
                       :allow :all}
             :namespaces {'clojure.core {'IFn (sci/copy-var IFn core-namespace)}
