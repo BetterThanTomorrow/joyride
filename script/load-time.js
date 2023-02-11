@@ -25,16 +25,40 @@ const end = performance.now();
 console.log("initial load joyride.js", end - start, "ms");
 delete require.cache[require.resolve(joyrideJs)];
 
-let totalTime = 0;
+let runTimes = [];
 for (let i = 0; i < runs; i++) {
   const start = performance.now();
   require(joyrideJs);
   const end = performance.now();
   const time = end - start;
   console.log("load joyride.js", time, "ms");
-  totalTime += time;
+  runTimes.push(time);
   delete require.cache[require.resolve(joyrideJs)];
 }
-console.log("average load time", totalTime / runs, "ms");
+console.log("average load time", averageRunTime(runTimes), "ms");
 
 fs.rmSync(fakeVscodeNodeModulesDestDir, { recursive: true });
+
+function averageRunTime(runTimes) {
+  if (runTimes.length === 0) {
+    return 0;
+  }
+
+  let sum = 0;
+  for (let i = 0; i < runTimes.length; i++) {
+    sum += runTimes[i];
+  }
+  let average = sum / runTimes.length;
+  let threshold = average * 1.5;
+
+  sum = 0;
+  let count = 0;
+  for (let i = 0; i < runTimes.length; i++) {
+    if (runTimes[i] < threshold) {
+      sum += runTimes[i];
+      count++;
+    }
+  }
+
+  return sum / count;
+}
