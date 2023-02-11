@@ -1,9 +1,9 @@
 globalThis.WebSocket = require("ws");
-joyride = require("./out/js/joyride.js");
+joyride = require("./out/js/joyride.cjs");
 
 function activate(context) {
   if (context != null) {
-    joyride.activate(context);
+    return joyride.activate(context);
   }
 }
 

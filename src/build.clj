@@ -1,13 +1,19 @@
 (ns build
   (:require [babashka.process :refer [shell]]))
 
+(def initial-compiled? (atom false))
+
 (defn esbuild-pass
   {:shadow.build/stage :flush}
   [build-state]
-  (println "[:viewer] bundling wiht esbuild")
-  (shell "node_modules/.bin/esbuild" "out/js/joyride.js"
-         "--outfile=out/js/joyride.js" "--format=cjs"
-         "--allow-overwrite"
+  (println "[:extension] bundling with esbuild")
+  (when (= :dev (:shadow.build/mode build-state))
+    (when-not @initial-compiled?
+      (Thread/sleep 5000)
+      (reset! initial-compiled? true)))
+  (shell {:continue true}
+         "node_modules/.bin/esbuild" "out/js/joyride.js"
+         "--outfile=out/js/joyride.cjs" "--format=cjs"
          "--bundle"
          "--platform=node"
          "--external:vscode")
