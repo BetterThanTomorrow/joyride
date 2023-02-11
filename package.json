@@ -157,7 +157,8 @@
     "@vscode/codicons": "^0.0.30",
     "fdir": "^5.2.0",
     "picomatch": "^2.3.1",
-    "vsce": "^2.7.0"
+    "vsce": "^2.7.0",
+    "ws": "^8.12.0"
   },
   "devDependencies": {
     "@vscode/test-electron": "^2.2.1",
