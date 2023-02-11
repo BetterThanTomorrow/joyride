@@ -75,7 +75,7 @@
         resolved (.resolve req lib)]
     (when reload
       (aset (.-cache req) resolved js/undefined))
-    (js/joyride_require resolved)))
+    (req resolved)))
 
 (def zns (sci/create-ns 'clojure.zip nil))
 

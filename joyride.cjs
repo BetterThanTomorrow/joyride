@@ -3,8 +3,9 @@ globalThis.joyride_vscode = require("vscode")
 globalThis.joyride_require = require;
 
 function activate(context) {
-  import("./out/js/joyride.js").then((joyride) => {
-    return joyride.activate(context);
+  return import("./out/js/joyride.js").then((joyride) => {
+    var ret = joyride.activate(context);
+    return ret;
   });
 }
 
