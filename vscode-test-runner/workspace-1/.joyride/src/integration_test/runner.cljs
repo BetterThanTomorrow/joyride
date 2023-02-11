@@ -63,6 +63,7 @@
       (require '[integration-test.nrepl-start-stop-test])
       (require '[integration-test.nrepl-eval-test])
       (require '[integration-test.joyride-core-test])
+      (require '[integration-test.rewrite-clj-test])
       (cljs.test/run-tests 'integration-test.activate-test
                            'integration-test.scripts-test
                            'integration-test.require-js-test
@@ -70,7 +71,8 @@
                            'integration-test.npm-test
                            'integration-test.nrepl-start-stop-test
                            'integration-test.nrepl-eval-test
-                           'integration-test.joyride-core-test))
+                           'integration-test.joyride-core-test
+                           'integration-test.rewrite-clj-test))
     (do
       (println "Runner: Workspace not activated yet, tries: " tries "- trying again in a jiffy")
       (js/setTimeout #(run-when-ws-activated (inc tries)) 10))))

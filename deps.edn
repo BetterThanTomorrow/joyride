@@ -1,6 +1,7 @@
 {:paths ["src"]
  :deps {funcool/promesa {:mvn/version "9.0.471"}
         thheller/shadow-cljs {:mvn/version "2.20.5"}
+        rewrite-clj/rewrite-clj {:mvn/version "1.1.46"}
         org.babashka/sci
         #_{:local/root "../babashka/sci"}
         {:git/url "https://github.com/babashka/sci"
