@@ -103,7 +103,8 @@ jobs:
       - run:
           name: Copy build
           command: |
-            cp -r out /tmp/build
+            cp -r dist /tmp/build
+            cp joyride.js /tmp/build
             cp  package.json /tmp/build
       - save_cache:
           name: Save dependencies
