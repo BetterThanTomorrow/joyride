@@ -1,8 +1,13 @@
-const path = require("path");
-const process = require("process");
-const os = require("os");
-const fs = require("fs");
-const { runTests } = require('@vscode/test-electron');
+const cp = require('child_process');
+const path = require('path');
+const process = require('process');
+const os = require('os');
+const fs = require('fs');
+const {
+  downloadAndUnzipVSCode,
+  resolveCliPathFromVSCodeExecutablePath,
+  runTests,
+} = require('@vscode/test-electron');
 
 function init() {
   return new Promise((resolve, reject) => {
@@ -28,38 +33,57 @@ function init() {
   });
 }
 
-async function main() {
+async function main(joyrideVSIXPathOrLabel, testWorkspace) {
   try {
-    // The folder containing the Extension Manifest package.json
-    // Passed to `--extensionDevelopmentPath`
-    const extensionDevelopmentPath = path.resolve(__dirname, '..');
-
-    // The path to the extension test runner script
-    // Passed to --extensionTestsPath
     const extensionTestsPath = path.resolve(__dirname, 'runTests');
-    const testWorkspace = path.resolve(__dirname, 'workspace-1');
+    const vscodeExecutablePath = await downloadAndUnzipVSCode('insiders');
+    const cliPath = resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath);
 
-    const launchArgs = [testWorkspace, '--disable-extensions', '--disable-workspace-trust', '--verbose'];
+    const launchArgs = [
+      testWorkspace,
+      '--verbose',
+      '--disable-workspace-trust'
+    ];
+    if (joyrideVSIXPathOrLabel !== 'extension-development') {
+      launchArgs.push('--install-extension', joyrideVSIXPathOrLabel, '--force');
+    }
+    cp.spawnSync(cliPath, launchArgs, {
+      encoding: 'utf-8',
+      stdio: 'inherit',
+    });
 
-    // Download VS Code, unzip it and run the integration test
-    await runTests({
-      version: 'insiders',
-      extensionDevelopmentPath,
+    const runOptions = {
+      vscodeExecutablePath,
+      reuseMachineInstall: true,
       extensionTestsPath,
-      launchArgs,
-    }).then((_result) => {
-      console.info('Tests finished');
-    }).catch((err) => {
-      console.error('Tests finished:', err);
-      process.exit(1);
-    });  
+      launchArgs: [testWorkspace],
+    };
+    if (joyrideVSIXPathOrLabel === 'extension-development') {
+      runOptions.extensionDevelopmentPath = path.resolve(__dirname, '..');
+    }
+    await runTests(runOptions)
+      .then((_result) => {
+        console.info('Tests finished');
+      })
+      .catch((err) => {
+        console.error('Tests finished:', err);
+        process.exit(1);
+      });
   } catch (err) {
     console.error('Failed to run tests:', err);
     process.exit(1);
   }
 }
 
-void init().then(() => main())
+const args = require('minimist')(process.argv.slice(2));
+const joyrideVSIX = args['joyride-vsix'] ? args['joyride-vsix'] : 'extension-development';
+const testWorkspace = args['test-workspace']
+  ? path.resolve(args['test-workspace'])
+  : path.resolve(__dirname, '..', 'vscode-test-runner', 'workspace-1');
+console.info(`Using:\n  Joyride: ${joyrideVSIX}\n  Test workspace: ${testWorkspace}`);
+
+void init()
+  .then(() => main(joyrideVSIX, testWorkspace))
   .catch((error) => {
     console.error('Failed to initialize test running environment:', error);
     process.exit(1);
