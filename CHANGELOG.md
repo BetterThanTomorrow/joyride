@@ -7,7 +7,6 @@ Changes to Joyride
 ## [0.0.33] - 2023-02-12
 
 - [Add rewrite-clj as built-in CLJS library](https://github.com/BetterThanTomorrow/joyride/issues/150)
-- Joyride dev: [Test the VSIX package in addition to from the filesystem](https://github.com/BetterThanTomorrow/joyride/issues/154)
 
 ## [0.0.32] - 2023-01-16
 
