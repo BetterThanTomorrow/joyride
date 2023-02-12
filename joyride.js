@@ -1,8 +1,8 @@
 // load ws conditionally for shadow
-ws_file = require.resolve("ws");
-if (ws_file != null) {
-  globalThis.WebSocket = require(ws_file);
+try {
+  globalThis.WebSocket = resolve("ws");
 }
+catch (_) {}
 
 globalThis.joyride_vscode = require("vscode");
 
