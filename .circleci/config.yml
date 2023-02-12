@@ -344,7 +344,8 @@ workflows:
               only: /^v\d+\.\d+\.\d+-?.*/
       - github-release:
           requires:
-            - test-integration
+            - test-integration-fs
+            - test-integration-vsix
           filters:
             branches:
               ignore: /.*/
