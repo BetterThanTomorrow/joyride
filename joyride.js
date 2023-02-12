@@ -1,6 +1,10 @@
-globalThis.WebSocket = require("ws");
+// load ws conditionally for shadow
+ws_file = require.resolve("ws");
+if (ws_file != null) {
+  globalThis.WebSocket = require(ws_file);
+}
+
 globalThis.joyride_vscode = require("vscode");
-globalThis.joyride_require = require;
 
 function activate(context) {
   return import("./dist/out/js/joyride.js").then((joyride) => {
