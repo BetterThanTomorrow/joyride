@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.33] - 2023-02-12
+
 - [Add rewrite-clj as built-in CLJS library](https://github.com/BetterThanTomorrow/joyride/issues/150)
 
 ## [0.0.32] - 2023-01-16
