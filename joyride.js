@@ -3,6 +3,7 @@ try {
   globalThis.WebSocket = require("ws");
 }
 catch (_) {
+  console.info("WebSocket not defined, since 'ws' library is not available.");
 }
 
 globalThis.joyride_vscode = require("vscode");
