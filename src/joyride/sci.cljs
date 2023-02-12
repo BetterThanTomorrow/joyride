@@ -107,7 +107,7 @@
                          (case libname
                            (rewrite-clj.parser rewrite-clj.zip rewrite-clj.node)
                            (let [req (module/createRequire (path/resolve (.-extensionPath (db/extension-context))))]
-                             (req "./dist/out/rewrite_clj.js")
+                             (req (path/resolve (.-extensionPath (db/extension-context)) "dist/out/js/rewrite_clj.js"))
                              {})
                            ;; default
                            (source-script-by-ns libname))
