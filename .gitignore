@@ -27,3 +27,4 @@ examples/.vscode
 examples/.calva
 
 .vscode-test/
+.calva

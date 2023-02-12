@@ -1,6 +1,12 @@
-globalThis.WebSocket = require("ws");
+// load ws conditionally for shadow
+try {
+  globalThis.WebSocket = require("ws");
+}
+catch (_) {
+  console.info("WebSocket not defined, since 'ws' library is not available.");
+}
+
 globalThis.joyride_vscode = require("vscode");
-globalThis.joyride_require = require;
 
 function activate(context) {
   return import("./dist/out/js/joyride.js").then((joyride) => {

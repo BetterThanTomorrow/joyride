@@ -8,7 +8,7 @@
 
 (defonce !app-db (atom init-db))
 
-(defn extension-context
+(defn ^js extension-context
   "Returns the Joyride ExtensionContext instance.
    See: https://code.visualstudio.com/api/references/vscode-api#ExtensionContext"
   []
@@ -20,7 +20,7 @@
   []
   (:invoked-script @!app-db))
 
-(defn output-channel
+(defn ^js output-channel
   "Returns the Joyride OutputChannel instance.
    See: https://code.visualstudio.com/api/references/vscode-api#OutputChannel"
   []
