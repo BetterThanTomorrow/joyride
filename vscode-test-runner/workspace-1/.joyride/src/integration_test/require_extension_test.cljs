@@ -16,3 +16,4 @@
   (testing "Requires the Joyride extension"
     (p/let [question (top-level-required-extension/runCode "42")]
       (is (= 42 question)))))
+

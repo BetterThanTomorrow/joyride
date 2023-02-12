@@ -104,7 +104,13 @@
             :load-fn (fn [{:keys [ns libname opts]}]
                        (cond
                          (symbol? libname)
-                         (source-script-by-ns libname)
+                         (case libname
+                           (rewrite-clj.parser rewrite-clj.zip rewrite-clj.node)
+                           (let [req (module/createRequire (path/resolve (.extensionPath (db/extension-context))))]
+                             (req "./dist/out/rewrite_clj.js")
+                             {})
+                           ;; default
+                           (source-script-by-ns libname))
                          (string? libname) ;; node built-in or npm library
                          (cond
                            (= "vscode" libname)
