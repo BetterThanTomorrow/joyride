@@ -103,7 +103,8 @@ jobs:
       - run:
           name: Copy build
           command: |
-            cp -r out /tmp/build
+            cp -r dist /tmp/build
+            cp joyride.js /tmp/build
             cp  package.json /tmp/build
       - save_cache:
           name: Save dependencies
@@ -119,7 +120,7 @@ jobs:
             - artifacts
             - build
             - env
-  test-integration:
+  test-integration-fs:
     docker:
       - image: cimg/clojure:1.11-browsers
     working_directory: ~/joyride
@@ -138,6 +139,32 @@ jobs:
       - run:
           name: Run Extension Tests
           command: npm run integration-test
+      - save_cache:
+          name: Save dependencies (VS Code install, Joyride workspace node_modules)
+          key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
+          paths:
+            - .vscode-test/extensions
+            - .vscode-test/vscode-linux-x64-insiders
+            - ./vscode-test-runner/workspace-1/node_modules
+  test-integration-vsix:
+    docker:
+      - image: cimg/clojure:1.11-browsers
+    working_directory: ~/joyride
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Restore build
+          command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
+      - restore_cache:
+          name: Restore dependencies (VS Code install, Joyride workspace node_modules)
+          key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
+      - run:
+          name: Apt install missing dependencies
+          command: sudo apt update && sudo apt install -y libnss3
+      - run:
+          name: Run Extension Tests
+          command: npm run integration-test -- --joyride-vsix=/tmp/artifacts/joyride-$(node -p 'require("./package.json").version').vsix
       - save_cache:
           name: Save dependencies (VS Code install, Joyride workspace node_modules)
           key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
@@ -269,7 +296,10 @@ workflows:
       #- test-cljslib:
       #    requires:
       #      - build
-      - test-integration:
+      - test-integration-fs:
+          requires:
+            - build
+      - test-integration-vsix:
           requires:
             - build
   release-publish:
@@ -296,7 +326,15 @@ workflows:
       #        ignore: /.*/
       #      tags:
       #        only: /^v\d+\.\d+\.\d+-?.*/
-      - test-integration:
+      - test-integration-fs:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+-?.*/
+      - test-integration-vsix:
           requires:
             - build
           filters:
