@@ -71,7 +71,8 @@
                  :runCode run-code+}))
 
 (defn ^:export activate [^js context]
-  (js/console.info "Joyride activate START")
+  (js/console.time "activation")
+  (js/console.timeLog "activation" "Joyride activate START")
   
   (when context
     (swap! db/!app-db assoc
@@ -105,7 +106,8 @@
                       (life-cycle/maybe-run-init-script+ scripts-handler/run-workspace-script+
                                                          (:workspace (life-cycle/init-scripts))))
                     (utils/sayln "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
-    (js/console.info "Joyride activate END")
+    (js/console.timeLog "activation" "Joyride activate END")
+    (js/console.timeEnd "activation")
     api))
 
 (defn ^:export deactivate []
