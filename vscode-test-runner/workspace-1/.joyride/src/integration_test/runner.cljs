@@ -53,27 +53,20 @@
 ;; We rely on that the user_activate.cljs script is run before workspace_activate.cljs
 (defn- run-when-ws-activated [tries]
   (if (:ws-activated? @db/!state)
-    (do
+    (let [test-nss ['integration-test.activate-test
+                    'integration-test.scripts-test
+                    'integration-test.require-js-test
+                    'integration-test.require-extension-test
+                    'integration-test.npm-test
+                    'integration-test.nrepl-start-stop-test
+                    'integration-test.nrepl-eval-test
+                    'integration-test.joyride-core-test
+                    'integration-test.rewrite-clj-test]]
       (println "Runner: Workspace activated, running tests...")
       (try
-        (require '[integration-test.activate-test])
-        (require '[integration-test.scripts-test])
-        (require '[integration-test.require-js-test])
-        (require '[integration-test.require-extension-test])
-        (require '[integration-test.npm-test])
-        (require '[integration-test.nrepl-start-stop-test])
-        (require '[integration-test.nrepl-eval-test])
-        (require '[integration-test.joyride-core-test])
-        (require '[integration-test.rewrite-clj-test])
-        (cljs.test/run-tests 'integration-test.activate-test
-                             'integration-test.scripts-test
-                             'integration-test.require-js-test
-                             'integration-test.require-extension-test
-                             'integration-test.npm-test
-                             'integration-test.nrepl-start-stop-test
-                             'integration-test.nrepl-eval-test
-                             'integration-test.joyride-core-test
-                             'integration-test.rewrite-clj-test)
+        (doseq [test-ns test-nss]
+          (require test-ns))
+        (apply cljs.test/run-tests test-nss)
         (catch :default e
           (p/reject! (:running @db/!state) e))))
     (do
