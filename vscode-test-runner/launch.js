@@ -39,7 +39,7 @@ async function main() {
     const extensionTestsPath = path.resolve(__dirname, 'runTests');
     const testWorkspace = path.resolve(__dirname, 'workspace-1');
 
-    const launchArgs = [testWorkspace, '--disable-extensions', '--disable-workspace-trust'];
+    const launchArgs = [testWorkspace, '--disable-extensions', '--disable-workspace-trust', '--verbose'];
 
     // Download VS Code, unzip it and run the integration test
     await runTests({
