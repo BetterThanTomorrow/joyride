@@ -55,32 +55,34 @@
   (if (:ws-activated? @db/!state)
     (do
       (println "Runner: Workspace activated, running tests...")
-      (require '[integration-test.activate-test])
-      (require '[integration-test.scripts-test])
-      (require '[integration-test.require-js-test])
-      (require '[integration-test.require-extension-test])
-      (require '[integration-test.npm-test])
-      (require '[integration-test.nrepl-start-stop-test])
-      (require '[integration-test.nrepl-eval-test])
-      (require '[integration-test.joyride-core-test])
-      (require '[integration-test.rewrite-clj-test])
-      (cljs.test/run-tests 'integration-test.activate-test
-                           'integration-test.scripts-test
-                           'integration-test.require-js-test
-                           'integration-test.require-extension-test
-                           'integration-test.npm-test
-                           'integration-test.nrepl-start-stop-test
-                           'integration-test.nrepl-eval-test
-                           'integration-test.joyride-core-test
-                           'integration-test.rewrite-clj-test))
+      (try
+        (require '[integration-test.activate-test])
+        (require '[integration-test.scripts-test])
+        (require '[integration-test.require-js-test])
+        (require '[integration-test.require-extension-test])
+        (require '[integration-test.npm-test])
+        (require '[integration-test.nrepl-start-stop-test])
+        (require '[integration-test.nrepl-eval-test])
+        (require '[integration-test.joyride-core-test])
+        (require '[integration-test.rewrite-clj-test])
+        (cljs.test/run-tests 'integration-test.activate-test
+                             'integration-test.scripts-test
+                             'integration-test.require-js-test
+                             'integration-test.require-extension-test
+                             'integration-test.npm-test
+                             'integration-test.nrepl-start-stop-test
+                             'integration-test.nrepl-eval-test
+                             'integration-test.joyride-core-test
+                             'integration-test.rewrite-clj-test)
+        (catch :default e
+          (p/reject! (:running @db/!state) e))))
     (do
       (println "Runner: Workspace not activated yet, tries: " tries "- trying again in a jiffy")
       (js/setTimeout #(run-when-ws-activated (inc tries)) 10))))
 
 (defn run-all-tests []
   (let [running (p/deferred)]
-    (swap! db/!state assoc
-           :running running)
+    (swap! db/!state assoc :running running)
     (run-when-ws-activated 1)
     running))
 
