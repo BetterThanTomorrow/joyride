@@ -45,7 +45,7 @@ async function main(joyrideVSIXPathOrLabel, testWorkspace) {
       '--disable-workspace-trust'
     ];
     if (joyrideVSIXPathOrLabel !== 'extension-development') {
-      launchArgs.push('--install-extension', joyrideVSIXPathOrLabel);
+      launchArgs.push('--install-extension', joyrideVSIXPathOrLabel, '--force');
     }
     cp.spawnSync(cliPath, launchArgs, {
       encoding: 'utf-8',
