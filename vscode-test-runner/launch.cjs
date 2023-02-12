@@ -41,7 +41,7 @@ async function main(joyrideVSIXPathOrLabel, testWorkspace) {
 
     const launchArgs = [
       testWorkspace,
-      '--verbose',
+      //'--verbose',
       '--disable-workspace-trust'
     ];
     if (joyrideVSIXPathOrLabel !== 'extension-development') {
