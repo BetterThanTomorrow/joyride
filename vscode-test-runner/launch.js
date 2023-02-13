@@ -49,7 +49,7 @@ async function main(joyrideVSIXPathOrLabel, testWorkspace) {
         : [
             // Install dummy extension to avoid runTests bug with not attaching to the spawned vscode instance
             "--install-extension",
-            path.resolve(__dirname, "dummy", "dummy-0.0.1.vsix"),
+            path.resolve(__dirname, "dummy-extension", "dummy-0.0.1.vsix"),
             "--force",
           ]),
       "--verbose",
