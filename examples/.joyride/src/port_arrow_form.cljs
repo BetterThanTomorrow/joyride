@@ -13,21 +13,19 @@
 (defn log [x]
   (.appendLine (joyride.core/output-channel) (str x)))
 
-(defn get-arrow-clause [zl]
-  (let [lhs (z/sexpr zl)
-        arrow (-> zl z/right z/string)
-        rhs (-> zl z/right z/right z/sexpr)]
+(defn get-arrow-clause
+  "Make a pseudo-form since we're just using this for parsing."
+  [text]
+  (let [zloc (z/down (z/of-string (str "[ " text " ]")))
+        lhs (z/sexpr zloc)
+        arrow (-> zloc z/right z/string)
+        rhs (-> zloc z/right z/right z/sexpr)]
     [lhs arrow rhs]))
 
 (defn main []
   (log "port-arrow-form started")
-  (-> (p/let [editor ^js vscode/window.activeTextEditor
-              selection (e/current-selection)
-              source (str "[ " (e/current-selection-text) " ]")
-              zloc (z/of-string source)
-              [lhs arrow rhs] (get-arrow-clause (z/down zloc))]
-        (e/delete-range! editor selection)
-        (e/insert-text!+ (str `(~'is (~'= ~rhs ~lhs)))))))
+  (-> (p/let [[lhs _ rhs] (get-arrow-clause (e/current-selection-text))]
+        (e/replace-range! (str `(~'is (~'= ~rhs ~lhs)))))))
 
 (when (= (joyride/invoked-script) joyride/*file*)
   (main))
