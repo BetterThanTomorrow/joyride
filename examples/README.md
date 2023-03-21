@@ -90,7 +90,7 @@ the default Windows comment keyboard shortcut.
 
 ## Structural Editing via rewrite-clj
 
-`.joyride/src/port_arrow_form.cljs`
+[.joyride/src/port_arrow_form.cljs](.joyride/src/port_arrow_form.cljs)
 
 Converts a midje arrow clause into a `clojure.test/is` form, when selected. Shows how to use `rewrite-clj`
 to for parsing, getting S-Expressions, as well as how to use syntax-quote for easy form building.
