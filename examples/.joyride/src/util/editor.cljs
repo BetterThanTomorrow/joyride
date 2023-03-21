@@ -26,7 +26,7 @@
        (p/catch (fn [e]
                   (js/console.error e))))))
 
-(defn delete-range!
+(defn delete-range!+
   [^js editor ^js range]
   (-> (p/do (.edit editor
                    (fn [^js builder]
@@ -34,6 +34,21 @@
                    #js {:undoStopBefore true :undoStopAfter false}))
       (p/catch (fn [e]
                  (js/console.error e)))))
+
+(def delete-range! delete-range!+) ;; backwards compatible
+
+(defn replace-range!+
+  "Defaults to the current selection."
+  ([^js text]
+   (replace-range!+ text vscode/window.activeTextEditor (.-active (current-selection)) (current-selection)))
+  ([^js text ^js editor ^js position ^js range]
+   (-> (p/do (.edit editor
+                    (fn [^js builder]
+                      (.delete builder range)
+                      (.insert builder position text))
+                    #js {:undoStopBefore true :undoStopAfter false}))
+       (p/catch (fn [e]
+                  (js/console.error e))))))
 
 (comment
   (def a-selection (current-selection))
