@@ -17,7 +17,7 @@ One for the Workspace and one on he User level:
 
 A User [activate.cljs](/assets/getting-started-content/user/activate.cljs) script that shows:
 
-* How to write to, _and show_, the Joyride output channel. 
+* How to write to, _and show_, the Joyride output channel.
 * A re-runnable recipe for registering VS Code disposables as with the Workspace `activate.cljs` example.
 * A way to safely require VS Code extensions from `activate.cljs` scripts, where the extensions might yet not be activated.
 
@@ -87,6 +87,30 @@ the default Windows comment keyboard shortcut.
   "when": "!editorHasSelection && editorTextFocus && !editorReadOnly && editorLangId =~ /clojure|scheme|lisp/"
 }
 ```
+
+## Structural Editing via rewrite-clj
+
+`.joyride/src/port_arrow_form.cljs`
+
+Converts a midje arrow clause into a `clojure.test/is` form, when selected. Shows how to use `rewrite-clj`
+to for parsing, getting S-Expressions, as well as how to use syntax-quote for easy form building.
+
+```clojure
+(+ 2 2) => 4
+;; is changed to
+(is (= 4 (+ 2 2)))
+```
+
+```json
+{
+  "key": "f3",
+  "command": "joyride.runWorkspaceScript",
+  "args": "port_arrow_form.cljs",
+  "when": "editorHasSelection && editorTextFocus && !editorReadOnly && editorLangId == 'clojure'"
+}
+```
+
+
 
 * Video here: https://www.youtube.com/watch?v=V1oTf-1EchU
 * Tweet to like/comment/retweet: https://twitter.com/pappapez/status/1519825664177807363
@@ -222,7 +246,7 @@ By adding the `:reload` option to the require, the JavaScript code is reloaded w
 
 ### npm packages
 
-You can use packages from `npm` in your Joyride scripts. There's an example of this, using [posthtml-parser](https://github.com/posthtml/posthtml-parser) in 
+You can use packages from `npm` in your Joyride scripts. There's an example of this, using [posthtml-parser](https://github.com/posthtml/posthtml-parser) in
 [html_to_hiccup.cljs](.joyride/scripts/html_to_hiccup.cljs)
 
 ![assets/joyride-html2hiccup.png](assets/joyride-html2hiccup.png)
