@@ -88,9 +88,12 @@ the default Windows comment keyboard shortcut.
 }
 ```
 
+* Video here: https://www.youtube.com/watch?v=V1oTf-1EchU
+* Tweet to like/comment/retweet: https://twitter.com/pappapez/status/1519825664177807363
+
 ## Structural Editing via rewrite-clj
 
-[.joyride/src/port_arrow_form.cljs](.joyride/src/port_arrow_form.cljs)
+[.joyride/scripts/port_arrow_form.cljs](.joyride/scripts/port_arrow_form.cljs)
 
 Converts a midje arrow clause into a `clojure.test/is` form, when selected. Shows how to use `rewrite-clj`
 to for parsing, getting S-Expressions, as well as how to use syntax-quote for easy form building.
@@ -109,11 +112,6 @@ to for parsing, getting S-Expressions, as well as how to use syntax-quote for ea
   "when": "editorHasSelection && editorTextFocus && !editorReadOnly && editorLangId == 'clojure'"
 }
 ```
-
-
-
-* Video here: https://www.youtube.com/watch?v=V1oTf-1EchU
-* Tweet to like/comment/retweet: https://twitter.com/pappapez/status/1519825664177807363
 
 ## Joyride API
 
@@ -272,7 +270,7 @@ clojure.walk is wonderful, and so is [clojure.zip](https://clojuredocs.org/cloju
 
 ### Hickory
 
-[Hickory](https://github.com/clj-commons/hickory) is not included with Joyride, but that doesn't mean you can't use it! In [](.joyride/src/hickory) there is the slighly (very slightly) modified source of `hickory.select` as well as the unmodified source of `hickory.zip`. This makes the [find-in-html](.joyride/scripts/find_in_html.cljs) possible. (See [npm packages](#npm-packages) about the `npm` dependency.)
+[Hickory](https://github.com/clj-commons/hickory) is not included with Joyride, but that doesn't mean you can't use it! In [.joyride/src/hickory](.joyride/src/hickory) there is the slightly (very slightly) modified source of `hickory.select` as well as the unmodified source of `hickory.zip`. This makes the [find-in-html](.joyride/scripts/find_in_html.cljs) possible. (See [npm packages](#npm-packages) about the `npm` dependency.)
 
 ![](assets/joyride-parse-html-hickory-select.png)
 
