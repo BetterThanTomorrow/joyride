@@ -12,6 +12,8 @@ Copy the script and this folder to your Joyride User Scripts folder and you will
 
 For a more elaborate introduction to how this all works, see the article [Extend VS Code in user space, without invented restrictions](https://blog.agical.se/en/posts/extend-vs-code-in-user-space--without-invented-restrictions/).
 
+Here's a recorded demo of Joyride Sidecar: https://www.youtube.com/watch?v=XX7QXwbKlqs
+
 NB: When you use this for your own scripts you probably will want to make it a general **Load Joyride Sidecar** script, and keep the registering of disposable and such together with your scripts that use them. This way you can also use the same sidecar for your workspace scripts.
 
-If a workspace script need a custom sidecar, at a minimum you'll need to change the extension id in the new manifest.
+If a workspace script need a _custom_ sidecar, at a minimum you'll need to change the extension id in the new manifest.
