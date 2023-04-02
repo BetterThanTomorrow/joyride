@@ -182,15 +182,16 @@ The demo ”project” used here is only a directory with this file `hello_joyri
 
 See the [examples](./examples) for examples including:
 
+* Workspace activation script
 * Creating an interactive Webview
+* Using `npm` dependencies (The wonderful [posthtml-parser](https://github.com/posthtml/posthtml-parser) in this case)
+* [Contribute a File Explorer tree view and commands (and anything)](examples/.joyride/scripts/sidecar/README.md) by creating a Joyride Sidecar extension on the fly.
 * Terminal creation and control
-* Fontsize manipulation
 * Calva Structural Editing enhancements
 * Opening and showing project files
-* Workspace activation script
+* Fontsize manipulation
 * The Joyride Extension API
 * The `joyride.core` namespace
-* Using `npm` dependencies (The wonderful [posthtml-parser](https://github.com/posthtml/posthtml-parser) in this case)
 * Using [clojure.zip](https://clojuredocs.org/clojure.zip)
 * Using [Hickory](https://github.com/clj-commons/hickory) (well, `hickory.select`, at least)
 
