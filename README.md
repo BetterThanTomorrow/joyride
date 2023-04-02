@@ -2,7 +2,7 @@
 
 Modify your editor while it is running by executing ClojureScript code via the Joyride REPL and/or run scripts via keyboard shortcuts you choose. The Visual Studio Code API, as well as the APIs of its extensions, are at your command! Joyride makes VS Code scriptable in a very similar way to how how Emacs users can hack their editor. Complete with Interactive Programming.
 
-https://user-images.githubusercontent.com/30010/165934412-ffeb5729-07be-4aa5-b291-ad991d2f9f6c.mp4
+<video src="https://user-images.githubusercontent.com/30010/165934412-ffeb5729-07be-4aa5-b291-ad991d2f9f6c.mp4"></video>
 
 [The video in much better quality on Youtube (CalvaTV)](https://www.youtube.com/watch?v=V1oTf-1EchU)
 
