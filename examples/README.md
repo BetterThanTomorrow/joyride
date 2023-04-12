@@ -216,6 +216,22 @@ Example shortcut definition:
 
 https://user-images.githubusercontent.com/30010/172149989-69e87313-afeb-44fc-a71d-417a439dac32.mp4
 
+#### Customize findInFiles (searching the whole workspace in the sidebar)
+
+A similar approach works to customize the workspace finder in the sidebar.  The following code will open up the sidebar with some values preset.  A complete list of available parameters is [here.](https://github.com/microsoft/vscode/blob/a73b3fac964271be1a54eb15889b0d534a5309ea/src/vs/workbench/contrib/search/browser/searchActionsFind.ts#L39)
+
+```clojure
+(ns find-in-files
+  (:require ["vscode" :as vscode]
+            [joyride.core :as joyride]))
+
+(defn find-regexp-in-src []
+  (vscode/commands.executeCommand "workbench.action.findInFiles"
+                                  #js {:isRegex true
+                                       :filesToInclude "src/**/*.clj"}))
+```
+This function can be mapped to a keybinding as above.
+
 ### Workspace file system
 
 The [.joyride/scripts/ws.cljs](.joyride/scripts/ws.cljs) script shows two things:
