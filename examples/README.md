@@ -15,7 +15,7 @@ One for the Workspace and one on he User level:
 
 ### `user_activate.cljs`
 
-A User [activate.cljs](/assets/getting-started-content/user/activate.cljs) script that shows:
+A User [activate.cljs](../assets/getting-started-content/user/user_activate.cljs) script that shows:
 
 * How to write to, _and show_, the Joyride output channel.
 * A re-runnable recipe for registering VS Code disposables as with the Workspace `activate.cljs` example.
@@ -25,14 +25,14 @@ A User [activate.cljs](/assets/getting-started-content/user/activate.cljs) scrip
 
 ### `workspace_activate.cljs`
 
-A Workspace [activate.cljs](/examples/.joyride/scripts/workspace_activate.cljs) script that registers a `vscode/workspace.onDidOpenTextDocument` event handler. Demonstrates:
+A Workspace [activate.cljs](../examples/.joyride/scripts/workspace_activate.cljs) script that registers a `vscode/workspace.onDidOpenTextDocument` event handler. Demonstrates:
 
 * Using the `joyride.core/extension-context` to push disposables on its `subscriptions` array. Making VS Code dispose of them when Joyride is deactivated.
 * A re-runnable recipe to avoid re-registering the event handler. (By disposing it and then re-register.)
 
 ## Create a Hover Provider
 
-In [examples/.joyride/src/problem_hover.cljs](examples/.joyride/src/problem_hover.cljs) there's a Hover Provider which can be activated from the template [user_activate.cljs](#user_activatecljs). It creates an extra Diagnostics item in the hover. It is registered after a significant delay (5 seconds) to make sure this hover item goes at the very top of the hover. Looks like so:
+In [examples/.joyride/src/problem_hover.cljs](../examples/.joyride/src/problem_hover.cljs) there's a Hover Provider which can be activated from the template [user_activate.cljs](#user_activatecljs). It creates an extra Diagnostics item in the hover. It is registered after a significant delay (5 seconds) to make sure this hover item goes at the very top of the hover. Looks like so:
 
 ![image](https://user-images.githubusercontent.com/30010/209091150-65b139f7-83be-44d6-9099-d0aa1ed6afd4.png)
 
@@ -169,7 +169,7 @@ Here are some `my-lib` examples. NB: _These examples are included as **Getting s
 
 ### Lookup current symbol in Clojuredocs
 
-See [.joyride/scripts/clojuredocs.cljs](.joyride/scripts/clojuredocs.cljs) for @seancorfield's script for looking up the current symbol on [clojuredocs.org](https://clojuredocs.org).
+See [.joyride/scripts/clojuredocs.cljs](.joyride/src/clojuredocs.cljs) for @seancorfield's script for looking up the current symbol on [clojuredocs.org](https://clojuredocs.org).
 
 If you require that script in your [User activation.cljs](#user_activatecljs), you can then define a keyboard shortcut like so for easy lookup:
 
@@ -263,7 +263,7 @@ By adding the `:reload` option to the require, the JavaScript code is reloaded w
 You can use packages from `npm` in your Joyride scripts. There's an example of this, using [posthtml-parser](https://github.com/posthtml/posthtml-parser) in
 [html_to_hiccup.cljs](.joyride/scripts/html_to_hiccup.cljs)
 
-![assets/joyride-html2hiccup.png](assets/joyride-html2hiccup.png)
+![assets/joyride-html2hiccup.png](../assets/joyride-html2hiccup.png)
 
 To use a package from npm, Joyride needs to find it somewhere in the path from the using script and up to the system root. Some directories to consider for your Joyride `node_modules` are `~/.config/joyride` and `<workspace-root>/.joyride`. Sometimes the workspace root makes sense. To try this particular example you can:
 
