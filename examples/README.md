@@ -1,6 +1,6 @@
 # Joyride Examples
 
-Demonstrating some ways to [Joyride VS Code](https://marketplace.visualstudio.com/items?itemName=betterthantomorrow.joyride). You'll find the examples in the [examples/.joyride](./examples/.joyride) folder of this repository.
+Demonstrating some ways to [Joyride VS Code](https://marketplace.visualstudio.com/items?itemName=betterthantomorrow.joyride). You'll find the examples in the [examples/.joyride](./.joyride) folder of this repository.
 
 See also: [Joyride @ London Clojurians, Nov 29 2022](https://github.com/PEZ/london-clojurians-joyride)
 
