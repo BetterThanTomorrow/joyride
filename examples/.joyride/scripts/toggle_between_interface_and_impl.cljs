@@ -18,6 +18,7 @@
   (:require ["path" :as path]
             ["vscode" :as vscode]
             [clojure.string :as str]
+            [joyride.core :as joyride]
             [promesa.core :as p]))
 
 (defonce run-main? true)
