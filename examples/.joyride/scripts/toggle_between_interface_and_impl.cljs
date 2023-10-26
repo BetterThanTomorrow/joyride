@@ -62,7 +62,7 @@
       (interface->impl file-name)
       (impl->interface file-name))))
 
-(when run-main?
+(when (= (joyride/invoked-script) joyride/*file*)
   (main))
 
 (comment
