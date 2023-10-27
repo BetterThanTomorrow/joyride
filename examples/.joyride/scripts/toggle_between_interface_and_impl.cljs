@@ -21,15 +21,6 @@
             [joyride.core :as joyride]
             [promesa.core :as p]))
 
-(defonce run-main? true)
-
-(comment
-  ;; Loading this in the REPL w/o evaluating `main`:
-  (defonce run-main? false)  ; <- First evaluate this
-  (ns-unmap *ns* 'run-main?) ; <- Evaluate this when you are done
-                             ;    or want to test-run the script
-  )
-
 (defn interface->impl
   [file-name]
   (let [extension (path/extname file-name)]
