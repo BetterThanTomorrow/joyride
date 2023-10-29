@@ -1,9 +1,12 @@
 ;; Best placed among your user scripts
 ;; How to use:
 ;; 0. Configure the keyboard shortcuts (see below)
-;; 1. Run the command **Joyride: Run User Script**
-;; 2. In your JS file, select code and evaluate with `ctrl+enter`
-;;    Clear results decorations with `ctrl+escape`
+;; 1. Run the command **Joyride: Run User Script...**
+;;    Select `js-repl.cljs`
+;; 2. In your JS files, select code and evaluate with `ctrl+enter`
+;;    Clear result decorations with `ctrl+escape`
+;;
+;; You decide yourself what are good keyboard shortcuts, of course
 ;;
 ;; == Keyboard shortcuts ==
 ;;    {
