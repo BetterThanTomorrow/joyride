@@ -36,7 +36,7 @@ Evaluate code in JavaScript files, similar to how it's done with Clojure and Clo
 
 https://github.com/BetterThanTomorrow/joyride/assets/30010/d5becc9d-d079-4371-9789-7c739ed0439f
 
-Source, including some usage info: [examples/.joyride/scripts/js_repl.cljs](examples/.joyride/scripts/js_repl.cljs)
+Source, including some usage info: [examples/.joyride/scripts/js_repl.cljs](.joyride/scripts/js_repl.cljs)
 
 ## Create a Hover Provider
 
