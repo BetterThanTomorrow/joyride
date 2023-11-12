@@ -21,14 +21,56 @@
             [joyride.core :as joyride]
             [promesa.core :as p]))
 
+(defn navigate-to
+  [path]
+  (-> (vscode/workspace.openTextDocument path)
+      (vscode/window.showTextDocument)
+      (p/catch #(vscode/window.showInformationMessage (str "Error: " %)))))
+
+(defn make-relative-path
+  [file-path]
+  (p/let [editor ^js vscode/window.activeTextEditor
+          doc-uri ^js (.. editor -document -uri)
+          workspace-root-path (.. (vscode/workspace.getWorkspaceFolder doc-uri) -uri -path)]
+    (path/relative workspace-root-path file-path)))
+
+(defn make-absolute-path
+  [relative-path]
+  (p/let [editor ^js vscode/window.activeTextEditor
+          doc-uri ^js (.. editor -document -uri)
+          workspace-root-path (.. (vscode/workspace.getWorkspaceFolder doc-uri) -uri -path)]
+    (str workspace-root-path path/sep relative-path)))
+
+(defn find-candidate-impls
+  [file-name]
+  (p/let [extension (path/extname file-name)
+          file-path (path/dirname file-name)
+          editor ^js vscode/window.activeTextEditor
+          doc-uri ^js (.. editor -document -uri)
+          workspace-root-path (.. (vscode/workspace.getWorkspaceFolder doc-uri) -uri -path)
+          rel (make-relative-path file-path)
+          rel-pattern (vscode/RelativePattern. workspace-root-path (str rel path/sep "**" path/sep "*" extension))]
+    (vscode/workspace.findFiles rel-pattern "**/interface.clj" 10)))
+
 (defn interface->impl
   [file-name]
   (let [extension (path/extname file-name)]
     (if (str/ends-with? file-name (str "interface" extension))
-      (vscode/window.showInformationMessage "Not sure what to show in this case")
-      (-> (vscode/workspace.openTextDocument (str/replace file-name "/interface/" "/"))
-          (vscode/window.showTextDocument)
-          (p/catch #(vscode/window.showInformationMessage (str "Error: " %)))))))
+      (p/let [candidates (find-candidate-impls file-name)]
+        (case (count candidates)
+          1
+          (navigate-to (first candidates))
+
+          0
+          ;; Create new impl file?
+          (vscode/window.showInformationMessage "Not sure what to show in this case")
+
+          (p/let [rel-candidates (p/all (map (fn [c] (make-relative-path (.-path c))) candidates))
+                  selection (vscode/window.showQuickPick (clj->js rel-candidates) #js {:title "Select implementation file"})
+                  abs-selection (make-absolute-path selection)]
+            (doto (joyride/output-channel) (.show true) (.append (pr-str abs-selection)))
+            (navigate-to abs-selection))))
+      (navigate-to (str/replace file-name "/interface/" "/")))))
 
 (defn impl->interface
   [file-name]
@@ -42,9 +84,7 @@
         (p/catch (fn [_]
                    ;; Then try .../interface/<name>.clj
                    (let [interface-in-folder (path/resolve file-path (str "interface" path/sep base-name))]
-                     (-> (vscode/workspace.openTextDocument interface-in-folder)
-                         (vscode/window.showTextDocument)
-                         (p/catch #(vscode/window.showInformationMessage (str "Error: " %))))))))))
+                     (navigate-to interface-in-folder)))))))
 
 (defn main
   []
@@ -56,7 +96,3 @@
 
 (when (= (joyride/invoked-script) joyride/*file*)
   (main))
-
-(comment
-  (main)
-  )
