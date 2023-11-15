@@ -121,6 +121,17 @@ to for parsing, getting S-Expressions, as well as how to use syntax-quote for ea
 }
 ```
 
+## Toggle between interface and implementation when using [Polylith](https://polylith.gitbook.io/polylith)
+
+[.joyride/scripts/toggle_between_interface_and_impl.cljs.cljs](.joyride/scripts/toggle_between_interface_and_impl.cljs.cljs)
+
+When using Polylith, you have interface files and implementation files in your
+components. This script helps you navigate between them: when you're in the
+interface, it will switch to the implementation and vice versa. Note: not all
+possible cases are implemented in this example, specifically when you're in
+`interface.clj`, this script does not know how to handle that. See also the
+documentation in the script file.
+
 ## Joyride API
 
 Joyride comes with the `joyride.core` namespace, giving you access to things as the extension context, the Joyride output channel, and some info about the evaluation environment.
