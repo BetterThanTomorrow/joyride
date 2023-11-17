@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [The nrepl server croaks on eval messages containing the `ns` field](https://github.com/BetterThanTomorrow/joyride/issues/171)
+
 ## [0.0.33] - 2023-02-12
 
 - [Add rewrite-clj as built-in CLJS library](https://github.com/BetterThanTomorrow/joyride/issues/150)
