@@ -47,10 +47,9 @@
        (remove #{"__lookupGetter__" "__defineSetter__"
                  "__lookupSetter__" "__defineGetter__"})))
 
-(defn ns-imports->completions [sci-ctx-atom query-ns query]
-  (let [ctx @sci-ctx-atom
-        [_ns-part name-part] (str/split query #"/")
-        resolved (sci/eval-string* ctx
+(defn ns-imports->completions [sci-ctx query-ns query]
+  (let [[_ns-part name-part] (str/split query #"/")
+        resolved (sci/eval-string* sci-ctx
                                    (pr-str `(let [resolved# (resolve '~query-ns)]
                                               (when-not (var? resolved#)
                                                 resolved#))))]
@@ -70,40 +69,39 @@
         (instance-completions imported prefix)))))
 
 (defn handle-complete* [{ns-str :ns
-                         :keys [sci-ctx-atom]
+                         :keys [sci-ctx]
                          :as request}]
   (try
-    (let [ctx @sci-ctx-atom
-          sci-ns (when ns-str
-                   (the-sci-ns ctx (symbol ns-str)))]
+    (let [sci-ns (when ns-str
+                   (the-sci-ns sci-ctx (symbol ns-str)))]
       (sci/binding [sci/ns (or sci-ns @sci/ns)]
         (if-let [query (or (:symbol request)
                            (:prefix request))]
           (let [has-namespace? (str/includes? query "/")
                 query-ns (when has-namespace? (some-> (str/split query #"/")
                                                       first symbol))
-                from-current-ns (fully-qualified-syms ctx (sci/eval-string* ctx "(ns-name *ns*)"))
+                from-current-ns (fully-qualified-syms sci-ctx (sci/eval-string* sci-ctx "(ns-name *ns*)"))
                 from-current-ns (map (fn [sym]
                                        [(namespace sym) (name sym) :unqualified])
                                      from-current-ns)
-                alias->ns (sci/eval-string* ctx "(let [m (ns-aliases *ns*)] (zipmap (keys m) (map ns-name (vals m))))")
+                alias->ns (sci/eval-string* sci-ctx "(let [m (ns-aliases *ns*)] (zipmap (keys m) (map ns-name (vals m))))")
                 ns->alias (zipmap (vals alias->ns) (keys alias->ns))
                 from-aliased-nss (doall (mapcat
                                          (fn [alias]
                                            (let [ns (get alias->ns alias)
-                                                 syms (sci/eval-string* ctx (format "(keys (ns-publics '%s))" ns))]
+                                                 syms (sci/eval-string* sci-ctx (format "(keys (ns-publics '%s))" ns))]
                                              (map (fn [sym]
                                                     [(str ns) (str sym) :qualified])
                                                   syms)))
                                          (keys alias->ns)))
-                all-namespaces (->> (sci/eval-string* ctx "(all-ns)")
+                all-namespaces (->> (sci/eval-string* sci-ctx "(all-ns)")
                                     (map (fn [ns]
                                            [(str ns) nil :qualified])))
-                from-imports (when has-namespace? (ns-imports->completions sci-ctx-atom query-ns query))
+                from-imports (when has-namespace? (ns-imports->completions sci-ctx query-ns query))
                 fully-qualified-names (when-not from-imports
                                         (when has-namespace?
                                           (let [ns (get alias->ns query-ns query-ns)
-                                                syms (sci/eval-string* ctx (format "(and (find-ns '%s)
+                                                syms (sci/eval-string* sci-ctx (format "(and (find-ns '%s)
                                                                                          (keys (ns-publics '%s)))"
                                                                                    ns))]
                                             (map (fn [sym]
