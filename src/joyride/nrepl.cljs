@@ -46,10 +46,10 @@
       (debug "response" response))
     (handler request response)))
 
-(defn eval-ctx-mw [handler {:keys [sci-ctx-atom]}]
+(defn eval-ctx-mw [handler {:keys [sci-ctx]}]
   (fn [request send-fn]
     (handler (assoc request
-                    :sci-ctx-atom sci-ctx-atom)
+                    :sci-ctx sci-ctx)
              send-fn)))
 
 (declare ops)
@@ -72,7 +72,7 @@
 
 (defn format-value [nrepl-pprint pprint-options value]
   (if nrepl-pprint
-    (if-let [pprint-fn (pretty-print-fns-map nrepl-pprint)] 
+    (if-let [pprint-fn (pretty-print-fns-map nrepl-pprint)]
       (let [{:keys [right-margin length level]} pprint-options]
         (binding [*print-length* length
                   *print-level* level
@@ -83,7 +83,7 @@
         (pr-str value)))
     (pr-str value)))
 
-(defn do-handle-eval [{:keys [ns code _sci-ctx-atom _load-file? file] :as request} send-fn]
+(defn do-handle-eval [{:keys [ns code _sci-ctx _load-file? file] :as request} send-fn]
   (sci/with-bindings
     {sci/ns ns
      sci/print-length @sci/print-length
@@ -112,9 +112,9 @@
                                "ns" (str @sci/ns)
                                "status" ["done"]}))))))
 
-(defn handle-eval [{:keys [ns sci-ctx-atom] :as request} send-fn]
+(defn handle-eval [{:keys [ns sci-ctx] :as request} send-fn]
   (do-handle-eval (assoc request :ns (or (when ns
-                                           (the-sci-ns @sci-ctx-atom (symbol ns)))
+                                           (the-sci-ns sci-ctx (symbol ns)))
                                          @jsci/!last-ns
                                          @sci/ns))
                   send-fn))
@@ -234,9 +234,9 @@
                          (.-log_level ^Object opts)
                          (:log_level opts))
                        "info")
-        ctx-atom (store/get-ctx)
+        ctx (store/get-ctx)
         #_#_on-exit (js/require "signal-exit")]
-    
+
     (swap! !db assoc ::root-path root-path)
 
     ;; TODO: I don't understand the following comment
@@ -252,7 +252,7 @@
                                     (.get "nreplHostAddress"))]
          (if (< 0 (node-net/isIP nrepl-host-address))
            (let [server (node-net/createServer
-                         (partial on-connect {:sci-ctx-atom ctx-atom}))]
+                         (partial on-connect {:sci-ctx ctx}))]
              (swap! !db assoc ::server server)
              (p/do
                (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning true))
