@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.35] - 2023-11-18
+
 - [Add deps.edn configs + instructions for full clojure-lsp support](https://github.com/BetterThanTomorrow/joyride/issues/170)
 
 ## [0.0.34] - 2023-11-17
