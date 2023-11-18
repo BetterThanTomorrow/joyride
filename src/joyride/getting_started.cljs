@@ -1,6 +1,7 @@
 (ns joyride.getting-started
   (:require ["path" :as path]
             ["vscode" :as vscode]
+            [clojure.string :as string]
             [joyride.config :as conf]
             [joyride.utils :as utils]
             [promesa.core :as p]))
@@ -20,7 +21,10 @@
         (vscode/workspace.fs.copy source-uri destination-uri)
         destination-uri))
 
-(defn- maybe-create-content+ [source-uri destination-uri]
+(defn- maybe-create-content+
+  "Copies `source-uri` to `destination-uri` if the latter does not exist.
+   Returns nil if `destination-uri` already exists."
+  [source-uri destination-uri]
   (p/let [exists?+ (utils/path-or-uri-exists?+ destination-uri)]
     (when-not exists?+
       (create-content-file+ source-uri destination-uri))))
@@ -40,9 +44,21 @@
       (maybe-create-content+ (getting-started-content-uri ["user" "src" "my_lib.cljs"])
                              (path->uri (conf/user-abs-src-path) ["my_lib.cljs"])))))
 
+(defn- update-workspace-deps+ [deps-uri]
+  (vscode/window.showInformationMessage (str "Updating deps edn: " deps-uri))
+  (p/let [buffer+ (vscode/workspace.fs.readFile deps-uri)
+          old-deps-content (-> (js/TextDecoder. "utf-8") (.decode buffer+))
+          new-deps-content (string/replace-first old-deps-content "-JOYRIDE-USER-CONFIG-PATH-" (conf/user-abs-joyride-path))
+          new-buffer (-> (js/TextEncoder. "utf-8") (.encode new-deps-content))
+          _ (vscode/workspace.fs.writeFile deps-uri new-buffer)]
+    deps-uri))
+
 (defn maybe-create-workspace-content+ []
-  (maybe-create-content+ (getting-started-content-uri ["workspace" "deps.edn"])
-                         (path->uri (conf/workspace-abs-joyride-path) ["deps.edn"])))
+  (p/let [deps-uri (path->uri (conf/workspace-abs-joyride-path) ["deps.edn"])
+          created?+ (maybe-create-content+ (getting-started-content-uri ["workspace" "deps.edn"])
+                                          deps-uri)]
+    (when created?+
+      (update-workspace-deps+ deps-uri))))
 
 (defn create-and-open-content-file+ [source destination]
   (fn []
