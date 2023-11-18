@@ -73,7 +73,7 @@
 (defn ^:export activate [^js context]
   (js/console.time "activation")
   (js/console.timeLog "activation" "Joyride activate START")
-  
+
   (when context
     (swap! db/!app-db assoc
            :output-channel (vscode/window.createOutputChannel "Joyride")
