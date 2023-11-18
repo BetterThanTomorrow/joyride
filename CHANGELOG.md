@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Add deps.edn configs + instructions for full clojure-lsp support](https://github.com/BetterThanTomorrow/joyride/issues/170)
+
 ## [0.0.34] - 2023-11-17
 
 - [The nrepl server croaks on eval messages containing the `ns` field](https://github.com/BetterThanTomorrow/joyride/issues/171)

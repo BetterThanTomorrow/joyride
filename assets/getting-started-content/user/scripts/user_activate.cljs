@@ -61,30 +61,18 @@
 
 ;; Pushing the disposables on the extension context's
 ;; subscriptions will make VS Code dispose of them when the
-;; Joyride extension is deactivated.
+;; Joyride extension is deactivated, or when you rerun
+;; `my-main` in this ns (such as rerunning this script).
 (defn- push-disposable! [disposable]
   (swap! !db update :disposables conj disposable)
   (-> (joyride/extension-context)
       .-subscriptions
       (.push disposable)))
 
-(defn- register-problem-hover []
-  (push-disposable! (#_{:clj-kondo/ignore [:unresolved-symbol]}
-                     (requiring-resolve 'problem-hover/register-diagnostics-handler!)))
-  (p/do
-    (.appendLine (joyride/output-channel) "Problem Hover Provider: Waiting a bit to register (to get to be topmost hover)...")
-    (p/delay 5000)
-    (push-disposable! (#_{:clj-kondo/ignore [:unresolved-symbol]}
-                       (requiring-resolve 'problem-hover/register-provider!)))
-    (.appendLine (joyride/output-channel) "Problem Hover Provider: Registered!")))
-
 (defn- my-main []
   (println "Hello World, from my-main in user_activate.cljs script")
   (clear-disposables!) ;; Any disposables add with `push-disposable!`
                        ;; will be cleared now. You can push them anew.
-
-  ;; To register a diagnostics hover item above the fold, un-ignore this:
-  #_(register-problem-hover)
 
   ;;; require my-lib
   (require '[my-lib])
@@ -94,12 +82,12 @@
   ;; particular extension is active, so we can't safely `(:require ..)`
   ;; in the `ns` form. Here's what you can do instead, using Calva
   ;; as the example. To try it for real, copy the example scripts from:
-  ;; https://github.com/BetterThanTomorrow/joyride/tree/master/examples 
+  ;; https://github.com/BetterThanTomorrow/joyride/tree/master/examples
   ;; Then un-ignore the below form and run
   ;;   *Joyride; Run User Script* -> user_activate.cljs
   ;; (Or reload the VS Code window.)
   #_(-> (vscode/extensions.getExtension "betterthantomorrow.calva")
-      ;; Force the Calva extension to activate 
+      ;; Force the Calva extension to activate
         (.activate)
       ;; The promise will resolve with the extension's API as the result
         (p/then (fn [_api]

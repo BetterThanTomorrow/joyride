@@ -73,7 +73,7 @@
 (defn ^:export activate [^js context]
   (js/console.time "activation")
   (js/console.timeLog "activation" "Joyride activate START")
-  
+
   (when context
     (swap! db/!app-db assoc
            :output-channel (vscode/window.createOutputChannel "Joyride")
@@ -94,7 +94,9 @@
     (when-contexts/set-context! ::when-contexts/joyride.isActive true)
 
     (when context
-      (-> (getting-started/maybe-create-user-content+)
+      (-> (p/do
+            (getting-started/maybe-create-user-content+)
+            (getting-started/maybe-create-workspace-content+))
           (p/catch
            (fn [e]
              (js/console.error "Joyride activate error" e)))
