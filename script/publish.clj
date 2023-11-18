@@ -47,7 +47,7 @@
 (defn commit-changelog [file-name message]
   (println "Committing")
   (shell/sh "git" "add" file-name)
-  (throw-if-error (shell/sh "git" "commit" 
+  (throw-if-error (shell/sh "git" "commit"
                             "-m" message
                             "-o" file-name)))
 
@@ -97,7 +97,7 @@
       (println "Release anyway? YES/NO: ")
       (flush)
       (let [answer (read)]
-        (when-not (= "YES" answer)
+        (when-not (= "YES" (-> answer str str/trim))
           (println "Aborting publish.")
           (System/exit 0))))
     (if (empty? unreleased-changelog-text)
