@@ -26,6 +26,8 @@
       (create-content-file+ source-uri destination-uri))))
 
 (defn maybe-create-user-content+ []
+  (maybe-create-content+ (getting-started-content-uri ["user" "deps.edn"])
+                         (path->uri (conf/user-abs-joyride-path) ["deps.edn"]))
   (p/let [user-activate-uri (path->uri (conf/user-abs-scripts-path) ["scripts" "user_activate.cljs"])
           user-activate-exists?+ (utils/path-or-uri-exists?+ user-activate-uri)]
     (when-not user-activate-exists?+
@@ -37,6 +39,10 @@
                              (path->uri (conf/user-abs-scripts-path) ["hello_joyride_user_script.js"]))
       (maybe-create-content+ (getting-started-content-uri ["user" "src" "my_lib.cljs"])
                              (path->uri (conf/user-abs-src-path) ["my_lib.cljs"])))))
+
+(defn maybe-create-workspace-content+ []
+  (maybe-create-content+ (getting-started-content-uri ["workspace" "deps.edn"])
+                         (path->uri (conf/workspace-abs-joyride-path) ["deps.edn"])))
 
 (defn create-and-open-content-file+ [source destination]
   (fn []
