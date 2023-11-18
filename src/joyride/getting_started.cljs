@@ -6,7 +6,7 @@
             [joyride.utils :as utils]
             [promesa.core :as p]))
 
-(defn path->uri [base-path sub-path]
+(defn- path->uri [base-path sub-path]
   (apply (.-joinPath vscode/Uri) (vscode/Uri.file base-path) sub-path))
 
 (defn- getting-started-content-uri [sub-path]
