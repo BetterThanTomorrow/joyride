@@ -48,7 +48,8 @@
   (vscode/window.showInformationMessage (str "Updating deps edn: " deps-uri))
   (p/let [buffer+ (vscode/workspace.fs.readFile deps-uri)
           old-deps-content (-> (js/TextDecoder. "utf-8") (.decode buffer+))
-          new-deps-content (string/replace-first old-deps-content "-JOYRIDE-USER-CONFIG-PATH-" (conf/user-abs-joyride-path))
+          user-path (-> (conf/user-abs-joyride-path) (string/escape {"\\" "\\\\"}))
+          new-deps-content (string/replace-first old-deps-content "-JOYRIDE-USER-CONFIG-PATH-" user-path)
           new-buffer (-> (js/TextEncoder. "utf-8") (.encode new-deps-content))
           _ (vscode/workspace.fs.writeFile deps-uri new-buffer)]
     deps-uri))
