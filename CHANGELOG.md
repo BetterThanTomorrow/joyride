@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.36] - 2023-11-19
+
 - Remove pop up message about .joyride/deps.edn being created/updated
 
 ## [0.0.35] - 2023-11-18
