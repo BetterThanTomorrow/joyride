@@ -45,7 +45,7 @@
                              (path->uri (conf/user-abs-src-path) ["my_lib.cljs"])))))
 
 (defn- update-workspace-deps+ [deps-uri]
-  (vscode/window.showInformationMessage (str "Updating deps edn: " deps-uri))
+  (js/console.info "Updating Workspace .joyride/deps.edn")
   (p/let [buffer+ (vscode/workspace.fs.readFile deps-uri)
           old-deps-content (-> (js/TextDecoder. "utf-8") (.decode buffer+))
           user-path (-> (conf/user-abs-joyride-path) (string/escape {"\\" "\\\\"}))

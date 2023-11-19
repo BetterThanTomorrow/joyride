@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Remove pop up message about .joyride/deps.edn being created/updated
+
 ## [0.0.35] - 2023-11-18
 
 - [Add deps.edn configs + instructions for full clojure-lsp support](https://github.com/BetterThanTomorrow/joyride/issues/170)
