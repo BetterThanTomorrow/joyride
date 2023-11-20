@@ -5,9 +5,11 @@
 ;; 2. Add a `:joyride` alias to the project root deps.edn file.
 ;;    Minimal file content:
 ;;    {:aliases {:joyride {:extra-deps {joyride/workspace {:local/root ".joyride"}}}}}
-
+;;
+;; To also tell clojure-lsp about your Joyride user scripts, see instructions
+;; in your User Joyride config directory `deps.edn` file.
+;; (`~/.config/joyride/deps.edn` on Mac/Linux, somewhere similar on Windows?)
 {:deps {org.clojure/clojurescript {:mvn/version "1.11.54"}
         funcool/promesa {:mvn/version "9.0.471"}
-        rewrite-clj/rewrite-clj {:mvn/version "1.1.46"}
-        joyride/user {:local/root "-JOYRIDE-USER-CONFIG-PATH-"}}
+        rewrite-clj/rewrite-clj {:mvn/version "1.1.46"}}
  :paths ["src" "scripts"]}
