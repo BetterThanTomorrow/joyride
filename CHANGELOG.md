@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.37] - 2023-11-20
+
 - Fix: [Unwanted .joyride directory creation](https://github.com/BetterThanTomorrow/joyride/issues/174)
 
 ## [0.0.36] - 2023-11-19
