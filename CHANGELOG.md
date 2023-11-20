@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.38] - 2023-11-20
+
 - Fix: [The `:joyride/user` workspace deps.edn only works for one user](https://github.com/BetterThanTomorrow/joyride/issues/176)
 
 ## [0.0.37] - 2023-11-20
