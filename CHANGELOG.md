@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: [Unwanted .joyride directory creation](https://github.com/BetterThanTomorrow/joyride/issues/174)
+
 ## [0.0.36] - 2023-11-19
 
 - Remove pop up message about .joyride/deps.edn being created/updated
@@ -14,7 +16,7 @@ Changes to Joyride
 
 ## [0.0.34] - 2023-11-17
 
-- [The nrepl server croaks on eval messages containing the `ns` field](https://github.com/BetterThanTomorrow/joyride/issues/171)
+- Fix: [The nrepl server croaks on eval messages containing the `ns` field](https://github.com/BetterThanTomorrow/joyride/issues/171)
 
 ## [0.0.33] - 2023-02-12
 
