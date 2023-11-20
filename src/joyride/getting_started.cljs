@@ -54,12 +54,14 @@
           _ (vscode/workspace.fs.writeFile deps-uri new-buffer)]
     deps-uri))
 
-(defn maybe-create-workspace-content+ []
-  (p/let [deps-uri (path->uri (conf/workspace-abs-joyride-path) ["deps.edn"])
-          created?+ (maybe-create-content+ (getting-started-content-uri ["workspace" "deps.edn"])
-                                          deps-uri)]
-    (when created?+
-      (update-workspace-deps+ deps-uri))))
+(defn maybe-create-workspace-config+ [create-joyride-dir?]
+  (p/let [joyride-dir-exists?+ (utils/path-or-uri-exists?+ (path->uri (conf/workspace-abs-joyride-path) "."))]
+    (when (or joyride-dir-exists?+ create-joyride-dir?)
+      (p/let [deps-uri (path->uri (conf/workspace-abs-joyride-path) ["deps.edn"])
+              created?+ (maybe-create-content+ (getting-started-content-uri ["workspace" "deps.edn"])
+                                               deps-uri)]
+        (when created?+
+          (update-workspace-deps+ deps-uri))))))
 
 (defn create-and-open-content-file+ [source destination]
   (fn []
@@ -74,9 +76,13 @@
       (create-and-open-content-file+ source destination))))
 
 (defn maybe-create-workspace-activate-fn+ []
-  (maybe-create-and-open-content+ (getting-started-content-uri ["workspace" "scripts" "workspace_activate.cljs"])
-                                  (path->uri (conf/workspace-abs-scripts-path) ["workspace_activate.cljs"])))
+  (p/do
+    (maybe-create-workspace-config+ true)
+    (maybe-create-and-open-content+ (getting-started-content-uri ["workspace" "scripts" "workspace_activate.cljs"])
+                                    (path->uri (conf/workspace-abs-scripts-path) ["workspace_activate.cljs"]))))
 
 (defn maybe-create-workspace-hello-fn+ []
-  (maybe-create-and-open-content+ (getting-started-content-uri ["workspace" "scripts" "hello_joyride_workspace_script.cljs"])
-                                  (path->uri (conf/workspace-abs-scripts-path) ["hello_joyride_workspace_script.cljs"])))
+  (p/do
+    (maybe-create-workspace-config+ true)
+    (maybe-create-and-open-content+ (getting-started-content-uri ["workspace" "scripts" "hello_joyride_workspace_script.cljs"])
+                                    (path->uri (conf/workspace-abs-scripts-path) ["hello_joyride_workspace_script.cljs"]))))

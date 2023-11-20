@@ -96,7 +96,7 @@
     (when context
       (-> (p/do
             (getting-started/maybe-create-user-content+)
-            (getting-started/maybe-create-workspace-content+))
+            (getting-started/maybe-create-workspace-config+ false))
           (p/catch
            (fn [e]
              (js/console.error "Joyride activate error" e)))
