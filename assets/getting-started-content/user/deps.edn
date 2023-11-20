@@ -1,4 +1,10 @@
 ;; clojure-lsp needs this config to analyze Joyride code
+;; To get clojure-lsp to find this file:
+;; 1. add a `:joyride-user` `:source-alias` to `.lsp/config.edn`
+;; 2. add `:joyride-user` to `:aliases` in your global/user `deps.edn`.
+;;    content something like so:
+;;    :joyride-user {:extra-deps {joyride/user {:local/root "/Users/pez/.config/joyride"}}}
+;;                                                           ^ your user Joyride directory
 {:deps {org.clojure/clojurescript {:mvn/version "1.11.54"}
         funcool/promesa {:mvn/version "9.0.471"}
         rewrite-clj/rewrite-clj {:mvn/version "1.1.46"}}

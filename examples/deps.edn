@@ -1,1 +1,1 @@
-{}
+{:aliases {:joyride {:extra-deps {joyride/workspace {:local/root ".joyride"}}}}}

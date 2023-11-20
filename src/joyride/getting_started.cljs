@@ -44,24 +44,13 @@
       (maybe-create-content+ (getting-started-content-uri ["user" "src" "my_lib.cljs"])
                              (path->uri (conf/user-abs-src-path) ["my_lib.cljs"])))))
 
-(defn- update-workspace-deps+ [deps-uri]
-  (js/console.info "Updating Workspace .joyride/deps.edn")
-  (p/let [buffer+ (vscode/workspace.fs.readFile deps-uri)
-          old-deps-content (-> (js/TextDecoder. "utf-8") (.decode buffer+))
-          user-path (-> (conf/user-abs-joyride-path) (string/escape {"\\" "\\\\"}))
-          new-deps-content (string/replace-first old-deps-content "-JOYRIDE-USER-CONFIG-PATH-" user-path)
-          new-buffer (-> (js/TextEncoder. "utf-8") (.encode new-deps-content))
-          _ (vscode/workspace.fs.writeFile deps-uri new-buffer)]
-    deps-uri))
-
 (defn maybe-create-workspace-config+ [create-joyride-dir?]
   (p/let [joyride-dir-exists?+ (utils/path-or-uri-exists?+ (path->uri (conf/workspace-abs-joyride-path) "."))]
     (when (or joyride-dir-exists?+ create-joyride-dir?)
       (p/let [deps-uri (path->uri (conf/workspace-abs-joyride-path) ["deps.edn"])
-              created?+ (maybe-create-content+ (getting-started-content-uri ["workspace" "deps.edn"])
-                                               deps-uri)]
-        (when created?+
-          (update-workspace-deps+ deps-uri))))))
+              _created?+ (maybe-create-content+ (getting-started-content-uri ["workspace" "deps.edn"])
+                                                deps-uri)]
+        deps-uri))))
 
 (defn create-and-open-content-file+ [source destination]
   (fn []
