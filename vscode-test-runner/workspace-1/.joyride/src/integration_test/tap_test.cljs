@@ -15,12 +15,14 @@
 (deftest tap
   (testing "taps to our atom"
     (async done
-           (p/do!
-            (add-tap tap-fn!)
-            (reset! !tap [])
-            (p/let [result+ (tap>+ :tapped)]
-              (is (boolean? result+)))
-            (is (= [:tapped] @!tap))
-            (remove-tap tap-fn!)
-            (reset! !tap [])
-            (done)))))
+           (-> (p/do!
+                (add-tap tap-fn!)
+                (reset! !tap [])
+                (p/let [result+ (tap>+ :tapped)]
+                  (is (boolean? result+))
+                  (is (= [:tapped] @!tap))
+                  (remove-tap tap-fn!)
+                  (reset! !tap [])
+                  result+))
+               (p/finally
+                 done)))))
