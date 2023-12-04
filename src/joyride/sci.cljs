@@ -73,7 +73,7 @@
   (let [from-path (if (.startsWith lib "/")
                     ""
                     (:path-to-load (source-script-by-ns from-ns)))
-        req (module/createRequire (path/resolve (or from-path "./script.cljs"))) 
+        req (module/createRequire (path/resolve (or from-path "./script.cljs")))
         resolved (.resolve req lib)]
     (when reload
       (aset (.-cache req) resolved js/undefined))
@@ -106,7 +106,10 @@
  (sci/init {:classes {'js (doto goog/global
                             (aset "require" js/require))
                       :allow :all}
-            :namespaces {'clojure.core {'IFn (sci/copy-var IFn core-namespace)}
+            :namespaces {'clojure.core {'IFn (sci/copy-var IFn core-namespace)
+                                        'tap> (sci/copy-var tap> core-namespace)
+                                        'add-tap (sci/copy-var add-tap core-namespace)
+                                        'remove-tap (sci/copy-var remove-tap core-namespace)}
                          'clojure.zip zip-namespace
                          'cljs.test cljs-test-config/cljs-test-namespace
                          'cljs.pprint cljs-pprint-config/cljs-pprint-namespace
