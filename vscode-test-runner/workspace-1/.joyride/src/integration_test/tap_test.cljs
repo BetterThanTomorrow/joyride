@@ -1,5 +1,6 @@
 (ns integration-test.tap-test
-  (:require [cljs.test :refer [deftest testing is async]]
+  (:require [cljs.test :refer [testing is]]
+            [integration-test.macros :refer [deftest-async]]
             [promesa.core :as p]))
 
 (def !tap (atom []))
@@ -12,17 +13,13 @@
               (let [result (tap> x)]
                 (js/setTimeout (fn [] (resolve result)) 10)))))
 
-(deftest tap
+(deftest-async tap
   (testing "taps to our atom"
-    (async done
-           (-> (p/do!
-                (add-tap tap-fn!)
-                (reset! !tap [])
-                (p/let [result+ (tap>+ :tapped)]
-                  (is (boolean? result+))
-                  (is (= [:tapped] @!tap))
-                  (remove-tap tap-fn!)
-                  (reset! !tap [])
-                  result+))
-               (p/finally
-                 done)))))
+    (p/do!
+     (add-tap tap-fn!)
+     (reset! !tap [])
+     (p/let [result+ (tap>+ :tapped)]
+       (is (boolean? result+))
+       (is (= [:tapped] @!tap))
+       (remove-tap tap-fn!)
+       (reset! !tap [])))))
