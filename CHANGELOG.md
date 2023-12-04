@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.39] - 2023-12-04
+
 - [Add `tap>`, `add-tap`, and `remove-tap`](https://github.com/BetterThanTomorrow/joyride/issues/112)
 
 ## [0.0.38] - 2023-11-20
