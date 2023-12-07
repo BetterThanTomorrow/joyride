@@ -49,8 +49,8 @@
        :source (str (fs/readFileSync path-to-load))})))
 
 (defn source-script-by-ns [namespace]
-  (or (source-script-by-ns-with-ext namespace ".cljc")
-      (source-script-by-ns-with-ext namespace ".cljs")))
+  (or (source-script-by-ns-with-ext namespace ".cljs")
+      (source-script-by-ns-with-ext namespace ".cljc")))
 
 (def ^:private extension-namespace-prefix "ext://")
 
