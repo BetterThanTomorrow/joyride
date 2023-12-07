@@ -25,14 +25,14 @@
 
 (def joyride-ns (sci/create-ns 'joyride.core nil))
 
-(defn ns->path [namespace]
+(defn- ns->path [namespace ext]
   (-> (str namespace)
       (munge)
       (str/replace  "." "/")
-      (str ".cljs")))
+      (str ext)))
 
-(defn source-script-by-ns [namespace]
-  (let [ns-path (ns->path namespace)
+(defn- source-script-by-ns-with-ext [namespace ext]
+  (let [ns-path (ns->path namespace ext)
         path-if-exists (fn [search-path]
                          (let [file-path (path/join search-path ns-path)]
                            (when (fs/existsSync file-path)
@@ -47,6 +47,10 @@
       {:file ns-path
        :path-to-load path-to-load
        :source (str (fs/readFileSync path-to-load))})))
+
+(defn source-script-by-ns [namespace]
+  (or (source-script-by-ns-with-ext namespace ".cljc")
+      (source-script-by-ns-with-ext namespace ".cljs")))
 
 (def ^:private extension-namespace-prefix "ext://")
 
@@ -106,6 +110,7 @@
  (sci/init {:classes {'js (doto goog/global
                             (aset "require" js/require))
                       :allow :all}
+            :features #{:joyride :cljs}
             :namespaces {'clojure.core {'IFn (sci/copy-var IFn core-namespace)
                                         'tap> (sci/copy-var tap> core-namespace)
                                         'add-tap (sci/copy-var add-tap core-namespace)
