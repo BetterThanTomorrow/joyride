@@ -86,3 +86,9 @@
     (p/let [result (vscode/commands.executeCommand "joyride.runWorkspaceScript" "a_ws_script.js")]
       (is (= 42
              (.-fortytwo result))))))
+
+(deftest-async run-a-ws-cljc-script
+  (testing "Runs a workspace cljc script"
+    (p/let [result (vscode/commands.executeCommand "joyride.runWorkspaceScript" "a_cljc_script.cljc")]
+      (is (= :a-cljc-script
+             result)))))
