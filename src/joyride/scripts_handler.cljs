@@ -19,7 +19,7 @@
    it is only Remote friendly in the case with a workspace root.)"
   [base-path script-folder-path]
   (if vscode/workspace.rootPath
-    (p/let [glob (vscode/RelativePattern. base-path (path/join script-folder-path "**" "*.{cljs,js}"))
+    (p/let [glob (vscode/RelativePattern. base-path (path/join script-folder-path "**" "*.{cljs,cljc,js}"))
             script-uris (p/->> (vscode/workspace.findFiles glob)
                                cljify
                                (sort-by #(.-fsPath ^js %)))]
