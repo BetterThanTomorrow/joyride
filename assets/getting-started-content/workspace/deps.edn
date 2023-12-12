@@ -1,7 +1,8 @@
 ;; clojure-lsp needs this config to analyze Joyride code
 ;; To tell clojure-lsp about this file:
-;; 1. Add a source-alias to `.lsp/config.edn`. Minimal config file content:
-;;    {:source-aliases #{:joyride}}
+;; 1. Add a source-alias to `.lsp/config.edn`. E.g.:
+;;    :source-aliases #{:src :test :joyride}
+;;   (The clojure-lsp defaults are `:src :test`.)
 ;; 2. Add a `:joyride` alias to the project root deps.edn file.
 ;;    Minimal file content:
 ;;    {:aliases {:joyride {:extra-deps {joyride/workspace {:local/root ".joyride"}}}}}
