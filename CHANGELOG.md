@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.41] - 2023-12-13
+
 - [Update `:source-aliases` recommendation in auto-created workspace `.joyride/deps.edn`](https://github.com/BetterThanTomorrow/joyride/issues/181)
 
 ## [0.0.40] - 2023-12-08
