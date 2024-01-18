@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Bump SCI to ad79a6c476affd1f8208efbfdba57992a68c8056
+
 ## [0.0.41] - 2023-12-13
 
 - [Update `:source-aliases` recommendation in auto-created workspace `.joyride/deps.edn`](https://github.com/BetterThanTomorrow/joyride/issues/181)
