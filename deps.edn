@@ -9,5 +9,5 @@
         org.babashka/sci.configs
         #_{:local/root "../sci.configs"}
         {:git/url "https://github.com/babashka/sci.configs"
-         :git/sha "c0d379a6853e6340ab50174651d427639290afd2"}}
+         :git/sha "3cd48a595bace287554b1735bb378bad1d22b931"}}
  :aliases {:dev {}}}
