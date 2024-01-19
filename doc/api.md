@@ -207,59 +207,14 @@ Here's a snippet from the [joyride_api.cljs](../examples/.joyride/scripts/joyrid
 
 #### promesa.core
 
-See [promesa docs](https://cljdoc.org/d/funcool/promesa/6.0.2/doc/user-guide).
+See [promesa docs for how to use it](https://cljdoc.org/d/funcool/promesa/11.0.678/doc/promises).
 
-- `p/*loop-run-fn*`
-- `p/->`
-- `p/->>`
-- `p/TimeoutException`
-- `p/all`
-- `p/any`
-- `p/as->`
-- `p/bind`
-- `p/cancel!`
-- `p/cancelled?`
-- `p/catch`
-- `p/catch'`
-- `p/chain`
-- `p/chain'`
-- `p/create`
-- `p/deferred`
-- `p/deferred?`
-- `p/delay`
-- `p/do`
-- `p/do!`
-- `p/doseq`
-- `p/done?`
-- `p/err`
-- `p/error`
-- `p/finally`
-- `p/future`
-- `p/handle`
-- `p/let`
-- `p/loop`
-- `p/map`
-- `p/mapcat`
-- `p/pending?`
-- `p/plet`
-- `p/promise`
-- `p/promise?`
-- `p/promisify`
-- `p/race`
-- `p/recur`
-- `p/reject!`
-- `p/rejected`
-- `p/rejected?`
-- `p/resolve!`
-- `p/resolved`
-- `p/resolved?`
-- `p/run!`
-- `p/then`
-- `p/then'`
-- `p/thenable?`
-- `p/timeout`
-- `p/with-redefs`
-- `p/wrap`
+NB: All of Promesa is not available in Joyride. Exactly how much is supported depends on which version of
+[sci-configs](https://github.com/babashka/sci.configs) Joyride is built with. At the time of this writing, we were using commit `c0d379a6853e6340ab50174651d427639290afd2`.
 
+To check what you can use from Promesa you can check sci-config for the given commit, like so:
+* https://github.com/babashka/sci.configs/blob/c0d379a6853e6340ab50174651d427639290afd2/src/sci/configs/funcool/promesa.cljs
+
+You'll find the commit id to use for latest Joyride in [deps.edn of this repo](../deps.edn).
 
 
