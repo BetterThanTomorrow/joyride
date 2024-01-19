@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.42] - 2024-01-19
+
 - Bump SCI to [ad79a6c476affd1f8208efbfdba57992a68c8056](https://github.com/babashka/sci/commit/ad79a6c476affd1f8208efbfdba57992a68c8056) (from [39ce36540eb4c2c6adc74c23ea76ac6330ca7835](https://github.com/babashka/sci/commit/39ce36540eb4c2c6adc74c23ea76ac6330ca7835))
 - More promesa.core support: Bump sci-configs to [3cd48a595bace287554b1735bb378bad1d22b931](https://github.com/babashka/sci.configs/commit/3cd48a595bace287554b1735bb378bad1d22b931) (from [0702ea5a21ad92e6d7cca6d36de84271083ea68f](https://github.com/babashka/sci.configs/commit/0702ea5a21ad92e6d7cca6d36de84271083ea68f))
 - Bump rewrite-clj to 1.1.47
