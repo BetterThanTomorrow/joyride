@@ -1,13 +1,13 @@
 {:paths ["src"]
- :deps {funcool/promesa {:mvn/version "9.0.471"}
-        thheller/shadow-cljs {:mvn/version "2.20.5"}
-        rewrite-clj/rewrite-clj {:mvn/version "1.1.46"}
+ :deps {funcool/promesa {:mvn/version "11.0.678"}
+        thheller/shadow-cljs {:mvn/version "2.26.5"}
+        rewrite-clj/rewrite-clj {:mvn/version "1.1.47"}
         org.babashka/sci
         #_{:local/root "../babashka/sci"}
         {:git/url "https://github.com/babashka/sci"
-         :git/sha "39ce36540eb4c2c6adc74c23ea76ac6330ca7835"}
+         :git/sha "ad79a6c476affd1f8208efbfdba57992a68c8056"}
         org.babashka/sci.configs
         #_{:local/root "../sci.configs"}
         {:git/url "https://github.com/babashka/sci.configs"
-         :git/sha "0702ea5a21ad92e6d7cca6d36de84271083ea68f"}}
+         :git/sha "3cd48a595bace287554b1735bb378bad1d22b931"}}
  :aliases {:dev {}}}

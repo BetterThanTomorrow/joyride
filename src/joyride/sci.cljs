@@ -119,7 +119,6 @@
                          'cljs.test cljs-test-config/cljs-test-namespace
                          'cljs.pprint cljs-pprint-config/cljs-pprint-namespace
                          'promesa.core promesa-config/promesa-namespace
-                         'promesa.protocols promesa-config/promesa-protocols-namespace
                          'joyride.core joyride-code
                          'rewrite-clj.zip rewrite-clj-zip-ns
                          'rewrite-clj.parser rewrite-clj-parser-ns
