@@ -210,10 +210,10 @@ Here's a snippet from the [joyride_api.cljs](../examples/.joyride/scripts/joyrid
 See [promesa docs for how to use it](https://cljdoc.org/d/funcool/promesa/11.0.678/doc/promises).
 
 NB: All of Promesa is not available in Joyride. Exactly how much is supported depends on which version of
-[sci-configs](https://github.com/babashka/sci.configs) Joyride is built with. At the time of this writing, we were using commit `c0d379a6853e6340ab50174651d427639290afd2`.
+[sci-configs](https://github.com/babashka/sci.configs) Joyride is built with. At the time of this writing, we were using commit `3cd48a595bace287554b1735bb378bad1d22b931`.
 
 To check what you can use from Promesa you can check sci-config for the given commit, like so:
-* https://github.com/babashka/sci.configs/blob/c0d379a6853e6340ab50174651d427639290afd2/src/sci/configs/funcool/promesa.cljs
+* https://github.com/babashka/sci.configs/blob/3cd48a595bace287554b1735bb378bad1d22b931/src/sci/configs/funcool/promesa.cljs
 
 You'll find the commit id to use for latest Joyride in [deps.edn of this repo](../deps.edn).
 
