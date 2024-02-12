@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.43] - 2024-02-12
+
 - Add uuid constructor to sci
 
 ## [0.0.42] - 2024-01-19
