@@ -134,7 +134,9 @@ jobs:
           key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
       - run:
           name: Apt install missing dependencies
-          command: sudo apt update && sudo apt install -y libnss3
+          command: |
+            sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E88979FB9B30ACF2 # workaround for some deprecated signing method, or something
+            sudo apt update && sudo apt install -y libnss3
       - run:
           name: Run Extension Tests
           command: npm run integration-test
@@ -160,7 +162,9 @@ jobs:
           key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
       - run:
           name: Apt install missing dependencies
-          command: sudo apt update && sudo apt install -y libnss3
+          command: |
+            sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E88979FB9B30ACF2 # workaround for some deprecated signing method, or something
+            sudo apt update && sudo apt install -y libnss3
       - run:
           name: Run Extension Tests
           command: npm run integration-test -- --joyride-vsix=/tmp/artifacts/joyride-$(node -p 'require("./package.json").version').vsix
