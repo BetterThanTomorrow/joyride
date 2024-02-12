@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Add uuid constructor to sci
+
 ## [0.0.42] - 2024-01-19
 
 - Bump SCI to [ad79a6c476affd1f8208efbfdba57992a68c8056](https://github.com/babashka/sci/commit/ad79a6c476affd1f8208efbfdba57992a68c8056) (from [39ce36540eb4c2c6adc74c23ea76ac6330ca7835](https://github.com/babashka/sci/commit/39ce36540eb4c2c6adc74c23ea76ac6330ca7835))
