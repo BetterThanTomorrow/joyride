@@ -99,6 +99,8 @@
 
 (def core-namespace (sci/create-ns 'clojure.core nil))
 
+(def pst-nyip (fn [_] (throw (js/Error. "pst not yet implemented"))))
+
 (def joyride-code
   {'*file* sci/file
    'extension-context (sci/copy-var db/extension-context joyride-ns)
@@ -117,6 +119,7 @@
                                         'remove-tap (sci/copy-var remove-tap core-namespace)
                                         'uuid (sci/copy-var uuid core-namespace)}
                          'clojure.zip zip-namespace
+                         'clojure.repl {'pst pst-nyip}
                          'cljs.test cljs-test-config/cljs-test-namespace
                          'cljs.pprint cljs-pprint-config/cljs-pprint-namespace
                          'promesa.core promesa-config/promesa-namespace
@@ -124,7 +127,8 @@
                          'rewrite-clj.zip rewrite-clj-zip-ns
                          'rewrite-clj.parser rewrite-clj-parser-ns
                          'rewrite-clj.node rewrite-clj-node-ns}
-            :ns-aliases {'clojure.test 'cljs.test}
+            :ns-aliases '{clojure.test cljs.test
+                          cljs.repl clojure.repl}
             :load-fn (fn [{:keys [ns libname opts]}]
                        (cond
                          (symbol? libname)
