@@ -4,6 +4,7 @@
    ["module" :as module]
    ["path" :as path]
    ["vscode" :as vscode]
+   clojure.repl
    [clojure.string :as str]
    [clojure.zip]
    [goog.object :as gobject]
@@ -99,6 +100,10 @@
 
 (def core-namespace (sci/create-ns 'clojure.core nil))
 
+(def cljreplns (sci/create-ns 'clojure.repl))
+(def clj-repl-namespace (merge (sci/copy-ns clojure.repl cljreplns)
+                                {'pst (fn [_] (throw (js/Error. "pst not yet implemented")))}))
+
 (def joyride-code
   {'*file* sci/file
    'extension-context (sci/copy-var db/extension-context joyride-ns)
@@ -117,6 +122,7 @@
                                         'remove-tap (sci/copy-var remove-tap core-namespace)
                                         'uuid (sci/copy-var uuid core-namespace)}
                          'clojure.zip zip-namespace
+                         'clojure.repl clj-repl-namespace
                          'cljs.test cljs-test-config/cljs-test-namespace
                          'cljs.pprint cljs-pprint-config/cljs-pprint-namespace
                          'promesa.core promesa-config/promesa-namespace
