@@ -124,7 +124,8 @@
                          'rewrite-clj.zip rewrite-clj-zip-ns
                          'rewrite-clj.parser rewrite-clj-parser-ns
                          'rewrite-clj.node rewrite-clj-node-ns}
-            :ns-aliases {'clojure.test 'cljs.test}
+            :ns-aliases '{clojure.test cljs.test
+                          clojure.repl cljs.repl}
             :load-fn (fn [{:keys [ns libname opts]}]
                        (cond
                          (symbol? libname)
