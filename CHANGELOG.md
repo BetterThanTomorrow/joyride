@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Make requiring utils from `cljs.repl` work](https://github.com/BetterThanTomorrow/joyride/issues/188)
+
 ## [0.0.43] - 2024-02-12
 
 - Add uuid constructor to sci
