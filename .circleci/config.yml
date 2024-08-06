@@ -209,7 +209,7 @@ jobs:
             ${GHR_CMD} -t ${GITHUB_TOKEN} ${EXTRA_RELEASE_OPTIONS} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -b "${BODY}" -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} /tmp/artifacts/
   marketplace-publish:
     docker:
-      - image: circleci/node:latest
+      - image: cimg/node:22.5.1
     working_directory: ~/joyride
     steps:
       - attach_workspace:
