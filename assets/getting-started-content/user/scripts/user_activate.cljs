@@ -65,10 +65,7 @@
   (clear-disposables!) ;; Any disposables add with `push-disposable!`
                        ;; will be cleared now. You can push them anew.
 
-  (push-disposable! (#_{:clj-kondo/ignore [:unresolved-symbol]}
-                     (requiring-resolve 'highlight-thousands/activate!)))
-
-  ;;; require VS Code extensions
+  ;;; About requiring VS Code extensions from activation scripts
   ;; In an activation.cljs script it can't be guaranteed that a
   ;; particular extension is active, so we can't safely `(:require ..)`
   ;; in the `ns` form. Here's what you can do instead, using Calva
