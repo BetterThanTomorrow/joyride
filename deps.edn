@@ -1,5 +1,7 @@
 {:paths ["src"]
- :deps {funcool/promesa {:mvn/version "11.0.678"}
+ :deps {org.clojure/clojure {:mvn/version "1.12.0"}
+        org.clojure/clojurescript {:mvn/version "1.11.132"}
+        funcool/promesa {:mvn/version "11.0.678"}
         thheller/shadow-cljs {:mvn/version "2.28.17"}
         rewrite-clj/rewrite-clj {:mvn/version "1.1.48"}
         org.babashka/sci
