@@ -8,19 +8,16 @@
 ;; place for you to initialize things. E.g. install event handlers,
 ;; print motivational messages, or whatever.
 
-;; You can run this and other User scripts with the command:
+;; You can run this and other User scripts with the VS Code command:
 ;;   *Joyride: Run User Script*
 
+;;;;;;;;;;;;;;;;;
 ;;; REPL practice
 (comment
   ;; Use Calva to start the Joyride REPL and connect it. The command:
   ;;   *Calva: Start Joyride REPL and Connect*
   ;; Then evaluate some code in this Rich comment block. Or just write
   ;; some new code and evaluate that. Or whatever. It's fun!
-
-  ;; New to Calva and/or Clojure? Use the Calva command:
-  ;;   *Calva: Fire up the Getting Started REPL*
-  ;; It will guide you through the basics.
 
   (-> 4
       (* 10)
@@ -32,19 +29,14 @@
       (.appendLine (joyride/output-channel)
                    (str "You choose: " choice " 🎉"))
       (.appendLine (joyride/output-channel)
-                   "You just closed it? 😭"))))
+                   "You just closed it? 😭")))
 
-;;; Output channel pop-up
-;; This following code is why you see the Joyride output channel
-;; on startup.
+  ;; New to Calva and/or Clojure? Use the Calva command:
+  ;;   *Calva: Start Joyride REPL and Connect*
+  ;; It will guide you through the basics.
+  :rcf)
 
-(doto (joyride/output-channel)
-  (.show true) ;; specifically this line. It shows the channel.
-  (.appendLine "Welcome Joyrider! This is your User activation script speaking.")
-  (.appendLine "Tired of this message popping up? It's the script doing it. Edit it away!")
-  (.appendLine "Hint: There is a command: **Open User Script...**"))
-
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; user_activate.cljs skeleton
 
 ;; Keep tally on VS Code disposables we register
@@ -61,8 +53,7 @@
 
 ;; Pushing the disposables on the extension context's
 ;; subscriptions will make VS Code dispose of them when the
-;; Joyride extension is deactivated, or when you rerun
-;; `my-main` in this ns (such as rerunning this script).
+;; Joyride extension is deactivated.
 (defn- push-disposable! [disposable]
   (swap! !db update :disposables conj disposable)
   (-> (joyride/extension-context)
@@ -74,8 +65,8 @@
   (clear-disposables!) ;; Any disposables add with `push-disposable!`
                        ;; will be cleared now. You can push them anew.
 
-  ;;; require my-lib
-  (require '[my-lib])
+  (push-disposable! (#_{:clj-kondo/ignore [:unresolved-symbol]}
+                     (requiring-resolve 'highlight-thousands/activate!)))
 
   ;;; require VS Code extensions
   ;; In an activation.cljs script it can't be guaranteed that a
@@ -87,18 +78,15 @@
   ;;   *Joyride; Run User Script* -> user_activate.cljs
   ;; (Or reload the VS Code window.)
   #_(-> (vscode/extensions.getExtension "betterthantomorrow.calva")
-      ;; Force the Calva extension to activate
+        ;; Force the Calva extension to activate
         (.activate)
-      ;; The promise will resolve with the extension's API as the result
+        ;; The promise will resolve with the extension's API as the result
         (p/then (fn [_api]
                   (.appendLine (joyride/output-channel) "Calva activated. Requiring dependent namespaces.")
-                ;; In `my-lib` and  `calva-api` the Calva extension
-                ;; is required, which will work fine since now Calva is active.
+                  ;; The Calva extension is required from`calva-api`
+                  ;; which will work fine since now Calva is active.
                   (require '[calva-api])
-                  (require '[clojuredocs])
-                ;; Code in your keybindings can now use the `my-lib` and/or
-                ;; `calva-api` namespace(s)
-                  ))
+                  (require '[clojuredocs])))
         (p/catch (fn [error]
                    (vscode/window.showErrorMessage (str "Requiring Calva failed: " error))))))
 

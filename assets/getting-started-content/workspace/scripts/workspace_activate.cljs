@@ -26,8 +26,7 @@
   (println "Hello World, from my-main workspace_activate.cljs script")
   (clear-disposables!)
   (push-disposable
-   ;; It might surprise you to see how often and when this happens,
-   ;; and when it doesn't happen.
+   ;; This is just an example. Remove it when it starts to annoy you.
    (vscode/workspace.onDidOpenTextDocument
     (fn [doc]
       (println "[Joyride example]"
