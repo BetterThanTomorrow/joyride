@@ -15,9 +15,13 @@ node_modules
 .shadow-cljs/
 
 # Calva
+**/.calva/output-window/
+
+# clj-kondo, clojure-lsp
 .cache
-/.portal/vs-code.edn
-.calva/output-window/
+
+# Portal
+**/.portal/vs-code.edn
 
 # Joyride
 /out/
@@ -27,3 +31,4 @@ examples/.vscode
 examples/.calva
 
 .vscode-test/
+playground/hello-joyride/.calva/output-window/output.calva-repl
