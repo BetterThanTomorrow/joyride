@@ -2,8 +2,9 @@
   (:require
    ["vscode" :as vscode]
    [joyride.lm-tool.core :as core]
-   [joyride.sci :as joyride-sci]
    [joyride.repl-utils :as repl-utils]
+   [joyride.sci :as joyride-sci]
+   [promesa.core :as p]
    [sci.core :as sci]
    [sci.ctx-store :as store]))
 
@@ -24,19 +25,19 @@
 
        ;; Execute the code using Joyride's SCI context with VS Code APIs
        ;; Handle namespace switching like the nREPL implementation does
-       (let [target-ns (symbol ns)
+       (p/let [target-ns (symbol ns)
              ;; Try to resolve namespace or default to user
-             resolved-ns (try
-                           (repl-utils/the-sci-ns (store/get-ctx) target-ns)
-                           (catch js/Error _
+               resolved-ns (try
+                             (repl-utils/the-sci-ns (store/get-ctx) target-ns)
+                             (catch js/Error _
                              ;; If namespace doesn't exist, create it or use user
-                             (try
-                               (sci/eval-form (store/get-ctx)
-                                              (list 'clojure.core/create-ns (list 'quote target-ns)))
-                               (catch js/Error _
-                                 @joyride-sci/!last-ns))))
-             result (sci/binding [sci/ns resolved-ns]
-                      (joyride-sci/eval-string code))]
+                               (try
+                                 (sci/eval-form (store/get-ctx)
+                                                (list 'clojure.core/create-ns (list 'quote target-ns)))
+                                 (catch js/Error _
+                                   @joyride-sci/!last-ns))))
+               result (sci/binding [sci/ns resolved-ns]
+                        (joyride-sci/eval-string code))]
          {:result result
           :error nil
           :namespace (str @sci/ns)
@@ -84,7 +85,7 @@
           (throw (js/Error. "Operation was cancelled")))
 
         ;; Execute the code using Joyride's SCI context with VS Code APIs
-        (let [result (execute-code+ (:code input-data) (:namespace input-data))]
+        (p/let [result (execute-code+ (:code input-data) (:namespace input-data))]
           (if (:error result)
             (let [error-data (core/format-error-message (:error result) (:code input-data)
                                                         (:stdout result) (:stderr result))]
