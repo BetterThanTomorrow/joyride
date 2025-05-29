@@ -2,28 +2,44 @@
   (:require
    ["vscode" :as vscode]
    [joyride.lm-tool.core :as core]
-   [sci.core :as jsci]))
+   [joyride.sci :as joyride-sci]
+   [joyride.repl-utils :as repl-utils]
+   [sci.core :as sci]
+   [sci.ctx-store :as store]))
 
 (defn execute-code+
-  "Execute ClojureScript code in SCI environment, capturing stdout/stderr.
+  "Execute ClojureScript code in Joyride's SCI environment with VS Code APIs.
    Returns a map with :result, :error, :namespace, :stdout, and :stderr keys.
-   Uses basic SCI context for testing, or Joyride SCI context when available."
+   Uses Joyride's full SCI context with VS Code API access and extensions."
   ([code] (execute-code+ code "user"))
   ([code ns]
    (let [stdout-buffer (atom "")
          stderr-buffer (atom "")
-         original-print-fn @jsci/print-fn
-         original-print-err-fn @jsci/print-err-fn]
+         original-print-fn @sci/print-fn
+         original-print-err-fn @sci/print-err-fn]
      (try
        ;; Set up output capture
-       (jsci/alter-var-root jsci/print-fn (constantly (fn [s] (swap! stdout-buffer str s))))
-       (jsci/alter-var-root jsci/print-err-fn (constantly (fn [s] (swap! stderr-buffer str s))))
+       (sci/alter-var-root sci/print-fn (constantly (fn [s] (swap! stdout-buffer str s))))
+       (sci/alter-var-root sci/print-err-fn (constantly (fn [s] (swap! stderr-buffer str s))))
 
-       ;; Execute the code - use basic SCI evaluation for testing
-       (let [result (jsci/eval-string code)]
+       ;; Execute the code using Joyride's SCI context with VS Code APIs
+       ;; Handle namespace switching like the nREPL implementation does
+       (let [target-ns (symbol ns)
+             ;; Try to resolve namespace or default to user
+             resolved-ns (try
+                           (repl-utils/the-sci-ns (store/get-ctx) target-ns)
+                           (catch js/Error _
+                             ;; If namespace doesn't exist, create it or use user
+                             (try
+                               (sci/eval-form (store/get-ctx) 
+                                              (list 'clojure.core/create-ns (list 'quote target-ns)))
+                               (catch js/Error _
+                                 @joyride-sci/!last-ns))))
+             result (sci/binding [sci/ns resolved-ns]
+                      (joyride-sci/eval-string code))]
          {:result result
           :error nil
-          :namespace ns
+          :namespace (str @sci/ns)
           :stdout @stdout-buffer
           :stderr @stderr-buffer})
 
@@ -36,8 +52,8 @@
 
        (finally
          ;; Restore original print functions
-         (jsci/alter-var-root jsci/print-fn (constantly original-print-fn))
-         (jsci/alter-var-root jsci/print-err-fn (constantly original-print-err-fn)))))))
+         (sci/alter-var-root sci/print-fn (constantly original-print-fn))
+         (sci/alter-var-root sci/print-err-fn (constantly original-print-err-fn)))))))
 
 (defn prepare-invocation
   "Prepare confirmation message with rich code preview"
