@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Add a language model (CoPilot) tool for running Joyride code](https://github.com/BetterThanTomorrow/joyride/issues/188)
+
 ## [0.0.44] - 2024-08-06
 
 - [Make requiring utils from `cljs.repl` work](https://github.com/BetterThanTomorrow/joyride/issues/188)
