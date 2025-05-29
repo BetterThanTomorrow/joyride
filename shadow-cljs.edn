@@ -9,4 +9,14 @@
               :output-to "out/joyride.js"
               :exports {:activate joyride.extension/activate}
               :devtools {:before-load-async joyride.extension/before
-                         :after-load joyride.extension/after}}}}
+                         :after-load joyride.extension/after}}
+  :test-watch
+  {:target    :node-test
+   :output-to "out/extension-tests.js"
+   :ns-regexp "-test$"
+   :autorun   true}
+
+  :test-compile
+  {:target    :node-test
+   :output-to "out/extension-tests.js"
+   :ns-regexp "-test$"}}}
