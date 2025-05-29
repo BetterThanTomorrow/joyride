@@ -31,7 +31,7 @@
                            (catch js/Error _
                              ;; If namespace doesn't exist, create it or use user
                              (try
-                               (sci/eval-form (store/get-ctx) 
+                               (sci/eval-form (store/get-ctx)
                                               (list 'clojure.core/create-ns (list 'quote target-ns)))
                                (catch js/Error _
                                  @joyride-sci/!last-ns))))
@@ -87,9 +87,10 @@
         (let [result (execute-code+ (:code input-data) (:namespace input-data))]
           (if (:error result)
             (let [error-data (core/format-error-message (:error result) (:code input-data)
-                                                        (:stdout result) (:stderr result))
-                  error-markdown (core/error-message->markdown error-data)]
-              (vscode/LanguageModelToolResult. #js [(vscode/LanguageModelTextPart. error-markdown)]))
+                                                        (:stdout result) (:stderr result))]
+              (vscode/LanguageModelToolResult.
+               #js [(vscode/LanguageModelTextPart.
+                     (js/JSON.stringify (clj->js error-data)))]))
             (let [result-data (core/format-result-message (:result result)
                                                           (:stdout result) (:stderr result))]
               (vscode/LanguageModelToolResult. #js [(vscode/LanguageModelTextPart.
