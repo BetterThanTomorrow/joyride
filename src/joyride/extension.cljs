@@ -3,6 +3,7 @@
             [joyride.db :as db]
             [joyride.getting-started :as getting-started]
             [joyride.lifecycle :as life-cycle]
+            [joyride.lm-tool :as lm-tool]
             [joyride.nrepl :as nrepl]
             [joyride.sci :as jsci]
             [joyride.scripts-handler :as scripts-handler]
@@ -89,9 +90,13 @@
     (register-command! extension-context "joyride.openUserScript" #'scripts-handler/open-user-script+)
     (register-command! extension-context "joyride.startNReplServer" #'start-nrepl-server+)
     (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server+)
-    (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
-    (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)
-    (when-contexts/set-context! ::when-contexts/joyride.isActive true)
+    (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)    (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)
+    (when-contexts/set-context! ::when-contexts/joyride.isActive true)    ;; Register Language Model Tool if available
+    (when (exists? js/vscode.lm)
+      (try
+        (lm-tool/register-tool!)
+        (catch js/Error e
+          (js/console.warn "Failed to register LM tool:" (.-message e)))))
 
     (when context
       (-> (p/do
