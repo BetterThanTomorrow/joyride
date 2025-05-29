@@ -140,6 +140,13 @@
         "command": "joyride.runWorkspaceScript",
         "key": "ctrl+alt+j w"
       }
+    ],
+    "languageModelTools": [
+      {
+        "name": "joyride_clojurescript_repl",
+        "displayName": "Joyride ClojureScript REPL",
+        "modelDescription": "Execute ClojureScript code in Joyride's SCI environment"
+      }
     ]
   },
   "scripts": {
