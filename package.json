@@ -18,7 +18,7 @@
     "url": "https://github.com/BetterThanTomorrow/joyride/issues"
   },
   "engines": {
-    "vscode": "^1.66.0"
+    "vscode": ">=1.96.2"
   },
   "categories": [
     "Other"
@@ -47,11 +47,6 @@
   ],
   "activationEvents": [
     "*",
-    "onCommand:joyride.runCode",
-    "onCommand:joyride.evaluateSelection",
-    "onCommand:joyride.runUserScript",
-    "onCommand:joyride.runWorkspaceScript",
-    "onCommand:joyride.startNReplServer",
     "workspaceContains:**/.joyride",
     "onStartupFinished"
   ],
