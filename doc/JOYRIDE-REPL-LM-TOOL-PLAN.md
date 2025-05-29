@@ -82,30 +82,29 @@ This delegation strategy ensures:
 ### 3. Core Components
 
 #### A. Language Model Tool Registration (`src/joyride/lm_tool.cljs`)
+
+**Key Implementation Requirements:**
+
+1. **Static Declaration**: Tool must be declared in `package.json` under `contributes.languageModelTools`
+2. **Dynamic Registration**: Tool implementation registered via `vscode.lm.registerTool`
+3. **Rich Confirmation**: Use `MarkdownString` for user-friendly code previews
+4. **Error Handling**: Provide LLM-friendly error messages with actionable suggestions
+5. **Cancellation Support**: Respect cancellation tokens for long-running operations
+6. **Chat Integration**: Support `#joyride` tool references in chat prompts
+
 ```clojure
 (ns joyride.lm-tool
   (:require ["vscode" :as vscode]
             [joyride.sci :as sci]
             [promesa.core :as p]))
 
+;; Direct SCI evaluation - leverages existing Joyride infrastructure
 (defn execute-code+ [code namespace]
-  ;; Direct SCI evaluation - no nREPL complexity
   (sci/eval-string code {:ns (or namespace 'user)}))
 
+;; Tool registration follows VS Code LanguageModelTool API
 (defn register-lm-tool! []
-  ;; Register with VS Code's LanguageModelTool API
-  (vscode/lm.registerTool
-   #js {:name "joyride_repl_execute"
-        :description "Execute ClojureScript code in VS Code's Joyride environment"
-        :parametersSchema #js {:type "object"
-                              :properties #js {:code #js {:type "string"}
-                                              :namespace #js {:type "string"}}}
-        :prepareInvocation (fn [request token]
-                            ;; VS Code handles confirmation UI
-                            )
-        :invoke (fn [request stream token]
-                 ;; Direct execution via existing SCI
-                 )}))
+  (vscode/lm.registerTool "joyride_evaluate_code" (create-joyride-tool)))
 ```
 
 ## Implementation Phases
@@ -121,19 +120,25 @@ This delegation strategy ensures:
 
 **Implementation Steps**:
 ```clojure
-;; 1. Create simple tool that calls existing SCI evaluation
-(defn invoke-tool [request stream token]
-  (p/let [code (.-code (.-parameters request))
-          namespace (.-namespace (.-parameters request))
-          result (sci/eval-string code {:ns (or namespace 'user)})]
-    (stream.textContent (pr-str result))))
+;; 1. Implement LanguageModelTool interface with enhanced features
+(defn create-joyride-tool []
+  #js {:prepareInvocation prepare-invocation
+       :invoke invoke-tool})
 
-;; 2. Register with VS Code's tool system (not Copilot directly)
-(vscode/lm.registerTool #js {:invoke invoke-tool ...})
+;; 2. Register with VS Code's Language Model API (not directly with Copilot)
+(vscode/lm.registerTool "joyride_evaluate_code" (create-joyride-tool))
+
+;; 3. Add to package.json languageModelTools contribution point
+;; 4. Enhanced error handling with LLM-friendly messages
+;; 5. Rich confirmation dialogs with code syntax highlighting
 ```
 
 **Success Criteria**:
-- LM can execute ClojureScript via VS Code's tool system
+- LM can execute ClojureScript via VS Code's Language Model Tool system
+- Rich confirmation dialogs display code with syntax highlighting
+- Tool appears in Copilot's available tools and can be referenced with `#joyride`
+- Error messages provide actionable guidance for the LLM
+- Proper cancellation support for long-running operations
 
 ## Technical Implementation Details
 
@@ -145,7 +150,7 @@ src/joyride/
 └── lm_context.cljs        # Optional context helpers
 ```
 
-### 2. Core Implementation
+### 2. Enhanced Core Implementation
 
 ```clojure
 ;; src/joyride/lm_tool.cljs
@@ -154,32 +159,48 @@ src/joyride/
             [joyride.sci :as sci]
             [promesa.core :as p]))
 
-(defn prepare-invocation [request token]
-  (let [code (.-code (.-parameters request))
-        namespace (.-namespace (.-parameters request))]
-    #js {:content (str "Execute ClojureScript:\n\n" code
-                      "\n\nIn namespace: " (or namespace "user"))}))
+(defn prepare-invocation [options token]
+  "Prepare confirmation message with rich code preview"
+  (let [code (.-code (.-input options))
+        namespace (or (.-namespace (.-input options)) "user")]
+    #js {:invocationMessage "Executing ClojureScript in Joyride environment"
+         :confirmationMessages
+         #js {:title "Execute ClojureScript Code"
+              :message (vscode/MarkdownString.
+                        (str "**Execute the following ClojureScript:**\n\n"
+                             "```clojure\n" code "\n```\n\n"
+                             "**Namespace:** `" namespace "`\n\n"
+                             "This code will run with full VS Code API access and can modify your development environment."))}}))
 
-(defn invoke-tool [request stream token]
-  (let [code (.-code (.-parameters request))
-        namespace (.-namespace (.-parameters request))]
+(defn invoke-tool [options stream token]
+  "Execute ClojureScript code with enhanced error handling"
+  (let [code (.-code (.-input options))
+        namespace (or (.-namespace (.-input options)) "user")]
     (try
-      (let [result (sci/eval-string code {:ns (symbol (or namespace "user"))})]
-        (stream.textContent (pr-str {:status :success :result result})))
+      (when (.-isCancellationRequested token)
+        (throw (js/Error. "Operation was cancelled")))
+
+      (let [result (sci/eval-string code {:ns (symbol namespace)})]
+        (.textContent stream (pr-str {:status :success
+                                     :result result
+                                     :namespace namespace})))
       (catch js/Error e
-        (stream.textContent (pr-str {:status :error :error (.-message e)}))))))
+        (let [error-msg (str "ClojureScript execution failed: " (.-message e)
+                            "\n\nSuggestion: Check syntax and ensure all required namespaces are available. "
+                            "Try simpler expressions first if this is a complex operation.")]
+          (.textContent stream (pr-str {:status :error
+                                       :error error-msg
+                                       :original-error (.-message e)}))
+          (throw (js/Error. error-msg)))))))
+
+(defn create-joyride-tool []
+  "Create the Joyride Language Model Tool implementation"
+  #js {:prepareInvocation prepare-invocation
+       :invoke invoke-tool})
 
 (defn register-tool! []
-  (vscode/lm.registerTool
-   #js {:name "joyride_repl_execute"
-        :description "Execute ClojureScript code in VS Code's Joyride environment"
-        :parametersSchema #js {:type "object"
-                              :properties #js {:code #js {:type "string"
-                                                         :description "ClojureScript code to execute"}
-                                              :namespace #js {:type "string"
-                                                             :description "Target namespace"}}}
-        :prepareInvocation prepare-invocation
-        :invoke invoke-tool}))
+  "Register the Joyride tool with VS Code's Language Model API"
+  (vscode/lm.registerTool "joyride_evaluate_code" (create-joyride-tool)))
 ```
 
 ### 3. Extension Integration
@@ -191,19 +212,45 @@ src/joyride/
   (lm-tool/register-tool!))
 ```
 
-### 4. Simple Configuration
+### 4. Complete Configuration
 
 ```json
 // package.json additions
 {
   "contributes": {
+    "languageModelTools": [
+      {
+        "name": "joyride_evaluate_code",
+        "displayName": "Execute ClojureScript",
+        "modelDescription": "Execute ClojureScript code in VS Code's Joyride environment. This tool can modify editor behavior, manipulate files, invoke VS Code APIs, and create dynamic workflows. Use when the user requests VS Code automation, editor customization, or Joyride usage. The code runs with full VS Code API access.",
+        "userDescription": "Execute ClojureScript code with full VS Code API access",
+        "canBeReferencedInPrompt": true,
+        "toolReferenceName": "joyride-eval",
+        "icon": "$(play)",
+        "when": "joyride.lm.enableReplTool",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "description": "ClojureScript code to execute. Should be valid ClojureScript syntax."
+            },
+            "namespace": {
+              "type": "string",
+              "description": "Target namespace for code execution. Defaults to 'user' if not specified."
+            }
+          },
+          "required": ["code"]
+        }
+      }
+    ],
     "configuration": {
-      "title": "Joyride AI Integration",
+      "title": "Joyride AI Language Model Integration",
       "properties": {
-        "joyride.ai.enableReplTool": {
+        "joyride.lm.enableReplTool": {
           "type": "boolean",
           "default": true,
-          "description": "Enable AI tool integration"
+          "description": "Enable CoPilot Joyride REPL access"
         }
       }
     }
@@ -211,6 +258,44 @@ src/joyride/
 }
 ```
 
+### 5. Advanced Integration Considerations
+
+#### A. Chat Integration Features
+- **Tool References**: Users can invoke with `#joyride-eval` in chat prompts
+- **Agent Compatibility**: Tool works seamlessly in automatic agent workflows
+- **Tool Chaining**: Structured results enable follow-up tool calls
+- **Context Awareness**: Tool can access workspace and editor context
+
+#### B. Parameter Validation and Type Safety
+```clojure
+;; Optional: Add spec validation for enhanced type safety
+(require '[clojure.spec.alpha :as s])
+
+(s/def ::code string?)
+(s/def ::namespace (s/nilable string?))
+(s/def ::joyride-params (s/keys :req-un [::code] :opt-un [::namespace]))
+
+(defn validate-params [input]
+  (when-not (s/valid? ::joyride-params input)
+    (throw (js/Error. (str "Invalid parameters: " (s/explain-str ::joyride-params input))))))
+```
+
+#### C. Enhanced Error Recovery
+```clojure
+(defn enhanced-error-handling [code namespace]
+  (try
+    (sci/eval-string code {:ns (symbol namespace)})
+    (catch js/Error e
+      (cond
+        (re-find #"Could not resolve symbol" (.-message e))
+        (throw (js/Error. (str "Symbol not found. Try requiring the necessary namespace first. Original error: " (.-message e))))
+
+        (re-find #"EOF while reading" (.-message e))
+        (throw (js/Error. (str "Incomplete expression. Check for unmatched parentheses or brackets. Original error: " (.-message e))))
+
+        :else
+        (throw (js/Error. (str "Execution failed: " (.-message e) "\n\nSuggestion: Try simpler expressions or check the Joyride documentation.")))))))
+```
 ## Integration Points
 
 ### 1. Existing Joyride Features to Leverage
