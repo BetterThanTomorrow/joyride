@@ -42,8 +42,8 @@
 (defn extract-input-data
   "Extract code and namespace from LM tool input options"
   [input]
-  (let [code (.-code input)
-        namespace (or (.-namespace input) "user")]
+  (let [code (.-code ^js input)
+        namespace (or (.-namespace ^js input) "user")]
     {:code code :namespace namespace}))
 
 (defn validate-input

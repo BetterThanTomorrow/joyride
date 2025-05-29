@@ -44,7 +44,7 @@
             (.markdown stream (core/format-error-message (:error result) (:code input-data)))
             (.markdown stream (core/format-result-message (:result result))))
           vscode/LanguageModelToolResult.Empty)
-        
+
         (catch js/Error e
           ;; Enhanced error information
           (.markdown stream (core/format-error-message (.-message e) (:code input-data)))
@@ -57,11 +57,13 @@
        :invoke invoke-tool})
 
 (defn register-tool!
-  "Register the Joyride tool with VS Code's Language Model API"
+  "Register the Joyride tool with VS Code's Language Model API.
+   Returns the disposable for proper lifecycle management."
   []
-  (when (.-lm vscode)
-    (try
-      (vscode/lm.registerTool "joyride_evaluate_code" (create-joyride-tool))
+  (try
+    (let [disposable (vscode/lm.registerTool "joyride_evaluate_code" (create-joyride-tool))]
       (js/console.log "Joyride LM Tool registered successfully")
-      (catch js/Error e
-        (js/console.error "Failed to register Joyride LM Tool:" (.-message e))))))
+      disposable)
+    (catch js/Error e
+      (js/console.error "Failed to register Joyride LM Tool:" (.-message e))
+      nil)))

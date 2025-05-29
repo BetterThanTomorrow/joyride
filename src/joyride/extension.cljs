@@ -89,14 +89,13 @@
     (register-command! extension-context "joyride.openWorkspaceScript" #'scripts-handler/open-workspace-script+)
     (register-command! extension-context "joyride.openUserScript" #'scripts-handler/open-user-script+)
     (register-command! extension-context "joyride.startNReplServer" #'start-nrepl-server+)
-    (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server+)
-    (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)    (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)
-    (when-contexts/set-context! ::when-contexts/joyride.isActive true)    ;; Register Language Model Tool if available
-    (when (exists? js/vscode.lm)
-      (try
-        (lm-tool/register-tool!)
-        (catch js/Error e
-          (js/console.warn "Failed to register LM tool:" (.-message e)))))
+    (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server+)    (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
+    (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)
+    (when-contexts/set-context! ::when-contexts/joyride.isActive true)
+      ;; Register Language Model Tool
+    (when-let [lm-disposable (lm-tool/register-tool!)]
+      (swap! db/!app-db update :disposables conj lm-disposable)
+      (.push (.-subscriptions ^js extension-context) lm-disposable))
 
     (when context
       (-> (p/do
