@@ -45,9 +45,13 @@ Also: In the **Joyride: Run Workspace Script** menu, there is a command for down
 
 ## Quick Start - Ask CoPilot to do some Joyride hacking
 
+**NB**: Joyride gives you and CoPilot full access to the VS Code API and execution environment. You are responsible for the code that is executed in Joyride.
+
 Joyride includes a Language Model Tool that gives CoPilot access to the scripting environment so that it can hack your editor while your are working with it.
 
 You can also ask CoPilot to create Joyride scripts for you.
+
+If you don't want CoPilot to see the Joyride REPL tool, then disable it in settings: `joyride.lm.enableReplTool`.
 
 ## Quick Start - Start your Scripts Library
 
