@@ -1,56 +1,54 @@
 (ns joyride.lm-tool
   (:require ["vscode" :as vscode]
-            [joyride.sci :as sci]))
+            [joyride.lm-tool.core :as core]))
 
 (defn execute-code+
   "Execute ClojureScript code in the SCI environment with optional namespace"
   ([code] (execute-code+ code "user"))
-  ([code _namespace]
-   (try
-     (sci/eval-string code)
-     (catch js/Error e
-       (throw (js/Error. (str "ClojureScript execution failed: " (.-message e))))))))
+  ([code namespace]
+   (let [result (core/execute-code code namespace)]
+     (if (:error result)
+       (throw (js/Error. (str "ClojureScript execution failed: " (:error result))))
+       (:result result)))))
 
 (defn prepare-invocation
   "Prepare confirmation message with rich code preview"
   [options _token]
-  (let [code (.-code ^js (.-input options))
-        namespace (or (.-namespace ^js (.-input options)) "user")]
-    #js {:invocationMessage "Executing ClojureScript in Joyride environment"
-         :confirmationMessages
-         #js {:title "Execute ClojureScript Code"
-              :message (vscode/MarkdownString.
-                        (str "**Execute the following ClojureScript:**\n\n"
-                             "```clojure\n"
-                             code
-                             "\n```\n\n"
-                             "**In namespace:** " namespace "\n\n"
-                             "This will run in Joyride's SCI environment with full VS Code API access."))}}))
+  (let [input-data (core/extract-input-data ^js (.-input options))
+        validation (core/validate-input input-data)]
+    (if (:valid? validation)
+      #js {:invocationMessage "Executing ClojureScript in Joyride environment"
+           :confirmationMessages
+           #js {:title "Execute ClojureScript Code"
+                :message (vscode/MarkdownString.
+                          (core/format-confirmation-message (:code input-data) (:namespace input-data)))}}
+      (throw (js/Error. (:error validation))))))
 
 (defn invoke-tool
   "Execute ClojureScript code with enhanced error handling"
   [options ^js stream token]
-  (let [code (.-code ^js (.-input options))
-        namespace (or (.-namespace ^js (.-input options)) "user")]
-    (try
-      ;; Check for cancellation
-      (when (.-isCancellationRequested ^js token)
-        (throw (js/Error. "Operation was cancelled")))
-
-      ;; Execute the code
-      (let [result (execute-code+ code namespace)]
-        ;; Stream results
-        (.markdown stream (str "**Evaluation result:**\n\n```clojure\n" result "\n```"))
+  (let [input-data (core/extract-input-data ^js (.-input options))
+        validation (core/validate-input input-data)]
+    (if-not (:valid? validation)
+      (do
+        (.markdown stream (core/format-error-message (:error validation) (:code input-data)))
         vscode/LanguageModelToolResult.Empty)
+      (try
+        ;; Check for cancellation
+        (when (.-isCancellationRequested ^js token)
+          (throw (js/Error. "Operation was cancelled")))
 
-      (catch js/Error e
-        ;; Enhanced error information
-        (.markdown stream
-                   (str "**Error executing ClojureScript:**\n\n"
-                        "```\n" (.-message e) "\n```\n\n"
-                        "**Code that failed:**\n\n"
-                        "```clojure\n" code "\n```"))
-        vscode/LanguageModelToolResult.Empty))))
+        ;; Execute the code using pure logic
+        (let [result (core/execute-code (:code input-data) (:namespace input-data))]
+          (if (:error result)
+            (.markdown stream (core/format-error-message (:error result) (:code input-data)))
+            (.markdown stream (core/format-result-message (:result result))))
+          vscode/LanguageModelToolResult.Empty)
+        
+        (catch js/Error e
+          ;; Enhanced error information
+          (.markdown stream (core/format-error-message (.-message e) (:code input-data)))
+          vscode/LanguageModelToolResult.Empty)))))
 
 (defn create-joyride-tool
   "Create the Joyride Language Model Tool implementation"
