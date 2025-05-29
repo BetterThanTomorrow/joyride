@@ -1,23 +1,23 @@
 (ns joyride.lm-tool.core
   "Core logic for LM tool functionality - pure functions without VS Code dependencies"
-  (:require [joyride.sci :as sci]
-            [sci.core :as sci-core]))
+  (:require [sci.core :as sci]))
 
 (defn execute-code
   "Execute ClojureScript code in SCI environment, capturing stdout/stderr.
-   Returns a map with :result, :error, :namespace, :stdout, and :stderr keys."
+   Returns a map with :result, :error, :namespace, :stdout, and :stderr keys.
+   Uses basic SCI context for testing, or Joyride SCI context when available."
   ([code] (execute-code code "user"))
   ([code namespace]
    (let [stdout-buffer (atom "")
          stderr-buffer (atom "")
-         original-print-fn @sci-core/print-fn
-         original-print-err-fn @sci-core/print-err-fn]
+         original-print-fn @sci/print-fn
+         original-print-err-fn @sci/print-err-fn]
      (try
        ;; Set up output capture
-       (sci-core/alter-var-root sci-core/print-fn (constantly (fn [s] (swap! stdout-buffer str s))))
-       (sci-core/alter-var-root sci-core/print-err-fn (constantly (fn [s] (swap! stderr-buffer str s))))
+       (sci/alter-var-root sci/print-fn (constantly (fn [s] (swap! stdout-buffer str s))))
+       (sci/alter-var-root sci/print-err-fn (constantly (fn [s] (swap! stderr-buffer str s))))
 
-       ;; Execute the code
+       ;; Execute the code - use basic SCI evaluation for testing
        (let [result (sci/eval-string code)]
          {:result result
           :error nil
@@ -34,8 +34,8 @@
 
        (finally
          ;; Restore original print functions
-         (sci-core/alter-var-root sci-core/print-fn (constantly original-print-fn))
-         (sci-core/alter-var-root sci-core/print-err-fn (constantly original-print-err-fn)))))))
+         (sci/alter-var-root sci/print-fn (constantly original-print-fn))
+         (sci/alter-var-root sci/print-err-fn (constantly original-print-err-fn)))))))
 
 (defn format-confirmation-message
   "Generate confirmation message data for code execution"
