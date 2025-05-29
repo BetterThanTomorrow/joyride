@@ -144,6 +144,7 @@
     "languageModelTools": [
       {
         "name": "joyride_evaluate_code",
+        "when": "config.joyride.lm.enableReplTool",
         "displayName": "Execute ClojureScript",
         "modelDescription": "Execute ClojureScript code in VS Code's Joyride environment. This tool can modify editor behavior, manipulate files, invoke VS Code APIs, and create dynamic workflows. Use when the user requests VS Code automation, editor customization, or Joyride usage. The code runs with full VS Code API access.",
         "userDescription": "Execute ClojureScript code with full VS Code API access",
