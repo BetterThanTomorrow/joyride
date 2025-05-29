@@ -60,6 +60,11 @@
             "type": "string",
             "default": "127.0.0.1",
             "markdownDescription": "The host address to use for the nREPL server."
+          },
+          "joyride.lm.enableReplTool": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable Copilot Joyride REPL access"
           }
         }
       }
@@ -138,9 +143,27 @@
     ],
     "languageModelTools": [
       {
-        "name": "joyride_clojurescript_repl",
-        "displayName": "Joyride ClojureScript REPL",
-        "modelDescription": "Execute ClojureScript code in Joyride's SCI environment"
+        "name": "joyride_evaluate_code",
+        "displayName": "Execute ClojureScript",
+        "modelDescription": "Execute ClojureScript code in VS Code's Joyride environment. This tool can modify editor behavior, manipulate files, invoke VS Code APIs, and create dynamic workflows. Use when the user requests VS Code automation, editor customization, or Joyride usage. The code runs with full VS Code API access.",
+        "userDescription": "Execute ClojureScript code with full VS Code API access",
+        "canBeReferencedInPrompt": true,
+        "toolReferenceName": "joyride-eval",
+        "icon": "$(play)",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "description": "ClojureScript code to execute. Should be valid ClojureScript syntax."
+            },
+            "namespace": {
+              "type": "string",
+              "description": "Target namespace for code execution. Defaults to 'user' if not specified."
+            }
+          },
+          "required": ["code"]
+        }
       }
     ]
   },
