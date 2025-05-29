@@ -17,11 +17,12 @@
   (let [input-data (core/extract-input-data ^js (.-input options))
         validation (core/validate-input input-data)]
     (if (:valid? validation)
-      #js {:invocationMessage "Executing ClojureScript in Joyride environment"
-           :confirmationMessages
-           #js {:title "Execute ClojureScript Code"
-                :message (vscode/MarkdownString.
-                          (core/format-confirmation-message (:code input-data) (:namespace input-data)))}}
+      (let [confirmation-data (core/format-confirmation-message (:code input-data) (:namespace input-data))]
+        #js {:invocationMessage "Executing ClojureScript in Joyride environment"
+             :confirmationMessages
+             #js {:title (:title confirmation-data)
+                  :message (vscode/MarkdownString.
+                            (core/confirmation-message->markdown confirmation-data))}})
       (throw (js/Error. (:error validation))))))
 
 (defn invoke-tool
@@ -30,8 +31,8 @@
   (let [input-data (core/extract-input-data ^js (.-input options))
         validation (core/validate-input input-data)]
     (if-not (:valid? validation)
-      (do
-        (.markdown stream (core/format-error-message (:error validation) (:code input-data)))
+      (let [error-data (core/format-error-message (:error validation) (:code input-data) "" "")]
+        (.markdown stream (core/error-message->markdown error-data))
         vscode/LanguageModelToolResult.Empty)
       (try
         ;; Check for cancellation
@@ -41,13 +42,18 @@
         ;; Execute the code using pure logic
         (let [result (core/execute-code (:code input-data) (:namespace input-data))]
           (if (:error result)
-            (.markdown stream (core/format-error-message (:error result) (:code input-data)))
-            (.markdown stream (core/format-result-message (:result result))))
+            (let [error-data (core/format-error-message (:error result) (:code input-data)
+                                                       (:stdout result) (:stderr result))]
+              (.markdown stream (core/error-message->markdown error-data)))
+            (let [result-data (core/format-result-message (:result result)
+                                                         (:stdout result) (:stderr result))]
+              (.markdown stream (core/result-message->markdown result-data))))
           vscode/LanguageModelToolResult.Empty)
 
         (catch js/Error e
           ;; Enhanced error information
-          (.markdown stream (core/format-error-message (.-message e) (:code input-data)))
+          (let [error-data (core/format-error-message (.-message e) (:code input-data) "" "")]
+            (.markdown stream (core/error-message->markdown error-data)))
           vscode/LanguageModelToolResult.Empty)))))
 
 (defn create-joyride-tool
