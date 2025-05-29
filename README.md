@@ -43,6 +43,12 @@ You can run these scripts with the commands mentioned above.
 
 Also: In the **Joyride: Run Workspace Script** menu, there is a command for downloading and installing some default/example workspace scripts.
 
+## Quick Start - Ask CoPilot to do some Joyride hacking
+
+Joyride includes a Language Model Tool that gives CoPilot access to the scripting environment so that it can hack your editor while your are working with it.
+
+You can also ask CoPilot to create Joyride scripts for you.
+
 ## Quick Start - Start your Scripts Library
 
 Joyride lets you bind keyboard shortcuts to its User and Workspace scripts.
@@ -92,7 +98,7 @@ Create the file `.joyride/scripts/example/write_a_file.cljs`:
 
 (def root-path (-> (first vscode/workspace.workspaceFolders) .-uri .-fsPath))
 (info "The root path of this workspace:" root-path)
-(fs/writeFileSync (path/resolve root-path "test-from-cljs-script.txt") 
+(fs/writeFileSync (path/resolve root-path "test-from-cljs-script.txt")
                   "Written from a Workspace ClojureScript Script!")
 ```
 
@@ -115,7 +121,7 @@ In your keyboard shortcuts JSON file, add:
  }
 ```
 
-Now you can run the scripts from the keyboard shortcuts! 
+Now you can run the scripts from the keyboard shortcuts!
 
 Note: Because of how VS Code renders the command palette it is good to add the default `joyride.runWorkspaceScript` keybinding as the last bindings in the JSON file:
 
