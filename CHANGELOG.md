@@ -4,7 +4,7 @@ Changes to Joyride
 
 ## [Unreleased]
 
-- [Example script for searching deps on clojars](https://github.com/BetterThanTomorrow/joyride/issues/192)
+- [Add a language model (CoPilot) tool for running Joyride code](https://github.com/BetterThanTomorrow/joyride/issues/188)
 
 ## [0.0.44] - 2024-08-06
 

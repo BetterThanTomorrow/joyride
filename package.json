@@ -18,7 +18,7 @@
     "url": "https://github.com/BetterThanTomorrow/joyride/issues"
   },
   "engines": {
-    "vscode": "^1.66.0"
+    "vscode": ">=1.96.2"
   },
   "categories": [
     "Other"
@@ -47,11 +47,6 @@
   ],
   "activationEvents": [
     "*",
-    "onCommand:joyride.runCode",
-    "onCommand:joyride.evaluateSelection",
-    "onCommand:joyride.runUserScript",
-    "onCommand:joyride.runWorkspaceScript",
-    "onCommand:joyride.startNReplServer",
     "workspaceContains:**/.joyride",
     "onStartupFinished"
   ],
@@ -65,6 +60,11 @@
             "type": "string",
             "default": "127.0.0.1",
             "markdownDescription": "The host address to use for the nREPL server."
+          },
+          "joyride.lm.enableReplTool": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable Copilot Joyride REPL access"
           }
         }
       }
@@ -140,11 +140,37 @@
         "command": "joyride.runWorkspaceScript",
         "key": "ctrl+alt+j w"
       }
+    ],
+    "languageModelTools": [
+      {
+        "name": "joyride_evaluate_code",
+        "when": "config.joyride.lm.enableReplTool",
+        "displayName": "Run Joyride Code",
+        "modelDescription": "Execute ClojureScript code in VS Code's Extension API environment, through Joyride. This tool can modify editor behavior, manipulate files, invoke VS Code APIs, and create dynamic workflows. Use when the user requests VS Code automation, editor customization, or Joyride usage. The code runs with full VS Code API access.\n\n#fetch https://github.com/BetterThanTomorrow/joyride/blob/master/doc/api.md",
+        "userDescription": "Execute code with full VS Code API access (inspecting or modifying your VS Code environment)",
+        "canBeReferencedInPrompt": true,
+        "toolReferenceName": "joyride-eval",
+        "icon": "$(play)",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "description": "Joyride code to execute. Joyride code is written in ClojureScript, a Joyride adpted SCI ClojureScript, even. \n\nJoyride has a fixed ”classpath” (the paths where it looks for roots to your Joyride code source files). It searches these directories in this order:\n1. `<workspace-root>/.joyride/src`\n1. `<workspace-root>/.joyride/scripts`\n1. `<user-home>/.config/joyride/src`\n1. `<user-home>/.config/joyride/scripts`"
+            },
+            "namespace": {
+              "type": "string",
+              "description": "Target namespace for code execution. Defaults to 'user' if not specified."
+            }
+          },
+          "required": ["code"]
+        }
+      }
     ]
   },
   "scripts": {
     "clean": "rimraf .cpcache .shadow-cljs/ out/",
-    "watch": "npx shadow-cljs -d cider/cider-nrepl:0.27.4 watch :extension",
+    "watch": "clojure -Sdeps '{:deps {nrepl/nrepl {:mvn/version,\"1.3.1\"},cider/cider-nrepl {:mvn/version,\"0.55.4\"}}}' -M:dev -m nrepl.cmdline --middleware \"[cider.nrepl/cider-middleware shadow.cljs.devtools.server.nrepl/middleware]\"",
     "prewatch": "npm run clean",
     "compile": "npx shadow-cljs compile :extension",
     "release": "npx shadow-cljs release :extension",
