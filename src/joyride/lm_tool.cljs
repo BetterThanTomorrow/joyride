@@ -63,7 +63,7 @@
         validation (core/validate-input input-data)]
     (if (:valid? validation)
       (let [confirmation-data (core/format-confirmation-message (:code input-data) (:namespace input-data))]
-        #js {:invocationMessage "Executing ClojureScript in Joyride environment"
+        #js {:invocationMessage "Running Joyride code in the VS Code environment"
              :confirmationMessages
              #js {:title (:title confirmation-data)
                   :message (vscode/MarkdownString.

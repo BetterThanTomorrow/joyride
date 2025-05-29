@@ -5,7 +5,7 @@
   "Generate confirmation message data for code execution"
   [code namespace]
   {:type :confirmation
-   :title "Execute ClojureScript Code"
+   :title "Run Joyride Code"
    :code code
    :namespace namespace
    :description "This will run in Joyride's SCI environment with full VS Code API access."})

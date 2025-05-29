@@ -12,9 +12,9 @@ The expression doesn't have to be a complete function it can a simple sub expres
 
 Where each step you evaluate an expression to verify that it does what you thing it will do.
 
-Println use id HIGHLY discouraged. Prefer evaluating subexpressions to test them vs using println.
+Println use is HIGHLY discouraged. Prefer evaluating subexpressions to test them vs using println.
 
-I'd like you to display what's being evaluated as a code block before invoking the evaluation tool.
+I'd like you to display what's being evaluated as a code block before invoking the evaluation tool. Please inlude an `in-ns` form first in the code block.
 
 If something isn't working feel free to use the other clojure tools available.
 

@@ -1,7 +1,7 @@
 (ns joyride.lm-tool.core-test
   "Tests for LM tool core functionality"
   (:require [cljs.test :refer [deftest is testing]]
-            [clojure.string]
+            [clojure.string :as string]
             [joyride.lm-tool.core :as core]))
 
 (deftest test-format-confirmation-message
@@ -11,7 +11,7 @@
           result (core/format-confirmation-message code namespace)]
       (is (map? result))
       (is (= :confirmation (:type result)))
-      (is (= "Execute ClojureScript Code" (:title result)))
+      (is (= "Run Joyride Code" (:title result)))
       (is (= code (:code result)))
       (is (= namespace (:namespace result)))
       (is (string? (:description result))))))
@@ -70,9 +70,9 @@
                             :description "Test description"}
           markdown (core/confirmation-message->markdown confirmation-data)]
       (is (string? markdown))
-      (is (clojure.string/includes? markdown "Execute the following ClojureScript"))
-      (is (clojure.string/includes? markdown "(+ 1 2 3)"))
-      (is (clojure.string/includes? markdown "user"))))
+      (is (string/includes? markdown "Execute the following ClojureScript"))
+      (is (string/includes? markdown "(+ 1 2 3)"))
+      (is (string/includes? markdown "user"))))
 
   (testing "Error message to markdown conversion"
     (let [error-data {:type :error
@@ -82,7 +82,7 @@
                      :stderr "Warning"}
           markdown (core/error-message->markdown error-data)]
       (is (string? markdown))
-      (is (clojure.string/includes? markdown "Error executing ClojureScript"))
-      (is (clojure.string/includes? markdown "Could not resolve symbol"))
-      (is (clojure.string/includes? markdown "(unknown-fn)"))
-      (is (clojure.string/includes? markdown "Some output")))))
+      (is (string/includes? markdown "Error executing ClojureScript"))
+      (is (string/includes? markdown "Could not resolve symbol"))
+      (is (string/includes? markdown "(unknown-fn)"))
+      (is (string/includes? markdown "Some output")))))
