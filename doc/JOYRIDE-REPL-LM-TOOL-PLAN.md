@@ -33,7 +33,29 @@ interface JoyrideReplTool {
 
 ### 2. Architecture Overview
 
+#### User Trust and Control Model
+
+The user maintains complete sovereignty over code execution through VS Code's built-in trust system. Users can configure their trust level on multiple scopes:
+
+- **Interactive** (default): Prompt for each execution request - user sees and approves code
+- **Per-session**: Auto-allow for current VS Code session
+- **Per-workspace**: Auto-allow for specific project/workspace
+- **Global**: Auto-allow always (not recommended for security)
+
+The architecture diagram below shows the **default interactive flow** where the user sees and approves each code execution request.
+
 ```
+                           ┌─────────────────┐
+                           │      USER       │
+                           │   (Developer)   │
+                           │   Sees Code +   │
+                           │   Approves/     │
+                           │   Denies        │
+                           └─────────────────┘
+                                    │
+                                    │ Interactive
+                                    │ Decision
+                                    ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   GitHub        │    │   VS Code       │    │   Joyride       │
 │   Copilot       │◄──►│   LM Tool API   │◄──►│   SCI Direct    │
@@ -43,11 +65,19 @@ interface JoyrideReplTool {
          │                       │                       │
          ▼                       ▼                       ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Tool Call     │    │   Built-in      │    │   VS Code API   │
-│   Request       │    │   Approval UI   │    │   Access        │
-│                 │    │   & Validation  │    │                 │
+│   Tool Call     │    │   User Consent  │    │   VS Code API   │
+│   Request       │    │   Dialog with   │    │   Access        │
+│                 │    │   Code Preview  │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
+
+**Key Architectural Principle**: Joyride's implementation **delegates all trust and security decisions to VS Code's established patterns**. When users configure auto-approval at any scope, the approval step becomes transparent but the same security infrastructure is leveraged - Joyride simply receives the "approved" execution request without needing to implement custom trust logic.
+
+This delegation strategy ensures:
+- Consistent security model across all VS Code tools
+- No custom security implementation to maintain
+- User familiarity with existing VS Code trust patterns
+- Simplified Joyride implementation focused on core REPL functionality
 
 ### 3. Core Components
 
