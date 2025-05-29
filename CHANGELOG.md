@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.45] - 2025-05-29
+
 - [Add a language model (CoPilot) tool for running Joyride code](https://github.com/BetterThanTomorrow/joyride/issues/188)
 
 ## [0.0.44] - 2024-08-06
