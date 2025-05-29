@@ -74,17 +74,6 @@
       (is (clojure.string/includes? markdown "(+ 1 2 3)"))
       (is (clojure.string/includes? markdown "user"))))
 
-  (testing "Result message to markdown conversion"
-    (let [result-data {:type :success
-                      :result "6"
-                      :stdout "Hello world!"
-                      :stderr ""}
-          markdown (core/result-message->markdown result-data)]
-      (is (string? markdown))
-      (is (clojure.string/includes? markdown "Evaluation result"))
-      (is (clojure.string/includes? markdown "6"))
-      (is (clojure.string/includes? markdown "Hello world!"))))
-
   (testing "Error message to markdown conversion"
     (let [error-data {:type :error
                      :error "Could not resolve symbol"

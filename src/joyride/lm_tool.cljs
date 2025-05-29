@@ -1,25 +1,43 @@
 (ns joyride.lm-tool
-  (:require ["vscode" :as vscode]
-            [joyride.lm-tool.core :as core]
-            [joyride.sci :as jsci]))
+  (:require
+   ["vscode" :as vscode]
+   [joyride.lm-tool.core :as core]
+   [sci.core :as jsci]))
 
 (defn execute-code+
-  "Execute ClojureScript code using Joyride's enhanced SCI context with VS Code APIs"
+  "Execute ClojureScript code in SCI environment, capturing stdout/stderr.
+   Returns a map with :result, :error, :namespace, :stdout, and :stderr keys.
+   Uses basic SCI context for testing, or Joyride SCI context when available."
   ([code] (execute-code+ code "user"))
-  ([code namespace]
-   (try
-     (let [result (jsci/eval-string code)]
-       {:result result
-        :error nil
-        :namespace namespace
-        :stdout ""
-        :stderr ""})
-     (catch js/Error e
-       {:result nil
-        :error (.-message e)
-        :namespace namespace
-        :stdout ""
-        :stderr ""}))))
+  ([code ns]
+   (let [stdout-buffer (atom "")
+         stderr-buffer (atom "")
+         original-print-fn @jsci/print-fn
+         original-print-err-fn @jsci/print-err-fn]
+     (try
+       ;; Set up output capture
+       (jsci/alter-var-root jsci/print-fn (constantly (fn [s] (swap! stdout-buffer str s))))
+       (jsci/alter-var-root jsci/print-err-fn (constantly (fn [s] (swap! stderr-buffer str s))))
+
+       ;; Execute the code - use basic SCI evaluation for testing
+       (let [result (jsci/eval-string code)]
+         {:result result
+          :error nil
+          :namespace ns
+          :stdout @stdout-buffer
+          :stderr @stderr-buffer})
+
+       (catch js/Error e
+         {:result nil
+          :error (.-message e)
+          :namespace ns
+          :stdout @stdout-buffer
+          :stderr @stderr-buffer})
+
+       (finally
+         ;; Restore original print functions
+         (jsci/alter-var-root jsci/print-fn (constantly original-print-fn))
+         (jsci/alter-var-root jsci/print-err-fn (constantly original-print-err-fn)))))))
 
 (defn prepare-invocation
   "Prepare confirmation message with rich code preview"
@@ -50,27 +68,16 @@
           (throw (js/Error. "Operation was cancelled")))
 
         ;; Execute the code using Joyride's SCI context with VS Code APIs
-        (let [result (try
-                       {:result (execute-code+ (:code input-data) (:namespace input-data))
-                        :error nil
-                        :namespace (:namespace input-data)
-                        :stdout ""
-                        :stderr ""}
-                       (catch js/Error e
-                         {:result nil
-                          :error (.-message e)
-                          :namespace (:namespace input-data)
-                          :stdout ""
-                          :stderr ""}))]
+        (let [result (execute-code+ (:code input-data) (:namespace input-data))]
           (if (:error result)
             (let [error-data (core/format-error-message (:error result) (:code input-data)
-                                                       (:stdout result) (:stderr result))
+                                                        (:stdout result) (:stderr result))
                   error-markdown (core/error-message->markdown error-data)]
               (vscode/LanguageModelToolResult. #js [(vscode/LanguageModelTextPart. error-markdown)]))
             (let [result-data (core/format-result-message (:result result)
-                                                         (:stdout result) (:stderr result))
-                  result-markdown (core/result-message->markdown result-data)]
-              (vscode/LanguageModelToolResult. #js [(vscode/LanguageModelTextPart. result-markdown)]))))
+                                                          (:stdout result) (:stderr result))]
+              (vscode/LanguageModelToolResult. #js [(vscode/LanguageModelTextPart.
+                                                     (js/JSON.stringify (clj->js result-data)))]))))
 
         (catch js/Error e
           ;; Enhanced error information

@@ -1,41 +1,5 @@
 (ns joyride.lm-tool.core
-  "Core logic for LM tool functionality - pure functions without VS Code dependencies"
-  (:require [sci.core :as sci]))
-
-(defn execute-code
-  "Execute ClojureScript code in SCI environment, capturing stdout/stderr.
-   Returns a map with :result, :error, :namespace, :stdout, and :stderr keys.
-   Uses basic SCI context for testing, or Joyride SCI context when available."
-  ([code] (execute-code code "user"))
-  ([code namespace]
-   (let [stdout-buffer (atom "")
-         stderr-buffer (atom "")
-         original-print-fn @sci/print-fn
-         original-print-err-fn @sci/print-err-fn]
-     (try
-       ;; Set up output capture
-       (sci/alter-var-root sci/print-fn (constantly (fn [s] (swap! stdout-buffer str s))))
-       (sci/alter-var-root sci/print-err-fn (constantly (fn [s] (swap! stderr-buffer str s))))
-
-       ;; Execute the code - use basic SCI evaluation for testing
-       (let [result (sci/eval-string code)]
-         {:result result
-          :error nil
-          :namespace namespace
-          :stdout @stdout-buffer
-          :stderr @stderr-buffer})
-
-       (catch js/Error e
-         {:result nil
-          :error (.-message e)
-          :namespace namespace
-          :stdout @stdout-buffer
-          :stderr @stderr-buffer})
-
-       (finally
-         ;; Restore original print functions
-         (sci/alter-var-root sci/print-fn (constantly original-print-fn))
-         (sci/alter-var-root sci/print-err-fn (constantly original-print-err-fn)))))))
+  "Core logic for LM tool functionality - pure functions without VS Code dependencies")
 
 (defn format-confirmation-message
   "Generate confirmation message data for code execution"
@@ -89,17 +53,6 @@
        "\n```\n\n"
        "**In namespace:** " namespace "\n\n"
        description))
-
-(defn result-message->markdown
-  "Convert result message data to markdown string"
-  [{:keys [result stdout stderr]}]
-  (let [parts ["**Evaluation result:**\n\n```clojure\n" (str result) "\n```"]]
-    (cond-> (apply str parts)
-      (and stdout (not-empty stdout))
-      (str "\n\n**Output:**\n\n```\n" stdout "```")
-
-      (and stderr (not-empty stderr))
-      (str "\n\n**Errors/Warnings:**\n\n```\n" stderr "```"))))
 
 (defn error-message->markdown
   "Convert error message data to markdown string"
