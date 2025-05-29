@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Example script for searching deps on clojars](https://github.com/BetterThanTomorrow/joyride/issues/192)
+
 ## [0.0.44] - 2024-08-06
 
 - [Make requiring utils from `cljs.repl` work](https://github.com/BetterThanTomorrow/joyride/issues/188)
