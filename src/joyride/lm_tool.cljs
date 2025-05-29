@@ -1,15 +1,25 @@
 (ns joyride.lm-tool
   (:require ["vscode" :as vscode]
-            [joyride.lm-tool.core :as core]))
+            [joyride.lm-tool.core :as core]
+            [joyride.sci :as jsci]))
 
 (defn execute-code+
-  "Execute ClojureScript code in the SCI environment with optional namespace"
+  "Execute ClojureScript code using Joyride's enhanced SCI context with VS Code APIs"
   ([code] (execute-code+ code "user"))
   ([code namespace]
-   (let [result (core/execute-code code namespace)]
-     (if (:error result)
-       (throw (js/Error. (str "ClojureScript execution failed: " (:error result))))
-       (:result result)))))
+   (try
+     (let [result (jsci/eval-string code)]
+       {:result result
+        :error nil
+        :namespace namespace
+        :stdout ""
+        :stderr ""})
+     (catch js/Error e
+       {:result nil
+        :error (.-message e)
+        :namespace namespace
+        :stdout ""
+        :stderr ""}))))
 
 (defn prepare-invocation
   "Prepare confirmation message with rich code preview"
