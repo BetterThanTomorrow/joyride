@@ -51,6 +51,8 @@ Joyride includes a Language Model Tool that gives CoPilot access to the scriptin
 
 You can also ask CoPilot to create Joyride scripts for you.
 
+We're still discovering how to best instruct the AI for helping with Joyride scripting. You can use [these custom instructions](prompts/general/copilot-instructions.md) as a start. And please share your experiences with custom instructsions with us. 🙏
+
 If you don't want CoPilot to see the Joyride REPL tool, then disable it in settings: `joyride.lm.enableReplTool`.
 
 ## Quick Start - Start your Scripts Library
