@@ -14,8 +14,8 @@
                                            workspace-init-script))
 (defn workspace-init-script-abs-path []
   (when-let [abs-scripts-path (conf/workspace-abs-scripts-path)]
-   (path/join abs-scripts-path
-              workspace-init-script)))
+    (path/join abs-scripts-path
+               workspace-init-script)))
 
 (defn init-scripts []
   {:user {:label "User activate"

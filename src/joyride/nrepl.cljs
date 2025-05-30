@@ -142,7 +142,6 @@
                            :file file-path)
                     send-fn)))
 
-
 ;;;; Completions, based on babashka.nrepl
 
 (defn handle-complete [request send-fn]
@@ -316,5 +315,4 @@
   (-> (start-server+ {:root-path "/Users/pez/Projects/joyride/playground" #_"/hello-joyride"})
       (p/catch #(js/console.error %)))
   (stop-server+)
-  (server-running?)
-  )
+  (server-running?))

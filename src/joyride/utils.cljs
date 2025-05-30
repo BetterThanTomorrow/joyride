@@ -13,7 +13,7 @@
   (js->clj js-thing :keywordize-keys true))
 
 (defn path-or-uri-exists?+ [path-or-uri]
-  (-> (p/let [uri (if (= (type "") (type path-or-uri)) 
+  (-> (p/let [uri (if (= (type "") (type path-or-uri))
                     (vscode/Uri.file path-or-uri)
                     path-or-uri)
               _stat (vscode/workspace.fs.stat uri)])

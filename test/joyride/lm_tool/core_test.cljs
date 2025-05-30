@@ -7,13 +7,15 @@
 (deftest test-format-confirmation-message
   (testing "Confirmation message formatting returns structured data"
     (let [code "(+ 1 2 3)"
-          namespace "user"
-          result (core/format-confirmation-message code namespace)]
+          ns "user"
+          wait-for-promise? false
+          result (core/format-confirmation-message code ns wait-for-promise?)]
       (is (map? result))
       (is (= :confirmation (:type result)))
       (is (= "Run Joyride Code" (:title result)))
       (is (= code (:code result)))
-      (is (= namespace (:namespace result)))
+      (is (= ns (:ns result)))
+      (is (= wait-for-promise? (:wait-for-promise? result)))
       (is (string? (:description result))))))
 
 (deftest test-format-result-message
@@ -44,30 +46,31 @@
 
 (deftest test-validate-input
   (testing "Input validation"
-    (is (:valid? (core/validate-input {:code "(+ 1 2)" :namespace "user"})))
-    (is (not (:valid? (core/validate-input {:code nil :namespace "user"}))))
-    (is (not (:valid? (core/validate-input {:code "" :namespace "user"}))))
-    (is (not (:valid? (core/validate-input {:code "(+ 1 2)" :namespace nil}))))))
+    (is (:valid? (core/validate-input {:code "(+ 1 2)" :ns "user" :wait-for-promise? false})))
+    (is (not (:valid? (core/validate-input {:code "(+ 1 2)" :ns "user" :wait-for-promise? ""}))))
+    (is (not (:valid? (core/validate-input {:code nil :ns "user"}))))
+    (is (not (:valid? (core/validate-input {:code "" :ns "user"}))))
+    (is (not (:valid? (core/validate-input {:code "(+ 1 2)" :ns nil}))))))
 
 (deftest test-extract-input-data
   (testing "Input data extraction"
     (let [input #js {:code "(+ 1 2)" :namespace "test"}
           result (core/extract-input-data input)]
       (is (= "(+ 1 2)" (:code result)))
-      (is (= "test" (:namespace result))))
+      (is (= "test" (:ns result))))
 
     (let [input #js {:code "(+ 1 2)"}  ; No namespace
           result (core/extract-input-data input)]
       (is (= "(+ 1 2)" (:code result)))
-      (is (= "user" (:namespace result))))))
+      (is (= "user" (:ns result))))))
 
 (deftest test-markdown-conversion-functions
   (testing "Confirmation message to markdown conversion"
     (let [confirmation-data {:type :confirmation
-                            :title "Execute ClojureScript Code"
-                            :code "(+ 1 2 3)"
-                            :namespace "user"
-                            :description "Test description"}
+                             :title "Execute ClojureScript Code"
+                             :code "(+ 1 2 3)"
+                             :ns "user"
+                             :description "Test description"}
           markdown (core/confirmation-message->markdown confirmation-data)]
       (is (string? markdown))
       (is (string/includes? markdown "Execute the following ClojureScript"))
@@ -76,10 +79,10 @@
 
   (testing "Error message to markdown conversion"
     (let [error-data {:type :error
-                     :error "Could not resolve symbol"
-                     :code "(unknown-fn)"
-                     :stdout "Some output"
-                     :stderr "Warning"}
+                      :error "Could not resolve symbol"
+                      :code "(unknown-fn)"
+                      :stdout "Some output"
+                      :stderr "Warning"}
           markdown (core/error-message->markdown error-data)]
       (is (string? markdown))
       (is (string/includes? markdown "Error executing ClojureScript"))

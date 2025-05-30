@@ -3,11 +3,12 @@
 
 (defn format-confirmation-message
   "Generate confirmation message data for code execution"
-  [code namespace]
+  [code namespace wait-for-promise?]
   {:type :confirmation
    :title "Run Joyride Code"
    :code code
-   :namespace namespace
+   :ns namespace
+   :wait-for-promise? wait-for-promise?
    :description "This will run in Joyride's SCI environment with full VS Code API access."})
 
 (defn format-result-message
@@ -29,29 +30,32 @@
 
 (defn extract-input-data
   "Extract code and namespace from LM tool input options"
-  [input]
-  (let [code (.-code ^js input)
-        namespace (or (.-namespace ^js input) "user")]
-    {:code code :namespace namespace}))
+  [^js input]
+  (let [code (.-code input)
+        ns (or (.-namespace input) "user")
+        wait-for-promise? (or (.-waitForFinalPromise input) false)]
+    {:code code :ns ns :wait-for-promise? wait-for-promise?}))
 
 (defn validate-input
   "Validate LM tool input data"
-  [{:keys [code namespace]}]
+  [{:keys [code ns wait-for-promise?]}]
   (cond
     (nil? code) {:valid? false :error "Code is required"}
     (empty? code) {:valid? false :error "Code cannot be empty"}
     (not (string? code)) {:valid? false :error "Code must be a string"}
-    (not (string? namespace)) {:valid? false :error "Namespace must be a string"}
+    (not (string? ns)) {:valid? false :error "Namespace must be a string"}
+    (not (boolean? wait-for-promise?)) {:valid? false :error "waitForFinalPromise must be a boolean"}
     :else {:valid? true :error nil}))
 
 (defn confirmation-message->markdown
   "Convert confirmation message data to markdown string"
-  [{:keys [code namespace description]}]
+  [{:keys [code ns wait-for-promise? description]}]
   (str "**Execute the following ClojureScript:**\n\n"
        "```clojure\n"
        code
        "\n```\n\n"
-       "**In namespace:** " namespace "\n\n"
+       "**In namespace:** " ns "\n\n"
+       "**Wait for promise?:**" wait-for-promise? "\n\n"
        description))
 
 (defn error-message->markdown
