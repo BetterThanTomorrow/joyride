@@ -55,7 +55,7 @@
        code
        "\n```\n\n"
        "**In namespace:** " ns "\n\n"
-       "**Wait for promise?:**" wait-for-promise? "\n\n"
+       "**Wait for promise?:** " wait-for-promise? "\n\n"
        description))
 
 (defn error-message->markdown
