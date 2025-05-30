@@ -103,7 +103,7 @@
                                           (let [ns (get alias->ns query-ns query-ns)
                                                 syms (sci/eval-string* sci-ctx (format "(and (find-ns '%s)
                                                                                          (keys (ns-publics '%s)))"
-                                                                                   ns))]
+                                                                                       ns))]
                                             (map (fn [sym]
                                                    [(str ns) (str sym) :qualified])
                                                  syms))))

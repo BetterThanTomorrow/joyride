@@ -156,11 +156,15 @@
           "properties": {
             "code": {
               "type": "string",
-              "description": "Joyride code to execute. Joyride code is written in ClojureScript, a Joyride adpted SCI ClojureScript, even. \n\nJoyride has a fixed ”classpath” (the paths where it looks for roots to your Joyride code source files). It searches these directories in this order:\n1. `<workspace-root>/.joyride/src`\n1. `<workspace-root>/.joyride/scripts`\n1. `<user-home>/.config/joyride/src`\n1. `<user-home>/.config/joyride/scripts`"
+              "description": "Joyride code to execute. Joyride code is written in ClojureScript, a Joyride adapted SCI ClojureScript, even. \n\nJoyride has a fixed ”classpath” (the paths where it looks for roots to your Joyride code source files). It searches these directories in this order:\n1. `<workspace-root>/.joyride/src`\n1. `<workspace-root>/.joyride/scripts`\n1. `<user-home>/.config/joyride/src`\n1. `<user-home>/.config/joyride/scripts`"
             },
             "namespace": {
               "type": "string",
-              "description": "Target namespace for code execution. Defaults to 'user' if not specified."
+              "description": "Target namespace for code execution. Defaults to 'user'."
+            },
+            "waitForFinalPromise": {
+              "type": "boolean",
+              "description": "Wether to wait for promises if the evaluation results in a promise. Defaults to `false`. When you specifically want interact with the user, or otherwise need the resolved promise value."
             }
           },
           "required": [
