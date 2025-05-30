@@ -24,8 +24,14 @@
         restore-fns! (fn []
                        (sci/alter-var-root sci/print-fn (constantly original-print-fn))
                        (sci/alter-var-root sci/print-err-fn (constantly original-print-err-fn)))
-        make-result (fn [result error]
-                      {:result result
+        make-result (fn [result error wait-for-promise?]
+                      {:result (if (and (not wait-for-promise?)
+                                        (not error)
+                                        (instance? js/Promise result))
+                                 {:type "promise"
+                                  :message "Promise returned but not awaited (fire-and-forget mode)"
+                                  :toString (str result)}
+                                 result)
                        :error error
                        :ns (str @sci/ns)
                        :stdout @stdout-buffer
@@ -45,9 +51,9 @@
                                     @joyride-sci/!last-ns))))
                 result (sci/binding [sci/ns resolved-ns]
                          (joyride-sci/eval-string code))]
-          (make-result result nil))
+          (make-result result nil wait-for-promise?))
         (catch js/Error e
-          (make-result nil (.-message e)))
+          (make-result nil (.-message e) wait-for-promise?))
         (finally
           (restore-fns!)))
       ;; Sync path without promises
@@ -63,10 +69,10 @@
                                 (catch js/Error _
                                   @joyride-sci/!last-ns))))
               result (sci/binding [sci/ns resolved-ns]
-                       (joyride-sci/eval-string code))]
-          (make-result result nil))
+                         (joyride-sci/eval-string code))]
+          (make-result result nil wait-for-promise?))
         (catch js/Error e
-          (make-result nil (.-message e)))
+          (make-result nil (.-message e) wait-for-promise?))
         (finally
           (restore-fns!))))))
 
