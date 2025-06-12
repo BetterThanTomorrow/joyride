@@ -106,7 +106,8 @@
    'extension-context (sci/copy-var db/extension-context joyride-ns)
    'invoked-script (sci/copy-var db/invoked-script joyride-ns)
    'output-channel (sci/copy-var db/output-channel joyride-ns)
-   'js-properties repl-utils/instance-properties})
+   'js-properties repl-utils/instance-properties
+   'user-joyride-dir (conf/user-abs-joyride-path)})
 
 (store/reset-ctx!
  (sci/init {:classes {'js (doto goog/global

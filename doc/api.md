@@ -182,6 +182,7 @@ In addition to these there is also `joyride.core`:
 - `extension-context`: function returning the Joyride [ExtensionContext](https://code.visualstudio.com/api/references/vscode-api#ExtensionContext) instance
 - `output-channel`: function returning the Joyride [OutputChannel](https://code.visualstudio.com/api/references/vscode-api#OutputChannel) instance
 - `js-properties`: a function returning a sequence of the full JS API of the provided JS object/instance. For use instead of `cljs.core/js-keys` when it doesn't return the full API.
+- `user-joyride-dir`: a string path with the user/global joyride directory.
 
 Here's a snippet from the [joyride_api.cljs](../examples/.joyride/scripts/joyride_api.cljs) example.
 

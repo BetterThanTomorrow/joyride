@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Add access to user/global path to `joyride.core`](https://github.com/BetterThanTomorrow/joyride/issues/198)
+
 ## [0.0.46] - 2025-05-30
 
 - Fix: [CoPilot/the LLM gets stuck when the evaluation result is a promise](https://github.com/BetterThanTomorrow/joyride/issues/196)
