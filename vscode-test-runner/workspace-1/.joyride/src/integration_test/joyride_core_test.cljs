@@ -34,8 +34,8 @@
 
 (deftest user-joyride-dir
   (is (= (path/join (aget process/env "VSCODE_JOYRIDE_USER_CONFIG_PATH") "joyride")
-         joy/user-joyride-dir
-         "joyride.core/user-joyride-dir is defined and points to the right directory")))
+         joy/user-joyride-dir)
+      "joyride.core/user-joyride-dir is defined and points to the right directory"))
 
 (comment
   ;; TODO: Is this a bug?
