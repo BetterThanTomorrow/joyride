@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.47] - 2025-06-13
+
 - [Add access to user/global path to `joyride.core`](https://github.com/BetterThanTomorrow/joyride/issues/198)
 
 ## [0.0.46] - 2025-05-30
