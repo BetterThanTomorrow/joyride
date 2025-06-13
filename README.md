@@ -1,14 +1,10 @@
-# Making VS Code Hackable since 2022
+# Extend VS Code without extensions
 
-Modify your editor while it is running by executing ClojureScript code via the Joyride REPL and/or run scripts via keyboard shortcuts you choose. The Visual Studio Code API, as well as the APIs of its extensions, are at your command! Joyride makes VS Code scriptable in a very similar way to how how Emacs users can hack their editor. Complete with Interactive Programming.
+Modify your VS Code while it is running. The Visual Studio Code API, as well as the APIs of its extensions, are at your command! Joyride makes VS Code scriptable in a very similar way to how how Emacs users can hack their editor.
 
 <video src="https://user-images.githubusercontent.com/30010/165934412-ffeb5729-07be-4aa5-b291-ad991d2f9f6c.mp4"></video>
 
 [The video in much better quality on Youtube (CalvaTV)](https://www.youtube.com/watch?v=V1oTf-1EchU)
-
-Joyride is Powered by [SCI](https://github.com/babashka/sci) (Small Clojure Interpreter).
-
-You can use both JavaScript and ClojureScript with Joyride. You will only get to enjoy Interactive Programming using ClojureScript, because JavaScript does not support it. Also the JavaScript support in Joyride is new and not yet fully at par with the ClojureScript support.
 
 See [doc/api.md](https://github.com/BetterThanTomorrow/joyride/blob/master/doc/api.md) for documentation about the Joyride API.
 
@@ -67,27 +63,6 @@ Let's go with a Workspace script: Create a folder and open it in VS Code.
 Both the scripts here do almost the same thing: They show an information message and writes to a file in
 the root of the workspace. Create both, why don't ya?
 
-### Using JavaScript
-
-Create the file `.joyride/scripts/example/write-a-file.js`:
-
-```javascript
-const fs = require("fs");
-const path = require("path");
-const vscode = require("vscode");
-
-function info(...xs) {
-  vscode.window.showInformationMessage(xs.join(" "));
-}
-
-const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-info("The root path of this workspace:", rootPath);
-fs.writeFileSync(
-  path.resolve(rootPath, "test-from-js-script.txt"),
-  "Written from a Workspace JavaScript Script!"
-);
-```
-
 ### Using ClojureScript
 
 Create the file `.joyride/scripts/example/write_a_file.cljs`:
@@ -106,6 +81,29 @@ Create the file `.joyride/scripts/example/write_a_file.cljs`:
 (info "The root path of this workspace:" root-path)
 (fs/writeFileSync (path/resolve root-path "test-from-cljs-script.txt")
                   "Written from a Workspace ClojureScript Script!")
+```
+
+### Using JavaScript
+
+You can use both JavaScript and ClojureScript with Joyride. However, you will only get to enjoy Interactive Programming using ClojureScript. Also the JavaScript support in Joyride is new and not yet fully at par with the ClojureScript support. It's even fair to say that the JavaScript support is experimental. With CoPilot support you probably do not need it. CoPilot knows CLojureScript and is a great tutor.
+
+Still want to use JavaScript? Create the file `.joyride/scripts/example/write-a-file.js`:
+
+```javascript
+const fs = require("fs");
+const path = require("path");
+const vscode = require("vscode");
+
+function info(...xs) {
+  vscode.window.showInformationMessage(xs.join(" "));
+}
+
+const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+info("The root path of this workspace:", rootPath);
+fs.writeFileSync(
+  path.resolve(rootPath, "test-from-js-script.txt"),
+  "Written from a Workspace JavaScript Script!"
+);
 ```
 
 ### Bind the scripts to a keyboard shortcut.
@@ -207,6 +205,10 @@ See the [examples](./examples) for examples including:
 * Using [clojure.zip](https://clojuredocs.org/clojure.zip)
 * Using [Hickory](https://github.com/clj-commons/hickory) (well, `hickory.select`, at least)
 
+## How does this work?
+
+* Joyride is Powered by [SCI](https://github.com/babashka/sci) (Small Clojure Interpreter).
+* Joyride makes its extension host access, available to your scripts.
 
 ## Support and feedback
 
