@@ -2,9 +2,11 @@
 
 Modify your VS Code while it is running. The Visual Studio Code API, as well as the APIs of its extensions, are at your command! Joyride makes VS Code scriptable in a very similar way to how how Emacs users can hack their editor.
 
-<video src="https://user-images.githubusercontent.com/30010/165934412-ffeb5729-07be-4aa5-b291-ad991d2f9f6c.mp4"></video>
+[![Video thumbnail: CoPilot hacked my editorCoPilot hacked my editor](assets/copilot-hacked-my-editor-video-thumb.png)](https://www.youtube.com/watch?v=-yYJV7WEFjI)
 
-[The video in much better quality on Youtube (CalvaTV)](https://www.youtube.com/watch?v=V1oTf-1EchU)
+[YouTube: CoPilot hacked my editor](https://www.youtube.com/watch?v=-yYJV7WEFjI)
+
+Try this yourself with the project used for the demo video: https://github.com/PEZ/joydrive-lm-tool-prezo
 
 See [doc/api.md](https://github.com/BetterThanTomorrow/joyride/blob/master/doc/api.md) for documentation about the Joyride API.
 
