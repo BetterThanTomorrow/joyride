@@ -30,6 +30,17 @@ A Workspace [activate.cljs](../examples/.joyride/scripts/workspace_activate.cljs
 * Using the `joyride.core/extension-context` to push disposables on its `subscriptions` array. Making VS Code dispose of them when Joyride is deactivated.
 * A re-runnable recipe to avoid re-registering the event handler. (By disposing it and then re-register.)
 
+## Fuzzy git history search menu
+
+A quick-pick menu for fuzzy searching your git history
+* Instant preview of diffs
+* Button for copying the commit id
+* Button for opening the file
+
+![Fuzzy git history search screenshot](assets/git-fuzzy-example.png)
+
+[examples/.joyride/src/git_fuzzy.cljs].joyride/src/git_fuzzy.cljs
+
 ## Give yourself a JavaScript REPL
 
 Evaluate code in JavaScript files, similar to how it's done with Clojure and ClojureScript.
