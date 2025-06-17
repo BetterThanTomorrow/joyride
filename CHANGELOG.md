@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.48] - 2025-06-17
+
 - Update readme with CoPilot video
 
 ## [0.0.47] - 2025-06-13
