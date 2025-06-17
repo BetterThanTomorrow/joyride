@@ -39,7 +39,7 @@ A quick-pick menu for fuzzy searching your git history
 
 ![Fuzzy git history search screenshot](assets/git-fuzzy-example.png)
 
-[examples/.joyride/src/git_fuzzy.cljs].joyride/src/git_fuzzy.cljs
+Source: [examples/.joyride/src/git_fuzzy.cljs](.joyride/src/git_fuzzy.cljs)
 
 ## Give yourself a JavaScript REPL
 
