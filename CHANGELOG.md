@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Update readme with CoPilot video
+
 ## [0.0.47] - 2025-06-13
 
 - [Add access to user/global path to `joyride.core`](https://github.com/BetterThanTomorrow/joyride/issues/198)
