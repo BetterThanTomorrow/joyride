@@ -121,6 +121,30 @@
         "command": "joyride.disableNReplMessageLogging",
         "title": "Disable nREPL message logging",
         "category": "Joyride"
+      },
+      {
+        "command": "joyride.createUserActivateScript",
+        "title": "Create User Activate Script",
+        "category": "Joyride",
+        "enablement": "!joyride.userActivateScriptExists"
+      },
+      {
+        "command": "joyride.createUserHelloScript",
+        "title": "Create Hello Joyride User Script",
+        "category": "Joyride",
+        "enablement": "!joyride.userHelloScriptExists"
+      },
+      {
+        "command": "joyride.createWorkspaceActivateScript",
+        "title": "Create Workspace Activate Script",
+        "category": "Joyride",
+        "enablement": "!joyride.workspaceActivateScriptExists"
+      },
+      {
+        "command": "joyride.createWorkspaceHelloScript",
+        "title": "Create Hello Joyride Workspace Script",
+        "category": "Joyride",
+        "enablement": "!joyride.workspaceHelloScriptExists"
       }
     ],
     "keybindings": [

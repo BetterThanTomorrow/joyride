@@ -80,7 +80,6 @@
            :output-channel (vscode/window.createOutputChannel "Joyride")
            :extension-context context
            :workspace-root-path vscode/workspace.rootPath))
-
   (let [{:keys [extension-context]} @db/!app-db]
     (register-command! extension-context "joyride.runCode" #'run-code+)
     (register-command! extension-context "joyride.evaluateSelection" #'evaluate-selection+)
@@ -88,28 +87,32 @@
     (register-command! extension-context "joyride.runUserScript" #'scripts-handler/run-user-script+)
     (register-command! extension-context "joyride.openWorkspaceScript" #'scripts-handler/open-workspace-script+)
     (register-command! extension-context "joyride.openUserScript" #'scripts-handler/open-user-script+)
+    (register-command! extension-context "joyride.createUserActivateScript" #'getting-started/create-user-activate-script+)
+    (register-command! extension-context "joyride.createUserHelloScript" #'getting-started/create-user-hello-script+)
+    (register-command! extension-context "joyride.createWorkspaceActivateScript" #'getting-started/create-workspace-activate-script+)
+    (register-command! extension-context "joyride.createWorkspaceHelloScript" #'getting-started/create-workspace-hello-script+)
     (register-command! extension-context "joyride.startNReplServer" #'start-nrepl-server+)
     (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server+)    (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
-    (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)
-    (when-contexts/set-context! ::when-contexts/joyride.isActive true)
+    (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)    (when-contexts/set-context! ::when-contexts/joyride.isActive true)
       ;; Register Language Model Tool
     (when-let [lm-disposable (lm-tool/register-tool!)]
       (swap! db/!app-db update :disposables conj lm-disposable)
-      (.push (.-subscriptions ^js extension-context) lm-disposable))    (when context
-      (-> (p/do
-            (getting-started/maybe-create-user-readme+)
-            (getting-started/maybe-create-workspace-config+ false))
-          (p/catch
-           (fn [e]
-             (js/console.error "Joyride activate error" e)))
-          (p/then
-           (fn [_r]
-             (p/do! (life-cycle/maybe-run-init-script+ scripts-handler/run-user-script+
-                                                       (:user (life-cycle/init-scripts)))
-                    (when vscode/workspace.rootPath
-                      (life-cycle/maybe-run-init-script+ scripts-handler/run-workspace-script+
-                                                         (:workspace (life-cycle/init-scripts))))
-                    (utils/sayln "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
+      (.push (.-subscriptions ^js extension-context) lm-disposable))
+    (when context (-> (p/do
+                        (getting-started/maybe-create-user-readme+)
+                        (getting-started/maybe-create-workspace-config+ false)
+                        (getting-started/update-script-contexts!))
+                      (p/catch
+                       (fn [e]
+                         (js/console.error "Joyride activate error" e)))
+                      (p/then
+                       (fn [_r]
+                         (p/do! (life-cycle/maybe-run-init-script+ scripts-handler/run-user-script+
+                                                                   (:user (life-cycle/init-scripts)))
+                                (when vscode/workspace.rootPath
+                                  (life-cycle/maybe-run-init-script+ scripts-handler/run-workspace-script+
+                                                                     (:workspace (life-cycle/init-scripts))))
+                                (utils/sayln "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
     (js/console.timeLog "activation" "Joyride activate END")
     (js/console.timeEnd "activation")
     api))

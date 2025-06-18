@@ -4,6 +4,7 @@
             [clojure.string :as string]
             [joyride.config :as conf]
             [joyride.utils :as utils]
+            [joyride.when-contexts :as when-contexts]
             [promesa.core :as p]))
 
 (defn- getting-started-content-uri [sub-path]
@@ -76,3 +77,70 @@
     (maybe-create-workspace-config+ true)
     (maybe-create-and-open-content+ (getting-started-content-uri ["workspace" "scripts" "hello_joyride_workspace_script.cljs"])
                                     (utils/path->uri (conf/workspace-abs-scripts-path) ["hello_joyride_workspace_script.cljs"]))))
+
+(defn update-script-contexts!
+  "Updates VS Code context variables based on current script file existence"
+  []
+  (p/let [user-activate-exists? (utils/path-or-uri-exists?+
+                                 (utils/path->uri (conf/user-abs-scripts-path) ["user_activate.cljs"]))
+          user-hello-exists? (utils/path-or-uri-exists?+
+                              (utils/path->uri (conf/user-abs-scripts-path) ["hello_joyride_user_script.cljs"]))
+          ;; Workspace contexts - only check if workspace exists
+          ws-scripts-path (conf/workspace-abs-scripts-path)
+          ws-activate-exists? (when ws-scripts-path
+                                (utils/path-or-uri-exists?+
+                                 (utils/path->uri ws-scripts-path ["workspace_activate.cljs"])))
+          ws-hello-exists? (when ws-scripts-path
+                             (utils/path-or-uri-exists?+
+                              (utils/path->uri ws-scripts-path ["hello_joyride_workspace_script.cljs"])))]
+    ;; Update all contexts
+    (when-contexts/set-context! ::when-contexts/joyride.userActivateScriptExists user-activate-exists?)
+    (when-contexts/set-context! ::when-contexts/joyride.userHelloScriptExists user-hello-exists?)
+    (when-contexts/set-context! ::when-contexts/joyride.workspaceActivateScriptExists (boolean ws-activate-exists?))
+    (when-contexts/set-context! ::when-contexts/joyride.workspaceHelloScriptExists (boolean ws-hello-exists?))))
+
+;; Command handlers for individual script creation
+
+(defn create-user-activate-script+
+  "Creates user activate script and updates contexts"
+  []
+  (p/let [source-uri (getting-started-content-uri ["user" "scripts" "user_activate.cljs"])
+          dest-uri (utils/path->uri (conf/user-abs-scripts-path) ["user_activate.cljs"])
+          _result+ (create-content-file+ source-uri dest-uri)]
+    (update-script-contexts!)
+    (p/let [doc+ (vscode/workspace.openTextDocument dest-uri)]
+      (vscode/window.showTextDocument doc+ #js {:preview false, :preserveFocus false}))))
+
+(defn create-user-hello-script+
+  "Creates user hello script and updates contexts"
+  []
+  (p/let [source-uri (getting-started-content-uri ["user" "scripts" "hello_joyride_user_script.cljs"])
+          dest-uri (utils/path->uri (conf/user-abs-scripts-path) ["hello_joyride_user_script.cljs"])
+          _result+ (create-content-file+ source-uri dest-uri)]
+    (update-script-contexts!)
+    (p/let [doc+ (vscode/workspace.openTextDocument dest-uri)]
+      (vscode/window.showTextDocument doc+ #js {:preview false, :preserveFocus false}))))
+
+(defn create-workspace-activate-script+
+  "Creates workspace activate script and updates contexts"
+  []
+  (p/do
+    (maybe-create-workspace-config+ true)
+    (p/let [source-uri (getting-started-content-uri ["workspace" "scripts" "workspace_activate.cljs"])
+            dest-uri (utils/path->uri (conf/workspace-abs-scripts-path) ["workspace_activate.cljs"])
+            _result+ (create-content-file+ source-uri dest-uri)]
+      (update-script-contexts!)
+      (p/let [doc+ (vscode/workspace.openTextDocument dest-uri)]
+        (vscode/window.showTextDocument doc+ #js {:preview false, :preserveFocus false})))))
+
+(defn create-workspace-hello-script+
+  "Creates workspace hello script and updates contexts"
+  []
+  (p/do
+    (maybe-create-workspace-config+ true)
+    (p/let [source-uri (getting-started-content-uri ["workspace" "scripts" "hello_joyride_workspace_script.cljs"])
+            dest-uri (utils/path->uri (conf/workspace-abs-scripts-path) ["hello_joyride_workspace_script.cljs"])
+            _result+ (create-content-file+ source-uri dest-uri)]
+      (update-script-contexts!)
+      (p/let [doc+ (vscode/workspace.openTextDocument dest-uri)]
+        (vscode/window.showTextDocument doc+ #js {:preview false, :preserveFocus false})))))
