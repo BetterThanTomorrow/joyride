@@ -124,6 +124,167 @@ Key functions:
 - Verify command palette entries work correctly
 - Ensure menu items appear/disappear appropriately based on file existence
 
+## Implementation Details
+
+### Command Registration (package.json)
+
+Add these commands to the `contributes.commands` section:
+
+```json
+{
+  "command": "joyride.createUserActivateScript",
+  "title": "Create User Activate Script",
+  "category": "Joyride",
+  "when": "!joyride.when-contexts/userActivateScriptExists"
+},
+{
+  "command": "joyride.createUserHelloScript",
+  "title": "Create Hello Joyride User Script",
+  "category": "Joyride",
+  "when": "!joyride.when-contexts/userHelloScriptExists"
+},
+{
+  "command": "joyride.createWorkspaceActivateScript",
+  "title": "Create Workspace Activate Script",
+  "category": "Joyride",
+  "when": "!joyride.when-contexts/workspaceActivateScriptExists"
+},
+{
+  "command": "joyride.createWorkspaceHelloScript",
+  "title": "Create Hello Joyride Workspace Script",
+  "category": "Joyride",
+  "when": "!joyride.when-contexts/workspaceHelloScriptExists"
+}
+```
+
+### When Clause Contexts
+
+Joyride has an existing `when-contexts` module for managing VS Code context variables. Add the new contexts there:
+
+```clojure
+;; In src/joyride/when_contexts.cljs
+(defonce ^:private !db (atom {:contexts {::joyride.isActive false
+                                         ::joyride.isNReplServerRunning false
+                                         ;; Add new script existence contexts
+                                         ::userActivateScriptExists false
+                                         ::userHelloScriptExists false
+                                         ::workspaceActivateScriptExists false
+                                         ::workspaceHelloScriptExists false}}))
+
+;; Add helper function to update script contexts
+(defn update-script-contexts! []
+  (p/let [user-activate-exists? (utils/path-or-uri-exists?+
+                                 (path->uri (conf/user-abs-scripts-path) ["user_activate.cljs"]))
+          user-hello-exists? (utils/path-or-uri-exists?+
+                              (path->uri (conf/user-abs-scripts-path) ["hello_joyride_user_script.cljs"]))
+          ws-activate-exists? (when (conf/workspace-abs-scripts-path)
+                                (utils/path-or-uri-exists?+
+                                 (path->uri (conf/workspace-abs-scripts-path) ["workspace_activate.cljs"])))
+          ws-hello-exists? (when (conf/workspace-abs-scripts-path)
+                             (utils/path-or-uri-exists?+
+                              (path->uri (conf/workspace-abs-scripts-path) ["hello_joyride_workspace_script.cljs"])))]
+    (set-context! ::userActivateScriptExists user-activate-exists?)
+    (set-context! ::userHelloScriptExists user-hello-exists?)
+    (set-context! ::workspaceActivateScriptExists ws-activate-exists?)
+    (set-context! ::workspaceHelloScriptExists ws-hello-exists?)))
+```
+
+Then update the package.json when clauses to use the namespaced format:
+
+```json
+"when": "!joyride.when-contexts/userActivateScriptExists"
+"when": "!joyride.when-contexts/userHelloScriptExists"
+"when": "!joyride.when-contexts/workspaceActivateScriptExists"
+"when": "!joyride.when-contexts/workspaceHelloScriptExists"
+```
+
+Call this function:
+- On extension activation
+- After creating/deleting script files
+- On workspace folder changes
+
+Example integration:
+```clojure
+;; In getting_started.cljs after file creation
+(defn create-user-activate-script+ []
+  (p/do
+    ;; ... create the file ...
+    (when-contexts/update-script-contexts!)))
+
+;; In extension.cljs on activation
+(defn activate [context]
+  ;; ... existing activation code ...
+  (when-contexts/update-script-contexts!))
+```
+
+### README.md Template Content
+
+Create `assets/getting-started-content/user/README.md`:
+
+```markdown
+# Welcome to Joyride! 🎸
+
+Joyride lets you script VS Code using ClojureScript. This is your user Joyride directory where you can create scripts that enhance your VS Code experience.
+
+## Getting Started
+
+### 1. Create Your First Script
+Use VS Code commands to create your first Joyride scripts:
+- **Create User Activate Script** - Runs automatically when Joyride starts
+- **Create Hello Joyride User Script** - Example script to run manually
+
+### 2. Install Calva (Recommended)
+For the best Joyride development experience, install the Calva extension:
+- Provides syntax highlighting and REPL support
+- Use `Calva: Start Joyride REPL and Connect` to interact with your scripts
+
+### 3. Explore Examples
+Check out the Joyride examples repository:
+https://github.com/BetterThanTomorrow/joyride/tree/master/examples
+
+### 4. Run Scripts
+- Use `Joyride: Run User Script` to run your scripts
+- Scripts in this directory can access the full VS Code API
+
+## Directory Structure
+
+- `scripts/` - Your Joyride scripts go here
+- `src/` - Reusable Clojure code (created when needed)
+- `deps.edn` - Clojure dependencies (created when needed)
+
+## Next Steps
+
+- Read the Joyride documentation: https://github.com/BetterThanTomorrow/joyride
+- Join the Calva community: https://clojurians.slack.com (#calva channel)
+- Start scripting and have fun! 🎉
+```
+
+### Migration Strategy
+
+**For Existing Users:**
+- No automatic migration - preserve existing setups completely
+- New commands will work alongside existing content
+- Context variables will properly reflect existing file state
+
+**For New Users:**
+- Only README.md created on first install
+- Commands guide them to create scripts as needed
+- Maintains clean, minimal initial experience
+
+### Backwards Compatibility
+
+- Existing automatic content creation behavior is completely removed
+- Existing users with auto-created content are not affected
+- All existing script execution and menu functionality preserved
+- Template files remain unchanged for consistency
+
+### File Watcher Considerations
+
+Consider adding file system watchers to update context variables when script files are:
+- Created outside of Joyride commands (manual creation)
+- Deleted by user
+- Renamed or moved
+
 ## E2E Testing Coverage
 
 The existing e2e test infrastructure in `vscode-test-runner/` provides a solid foundation for testing the content creation changes. Here are specific test scenarios we should add:
