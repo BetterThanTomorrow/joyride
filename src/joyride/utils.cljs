@@ -94,3 +94,8 @@
                 (->> (cljify files)
                      (map #(vscode/Uri.file %))
                      (sort-by #(.-fsPath ^js %)))))))
+
+(defn path->uri
+  "Creates a VS Code URI by joining a base path with sub-path components"
+  [base-path sub-path]
+  (apply (.-joinPath vscode/Uri) (vscode/Uri.file base-path) sub-path))
