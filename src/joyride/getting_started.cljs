@@ -44,6 +44,10 @@
       (maybe-create-content+ (getting-started-content-uri ["user" "src" "my_lib.cljs"])
                              (path->uri (conf/user-abs-src-path) ["my_lib.cljs"])))))
 
+(defn maybe-create-user-readme+ []
+  (maybe-create-content+ (getting-started-content-uri ["user" "README.md"])
+                         (path->uri (conf/user-abs-joyride-path) ["README.md"])))
+
 (defn maybe-create-workspace-config+ [create-joyride-dir?]
   (p/let [joyride-dir-exists?+ (utils/path-or-uri-exists?+ (path->uri (conf/workspace-abs-joyride-path) "."))]
     (when (or joyride-dir-exists?+ create-joyride-dir?)

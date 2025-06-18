@@ -95,11 +95,9 @@
       ;; Register Language Model Tool
     (when-let [lm-disposable (lm-tool/register-tool!)]
       (swap! db/!app-db update :disposables conj lm-disposable)
-      (.push (.-subscriptions ^js extension-context) lm-disposable))
-
-    (when context
+      (.push (.-subscriptions ^js extension-context) lm-disposable))    (when context
       (-> (p/do
-            (getting-started/maybe-create-user-content+)
+            (getting-started/maybe-create-user-readme+)
             (getting-started/maybe-create-workspace-config+ false))
           (p/catch
            (fn [e]
