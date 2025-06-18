@@ -209,7 +209,7 @@ jobs:
             ${GHR_CMD} -t ${GITHUB_TOKEN} ${EXTRA_RELEASE_OPTIONS} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -b "${BODY}" -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} /tmp/artifacts/
   marketplace-publish:
     docker:
-      - image: cimg/node:22.5.1
+      - image: cimg/node:22
     working_directory: ~/joyride
     steps:
       - attach_workspace:
@@ -229,7 +229,7 @@ jobs:
             fi
   marketplace-preview-publish:
     docker:
-      - image: circleci/node:latest
+      - image: cimg/node:22
     working_directory: ~/joyride
     steps:
       - attach_workspace:
@@ -249,7 +249,7 @@ jobs:
             fi
   open-vsx-publish:
     docker:
-      - image: circleci/node:latest
+      - image: cimg/node:22
     working_directory: ~/joyride
     steps:
       - attach_workspace:
@@ -269,7 +269,7 @@ jobs:
             fi
   bump-version:
     docker:
-      - image: cimg/node:15.8
+      - image: cimg/node:22
     steps:
       - add_ssh_keys:
           fingerprints:
