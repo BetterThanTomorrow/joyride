@@ -5,7 +5,6 @@
 
 ## Progress Checklist
 
-### ✅ **COMPLETED**
 - [x] **Create README.md Template** - Added template in `assets/getting-started-content/user/README.md`
 - [x] **Minimal Extension Activation** - Modified `extension.cljs` to only create README on first install
 - [x] **Add README Creation Function** - Created `maybe-create-user-readme+` in `getting_started.cljs`
@@ -13,13 +12,8 @@
 - [x] **When Contexts Setup** - Added script existence contexts to `when_contexts.cljs`
 - [x] **When Contexts Function** - Created `update-script-contexts!` function with REPL testing
 - [x] **Centralize path->uri Utility** - Moved to `utils.cljs` and updated all modules to use it
-
-### 🔄 **IN PROGRESS**
-- [ ] **Command Registration** - Add new commands to `package.json`
-
-### ⏳ **TODO**
-- [ ] **Command Registration** - Add new commands to `package.json`
-- [ ] **Command Implementation** - Create command handler functions
+- [x] **Command Registration** - Add new commands to `package.json`
+- [x] **Command Implementation** - Create command handler functions
 - [ ] **Menu Integration** - Update user script menus to include create options
 - [ ] **Context Updates** - Call context updates after file creation/deletion
 - [ ] **Refactor Content Creation** - Break down `maybe-create-user-content+` into individual functions
