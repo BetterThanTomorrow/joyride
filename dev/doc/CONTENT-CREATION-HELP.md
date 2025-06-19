@@ -24,12 +24,14 @@
       - [x] No activate script option when activate script exists
       - [x] Hello script option when no script other than activate exists
       - [x] No hello script option when a non-activate script exists
+      - [x] Does not create anything if no such option is selected
     - [ ] Workspace menus
       - [x] Activate script option when no activate script exists
       - [x] No activate script option when activate script exists
-      - [ ] Hello script option when no script other than activate exists
+      - [x] Hello script option when no script other than activate exists
         - ERROR: With only an activcate script in place, the hello option is not there
       - [x] No hello script option when a non-activate script exists
+      - [ ] Does not create anything if no such option is selected
   - [x] Test file creation and opening works correctly
 - [ ] **Context Updates** - Call context updates after file creation/deletion
 - [ ] **Refactor Content Creation** - Break down `maybe-create-user-content+` into individual functions

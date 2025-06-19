@@ -177,12 +177,14 @@
                               (.-fsPath)
                               (strip-abs-scripts-path (conf/workspace-abs-scripts-path))))
                        script-uris)
+          create-activate-script? (and create-activate-fn
+                                       (not (some #(= % "workspace_activate.cljs") scripts)))
           create-hello-script? (and create-hello-fn
                                     (or (empty? scripts)
-                                        (= scripts '("activate.cljs"))))]
+                                        (= scripts '("workspace_activate.cljs"))))]
     {:title title
      :more-menu-items (cond-> []
-                        create-activate-fn (conj {:label (menu-label-with-icon
+                        create-activate-script? (conj {:label (menu-label-with-icon
                                                           "Create Workspace Script workspace_activate.cljs"
                                                           "plus")
                                                   :function create-activate-fn})
