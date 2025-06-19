@@ -14,7 +14,28 @@
 - [x] **Centralize path->uri Utility** - Moved to `utils.cljs` and updated all modules to use it
 - [x] **Command Registration** - Add new commands to `package.json`
 - [x] **Command Implementation** - Create command handler functions
-- [ ] **Menu Integration** - Update user script menus to include create options
+- [x] **Menu Integration** - Update user script menus to include create options
+  - [x] Add user-menu-conf+ function to scripts_handler.cljs
+  - [x] Update run-user-script+ to use new menu configuration
+  - [x] Update open-user-script+ to use new menu configuration
+  - [x] Test creation options appear in both menus
+    - [x] User menus
+      - [x] Activate script option when no activate script exists
+      - [x] No activate script option when activate script exists
+      - [x] Hello script option when no script other than activate exists
+      - [x] No hello script option when a non-activate script exists
+    - [ ] Workspace menus
+      - [x] Activate script option when no activate script exists
+      - [x] No activate script option when activate script exists
+      - [ ] Hello script option when no script other than activate exists
+        - ERROR: With only an activcate script in place, the hello option is not there
+      - [x] No hello script option when a non-activate script exists
+  - [x] Test file creation and opening works correctly
+  - [ ] **Fix conditional logic** - Creation options should disappear when files exist
+    - [x] Add script existence checking to user-menu-conf+ (like workspace-menu-conf+)
+    - [x] Test that user activate creation option disappears after file is created
+    - [x] Test that user hello creation option disappears after file is created
+    - [ ] Test conditional hello script creation (only show when no scripts or only activate exists)
 - [ ] **Context Updates** - Call context updates after file creation/deletion
 - [ ] **Refactor Content Creation** - Break down `maybe-create-user-content+` into individual functions
 - [ ] **E2E Tests** - Add comprehensive test coverage
