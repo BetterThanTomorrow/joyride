@@ -111,6 +111,8 @@
   []
   (p/do
     (maybe-create-user-config+)
+    (maybe-create-content+ (getting-started-content-uri ["user" "scripts" "hello_joyride_user_script.js"])
+                           (utils/path->uri (conf/user-abs-scripts-path) ["hello_joyride_user_script.js"]))
     (maybe-create-and-open-content+
      (getting-started-content-uri ["user" "scripts" "hello_joyride_user_script.cljs"])
      (utils/path->uri (conf/user-abs-scripts-path) ["hello_joyride_user_script.cljs"]))))
