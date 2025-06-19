@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Only create Joyride content on demand](https://github.com/BetterThanTomorrow/joyride/issues/200)
+
 ## [0.0.48] - 2025-06-17
 
 - Update readme with Copilot video

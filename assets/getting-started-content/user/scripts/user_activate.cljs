@@ -1,7 +1,13 @@
 (ns user-activate
   (:require ["vscode" :as vscode]
             [joyride.core :as joyride]
-            [promesa.core :as p]))
+            joy-button
+            [promesa.core :as p]
+            :reload))
+
+(def show-demo-joyride-button false) ; Initialize to `true` to enable demo button, save
+                                     ; Then issue the command *Joyride: Run User Script*
+                                     ; and select the activation
 
 ;; This is the Joyride User `activate.cljs` script. It will run
 ;; as the first thing when Joyride is activated, making it a good
@@ -14,6 +20,7 @@
 ;;;;;;;;;;;;;;;;;
 ;;; REPL practice
 (comment
+  ;; To work with the scripts interactively, install the Calva Extension
   ;; Use Calva to start the Joyride REPL and connect it. The command:
   ;;   *Calva: Start Joyride REPL and Connect*
   ;; Then evaluate some code in this Rich comment block. Or just write
@@ -43,7 +50,7 @@
 (defonce !db (atom {:disposables []}))
 
 ;; To make the activation script re-runnable we dispose of
-;; event handlers and such that we might have registered
+;; event handlers and such that we may have registered
 ;; in previous runs.
 (defn- clear-disposables! []
   (run! (fn [disposable]
@@ -65,37 +72,16 @@
   (clear-disposables!) ;; Any disposables add with `push-disposable!`
                        ;; will be cleared now. You can push them anew.
 
-  ;;; About requiring VS Code extensions from activation scripts
-  ;; In an activation.cljs script it can't be guaranteed that a
-  ;; particular extension is active, so we can't safely `(:require ..)`
-  ;; in the `ns` form. Here's what you can do instead, using Calva
-  ;; as the example. To try it for real, copy the example scripts from:
-  ;; https://github.com/BetterThanTomorrow/joyride/tree/master/examples
-  ;; Then un-ignore the below form and run
-  ;;   *Joyride; Run User Script* -> user_activate.cljs
-  ;; (Or reload the VS Code window.)
-  #_(-> (vscode/extensions.getExtension "betterthantomorrow.calva")
-        ;; Force the Calva extension to activate
-        (.activate)
-        ;; The promise will resolve with the extension's API as the result
-        (p/then (fn [_api]
-                  (.appendLine (joyride/output-channel) "Calva activated. Requiring dependent namespaces.")
-                  ;; The Calva extension is required from`calva-api`
-                  ;; which will work fine since now Calva is active.
-                  (require '[calva-api])
-                  (require '[clojuredocs])))
-        (p/catch (fn [error]
-                   (vscode/window.showErrorMessage (str "Requiring Calva failed: " error))))))
+  (if show-demo-joyride-button
+    (push-disposable! (joy-button/install!))
+    (println "Demo Joyr button disabled"))
+  )
 
 (when (= (joyride/invoked-script) joyride/*file*)
   (my-main))
 
-"🎉"
-
 ;; For more examples see:
 ;;   https://github.com/BetterThanTomorrow/joyride/tree/master/examples
 
-(comment
-  (js-keys (second (:disposables @!db)))
-  :rcf)
 
+"🎸"

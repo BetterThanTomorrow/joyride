@@ -13,7 +13,7 @@
 (defn find-script-uris+
   "Returns a Promise that resolves to JS array of `vscode.Uri`s
    for the scripts files found in `base-path`/`script-folder-path`
-   
+
    Will use `vscode/workspace` API for it if there is a workspace
    root, otherwise it uses direct filesystem access. (Probably means
    it is only Remote friendly in the case with a workspace root.)"
@@ -177,17 +177,44 @@
                               (.-fsPath)
                               (strip-abs-scripts-path (conf/workspace-abs-scripts-path))))
                        script-uris)
+          create-activate-script? (and create-activate-fn
+                                       (not (some #(= % "workspace_activate.cljs") scripts)))
           create-hello-script? (and create-hello-fn
                                     (or (empty? scripts)
-                                        (= scripts '("activate.cljs"))))]
+                                        (= scripts '("workspace_activate.cljs"))))]
     {:title title
      :more-menu-items (cond-> []
-                        create-activate-fn (conj {:label (menu-label-with-icon
-                                                          "Create Workspace workspace_activate.cljs"
-                                                          "plus")
-                                                  :function create-activate-fn})
+                        create-activate-script? (conj {:label (menu-label-with-icon
+                                                               "Create Workspace Script workspace_activate.cljs"
+                                                               "plus")
+                                                       :function create-activate-fn})
                         create-hello-script? (conj {:label (menu-label-with-icon
-                                                            "Create Workspace hello_joyride_workspace_script.cljs"
+                                                            "Create Workspace Script hello_joyride_workspace_script.cljs"
+                                                            "plus")
+                                                    :function create-hello-fn})
+                        :always (into more-menu-items))}))
+
+(defn user-menu-conf+ [title more-menu-items create-activate-fn create-hello-fn]
+  (p/let [script-uris (cljify (find-script-uris+ conf/user-config-path
+                                                 conf/user-scripts-path))
+          scripts (map (fn [^js uri]
+                         (->> uri
+                              (.-fsPath)
+                              (strip-abs-scripts-path (conf/user-abs-scripts-path))))
+                       script-uris)
+          create-activate-script? (and create-activate-fn
+                                       (not (some #(= % "user_activate.cljs") scripts)))
+          create-hello-script? (and create-hello-fn
+                                    (or (empty? scripts)
+                                        (= scripts '("user_activate.cljs"))))]
+    {:title title
+     :more-menu-items (cond-> []
+                        create-activate-script? (conj {:label (menu-label-with-icon
+                                                               "Create User Script user_activate.cljs"
+                                                               "plus")
+                                                       :function create-activate-fn})
+                        create-hello-script? (conj {:label (menu-label-with-icon
+                                                            "Create User Script hello_joyride_user_script.cljs"
                                                             "plus")
                                                     :function create-hello-fn})
                         :always (into more-menu-items))}))
@@ -196,22 +223,23 @@
   ([]
    (apply run-script+
           (run-or-open-workspace-script-args
-           (p/let [create-activate-fn+ (getting-started/maybe-create-workspace-activate-fn+)
-                   create-hello-fn+ (getting-started/maybe-create-workspace-hello-fn+)]
-             (workspace-menu-conf+ "Run Workspace Script..."
-                                   [open-workspace-script-menu-item
-                                    run-user-script-menu-item]
-                                   create-activate-fn+
-                                   create-hello-fn+)))))
+           (workspace-menu-conf+ "Run Workspace Script..."
+                                 [open-workspace-script-menu-item
+                                  run-user-script-menu-item]
+                                 getting-started/maybe-create-workspace-activate-script+
+                                 getting-started/maybe-create-workspace-hello-script+))))
   ([script]
    (apply run-script+ (conj (run-or-open-workspace-script-args "Run") script))))
 
 (defn run-user-script+
   ([]
-   (apply run-script+ (run-or-open-user-script-args
-                       {:title "Run User Script..."
-                        :more-menu-items [open-user-script-menu-item
-                                          run-workspace-script-menu-item]})))
+   (apply run-script+
+          (run-or-open-user-script-args
+           (user-menu-conf+ "Run User Script..."
+                            [open-user-script-menu-item
+                             run-workspace-script-menu-item]
+                            getting-started/maybe-create-user-activate-script+
+                            getting-started/maybe-create-user-hello-script+))))
   ([script]
    (apply run-script+ (conj (run-or-open-user-script-args "Run") script))))
 
@@ -219,21 +247,22 @@
   ([]
    (apply open-script+
           (run-or-open-workspace-script-args
-           (p/let [create-activate-fn+ (getting-started/maybe-create-workspace-activate-fn+)
-                   create-hello-fn+ (getting-started/maybe-create-workspace-hello-fn+)]
-             (workspace-menu-conf+ "Open Workspace Script..."
-                                   [run-workspace-script-menu-item
-                                    open-user-script-menu-item]
-                                   create-activate-fn+
-                                   create-hello-fn+)))))
+           (workspace-menu-conf+ "Open Workspace Script..."
+                                 [run-workspace-script-menu-item
+                                  open-user-script-menu-item]
+                                 getting-started/maybe-create-workspace-activate-script+
+                                 getting-started/maybe-create-workspace-hello-script+))))
   ([script]
    (apply open-script+ (conj (run-or-open-workspace-script-args "Open") script))))
 
 (defn open-user-script+
   ([]
-   (apply open-script+ (run-or-open-user-script-args
-                        {:title "Open User Script..."
-                         :more-menu-items [run-user-script-menu-item
-                                           open-workspace-script-menu-item]})))
+   (apply open-script+
+          (run-or-open-user-script-args
+           (user-menu-conf+ "Open User Script..."
+                            [run-user-script-menu-item
+                             open-workspace-script-menu-item]
+                            getting-started/maybe-create-user-activate-script+
+                            getting-started/maybe-create-user-hello-script+))))
   ([script]
    (apply open-script+ (conj (run-or-open-user-script-args "Open") script))))

@@ -1,12 +1,29 @@
 (ns integration-test.activate-test
   (:require [cljs.test :refer [deftest testing is]]
-            ["path" :as path]))
+            [promesa.core :as p]
+            [joyride.core :as joyride]
+            ["fs" :as fs]
+            ["path" :as path]
+            ["vscode" :as vscode]))
+
+(defn path-exists-in-workspace?+ [path]
+  (-> (p/let [ws-path (path/join vscode/workspace.rootPath path)]
+        (fs/existsSync ws-path))))
+
+(defn path-exists-in-user-dir?+ [path]
+  (-> (let [user-path (path/join joyride.core/user-joyride-dir path)]
+        (fs/existsSync user-path))))
+
+(comment
+  (p/let [e? (path-exists-in-workspace?+ ".joyride")]
+    (vscode/window.showInformationMessage e?)
+    (def e? e?))
+  :rcf)
 
 (deftest user-activate
-  (testing "User activation script is required"
-    (is #_{:clj-kondo/ignore [:unresolved-namespace]}
-     (= #'user-activate/!db
-        ((ns-publics 'user-activate) '!db)))))
+  (testing "No user joyride content is created"
+    (is (= false
+           (path-exists-in-user-dir?+ "deps.edn")))))
 
 (deftest ws-activate
   (testing "Workspace activation script defines a symbol"
