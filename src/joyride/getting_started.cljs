@@ -104,6 +104,9 @@
   (p/do
     (maybe-create-user-config+)
     (maybe-create-and-open-content+
+     (getting-started-content-uri ["user" "src" "joy_button.cljs"])
+     (utils/path->uri (conf/user-abs-src-path) ["joy_button.cljs"]))
+    (maybe-create-and-open-content+
      (getting-started-content-uri ["user" "scripts" "user_activate.cljs"])
      (utils/path->uri (conf/user-abs-scripts-path) ["user_activate.cljs"]))))
 
