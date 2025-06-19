@@ -223,13 +223,11 @@
   ([]
    (apply run-script+
           (run-or-open-workspace-script-args
-           (p/let [create-activate-fn+ (getting-started/maybe-create-workspace-activate-fn+)
-                   create-hello-fn+ (getting-started/maybe-create-workspace-hello-fn+)]
-             (workspace-menu-conf+ "Run Workspace Script..."
-                                   [open-workspace-script-menu-item
-                                    run-user-script-menu-item]
-                                   create-activate-fn+
-                                   create-hello-fn+)))))
+           (workspace-menu-conf+ "Run Workspace Script..."
+                                 [open-workspace-script-menu-item
+                                  run-user-script-menu-item]
+                                 getting-started/maybe-create-workspace-activate-script+
+                                 getting-started/maybe-create-workspace-hello-script+))))
   ([script]
    (apply run-script+ (conj (run-or-open-workspace-script-args "Run") script))))
 
@@ -240,8 +238,8 @@
            (user-menu-conf+ "Run User Script..."
                            [open-user-script-menu-item
                             run-workspace-script-menu-item]
-                           getting-started/create-user-activate-script+
-                           getting-started/create-user-hello-script+))))
+                           getting-started/maybe-create-user-activate-script+
+                           getting-started/maybe-create-user-hello-script+))))
   ([script]
    (apply run-script+ (conj (run-or-open-user-script-args "Run") script))))
 
@@ -249,13 +247,11 @@
   ([]
    (apply open-script+
           (run-or-open-workspace-script-args
-           (p/let [create-activate-fn+ (getting-started/maybe-create-workspace-activate-fn+)
-                   create-hello-fn+ (getting-started/maybe-create-workspace-hello-fn+)]
-             (workspace-menu-conf+ "Open Workspace Script..."
-                                   [run-workspace-script-menu-item
-                                    open-user-script-menu-item]
-                                   create-activate-fn+
-                                   create-hello-fn+)))))
+           (workspace-menu-conf+ "Open Workspace Script..."
+                                 [run-workspace-script-menu-item
+                                  open-user-script-menu-item]
+                                 getting-started/maybe-create-workspace-activate-script+
+                                 getting-started/maybe-create-workspace-hello-script+))))
   ([script]
    (apply open-script+ (conj (run-or-open-workspace-script-args "Open") script))))
 
@@ -266,7 +262,7 @@
            (user-menu-conf+ "Open User Script..."
                            [run-user-script-menu-item
                             open-workspace-script-menu-item]
-                           getting-started/create-user-activate-script+
-                           getting-started/create-user-hello-script+))))
+                           getting-started/maybe-create-user-activate-script+
+                           getting-started/maybe-create-user-hello-script+))))
   ([script]
    (apply open-script+ (conj (run-or-open-user-script-args "Open") script))))

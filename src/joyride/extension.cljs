@@ -87,10 +87,10 @@
     (register-command! extension-context "joyride.runUserScript" #'scripts-handler/run-user-script+)
     (register-command! extension-context "joyride.openWorkspaceScript" #'scripts-handler/open-workspace-script+)
     (register-command! extension-context "joyride.openUserScript" #'scripts-handler/open-user-script+)
-    (register-command! extension-context "joyride.createUserActivateScript" #'getting-started/create-user-activate-script+)
-    (register-command! extension-context "joyride.createUserHelloScript" #'getting-started/create-user-hello-script+)
-    (register-command! extension-context "joyride.createWorkspaceActivateScript" #'getting-started/create-workspace-activate-script+)
-    (register-command! extension-context "joyride.createWorkspaceHelloScript" #'getting-started/create-workspace-hello-script+)
+    (register-command! extension-context "joyride.createUserActivateScript" #'getting-started/maybe-create-user-activate-script+)
+    (register-command! extension-context "joyride.createUserHelloScript" #'getting-started/maybe-create-user-hello-script+)
+    (register-command! extension-context "joyride.createWorkspaceActivateScript" #'getting-started/maybe-create-workspace-activate-script+)
+    (register-command! extension-context "joyride.createWorkspaceHelloScript" #'getting-started/maybe-create-workspace-hello-script+)
     (register-command! extension-context "joyride.startNReplServer" #'start-nrepl-server+)
     (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server+)    (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
     (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)    (when-contexts/set-context! ::when-contexts/joyride.isActive true)
@@ -100,7 +100,6 @@
       (.push (.-subscriptions ^js extension-context) lm-disposable))
     (when context (-> (p/do
                         (getting-started/maybe-create-user-readme+)
-                        (getting-started/maybe-create-workspace-config+ false)
                         (getting-started/update-script-contexts!))
                       (p/catch
                        (fn [e]
