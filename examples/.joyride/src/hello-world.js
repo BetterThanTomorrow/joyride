@@ -1,5 +1,7 @@
 const vscode = require("vscode");
 
+// JavaScript scripts work, but is quite experimental and not encouraged
+
 exports.hello = () => {
   return "Hello World!";
 };

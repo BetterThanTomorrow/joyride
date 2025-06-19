@@ -1,6 +1,6 @@
 const vscode = require("vscode");
 
-// You can write your Joyride scripts in JavaScript, if you want.
+// JavaScript scripts work, but is quite experimental and not encouraged
 
 const hello = () => {
   return "Hello World!";

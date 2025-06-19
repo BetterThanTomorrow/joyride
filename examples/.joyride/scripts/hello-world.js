@@ -1,5 +1,7 @@
 const vscode = require("vscode");
 
+// JavaScript scripts work, but is quite experimental and not encouraged
+
 showHelloMessage = async () => {
   const button = await vscode.window.showInformationMessage("Hello World!", "Cancel", "OK");
   if (button === "OK") {
