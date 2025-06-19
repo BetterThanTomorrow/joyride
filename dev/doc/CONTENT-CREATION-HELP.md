@@ -38,7 +38,7 @@
     - [ ] Test conditional hello script creation (only show when no scripts or only activate exists)
 - [ ] **Context Updates** - Call context updates after file creation/deletion
 - [ ] **Refactor Content Creation** - Break down `maybe-create-user-content+` into individual functions
-- [ ] **E2E Tests** - Add comprehensive test coverage
+- [x] **E2E Tests** - Add smoke test to check basics
 - [ ] **Manual Testing** - Test all scenarios end-to-end
 
 ---
