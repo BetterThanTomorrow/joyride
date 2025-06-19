@@ -2,15 +2,24 @@
 
 Modify your VS Code while it is running. The Visual Studio Code API, as well as the APIs of its extensions, are at your command! Joyride makes VS Code scriptable in a very similar way to how how Emacs users can hack their editor.
 
-[![Video thumbnail: CoPilot hacked my editorCoPilot hacked my editor](assets/copilot-hacked-my-editor-video-thumb.png)](https://www.youtube.com/watch?v=-yYJV7WEFjI)
+[![Video thumbnail: Copilot hacked my editorCopilot hacked my editor](assets/copilot-hacked-my-editor-video-thumb.png)](https://www.youtube.com/watch?v=-yYJV7WEFjI)
 
-[YouTube: CoPilot hacked my editor](https://www.youtube.com/watch?v=-yYJV7WEFjI)
+[YouTube: Copilot hacked my editor](https://www.youtube.com/watch?v=-yYJV7WEFjI)
 
 Try this yourself with the project used for the demo video: https://github.com/PEZ/joydrive-lm-tool-prezo
 
 See [doc/api.md](https://github.com/BetterThanTomorrow/joyride/blob/master/doc/api.md) for documentation about the Joyride API.
 
 Your feedback is highly welcome!
+
+## Copilot integration
+
+Joyride includes a Language Model Tool that gives Copilot access to the scripting environment so that it can hack your editor while your are working with it.
+
+> [!NOTE]
+> Joyride gives you and CoPilot full access to the VS Code API and execution environment. **You are responsible for the code that is executed in Joyride**.
+>
+> If you don't want Copilot to have any access to the Joyride REPL tool, then disable it in settings: `joyride.lm.enableReplTool`.
 
 ## User and Workspace scripts
 
@@ -41,17 +50,11 @@ You can run these scripts with the commands mentioned above.
 
 Also: In the **Joyride: Run Workspace Script** menu, there is a command for downloading and installing some default/example workspace scripts.
 
-## Quick Start - Ask CoPilot to do some Joyride hacking
+## Quick Start - Ask Copilot to do some Joyride hacking
 
-**NB**: Joyride gives you and CoPilot full access to the VS Code API and execution environment. You are responsible for the code that is executed in Joyride.
-
-Joyride includes a Language Model Tool that gives CoPilot access to the scripting environment so that it can hack your editor while your are working with it.
-
-You can also ask CoPilot to create Joyride scripts for you.
+You can also ask Copilot to create Joyride scripts for you.
 
 We're still discovering how to best instruct the AI for helping with Joyride scripting. You can use [these custom instructions](prompts/general/copilot-instructions.md) as a start. And please share your experiences with custom instructsions with us. 🙏
-
-If you don't want CoPilot to see the Joyride REPL tool, then disable it in settings: `joyride.lm.enableReplTool`.
 
 ## Quick Start - Start your Scripts Library
 
@@ -87,7 +90,7 @@ Create the file `.joyride/scripts/example/write_a_file.cljs`:
 
 ### Using JavaScript
 
-You can use both JavaScript and ClojureScript with Joyride. However, you will only get to enjoy Interactive Programming using ClojureScript. Also the JavaScript support in Joyride is new and not yet fully at par with the ClojureScript support. It's even fair to say that the JavaScript support is experimental. With CoPilot support you probably do not need it. CoPilot knows CLojureScript and is a great tutor.
+You can use both JavaScript and ClojureScript with Joyride. However, you will only get to enjoy Interactive Programming using ClojureScript. Also the JavaScript support in Joyride is new and not yet fully at par with the ClojureScript support. It's even fair to say that the JavaScript support is experimental. With Copilot support you probably do not need it. Copilot knows CLojureScript and is a great tutor.
 
 Still want to use JavaScript? Create the file `.joyride/scripts/example/write-a-file.js`:
 
