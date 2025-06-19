@@ -35,10 +35,10 @@
       - [x] Does not create anything if no such option is selected
       - [x] Creates deps.edn
   - [x] Test file creation and opening works correctly
-- [ ] **Context Updates** - Call context updates after file creation/deletion
-- [ ] **Refactor Content Creation** - Break down `maybe-create-user-content+` into individual functions
-- [ ] **E2E Tests** - Add smoke test to check basics
-- [ ] **Manual Testing** - Test all scenarios end-to-end
+- [x] **Context Updates** - Call context updates after file creation/deletion
+- [x] **Refactor Content Creation** - Break down `maybe-create-user-content+` into individual functions
+- [x] **E2E Tests** - Add smoke test to check basics
+- [x] **Manual Testing** - Test all scenarios end-to-end
 
 ---
 
