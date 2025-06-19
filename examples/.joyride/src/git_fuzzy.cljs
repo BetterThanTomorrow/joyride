@@ -14,7 +14,7 @@
 
 ;; vscode.git API
 ;; https://github.com/Microsoft/vscode/blob/main/extensions/git/src/api/git.d.ts
-;; (Ask CoPilot to fetch it to get great help with hacking on the script.)
+;; (Ask Copilot to fetch it to get great help with hacking on the script.)
 
 (def max-entries 5000)
 (def batch-size 250)

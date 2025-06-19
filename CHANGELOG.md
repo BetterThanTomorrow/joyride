@@ -6,7 +6,7 @@ Changes to Joyride
 
 ## [0.0.48] - 2025-06-17
 
-- Update readme with CoPilot video
+- Update readme with Copilot video
 
 ## [0.0.47] - 2025-06-13
 
@@ -14,11 +14,11 @@ Changes to Joyride
 
 ## [0.0.46] - 2025-05-30
 
-- Fix: [CoPilot/the LLM gets stuck when the evaluation result is a promise](https://github.com/BetterThanTomorrow/joyride/issues/196)
+- Fix: [Copilot/the LLM gets stuck when the evaluation result is a promise](https://github.com/BetterThanTomorrow/joyride/issues/196)
 
 ## [0.0.45] - 2025-05-29
 
-- [Add a language model (CoPilot) tool for running Joyride code](https://github.com/BetterThanTomorrow/joyride/issues/188)
+- [Add a language model (Copilot) tool for running Joyride code](https://github.com/BetterThanTomorrow/joyride/issues/188)
 
 ## [0.0.44] - 2024-08-06
 
