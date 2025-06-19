@@ -185,9 +185,9 @@
     {:title title
      :more-menu-items (cond-> []
                         create-activate-script? (conj {:label (menu-label-with-icon
-                                                          "Create Workspace Script workspace_activate.cljs"
-                                                          "plus")
-                                                  :function create-activate-fn})
+                                                               "Create Workspace Script workspace_activate.cljs"
+                                                               "plus")
+                                                       :function create-activate-fn})
                         create-hello-script? (conj {:label (menu-label-with-icon
                                                             "Create Workspace Script hello_joyride_workspace_script.cljs"
                                                             "plus")
@@ -236,10 +236,10 @@
    (apply run-script+
           (run-or-open-user-script-args
            (user-menu-conf+ "Run User Script..."
-                           [open-user-script-menu-item
-                            run-workspace-script-menu-item]
-                           getting-started/maybe-create-user-activate-script+
-                           getting-started/maybe-create-user-hello-script+))))
+                            [open-user-script-menu-item
+                             run-workspace-script-menu-item]
+                            getting-started/maybe-create-user-activate-script+
+                            getting-started/maybe-create-user-hello-script+))))
   ([script]
    (apply run-script+ (conj (run-or-open-user-script-args "Run") script))))
 
@@ -260,9 +260,9 @@
    (apply open-script+
           (run-or-open-user-script-args
            (user-menu-conf+ "Open User Script..."
-                           [run-user-script-menu-item
-                            open-workspace-script-menu-item]
-                           getting-started/maybe-create-user-activate-script+
-                           getting-started/maybe-create-user-hello-script+))))
+                            [run-user-script-menu-item
+                             open-workspace-script-menu-item]
+                            getting-started/maybe-create-user-activate-script+
+                            getting-started/maybe-create-user-hello-script+))))
   ([script]
    (apply open-script+ (conj (run-or-open-user-script-args "Open") script))))

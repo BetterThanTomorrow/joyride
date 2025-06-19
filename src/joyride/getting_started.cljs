@@ -7,7 +7,6 @@
             [joyride.when-contexts :as when-contexts]
             [promesa.core :as p]))
 
-
 (defn update-script-contexts!
   "Updates VS Code context variables based on current script file existence"
   []

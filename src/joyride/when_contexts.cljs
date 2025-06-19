@@ -80,5 +80,4 @@
     (set-context! ::joyride.workspaceHelloScriptExists false)
     @!db)
 
-  (context "joyride.isActive")
-  )
+  (context "joyride.isActive"))

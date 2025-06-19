@@ -69,7 +69,7 @@
                                 (catch js/Error _
                                   @joyride-sci/!last-ns))))
               result (sci/binding [sci/ns resolved-ns]
-                         (joyride-sci/eval-string code))]
+                       (joyride-sci/eval-string code))]
           (make-result result nil wait-for-promise?))
         (catch js/Error e
           (make-result nil (.-message e) wait-for-promise?))
