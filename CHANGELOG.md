@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.49] - 2025-06-19
+
 - [Only create Joyride content on demand](https://github.com/BetterThanTomorrow/joyride/issues/200)
 
 ## [0.0.48] - 2025-06-17
