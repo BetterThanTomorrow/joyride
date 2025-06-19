@@ -105,8 +105,10 @@
   "Creates user activate script and updates contexts"
   []
   (p/let [source-uri (getting-started-content-uri ["user" "scripts" "user_activate.cljs"])
+          _deps-result (maybe-create-content+ (getting-started-content-uri ["user" "deps.edn"])
+                                 (utils/path->uri (conf/user-abs-joyride-path) ["deps.edn"]))
           dest-uri (utils/path->uri (conf/user-abs-scripts-path) ["user_activate.cljs"])
-          _result+ (create-content-file+ source-uri dest-uri)]
+          _result (create-content-file+ source-uri dest-uri)]
     (update-script-contexts!)
     (p/let [doc+ (vscode/workspace.openTextDocument dest-uri)]
       (vscode/window.showTextDocument doc+ #js {:preview false, :preserveFocus false}))))
@@ -115,8 +117,10 @@
   "Creates user hello script and updates contexts"
   []
   (p/let [source-uri (getting-started-content-uri ["user" "scripts" "hello_joyride_user_script.cljs"])
+          _deps-result (maybe-create-content+ (getting-started-content-uri ["user" "deps.edn"])
+                                              (utils/path->uri (conf/user-abs-joyride-path) ["deps.edn"]))
           dest-uri (utils/path->uri (conf/user-abs-scripts-path) ["hello_joyride_user_script.cljs"])
-          _result+ (create-content-file+ source-uri dest-uri)]
+          _result (create-content-file+ source-uri dest-uri)]
     (update-script-contexts!)
     (p/let [doc+ (vscode/workspace.openTextDocument dest-uri)]
       (vscode/window.showTextDocument doc+ #js {:preview false, :preserveFocus false}))))
