@@ -31,14 +31,9 @@
         - ERROR: With only an activcate script in place, the hello option is not there
       - [x] No hello script option when a non-activate script exists
   - [x] Test file creation and opening works correctly
-  - [ ] **Fix conditional logic** - Creation options should disappear when files exist
-    - [x] Add script existence checking to user-menu-conf+ (like workspace-menu-conf+)
-    - [x] Test that user activate creation option disappears after file is created
-    - [x] Test that user hello creation option disappears after file is created
-    - [ ] Test conditional hello script creation (only show when no scripts or only activate exists)
 - [ ] **Context Updates** - Call context updates after file creation/deletion
 - [ ] **Refactor Content Creation** - Break down `maybe-create-user-content+` into individual functions
-- [x] **E2E Tests** - Add smoke test to check basics
+- [ ] **E2E Tests** - Add smoke test to check basics
 - [ ] **Manual Testing** - Test all scenarios end-to-end
 
 ---
