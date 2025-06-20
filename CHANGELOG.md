@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: [The LM Tool is not capturing stdout, when waiting for promises](https://github.com/BetterThanTomorrow/joyride/issues/202)
+
 ## [0.0.49] - 2025-06-19
 
 - [Only create Joyride content on demand](https://github.com/BetterThanTomorrow/joyride/issues/200)
