@@ -40,22 +40,24 @@
       ;; Async path with p/let (existing behavior)
       (try
         (setup-capture!)
-        (p/let [target-ns (symbol ns)
-                resolved-ns (try
-                              (repl-utils/the-sci-ns (store/get-ctx) target-ns)
-                              (catch js/Error _
-                                (try
-                                  (sci/eval-form (store/get-ctx)
-                                                 (list 'clojure.core/create-ns (list 'quote target-ns)))
-                                  (catch js/Error _
-                                    @joyride-sci/!last-ns))))
-                result (sci/binding [sci/ns resolved-ns]
-                         (joyride-sci/eval-string code))]
-          (make-result result nil wait-for-promise?))
+        (p/-> (p/let [target-ns (symbol ns)
+                      resolved-ns (try
+                                    (repl-utils/the-sci-ns (store/get-ctx) target-ns)
+                                    (catch js/Error _
+                                      (try
+                                        (sci/eval-form (store/get-ctx)
+                                                       (list 'clojure.core/create-ns (list 'quote target-ns)))
+                                        (catch js/Error _
+                                          @joyride-sci/!last-ns))))
+                      result (sci/binding [sci/ns resolved-ns]
+                               (joyride-sci/eval-string code))]
+                (make-result result nil wait-for-promise?))
+              (p/catch (fn [e] ;; Todo, this doesn't catch evalutation errors
+                         (make-result nil (.-message e) wait-for-promise?)))
+              (p/finally
+                (restore-fns!)))
         (catch js/Error e
-          (make-result nil (.-message e) wait-for-promise?))
-        (finally
-          (restore-fns!)))
+          (make-result nil (.-message e) wait-for-promise?)))
       ;; Sync path without promises
       (try
         (setup-capture!)
