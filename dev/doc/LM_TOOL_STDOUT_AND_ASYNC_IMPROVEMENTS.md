@@ -90,7 +90,7 @@ Use `false` (default) for:
 ## Recommended Implementation Plan
 
 ### Immediate Actions
-- [ ] **Rename parameter**: `waitForFinalPromise` → `awaitResult`
+- [x] **Rename parameter**: `waitForFinalPromise` → `awaitResult`
 - [ ] **Craft stellar agent guidance** - collaborative session to design clear descriptions
   - Review overall tool description for clarity
   - Draft improved parameter description with precise usage scenarios

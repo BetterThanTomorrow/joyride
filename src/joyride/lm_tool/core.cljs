@@ -33,7 +33,7 @@
   [^js input]
   (let [code (.-code input)
         ns (or (.-namespace input) "user")
-        wait-for-promise? (or (.-waitForFinalPromise input) false)]
+        wait-for-promise? (or (.-awaitResult input) false)]
     {:code code :ns ns :wait-for-promise? wait-for-promise?}))
 
 (defn validate-input

@@ -186,7 +186,7 @@
               "type": "string",
               "description": "Target namespace for code execution. Defaults to 'user'."
             },
-            "waitForFinalPromise": {
+            "awaitResult": {
               "type": "boolean",
               "description": "Wether to wait for promises if the evaluation results in a promise. Defaults to `false`. When you specifically want interact with the user, or otherwise need the resolved promise value."
             }
