@@ -92,13 +92,14 @@ Use `false` (default) for:
 ### Immediate Actions
 - [x] **Rename parameter**: `waitForFinalPromise` → `awaitResult`
 - [x] **Update tool description** with sync/async guidance
-- [ ] **Craft stellar agent guidance** - collaborative session to design clear descriptions
-  - Review and improve `code` parameter description for clarity
-  - Draft improved `awaitResult` parameter description with precise usage scenarios
-  - Review `namespace` parameter description for completeness
-  - Ensure all descriptions work together cohesively to guide proper tool usage
-  - Test language with example agent interactions
-- [ ] **Update package.json** with all improved parameter descriptions
+- [x] **Craft stellar agent guidance** - collaborative session to design clear descriptions
+  - [x] Review and improve `code` parameter description for clarity
+  - [x] Draft improved `awaitResult` parameter description with precise usage scenarios
+  - [x] Review `namespace` parameter description for completeness
+  - [x] Ensure all descriptions work together cohesively to guide proper tool usage
+  - [x] Test language with example agent interactions
+- [x] **Update package.json** with all improved parameter descriptions
+- [x] **Update validation error messages** to use correct parameter names
 
 ### Next Phase
 - [ ] **Implement auto-detection logic** in `execute-code+`
@@ -124,3 +125,34 @@ Use `false` (default) for:
 - Maintain backward compatibility during transition
 - Consider logging when auto-detection overrides agent choice
 - Test with both sync and async code scenarios
+
+## Status Update (June 21, 2025)
+
+### ✅ Phase 1 Complete: Agent Guidance Improvements
+All immediate actions have been successfully completed:
+
+**Parameter Improvements**:
+- **Renamed**: `waitForFinalPromise` → `awaitResult` ✅
+- **Enhanced Descriptions**: All three parameters now have clear, actionable guidance ✅
+- **Validation Fixed**: Error messages use correct parameter names ✅
+
+**Tool Description**:
+- **Sync/Async Clarity**: Tool description explains default behavior and when to use `awaitResult` ✅
+- **Performance Guidance**: Warns against unnecessary waiting ✅
+
+**Agent Guidance Quality**:
+- **Code Parameter**: Includes common patterns, examples, and classpath information ✅
+- **awaitResult Parameter**: Focuses on blocking behavior with concrete use cases ✅
+- **Namespace Parameter**: Includes display guidance for better UX ✅
+
+**Current Configuration** (package.json):
+```json
+"modelDescription": "Execute ClojureScript code in VS Code's Extension API environment via Joyride. Thus, you can modify editor behavior, manipulate files, invoke VS Code APIs, and create dynamic workflows. Runs synchronously by default - if you evaluate async code and need the unwrapped result, use the `awaitResult` parameter."
+```
+
+### 🔄 Next Phase: Monitor and Iterate
+- **Monitor Usage Patterns**: Track if agents reduce misuse of `awaitResult: true`
+- **Performance Metrics**: Measure if response times improve for sync operations
+- **Consider Advanced Features**: Auto-detection logic, README tool, architectural changes
+
+The core problem of agent confusion has been addressed with data-oriented, functional improvements that maintain backward compatibility while providing clear guidance.

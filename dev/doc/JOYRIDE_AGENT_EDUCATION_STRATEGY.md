@@ -3,7 +3,7 @@
 ## The Problem
 Agents frequently make common mistakes with Joyride that could be prevented with better guidance:
 - Common coding errors
-- Misunderstanding of the environment 
+- Misunderstanding of the environment
 - Not knowing available APIs
 - Incorrect usage patterns
 
@@ -24,10 +24,10 @@ Agents frequently make common mistakes with Joyride that could be prevented with
 **Cons**: Another tool for agents to discover and use
 **Approach**: Create `joyride_get_guidance` or similar tool
 
-### Option C: Hybrid Approach  
+### Option C: Hybrid Approach
 **Pros**: Best of both worlds
 **Cons**: More complex to implement
-**Approach**: 
+**Approach**:
 - Keep current parameter descriptions focused and clean
 - Add README tool with note in main tool description: "For comprehensive guidance, use the joyride_get_guidance tool first"
 
@@ -35,7 +35,7 @@ Agents frequently make common mistakes with Joyride that could be prevented with
 
 ### Tool Name Options
 - `joyride_get_guidance`
-- `joyride_readme` 
+- `joyride_readme`
 - `joyride_documentation`
 - `joyride_help`
 
@@ -60,7 +60,7 @@ Start with **Option C (Hybrid)**:
 
 ## Next Steps
 1. Finish current parameter description improvements
-2. Design README tool specification  
+2. Design README tool specification
 3. Implement README tool
 4. Update main tool description to reference README tool
 5. Monitor and iterate based on usage
