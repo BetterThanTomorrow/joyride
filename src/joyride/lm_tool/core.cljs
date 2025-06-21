@@ -44,7 +44,7 @@
     (empty? code) {:valid? false :error "Code cannot be empty"}
     (not (string? code)) {:valid? false :error "Code must be a string"}
     (not (string? ns)) {:valid? false :error "Namespace must be a string"}
-    (not (boolean? wait-for-promise?)) {:valid? false :error "waitForFinalPromise must be a boolean"}
+    (not (boolean? wait-for-promise?)) {:valid? false :error "awaitResult must be a boolean"}
     :else {:valid? true :error nil}))
 
 (defn confirmation-message->markdown
