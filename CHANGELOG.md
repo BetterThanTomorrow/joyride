@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.51] - 2025-06-21
+
 - Addressing: [Copilot often misuses the `waitForFinalPromise` parameter](https://github.com/BetterThanTomorrow/joyride/issues/205)
 
 ## [0.0.50] - 2025-06-20
