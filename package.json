@@ -170,8 +170,8 @@
         "name": "joyride_evaluate_code",
         "when": "config.joyride.lm.enableReplTool",
         "displayName": "Run Joyride Code",
-        "modelDescription": "Execute ClojureScript code in VS Code's Extension API environment, through Joyride. This tool can modify editor behavior, manipulate files, invoke VS Code APIs, and create dynamic workflows. Use when the user requests VS Code automation, editor customization, or Joyride usage. The code runs with full VS Code API access.\n\n#fetch https://github.com/BetterThanTomorrow/joyride/blob/master/doc/api.md",
-        "userDescription": "Execute code with full VS Code API access (inspecting or modifying your VS Code environment)",
+        "modelDescription": "Execute ClojureScript code in VS Code's Extension API environment via Joyride. Thus, you can modify editor behavior, manipulate files, invoke VS Code APIs, and create dynamic workflows. Runs synchronously by default - if you evaluate async code and need the unwrapped result, use the `awaitResult` parameter.",
+        "userDescription": "Execute code with full VS Code API access (inspecting and/or modifying your VS Code environment)",
         "canBeReferencedInPrompt": true,
         "toolReferenceName": "joyride-eval",
         "icon": "$(play)",
@@ -180,15 +180,15 @@
           "properties": {
             "code": {
               "type": "string",
-              "description": "Joyride code to execute. Joyride code is written in ClojureScript, a Joyride adapted SCI ClojureScript, even. \n\nJoyride has a fixed ”classpath” (the paths where it looks for roots to your Joyride code source files). It searches these directories in this order:\n1. `<workspace-root>/.joyride/src`\n1. `<workspace-root>/.joyride/scripts`\n1. `<user-home>/.config/joyride/src`\n1. `<user-home>/.config/joyride/scripts`"
+              "description": "Joyride code to evaluate. Joyride is scripted with SCI ClojureScript within the VS Code Extension Host environment. Patterns examples: `(require '[\"vscode\" :as vscode])`, `(vscode/window.showInformationMessage \"Hello!\")`, `(vscode/workspace.getConfiguration \"setting\")`. **Classpath**:  When resolving namespaces, Joyride searches for source files in: 1. `<workspace-root>/.joyride/src` 2. `<workspace-root>/.joyride/scripts` 3. `<user-home>/.config/joyride/src` 4. `<user-home>/.config/joyride/scripts`"
             },
             "namespace": {
               "type": "string",
-              "description": "Target namespace for code execution. Defaults to 'user'."
+              "description": "Target namespace for code evaluation. Defaults to 'user'. When showing the evaluated code to the user, include the namespace first in the codeblock like so `(in-ns 'namespace)`."
             },
-            "waitForFinalPromise": {
+            "awaitResult": {
               "type": "boolean",
-              "description": "Wether to wait for promises if the evaluation results in a promise. Defaults to `false`. When you specifically want interact with the user, or otherwise need the resolved promise value."
+              "description": "Whether to wait for async operations to finish. Defaults to `false`. Use `true` when you need the result (user input, file contents, API responses, etcetera). Use  `false` to avoid blocking on promises that may never resolve."
             }
           },
           "required": [
