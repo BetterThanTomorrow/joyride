@@ -188,7 +188,7 @@
             },
             "awaitResult": {
               "type": "boolean",
-              "description": "Wether to wait for promises if the evaluation results in a promise. Defaults to `false`. When you specifically want interact with the user, or otherwise need the resolved promise value."
+              "description": "Whether to wait for async operations to finish. Defaults to `false`. Use `true` when you need the result (user input, file contents, API responses, etcetera). Use  `false` to avoid blocking on promises that may never resolve."
             }
           },
           "required": [
