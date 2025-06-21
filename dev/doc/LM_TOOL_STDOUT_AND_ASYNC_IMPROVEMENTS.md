@@ -91,11 +91,14 @@ Use `false` (default) for:
 
 ### Immediate Actions
 - [x] **Rename parameter**: `waitForFinalPromise` → `awaitResult`
+- [x] **Update tool description** with sync/async guidance
 - [ ] **Craft stellar agent guidance** - collaborative session to design clear descriptions
-  - Review overall tool description for clarity
-  - Draft improved parameter description with precise usage scenarios
+  - Review and improve `code` parameter description for clarity
+  - Draft improved `awaitResult` parameter description with precise usage scenarios  
+  - Review `namespace` parameter description for completeness
+  - Ensure all descriptions work together cohesively to guide proper tool usage
   - Test language with example agent interactions
-- [ ] **Update package.json** with new parameter spec
+- [ ] **Update package.json** with all improved parameter descriptions
 
 ### Next Phase
 - [ ] **Implement auto-detection logic** in `execute-code+`
