@@ -219,6 +219,93 @@
                                                     :function create-hello-fn})
                         :always (into more-menu-items))}))
 
+(defn find-user-scripts-and-src-uris+
+  "Returns a Promise that resolves to a map with :scripts and :src keys,
+   each containing arrays of file URIs for their respective directories"
+  []
+  (p/let [scripts-uris (find-script-uris+ conf/user-config-path conf/user-scripts-path)
+          src-uris (find-script-uris+ conf/user-config-path (path/join conf/user-joyride-path "src"))]
+    {:scripts scripts-uris
+     :src src-uris}))
+
+(defn user-files->sectioned-file-infos+
+  "Converts the user-files map to file-infos with section information"
+  [user-files]
+  (p/let [scripts-infos (when (seq (:scripts user-files))
+                          (script-uris->file-infos+ (conf/user-abs-scripts-path) (:scripts user-files)))
+          src-infos (when (seq (:src user-files))
+                      (script-uris->file-infos+ (conf/user-abs-src-path) (:src user-files)))]
+    {:scripts (map #(assoc % :section :scripts) (or scripts-infos []))
+     :src (map #(assoc % :section :src) (or src-infos []))}))
+
+(defn create-sectioned-menu-items
+  "Creates menu items with section separators for scripts and src files"
+  [sectioned-file-infos more-menu-items]
+  (let [scripts-items (file-info->menu-item (:scripts sectioned-file-infos))
+        src-items (file-info->menu-item (:src sectioned-file-infos))]
+    (cond-> []
+      (seq scripts-items) (-> (conj {:label "scripts/" :kind vscode/QuickPickItemKind.Separator})
+                              (into scripts-items))
+      (seq src-items) (-> (conj {:label "src/" :kind vscode/QuickPickItemKind.Separator})
+                          (into src-items))
+      :always (-> (conj {:kind vscode/QuickPickItemKind.Separator})
+                  (into more-menu-items)))))
+
+(defn show-user-script-picker+
+  "Shows a menu with both user scripts and src files to the user, organized in sections.
+   Returns the picked item as a map with keys:
+   `:uri`, `:absolute-path`, `:relative-path`, `:section`"
+  [{:keys [title more-menu-items]}]
+  (p/let [user-files (find-user-scripts-and-src-uris+)
+          sectioned-file-infos (user-files->sectioned-file-infos+ user-files)
+          menu-items (create-sectioned-menu-items sectioned-file-infos more-menu-items)
+          script-info (vscode/window.showQuickPick (jsify menu-items) #js {:title title})]
+    (cljify script-info)))
+
+(defn handle-user-script-menu-selection+
+  "Handles user script menu selection for files that can be in scripts or src directories"
+  [menu-conf+ script-fn+]
+  (p/let [{:keys [title] :as menu-conf} menu-conf+
+          pick (show-user-script-picker+ menu-conf)]
+    (when pick
+      (let [relative-path (:relative-path pick)
+            section (:section pick)
+            function (:function pick)]
+        (cond
+          relative-path (case section
+                          :scripts (script-fn+ title conf/user-config-path conf/user-scripts-path relative-path)
+                          :src (script-fn+ title conf/user-config-path (path/join conf/user-joyride-path "src") relative-path)
+                          ;; fallback for backwards compatibility
+                          (script-fn+ title conf/user-config-path conf/user-scripts-path relative-path))
+          function (function))))))
+
+(defn user-scripts-and-src-menu-conf+
+  "User menu configuration that includes both scripts and src files"
+  [title more-menu-items create-activate-fn create-hello-fn]
+  (p/let [user-files (find-user-scripts-and-src-uris+)
+          all-scripts (concat (:scripts user-files) (:src user-files))
+          scripts (map (fn [^js uri]
+                         (->> uri
+                              (.-fsPath)
+                              path/basename))
+                       all-scripts)
+          create-activate-script? (and create-activate-fn
+                                       (not (some #(= % "user_activate.cljs") scripts)))
+          create-hello-script? (and create-hello-fn
+                                    (or (empty? scripts)
+                                        (= scripts '("user_activate.cljs"))))]
+    {:title title
+     :more-menu-items (cond-> []
+                        create-activate-script? (conj {:label (menu-label-with-icon
+                                                               "Create User Script user_activate.cljs"
+                                                               "plus")
+                                                       :function create-activate-fn})
+                        create-hello-script? (conj {:label (menu-label-with-icon
+                                                            "Create User Script hello_joyride_user_script.cljs"
+                                                            "plus")
+                                                    :function create-hello-fn})
+                        :always (into more-menu-items))}))
+
 (defn run-workspace-script+
   ([]
    (apply run-script+
@@ -257,12 +344,12 @@
 
 (defn open-user-script+
   ([]
-   (apply open-script+
-          (run-or-open-user-script-args
-           (user-menu-conf+ "Open User Script..."
-                            [run-user-script-menu-item
-                             open-workspace-script-menu-item]
-                            getting-started/maybe-create-user-activate-script+
-                            getting-started/maybe-create-user-hello-script+))))
+   (handle-user-script-menu-selection+
+    (user-scripts-and-src-menu-conf+ "Open User Script..."
+                                     [run-user-script-menu-item
+                                      open-workspace-script-menu-item]
+                                     getting-started/maybe-create-user-activate-script+
+                                     getting-started/maybe-create-user-hello-script+)
+    open-script+))
   ([script]
    (apply open-script+ (conj (run-or-open-user-script-args "Open") script))))
