@@ -21,6 +21,24 @@ Joyride includes a Language Model Tool that gives Copilot access to the scriptin
 >
 > If you don't want Copilot to have any access to the Joyride REPL tool, then disable it in settings: `joyride.lm.enableReplTool`.
 
+## Examples
+
+See the [examples](./examples) for examples including:
+
+* Workspace activation script
+* [Add a fuzzy git commit search and lookup menu](examples/.joyride/src/git_fuzzy.cljs)
+* Creating an interactive Webview
+* Using `npm` dependencies (The wonderful [posthtml-parser](https://github.com/posthtml/posthtml-parser) in this case)
+* [Contribute a File Explorer tree view and commands (and anything)](examples/.joyride/scripts/sidecar/README.md) by creating a Joyride Sidecar extension on the fly.
+* Terminal creation and control
+* Calva Structural Editing enhancements
+* Opening and showing project files
+* Fontsize manipulation
+* The Joyride Extension API
+* The `joyride.core` namespace
+* Using [clojure.zip](https://clojuredocs.org/clojure.zip)
+* Using [Hickory](https://github.com/clj-commons/hickory) (well, `hickory.select`, at least)
+
 ## User and Workspace scripts
 
 Joyride supports User and Workspace scripts:
@@ -192,23 +210,6 @@ The demo ”project” used here is only a directory with this file `hello_joyri
 
 "Hello World"
 ```
-
-## Examples
-
-See the [examples](./examples) for examples including:
-
-* Workspace activation script
-* Creating an interactive Webview
-* Using `npm` dependencies (The wonderful [posthtml-parser](https://github.com/posthtml/posthtml-parser) in this case)
-* [Contribute a File Explorer tree view and commands (and anything)](examples/.joyride/scripts/sidecar/README.md) by creating a Joyride Sidecar extension on the fly.
-* Terminal creation and control
-* Calva Structural Editing enhancements
-* Opening and showing project files
-* Fontsize manipulation
-* The Joyride Extension API
-* The `joyride.core` namespace
-* Using [clojure.zip](https://clojuredocs.org/clojure.zip)
-* Using [Hickory](https://github.com/clj-commons/hickory) (well, `hickory.select`, at least)
 
 ## How does this work?
 
