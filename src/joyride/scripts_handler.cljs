@@ -1,6 +1,7 @@
 (ns joyride.scripts-handler
   (:require ["path" :as path]
             ["vscode" :as vscode]
+            [clojure.string :as str]
             [joyride.config :as conf]
             [joyride.constants :as const]
             [joyride.db :as db]
@@ -306,6 +307,71 @@
                                                     :function create-hello-fn})
                         :always (into more-menu-items))}))
 
+(defn parse-namespace-and-filename
+  "Converts user input to namespace and file path.
+   Handles both namespace-style (my.lib) and path-style (my/lib) inputs.
+   Sanitizes dashes to underscores for file paths, dots to slashes (except final .cljs)"
+  [input]
+  (let [;; Remove .cljs extension if present to process the base name
+        base-name (if (.endsWith input ".cljs")
+                    (subs input 0 (- (count input) 5))
+                    input)
+        ;; Split on path separators and dots to get segments
+        segments (-> base-name
+                     (str/split #"[/\\.]"))
+        ;; Create namespace (dots between segments, dashes preserved)
+        namespace (str/join "." segments)
+        ;; Create file path (slashes between segments, dashes become underscores)
+        file-path-segments (map #(str/replace % "-" "_") segments)
+        file-path (str (path/join file-path-segments) ".cljs")]
+    {:namespace namespace
+     :file-path file-path}))
+
+(defn script-template
+  "Returns a script template with the given namespace"
+  [namespace]
+  (str "(ns " namespace "
+  (:require [\"vscode\" :as vscode]
+            [joyride.core :as joyride]
+            [promesa.core :as p]
+            :reload))
+
+(defn- main []
+  (println \"Hello World\"))
+
+(when (= (joyride/invoked-script) joyride/*file*)
+  (main))"))
+
+(defn src-template
+  "Returns a source file template with the given namespace"
+  [namespace]
+  (str "(ns " namespace ")"))
+
+(defn create-and-open-user-file+
+  "Creates a new user file (script or src) and opens it in the editor"
+  [file-type]
+  (p/let [input (vscode/window.showInputBox
+                 #js {:title (str "Create User " (str/capitalize (name file-type)) " File")
+                      :placeHolder (case file-type
+                                     :scripts "e.g., my-script, utils.helpers, or foo/bar"
+                                     :src "e.g., my-lib, utils.core, or helpers/string-utils")
+                      :prompt "Enter a namespace or file path (will add .cljs if needed)"})
+          {:keys [namespace file-path]} (parse-namespace-and-filename input)
+          template (case file-type
+                     :scripts (script-template namespace)
+                     :src (src-template namespace))
+          base-path (case file-type
+                      :scripts (conf/user-abs-scripts-path)
+                      :src (conf/user-abs-src-path))
+          full-path (path/join base-path file-path)
+          file-uri (vscode/Uri.file full-path)]
+    (when input
+      (p/do (vscode/workspace.fs.createDirectory (vscode/Uri.file (path/dirname full-path)))
+            (vscode/workspace.fs.writeFile file-uri (.encode (js/TextEncoder.) template))
+            (p/-> (vscode/workspace.openTextDocument file-uri)
+                  (vscode/window.showTextDocument
+                   #js {:preview false :preserveFocus false}))))))
+
 (defn run-workspace-script+
   ([]
    (apply run-script+
@@ -342,12 +408,22 @@
   ([script]
    (apply open-script+ (conj (run-or-open-workspace-script-args "Open") script))))
 
+(def create-user-script-menu-item
+  {:label (menu-label-with-icon "Create User Script..." "plus")
+   :function #(create-and-open-user-file+ :scripts)})
+
+(def create-user-src-file-menu-item
+  {:label (menu-label-with-icon "Create User Source File..." "plus")
+   :function #(create-and-open-user-file+ :src)})
+
 (defn open-user-script+
   ([]
    (handle-user-script-menu-selection+
     (user-scripts-and-src-menu-conf+ "Open User Script..."
                                      [run-user-script-menu-item
-                                      open-workspace-script-menu-item]
+                                      open-workspace-script-menu-item
+                                      create-user-script-menu-item
+                                      create-user-src-file-menu-item]
                                      getting-started/maybe-create-user-activate-script+
                                      getting-started/maybe-create-user-hello-script+)
     open-script+))
