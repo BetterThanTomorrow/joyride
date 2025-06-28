@@ -27,6 +27,8 @@
     (is (= true
            (path-exists-in-user-dir?+ "README.md")))
     (is (= true
+           (path-exists-in-user-dir?+ ".gitignore")))
+    (is (= true
            (path-exists-in-user-dir?+ ".joyride/scripts/workspace_activate.cljs")))
     (is (= true
            (path-exists-in-user-dir?+ ".github/copilot-instructions.md")))))
