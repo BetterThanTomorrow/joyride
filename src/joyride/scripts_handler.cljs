@@ -351,26 +351,28 @@
   "Creates a new user file (script or src) and opens it in the editor"
   [file-type]
   (p/let [input (vscode/window.showInputBox
-                 #js {:title (str "Create User " (str/capitalize (name file-type)) " File")
-                      :placeHolder (case file-type
-                                     :scripts "e.g., my-script, utils.helpers, or foo/bar"
-                                     :src "e.g., my-lib, utils.core, or helpers/string-utils")
-                      :prompt "Enter a namespace or file path (will add .cljs if needed)"})
-          {:keys [namespace file-path]} (parse-namespace-and-filename input)
-          template (case file-type
-                     :scripts (script-template namespace)
-                     :src (src-template namespace))
-          base-path (case file-type
-                      :scripts (conf/user-abs-scripts-path)
-                      :src (conf/user-abs-src-path))
-          full-path (path/join base-path file-path)
-          file-uri (vscode/Uri.file full-path)]
+                 #js {:title (str "Create User `" (name file-type) "/` File")
+                      :placeHolder "E.g. the-thing, or the_thing.cljs"
+                      :prompt (str "Enter a namespace or file path. Will be created in, and opeed from: `"
+                                   (case file-type
+                                     :scripts (conf/user-abs-scripts-path)
+                                     (conf/user-abs-src-path))
+                                   "/`.")})]
     (when input
-      (p/do (vscode/workspace.fs.createDirectory (vscode/Uri.file (path/dirname full-path)))
-            (vscode/workspace.fs.writeFile file-uri (.encode (js/TextEncoder.) template))
-            (p/-> (vscode/workspace.openTextDocument file-uri)
-                  (vscode/window.showTextDocument
-                   #js {:preview false :preserveFocus false}))))))
+      (let [{:keys [namespace file-path]} (parse-namespace-and-filename input)
+            template (case file-type
+                       :scripts (script-template namespace)
+                       (src-template namespace))
+            base-path (case file-type
+                        :scripts (conf/user-abs-scripts-path)
+                        (conf/user-abs-src-path))
+            full-path (path/join base-path file-path)
+            file-uri (vscode/Uri.file full-path)]
+        (p/do (vscode/workspace.fs.createDirectory (vscode/Uri.file (path/dirname full-path)))
+              (vscode/workspace.fs.writeFile file-uri (.encode (js/TextEncoder.) template))
+              (p/-> (vscode/workspace.openTextDocument file-uri)
+                    (vscode/window.showTextDocument
+                     #js {:preview false :preserveFocus false})))))))
 
 (defn run-workspace-script+
   ([]
