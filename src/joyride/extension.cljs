@@ -1,15 +1,17 @@
 (ns joyride.extension
-  (:require ["vscode" :as vscode]
-            [joyride.db :as db]
-            [joyride.getting-started :as getting-started]
-            [joyride.lifecycle :as life-cycle]
-            [joyride.lm-tool :as lm-tool]
-            [joyride.nrepl :as nrepl]
-            [joyride.sci :as jsci]
-            [joyride.scripts-handler :as scripts-handler]
-            [joyride.utils :as utils :refer [info jsify]]
-            [joyride.when-contexts :as when-contexts]
-            [promesa.core :as p]))
+  (:require
+   ["vscode" :as vscode]
+   [joyride.content-utils :as content-utils]
+   [joyride.db :as db]
+   [joyride.getting-started :as getting-started]
+   [joyride.lifecycle :as life-cycle]
+   [joyride.lm-tool :as lm-tool]
+   [joyride.nrepl :as nrepl]
+   [joyride.sci :as jsci]
+   [joyride.scripts-handler :as scripts-handler]
+   [joyride.utils :as utils :refer [info jsify]]
+   [joyride.when-contexts :as when-contexts]
+   [promesa.core :as p]))
 
 (defn- register-command! [^js context command-id var]
   (let [disposable (vscode/commands.registerCommand command-id var)]
@@ -87,6 +89,9 @@
     (register-command! extension-context "joyride.runUserScript" #'scripts-handler/run-user-script+)
     (register-command! extension-context "joyride.openWorkspaceScript" #'scripts-handler/open-workspace-script+)
     (register-command! extension-context "joyride.openUserScript" #'scripts-handler/open-user-script+)
+    (register-command! extension-context "joyride.createUserScript" #(scripts-handler/create-and-open-user-file+ :scripts))
+    (register-command! extension-context "joyride.createUserSourceFile" #(scripts-handler/create-and-open-user-file+ :src))
+    (register-command! extension-context "joyride.openUserDirectory" #'scripts-handler/open-user-joyride-directory+)
     (register-command! extension-context "joyride.createUserActivateScript" #'getting-started/maybe-create-user-activate-script+)
     (register-command! extension-context "joyride.createUserHelloScript" #'getting-started/maybe-create-user-hello-script+)
     (register-command! extension-context "joyride.createWorkspaceActivateScript" #'getting-started/maybe-create-workspace-activate-script+)
@@ -98,9 +103,7 @@
     (when-let [lm-disposable (lm-tool/register-tool!)]
       (swap! db/!app-db update :disposables conj lm-disposable)
       (.push (.-subscriptions ^js extension-context) lm-disposable))
-    (when context (-> (p/do
-                        (getting-started/maybe-create-user-readme+)
-                        (getting-started/update-script-contexts!))
+    (when context (-> (content-utils/maybe-create-user-project+)
                       (p/catch
                        (fn [e]
                          (js/console.error "Joyride activate error" e)))

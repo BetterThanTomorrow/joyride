@@ -101,6 +101,21 @@
         "category": "Joyride"
       },
       {
+        "command": "joyride.createUserScript",
+        "title": "Create User Script...",
+        "category": "Joyride"
+      },
+      {
+        "command": "joyride.createUserSourceFile",
+        "title": "Create User Source File...",
+        "category": "Joyride"
+      },
+      {
+        "command": "joyride.openUserDirectory",
+        "title": "Open User Joyride Directory in New Window",
+        "category": "Joyride"
+      },
+      {
         "command": "joyride.startNReplServer",
         "title": "Start nREPL Server",
         "category": "Joyride",
