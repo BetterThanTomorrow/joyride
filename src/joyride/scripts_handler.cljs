@@ -423,6 +423,22 @@
    :function #(create-and-open-user-file+ :src)
    :detail (str "Will be created in `" (conf/user-abs-src-path) "/`.")})
 
+
+(defn open-user-joyride-directory+
+  "Opens the user Joyride directory in a new VS Code window"
+  []
+  (-> (p/let [joyride-path (conf/user-abs-joyride-path)
+              joyride-uri (vscode/Uri.file joyride-path)]
+        (vscode/commands.executeCommand "vscode.openFolder" joyride-uri true))
+      (p/catch (fn [error]
+                 (binding [utils/*show-when-said?* true]
+                   (utils/say-error (str "Failed to open User Joyride directory: " (.-message error))))))))
+
+(def open-user-joyride-directory-menu-item
+  {:label (menu-label-with-icon "Open User Joyride Directory in New Window" "folder")
+   :function #'open-user-joyride-directory+
+   :detail (str "Opens `" (conf/user-abs-joyride-path) "/` in a new VS Code window.")})
+
 (defn run-user-script+
   ([]
    (apply run-script+
@@ -431,7 +447,8 @@
                             [open-user-script-menu-item
                              run-workspace-script-menu-item
                              create-user-script-menu-item
-                             create-user-src-file-menu-item]
+                             create-user-src-file-menu-item
+                             open-user-joyride-directory-menu-item]
                             getting-started/maybe-create-user-activate-script+
                             getting-started/maybe-create-user-hello-script+))))
   ([script]
@@ -444,7 +461,8 @@
                                      [run-user-script-menu-item
                                       open-workspace-script-menu-item
                                       create-user-script-menu-item
-                                      create-user-src-file-menu-item]
+                                      create-user-src-file-menu-item
+                                      open-user-joyride-directory-menu-item]
                                      getting-started/maybe-create-user-activate-script+
                                      getting-started/maybe-create-user-hello-script+)
     open-script+))
