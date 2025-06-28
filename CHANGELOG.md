@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.53] - 2025-06-28
+
 - Fix: [Activation fails because `.gitignore` is created as a directory](https://github.com/BetterThanTomorrow/joyride/issues/212)
 
 ## [0.0.52] - 2025-06-28
