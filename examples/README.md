@@ -25,7 +25,7 @@ A User [activate.cljs](../assets/getting-started-content/user/scripts/user_activ
 
 ### `workspace_activate.cljs`
 
-A Workspace [activate.cljs](.joyride/scripts/workspace_activate.cljs) script that registers a `vscode/workspace.onDidOpenTextDocument` event handler. Demonstrates:
+A Workspace [activate.cljs](../assets/getting-started-content/workspace/scripts/workspace_activate.cljs) script that registers a `vscode/workspace.onDidOpenTextDocument` event handler. Demonstrates:
 
 * Using the `joyride.core/extension-context` to push disposables on its `subscriptions` array. Making VS Code dispose of them when Joyride is deactivated.
 * A re-runnable recipe to avoid re-registering the event handler. (By disposing it and then re-register.)
@@ -86,7 +86,7 @@ Live demo: https://twitter.com/borkdude/status/1519709769157775360
 `.joyride/scripts/ignore_form.cljs`
 
 Adds a command for (un)ignoring (Clojure-wise) the current enclosing form.
-Depends on that the [Calva](calva.io) extension is installed, because it is what
+Depends on that the [Calva](https://calva.io) extension is installed, because it is what
 helps us find out of the current list in order to insert, or remove, the ignore
 tag (`#_`).
 
@@ -134,7 +134,7 @@ to for parsing, getting S-Expressions, as well as how to use syntax-quote for ea
 
 ## Toggle between interface and implementation when using [Polylith](https://polylith.gitbook.io/polylith)
 
-[.joyride/scripts/toggle_between_interface_and_impl.cljs.cljs](.joyride/scripts/toggle_between_interface_and_impl.cljs.cljs)
+[.joyride/scripts/toggle_between_interface_and_impl.cljs](.joyride/scripts/toggle_between_interface_and_impl.cljs)
 
 When using Polylith, you have interface files and implementation files in your
 components. This script helps you navigate between them: when you're in the
@@ -293,7 +293,7 @@ By adding the `:reload` option to the require, the JavaScript code is reloaded w
 You can use packages from `npm` in your Joyride scripts. There's an example of this, using [posthtml-parser](https://github.com/posthtml/posthtml-parser) in
 [html_to_hiccup.cljs](.joyride/scripts/html_to_hiccup.cljs)
 
-![assets/joyride-html2hiccup.png](../assets/joyride-html2hiccup.png)
+![assets/joyride-html2hiccup.png](assets/joyride-html2hiccup.png)
 
 To use a package from npm, Joyride needs to find it somewhere in the path from the using script and up to the system root. Some directories to consider for your Joyride `node_modules` are `~/.config/joyride` and `<workspace-root>/.joyride`. Sometimes the workspace root makes sense. To try this particular example you can:
 
