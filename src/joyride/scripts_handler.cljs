@@ -1,7 +1,6 @@
 (ns joyride.scripts-handler
   (:require ["path" :as path]
             ["vscode" :as vscode]
-            [clojure.string :as str]
             [joyride.config :as conf]
             [joyride.constants :as const]
             [joyride.db :as db]
@@ -9,7 +8,8 @@
             [joyride.sci :as jsci]
             [joyride.utils :as utils :refer [cljify jsify]]
             [promesa.core :as p]
-            [sci.core :as sci]))
+            [sci.core :as sci]
+            [clojure.string :as string]))
 
 (defn find-script-uris+
   "Returns a Promise that resolves to JS array of `vscode.Uri`s
@@ -307,30 +307,10 @@
                                                     :function create-hello-fn})
                         :always (into more-menu-items))}))
 
-(defn parse-namespace-and-filename
-  "Converts user input to namespace and file path.
-   Handles both namespace-style (my.lib) and path-style (my/lib) inputs.
-   Sanitizes dashes to underscores for file paths, dots to slashes (except final .cljs)"
-  [input]
-  (let [;; Remove .cljs extension if present to process the base name
-        base-name (if (.endsWith input ".cljs")
-                    (subs input 0 (- (count input) 5))
-                    input)
-        ;; Split on path separators and dots to get segments
-        segments (-> base-name
-                     (str/split #"[/\\.]"))
-        ;; Create namespace (dots between segments, dashes preserved)
-        namespace (str/join "." segments)
-        ;; Create file path (slashes between segments, dashes become underscores)
-        file-path-segments (map #(str/replace % "-" "_") segments)
-        file-path (str (path/join file-path-segments) ".cljs")]
-    {:namespace namespace
-     :file-path file-path}))
-
 (defn script-template
   "Returns a script template with the given namespace"
-  [namespace]
-  (str "(ns " namespace "
+  [the-ns]
+  (str "(ns " the-ns "
   (:require [\"vscode\" :as vscode]
             [joyride.core :as joyride]
             [promesa.core :as p]
@@ -344,8 +324,32 @@
 
 (defn src-template
   "Returns a source file template with the given namespace"
-  [namespace]
-  (str "(ns " namespace ")"))
+  [the-ns]
+  (str "(ns " the-ns ")"))
+
+(defn parse-namespace-and-filename
+  "Converts user input to namespace and file path.
+   Handles both namespace-style (my.lib) and path-style (my/lib) inputs.
+   Sanitizes dashes to underscores for file paths, dots to slashes (except final .cljs)"
+  [input]
+  (when-not (string/blank? input)
+    (let [;; Remove .cljs extension if present to process the base name
+          base-name (if (.endsWith input ".cljs")
+                      (subs input 0 (- (count input) 5))
+                      input)
+        ;; Split on path separators and dots to get segments
+          segments (-> base-name
+                       (string/split #"[/\\.]"))
+        ;; Create namespace (dots between segmen
+          the-ns (string/join "." segments)
+        ;; Create file path (slashes between segments, dashes become underscores)
+          file-path-segments (map #(string/replace % "-" "_") segments)
+          file-path (str (apply path/join file-path-segments) ".cljs")]
+      (if (and (seq segments)
+               (not (some string/blank? segments)))
+        {:the-ns the-ns
+         :file-path file-path}
+        (throw (ex-info (str "Invalid namespace or file path: `" input "`") input))))))
 
 (defn create-and-open-user-file+
   "Creates a new user file (script or src) and opens it in the editor"
@@ -358,11 +362,11 @@
                                      :scripts (conf/user-abs-scripts-path)
                                      (conf/user-abs-src-path))
                                    "/`.")})]
-    (when input
-      (let [{:keys [namespace file-path]} (parse-namespace-and-filename input)
+    (when-let [parsed (parse-namespace-and-filename input)]
+      (let [{:keys [the-ns file-path]} parsed
             template (case file-type
-                       :scripts (script-template namespace)
-                       (src-template namespace))
+                       :scripts (script-template the-ns)
+                       (src-template the-ns))
             base-path (case file-type
                         :scripts (conf/user-abs-scripts-path)
                         (conf/user-abs-src-path))
