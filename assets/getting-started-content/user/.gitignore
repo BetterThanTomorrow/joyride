@@ -1,0 +1,18 @@
+# npm
+node_modules
+
+# macos
+.DS_Store
+
+# Clojure
+.nrepl-port
+
+# Calva
+.calva/output-window/
+.calva/repl.calva-repl
+
+# clj-kondo, clojure-lsp
+.cache
+
+# Portal
+.portal/vs-code.edn

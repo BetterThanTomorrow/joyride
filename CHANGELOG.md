@@ -4,6 +4,9 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Add commands for creating user scripts](https://github.com/BetterThanTomorrow/joyride/issues/207)
+- [Add command for opening the User Joyride project](https://github.com/BetterThanTomorrow/joyride/issues/208)
+
 ## [0.0.51] - 2025-06-21
 
 - Addressing: [Copilot often misuses the `waitForFinalPromise` parameter](https://github.com/BetterThanTomorrow/joyride/issues/205)
