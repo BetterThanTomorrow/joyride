@@ -21,9 +21,15 @@
   :rcf)
 
 (deftest user-activate
-  (testing "No user joyride content is created"
-    (is (= false
-           (path-exists-in-user-dir?+ "deps.edn")))))
+  (testing "Default joyride content is created"
+    (is (= true
+           (path-exists-in-user-dir?+ "deps.edn")))
+    (is (= true
+           (path-exists-in-user-dir?+ "README.md")))
+    (is (= true
+           (path-exists-in-user-dir?+ ".joyride/scripts/workspace_activate.cljs")))
+    (is (= true
+           (path-exists-in-user-dir?+ ".github/copilot-instructions.md")))))
 
 (deftest ws-activate
   (testing "Workspace activation script defines a symbol"
