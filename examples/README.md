@@ -15,7 +15,7 @@ One for the Workspace and one on he User level:
 
 ### `user_activate.cljs`
 
-A User [activate.cljs](../assets/getting-started-content/user/scripts/user_activate.cljs) script that shows:
+A User [user_activate.cljs](../assets/getting-started-content/user/scripts/user_activate.cljs) script that shows:
 
 * How to write to, _and show_, the Joyride output channel.
 * A re-runnable recipe for registering VS Code disposables as with the Workspace `activate.cljs` example.
