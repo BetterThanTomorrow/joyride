@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.52] - 2025-06-28
+
 - [Add commands for creating user scripts](https://github.com/BetterThanTomorrow/joyride/issues/207)
 - [Add command for opening the User Joyride project](https://github.com/BetterThanTomorrow/joyride/issues/208)
 - [Make the default User scripts project a Getting Started experience](https://github.com/BetterThanTomorrow/joyride/issues/210)
