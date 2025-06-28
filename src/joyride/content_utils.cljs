@@ -59,9 +59,21 @@
   (maybe-create-content+ (default-content-uri ["user" "deps.edn"])
                          (utils/path->uri (conf/user-abs-joyride-path) ["deps.edn"])))
 
+(defn maybe-create-user-workspace-activate+ []
+  (maybe-create-content+ (default-content-uri ["user" ".joyride" "scripts" "workspace_activate.cljs"])
+                         (utils/path->uri (conf/user-abs-joyride-path) [".joyride" "scripts" "workspace_activate.cljs"])))
+
+(defn maybe-create-user-copilot-instructions+ []
+  (maybe-create-content+ (default-content-uri ["user" ".github" "copilot-instructions.md"])
+                         (utils/path->uri (conf/user-abs-joyride-path) [".github" "copilot-instructions.md"])))
+
+
 (defn maybe-create-user-project+ []
   (p/do
+    (vscode/workspace.fs.createDirectory (utils/path->uri (conf/user-abs-joyride-path) [".gitignore"]))
     (vscode/workspace.fs.createDirectory (utils/path->uri (conf/user-abs-joyride-path) ["sripts"]))
     (vscode/workspace.fs.createDirectory (utils/path->uri (conf/user-abs-joyride-path) ["src"]))
     (maybe-create-user-readme+)
-    (maybe-create-user-config+)))
+    (maybe-create-user-config+)
+    (maybe-create-user-workspace-activate+)
+    (maybe-create-user-copilot-instructions+)))
