@@ -401,18 +401,6 @@
   ([script]
    (apply run-script+ (conj (run-or-open-workspace-script-args "Run") script))))
 
-(defn run-user-script+
-  ([]
-   (apply run-script+
-          (run-or-open-user-script-args
-           (user-menu-conf+ "Run User Script..."
-                            [open-user-script-menu-item
-                             run-workspace-script-menu-item]
-                            getting-started/maybe-create-user-activate-script+
-                            getting-started/maybe-create-user-hello-script+))))
-  ([script]
-   (apply run-script+ (conj (run-or-open-user-script-args "Run") script))))
-
 (defn open-workspace-script+
   ([]
    (apply open-script+
@@ -427,11 +415,27 @@
 
 (def create-user-script-menu-item
   {:label (menu-label-with-icon "Create User Script..." "plus")
-   :function #(create-and-open-user-file+ :scripts)})
+   :function #(create-and-open-user-file+ :scripts)
+   :detail (str "Scripts can be run with the **Run User Script** command. Will be created in `" (conf/user-abs-scripts-path) "/`.")})
 
 (def create-user-src-file-menu-item
   {:label (menu-label-with-icon "Create User Source File..." "plus")
-   :function #(create-and-open-user-file+ :src)})
+   :function #(create-and-open-user-file+ :src)
+   :detail (str "Will be created in `" (conf/user-abs-src-path) "/`.")})
+
+(defn run-user-script+
+  ([]
+   (apply run-script+
+          (run-or-open-user-script-args
+           (user-menu-conf+ "Run User Script..."
+                            [open-user-script-menu-item
+                             run-workspace-script-menu-item
+                             create-user-script-menu-item
+                             create-user-src-file-menu-item]
+                            getting-started/maybe-create-user-activate-script+
+                            getting-started/maybe-create-user-hello-script+))))
+  ([script]
+   (apply run-script+ (conj (run-or-open-user-script-args "Run") script))))
 
 (defn open-user-script+
   ([]
