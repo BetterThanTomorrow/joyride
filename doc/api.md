@@ -105,9 +105,9 @@ Look at the [Activation example](../examples/.joyride/scripts/activate.cljs) scr
 
 ### NPM modules
 
-To use npm modules these need to be installed in the path somewhere in the path from where the script using it resides, to the root of the filessystem. Consider using `<user-home>/.config/joyride` and `<ws-root>/.joyride`. (`yarn` or `npm i` both work, Joyride doesn't care, it looks for stuff in `node_modules`).
+To use npm modules these need to be installed in the path somewhere in the path from where the script using it resides, to the root of the filesystem. Consider using `<user-home>/.config/joyride` and `<ws-root>/.joyride`. (`yarn` or `npm i` both work, Joyride doesn't care, it looks for stuff in `node_modules`).
 
-See [examples/.joyride/scripts/html_to_hiccup.cljs](examples/.joyride/scripts/html_to_hiccup.cljs) for an example.
+See [examples/.joyride/scripts/html_to_hiccup.cljs](../examples/.joyride/scripts/html_to_hiccup.cljs) for an example.
 
 The modules you use need to be in CommonJS format.
 
@@ -157,7 +157,7 @@ Do this instead:
 
 The latter should not be instantiated. Just be used wherever an instance is expected.
 
-See [examples/.joyride/src/problem_hover.cljs](examples/.joyride/src/problem_hover.cljs) for an example. (Used from the [user_activate.cljs template](assets/getting-started-content/user/user_activate.cljs))
+See [examples/.joyride/src/problem_hover.cljs](../examples/.joyride/src/problem_hover.cljs) for an example. (Used from the [user_activate.cljs template](../assets/getting-started-content/user/scripts/user_activate.cljs))
 
 ### ClojureScript Namespaces
 

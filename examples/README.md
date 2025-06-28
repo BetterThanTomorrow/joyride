@@ -15,7 +15,7 @@ One for the Workspace and one on he User level:
 
 ### `user_activate.cljs`
 
-A User [activate.cljs](../assets/getting-started-content/user/user_activate.cljs) script that shows:
+A User [activate.cljs](../assets/getting-started-content/user/scripts/user_activate.cljs) script that shows:
 
 * How to write to, _and show_, the Joyride output channel.
 * A re-runnable recipe for registering VS Code disposables as with the Workspace `activate.cljs` example.
@@ -25,7 +25,7 @@ A User [activate.cljs](../assets/getting-started-content/user/user_activate.cljs
 
 ### `workspace_activate.cljs`
 
-A Workspace [activate.cljs](../examples/.joyride/scripts/workspace_activate.cljs) script that registers a `vscode/workspace.onDidOpenTextDocument` event handler. Demonstrates:
+A Workspace [activate.cljs](.joyride/scripts/workspace_activate.cljs) script that registers a `vscode/workspace.onDidOpenTextDocument` event handler. Demonstrates:
 
 * Using the `joyride.core/extension-context` to push disposables on its `subscriptions` array. Making VS Code dispose of them when Joyride is deactivated.
 * A re-runnable recipe to avoid re-registering the event handler. (By disposing it and then re-register.)
@@ -51,7 +51,7 @@ Source, including some usage info: [examples/.joyride/scripts/js_repl.cljs](.joy
 
 ## Create a Hover Provider
 
-In [examples/.joyride/src/problem_hover.cljs](../examples/.joyride/src/problem_hover.cljs) there's a Hover Provider which can be activated from the template [user_activate.cljs](#user_activatecljs). It creates an extra Diagnostics item in the hover. It is registered after a significant delay (5 seconds) to make sure this hover item goes at the very top of the hover. Looks like so:
+In [examples/.joyride/src/problem_hover.cljs](.joyride/src/problem_hover.cljs) there's a Hover Provider which can be activated from the template [user_activate.cljs](#user_activatecljs). It creates an extra Diagnostics item in the hover. It is registered after a significant delay (5 seconds) to make sure this hover item goes at the very top of the hover. Looks like so:
 
 ![image](https://user-images.githubusercontent.com/30010/209091150-65b139f7-83be-44d6-9099-d0aa1ed6afd4.png)
 
@@ -211,7 +211,7 @@ If you require that script in your [User activation.cljs](#user_activatecljs), y
     }
 ```
 
-Note that Calva has several facilites for looking up things in Clojuredocs, but if you like to have it in an inline browser view, you can have it with this script.
+Note that Calva has several facilities for looking up things in Clojuredocs, but if you like to have it in an inline browser view, you can have it with this script.
 
 ### Find-in-file with regexp toggled on
 
@@ -301,12 +301,12 @@ To use a package from npm, Joyride needs to find it somewhere in the path from t
 1. `$ cd joyride/examples`
 2. `$ npm init -y`
 3. `$ npm i`
-4. `code exmaples`
+4. `code examples`
 5. Issue the command: **Calva: Start a Joyride REPL and Connect**
 6. Open `.joyride/scripts/html_to_hiccup.cljs` and **Calva: Load/Evaluate Current File**
 7. Place the cursor somewhere in the `(-> ...)` form and **Calva: Evaluate Top Level Form**
 
-This example also uses [clojure.walk](https://clojuredocs.org/clojure.walk/postwalk). ([Somewhat unecessary according to some](https://twitter.com/borkdude/status/1581022161082322944), but there certainly are occations when it can be put to great use.)
+This example also uses [clojure.walk](https://clojuredocs.org/clojure.walk/postwalk). ([Somewhat unnecessary according to some](https://twitter.com/borkdude/status/1581022161082322944), but there certainly are occasions when it can be put to great use.)
 
 ### clojure.zip
 
