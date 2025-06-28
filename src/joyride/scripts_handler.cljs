@@ -351,6 +351,16 @@
          :file-path file-path}
         (throw (ex-info (str "Invalid namespace or file path: `" input "`") input))))))
 
+(defn create-file-safely+
+  "Creates a file only if it doesn't already exist.
+   Returns a Promise that rejects if the file already exists."
+  [^js file-uri content]
+  (p/let [exists? (utils/path-or-uri-exists?+ file-uri)]
+    (if exists?
+      (p/rejected (ex-info (str "File already exists: " (.-fsPath file-uri))
+                           {:file-path (.-fsPath file-uri)}))
+      (vscode/workspace.fs.writeFile file-uri (.encode (js/TextEncoder.) content)))))
+
 (defn create-and-open-user-file+
   "Creates a new user file (script or src) and opens it in the editor"
   [file-type]
@@ -372,11 +382,12 @@
                         (conf/user-abs-src-path))
             full-path (path/join base-path file-path)
             file-uri (vscode/Uri.file full-path)]
-        (p/do (vscode/workspace.fs.createDirectory (vscode/Uri.file (path/dirname full-path)))
-              (vscode/workspace.fs.writeFile file-uri (.encode (js/TextEncoder.) template))
-              (p/-> (vscode/workspace.openTextDocument file-uri)
-                    (vscode/window.showTextDocument
-                     #js {:preview false :preserveFocus false})))))))
+        (p/-> (p/do (vscode/workspace.fs.createDirectory (vscode/Uri.file (path/dirname full-path)))
+                    (create-file-safely+ file-uri template))
+              (p/then (fn [_]
+                        (p/-> (vscode/workspace.openTextDocument file-uri)
+                              (vscode/window.showTextDocument
+                               #js {:preview false :preserveFocus false})))))))))
 
 (defn run-workspace-script+
   ([]
