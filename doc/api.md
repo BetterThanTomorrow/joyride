@@ -96,12 +96,12 @@ The first file found will be used.
 
 ### Scripting lifecycle
 
-You can make some code run when Joyride activates, by naming the scripts `activate.cljs`. The activations script will be run in the order:
+You can make some code run when Joyride activates. The activations script will be run in the order:
 
-1. `<User scripts directory>/activate.cljs`
-1. `<Workspace scripts directory>/activate.cljs`
+1. `<User scripts directory>/user_activate.cljs`
+1. `<Workspace scripts directory>/workspace_activate.cljs`
 
-Look at the [Activation example](../examples/.joyride/scripts/activate.cljs) script for a way to use this, and for a way to make the script re-runnable.
+Look at the [Activation example](../examples/.joyride/scripts/workspace_activate.cljs) script for a way to use this, and for a way to make the script re-runnable.
 
 ### NPM modules
 
