@@ -210,6 +210,21 @@
             "code"
           ]
         }
+      },
+      {
+        "name": "joyride_basics_for_agents",
+        "when": "config.joyride.lm.enableReplTool",
+        "displayName": "Get Joyride for Agents Guide",
+        "modelDescription": "Retrieve the latest Joyride guide for LLM agents, providing context on how to use Joyride's evaluation capabilities effectively.",
+        "userDescription": "Gives the agent documentation about Joyride",
+        "canBeReferencedInPrompt": true,
+        "toolReferenceName": "joyride-basics-for-agents",
+        "icon": "$(book)",
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "required": []
+        }
       }
     ]
   },

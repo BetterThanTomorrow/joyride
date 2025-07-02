@@ -5,7 +5,7 @@
    [joyride.db :as db]
    [joyride.getting-started :as getting-started]
    [joyride.lifecycle :as life-cycle]
-   [joyride.lm-tool :as lm-tool]
+   [joyride.lm :as lm]
    [joyride.nrepl :as nrepl]
    [joyride.sci :as jsci]
    [joyride.scripts-handler :as scripts-handler]
@@ -99,8 +99,8 @@
     (register-command! extension-context "joyride.startNReplServer" #'start-nrepl-server+)
     (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server+)    (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
     (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)    (when-contexts/set-context! ::when-contexts/joyride.isActive true)
-      ;; Register Language Model Tool
-    (when-let [lm-disposable (lm-tool/register-tool!)]
+      ;; Register Language Model Tools
+    (doseq [lm-disposable (lm/register-tools!)]
       (swap! db/!app-db update :disposables conj lm-disposable)
       (.push (.-subscriptions ^js extension-context) lm-disposable))
     (when context (-> (content-utils/maybe-create-user-project+)

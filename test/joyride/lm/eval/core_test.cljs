@@ -1,8 +1,8 @@
-(ns joyride.lm-tool.core-test
-  "Tests for LM tool core functionality"
+(ns joyride.lm.eval.core-test
+  "Tests for LM evaluation tool core functionality"
   (:require [cljs.test :refer [deftest is testing]]
             [clojure.string :as string]
-            [joyride.lm-tool.core :as core]))
+            [joyride.lm.eval.core :as core]))
 
 (deftest test-format-confirmation-message
   (testing "Confirmation message formatting returns structured data"
