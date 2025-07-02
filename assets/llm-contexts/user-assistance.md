@@ -180,6 +180,25 @@ Users can create scripts that run automatically when Joyride starts:
     (vscode/window.showInformationMessage (str "You entered: " result))))
 ```
 
+### Async REPL Development Pattern
+Since Joyride doesn't support top-level await, use this pattern for interactive development:
+
+```clojure
+(comment
+  ;; Pattern for unwrapping async results in REPL
+  (p/let [environments (-> (vscode/extensions.getExtension "ms-python.python")
+                           .-exports
+                           .-environments
+                           .-known)]
+    (def environments environments))
+  ;; Now `environments` can be evaluated as unwrapped data in the REPL
+
+  ;; Another example with VS Code API
+  (p/let [choice (vscode/window.showQuickPick #js ["Option 1" "Option 2"])]
+    (def choice choice))
+  ;; Now inspect `choice` directly
+  )
+
 ## User Development Workflow
 
 ### REPL-Driven Development
