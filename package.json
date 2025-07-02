@@ -195,7 +195,7 @@
           "properties": {
             "code": {
               "type": "string",
-              "description": "Joyride code to evaluate. Joyride is scripted with SCI ClojureScript within the VS Code Extension Host environment. Patterns examples: `(require '[\"vscode\" :as vscode])`, `(vscode/window.showInformationMessage \"Hello!\")`, `(vscode/workspace.getConfiguration \"setting\")`. **Classpath**:  When resolving namespaces, Joyride searches for source files in: 1. `<workspace-root>/.joyride/src` 2. `<workspace-root>/.joyride/scripts` 3. `<user-home>/.config/joyride/src` 4. `<user-home>/.config/joyride/scripts`"
+              "description": "Joyride code to evaluate. Joyride is scripted with SCI ClojureScript within the VS Code Extension Host environment. Use the `joyride-basics-for-agents` to familiarize yourself with Joyride. Patterns examples: `(require '[\"vscode\" :as vscode])`, `(vscode/window.showInformationMessage \"Hello!\")`, `(vscode/workspace.getConfiguration \"setting\")`. **Classpath**:  When resolving namespaces, Joyride searches for source files in: 1. `<workspace-root>/.joyride/src` 2. `<workspace-root>/.joyride/scripts` 3. `<user-home>/.config/joyride/src` 4. `<user-home>/.config/joyride/scripts`"
             },
             "namespace": {
               "type": "string",
