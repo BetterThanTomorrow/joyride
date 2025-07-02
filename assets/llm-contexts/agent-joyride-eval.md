@@ -21,10 +21,17 @@ The evaluation tool has an `awaitResult` parameter for handling async operations
 - **`awaitResult: true`**: Waits for async operations to complete before returning results
 
 **When to use `awaitResult: true`:**
-- User input dialogs (`showInputBox`, `showQuickPick`)
-- File operations (`findFiles`, `readFile`)
-- Extension API calls that return promises
-- Any operation where you need the actual result
+- User input dialogs where you need the response (`showInputBox`, `showQuickPick`)
+- File operations where you need the results (`findFiles`, `readFile`)
+- Extension API calls that return data you need to inspect
+- Information messages with buttons where you need to know which was clicked
+- Any operation where you need the actual resolved value for further processing
+
+**When to use `awaitResult: false` (default):**
+- Fire-and-forget operations like simple information messages
+- Side-effect operations where you don't need the return value
+- Synchronous operations (most inspection/read operations)
+- When you want non-blocking behavior
 
 **Example with awaitResult:**
 ```clojure
@@ -127,15 +134,24 @@ joyride/user-joyride-dir          ; User joyride directory
     (def found-files files))
   ;; Now inspect `found-files` directly
 
-  ;; Test user interactions
+  ;; Test user interactions (use awaitResult: true)
   (p/let [input (vscode/window.showInputBox #js {:prompt "Enter value:"})]
     (def user-input input))
   ;; Now `user-input` contains the result
   )
 
-;; In actual scripts, use standard promise chains:
+;; Fire-and-forget: Show message and continue (awaitResult: false)
 (p/let [files (vscode/workspace.findFiles "**/*.cljs")]
   (vscode/window.showInformationMessage (str "Found " (count files) " files")))
+
+;; Wait for user response: Get which button was clicked (awaitResult: true)
+(p/let [files (vscode/workspace.findFiles "**/*.cljs")
+        choice (vscode/window.showInformationMessage
+                 (str "Found " (count files) " files")
+                 "Open First" "Cancel")]
+  (when (= choice "Open First")
+    ;; Do something with first file
+    ))
 ```
 
 ### Error Handling
