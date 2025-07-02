@@ -1,0 +1,20 @@
+{
+  "settings": {
+    "title": "Joyride",
+    "project": "/betterthantomorrow/joyride",
+    "description": "Making VS Code Hackable like Emacs since 2022",
+    "docsRepoUrl": "https://github.com/betterthantomorrow/joyride",
+    "folders": [
+      "doc",
+      "examples"
+    ],
+    "excludeFolders": [],
+    "excludeFiles": [
+      "doc/PROJECT_SUMMARY.md"
+    ],
+    "branch": "master",
+    "stars": 501,
+    "trustScore": 10,
+    "type": "repo"
+  }
+}
