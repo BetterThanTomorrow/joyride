@@ -17,7 +17,7 @@
    #js [(vscode/LanguageModelTextPart.
          (str "**Error:** " error-message))]))
 
-(defn read-local-file
+(defn read-extension-file
   "Read a file from the extension directory.
    Returns a promise that resolves to the file content as string."
   [app-db-state file-path]
@@ -28,7 +28,7 @@
              extension-path (when extension-context
                               (str (.-extensionPath ^js extension-context) "/" file-path))]
          (if extension-path
-           (-> js/vscode .-workspace 
+           (-> js/vscode .-workspace
                (.openTextDocument extension-path)
                (.then #(resolve (-> ^js % .-getText)))
                (.catch #(reject %)))

@@ -7,10 +7,10 @@
    [promesa.core :as p]))
 
 ;; Constants
-(def ^:private GITHUB_AGENT_GUIDE_URL
+(def ^:private GITHUB-AGENT-GUIDE-URL
   "https://raw.githubusercontent.com/BetterThanTomorrow/joyride/refs/heads/master/assets/llm-contexts/agent-joyride-eval.md")
 
-(def ^:private LOCAL_AGENT_GUIDE_PATH
+(def ^:private LOCAL-AGENT-GUIDE-PATH
   "assets/llm-contexts/agent-joyride-eval.md")
 
 (defn- fetch-agent-guide
@@ -22,45 +22,36 @@
         controller (js/AbortController.)
         signal (.-signal controller)
         timeout-id (js/setTimeout #(.abort controller) timeout-ms)]
-    (-> (p/create
-         (fn [resolve _reject]
-           (-> (js/fetch GITHUB_AGENT_GUIDE_URL #js {:signal signal})
-               (.then
-                (fn [response]
-                  (js/clearTimeout timeout-id)
-                  (if (.-ok response)
-                    (.text response)
-                    (throw (js/Error. (str "GitHub fetch failed: " (.-status response)))))))
-               (.then
-                (fn [text]
-                  (resolve {:type "success"
-                            :content text
-                            :source "github"})))
-               (.catch
-                (fn [error]
-                  (js/console.warn "Failed to fetch agent guide from GitHub" (.-message error))
-                  (-> (core/read-local-file @db/!app-db LOCAL_AGENT_GUIDE_PATH)
-                      (.then
-                       (fn [text]
-                         (resolve {:type "success"
-                                   :content text
-                                   :source "local"})))
-                      (.catch
-                       (fn [error]
-                         (js/console.error "Failed to read local agent guide" (.-message error))
-                         (resolve {:type "error"
-                                   :message "Failed to fetch agent guide from both GitHub and local extension"})))))))))
+    (-> (p/let [response (js/fetch GITHUB-AGENT-GUIDE-URL #js {:signal signal})
+                _ (js/clearTimeout timeout-id)
+                _ (when-not (.-ok response)
+                    (throw (js/Error. (str "GitHub fetch failed: " (.-status response)))))
+                text (.text response)]
+          {:type "success"
+           :content text
+           :source "github"})
+        (p/catch
+         (fn [error]
+           (js/console.warn "Failed to fetch agent guide from GitHub" (.-message error))
+           (p/let [text (core/read-extension-file @db/!app-db LOCAL-AGENT-GUIDE-PATH)]
+             {:type "success"
+              :content text
+              :source "local"})))
+        (p/catch
+         (fn [error]
+           (js/console.error "Failed to read local agent guide" (.-message error))
+           {:type "error"
+            :message "Failed to fetch agent guide from both GitHub and local extension"}))
         ;; Add timeout cancellation to avoid hanging
         (p/finally (fn [] (js/clearTimeout timeout-id))))))
 
 (defn handle-basics-for-agents
   "Handle joyride_basics_for_agents tool requests"
   [_options _token]
-  (-> (fetch-agent-guide)
-      (.then (fn [result]
-               (if (= (:type result) "success")
-                 (core/create-success-result (:content result))
-                 (core/create-error-result (:message result)))))))
+  (p/let [result (fetch-agent-guide)]
+    (if (= (:type result) "success")
+      (core/create-success-result (:content result))
+      (core/create-error-result (:message result)))))
 
 (defn register-tool!
   "Register the Joyride Basics for Agents tool with VS Code's Language Model API.
