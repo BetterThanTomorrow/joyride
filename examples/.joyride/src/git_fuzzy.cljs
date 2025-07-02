@@ -6,11 +6,11 @@
 
 ;; “Install” by by placing this script in ~/.config/joyride/src
 ;; and add something like this to your keybindings.json
-  ;; {
-  ;;   "key": "ctrl+alt+j ctrl+alt+g",
-  ;;   "command": "joyride.runCode",
-  ;;   "args": "(require '[git-fuzzy :as gz] :reload) (gz/show-git-history!+)"
-  ;; },
+;; {
+;;   "key": "ctrl+alt+j ctrl+alt+g",
+;;   "command": "joyride.runCode",
+;;   "args": "(require '[git-fuzzy :as gz] :reload) (gz/show-git-history!+)"
+;; },
 
 ;; vscode.git API
 ;; https://github.com/Microsoft/vscode/blob/main/extensions/git/src/api/git.d.ts
@@ -48,12 +48,11 @@
         formatted-date (when commit-date
                          (.toUTCString commit-date))
         file-uri (.-uri file-change)
-        file-path (vscode/workspace.asRelativePath file-uri)
-        status (.-status file-change)]
+        file-path (vscode/workspace.asRelativePath file-uri)]
     #js {:label message
-         :iconPath (vscode/ThemeIcon. "file")
-         :description (str file-path)
-         :detail (str "$(git-commit) " short-hash " - " author-name " - " formatted-date " Status: " status)
+         :iconPath (vscode/ThemeIcon. "git-commit")
+         :description (str "$(file) " file-path)
+         :detail (str short-hash " - " author-name " - " formatted-date)
          :commit commit
          :fileChange file-change
          :fileUri file-uri
