@@ -423,7 +423,6 @@
    :function #(create-and-open-user-file+ :src)
    :detail (str "Will be created in `" (conf/user-abs-src-path) "/`.")})
 
-
 (defn open-user-joyride-directory+
   "Opens the user Joyride directory in a new VS Code window"
   []

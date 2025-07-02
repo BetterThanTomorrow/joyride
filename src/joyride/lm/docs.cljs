@@ -53,7 +53,7 @@
   [extension-context]
   (try
     (let [tool-impl #js {:extensionContext extension-context
-                          :invoke handle-basics-for-agents}
+                         :invoke handle-basics-for-agents}
           disposable (vscode/lm.registerTool "joyride_basics_for_agents" tool-impl)]
       (js/console.log "Joyride Basics for Agents LM Tool registered successfully")
       disposable)
