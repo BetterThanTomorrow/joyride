@@ -108,7 +108,7 @@ Create the file `.joyride/scripts/example/write_a_file.cljs`:
 
 ### Using JavaScript
 
-You can use both JavaScript and ClojureScript with Joyride. However, you will only get to enjoy Interactive Programming using ClojureScript. Also the JavaScript support in Joyride is new and not yet fully at par with the ClojureScript support. It's even fair to say that the JavaScript support is experimental. With Copilot support you probably do not need it. Copilot knows CLojureScript and is a great tutor.
+You can use both JavaScript and ClojureScript with Joyride. However, Also the JavaScript support in Joyride is experimental and not at par with the ClojureScript support. Plus... you will only get to enjoy Interactive Programming using ClojureScript.
 
 Still want to use JavaScript? Create the file `.joyride/scripts/example/write-a-file.js`:
 
