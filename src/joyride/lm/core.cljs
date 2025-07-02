@@ -20,17 +20,7 @@
 (defn read-extension-file
   "Read a file from the extension directory.
    Returns a promise that resolves to the file content as string."
-  [extension-context file-path]
-  (p/create
-   (fn [resolve reject]
-     (try
-       (let [extension-path (when extension-context
-                              (str (.-extensionPath ^js extension-context) "/" file-path))]
-         (if extension-path
-           (-> js/vscode .-workspace
-               (.openTextDocument extension-path)
-               (.then #(resolve (-> ^js % .-getText)))
-               (.catch #(reject %)))
-           (reject (js/Error. "Extension context not available"))))
-       (catch js/Error e
-         (reject e))))))
+  [^js extension-context file-path]
+  (p/let [extension-path (str (.-extensionPath extension-context) "/" file-path)
+          ^js doc (vscode/workspace.openTextDocument extension-path)]
+    (.getText doc)))

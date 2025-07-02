@@ -10,7 +10,7 @@
   [extension-context]
   (try
     (let [eval-disposable (eval/register-tool!)
-          docs-disposable (docs/register-tool! extension-context)]
+          docs-disposable (docs/register-tool! extension-context "joyride_basics_for_agents" docs/agent-guide-path)]
       (js/console.log "Joyride LM Tools registered successfully")
       [eval-disposable docs-disposable])
     (catch js/Error e
