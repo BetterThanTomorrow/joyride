@@ -14,6 +14,26 @@ Joyride provides a Language Model Tool that allows agents to execute ClojureScri
 - **APIs Available**: Complete VS Code API + Extension APIs
 - **Execution Mode**: Synchronous and asynchronous support
 
+### Async Operation Handling
+The evaluation tool has an `awaitResult` parameter for handling async operations:
+
+- **`awaitResult: false` (default)**: Returns immediately, suitable for synchronous operations, or fire-and-forget asynch evaluations.
+- **`awaitResult: true`**: Waits for async operations to complete before returning results
+
+**When to use `awaitResult: true`:**
+- User input dialogs (`showInputBox`, `showQuickPick`)
+- File operations (`findFiles`, `readFile`)
+- Extension API calls that return promises
+- Any operation where you need the actual result
+
+**Example with awaitResult:**
+```clojure
+;; This will wait for user input and return the actual result
+(require '["vscode" :as vscode])
+(vscode/window.showInputBox #js {:prompt "Enter your name:"})
+;; Use awaitResult: true to get the actual input value
+```
+
 ### What You Can Do
 1. **Test code snippets** before suggesting them to users
 2. **Inspect VS Code state** (open files, workspace, configuration)
@@ -25,7 +45,7 @@ Joyride provides a Language Model Tool that allows agents to execute ClojureScri
 
 ### VS Code API Access
 ```clojure
-["vscode" :as vscode]
+(require '["vscode" :as vscode])
 
 ;; Common inspection patterns
 (-> vscode/window.activeTextEditor .-document .-fileName)
@@ -35,7 +55,7 @@ Joyride provides a Language Model Tool that allows agents to execute ClojureScri
 
 ### Joyride Core API
 ```clojure
-[joyride.core :as joyride]
+(require '[joyride.core :as joyride])
 
 ;; Essential functions for agents:
 joyride/*file*                    ; Current file path
@@ -46,6 +66,8 @@ joyride/user-joyride-dir          ; User joyride directory
 
 ### Extension APIs
 ```clojure
+(require '["vscode" :as vscode])
+
 ;; Better approach - get extension and check if active
 (when-let [ext (vscode/extensions.getExtension "ms-python.python")]
   (when (.-isActive ext)
@@ -66,6 +88,8 @@ joyride/user-joyride-dir          ; User joyride directory
 
 ### Environment Inspection
 ```clojure
+(require '["vscode" :as vscode])
+
 ;; Check what's currently open
 (when-let [editor vscode/window.activeTextEditor]
   {:file (.-fileName (.-document editor))
@@ -82,6 +106,8 @@ joyride/user-joyride-dir          ; User joyride directory
 
 ### Testing File Operations
 ```clojure
+(require '["vscode" :as vscode])
+
 ;; Safe file reading
 (when-let [folders vscode/workspace.workspaceFolders]
   (let [root-path (-> folders first .-uri .-fsPath)]
@@ -91,11 +117,25 @@ joyride/user-joyride-dir          ; User joyride directory
 
 ### Promise Handling
 ```clojure
-[promesa.core :as p]
+(require '[promesa.core :as p])
+(require '["vscode" :as vscode])
 
-;; Always use p/let for async operations
+;; For testing async operations in evaluation tool, use this pattern:
+(comment
+  ;; Pattern for unwrapping async results when exploring
+  (p/let [files (vscode/workspace.findFiles "**/*.cljs")]
+    (def found-files files))
+  ;; Now inspect `found-files` directly
+
+  ;; Test user interactions
+  (p/let [input (vscode/window.showInputBox #js {:prompt "Enter value:"})]
+    (def user-input input))
+  ;; Now `user-input` contains the result
+  )
+
+;; In actual scripts, use standard promise chains:
 (p/let [files (vscode/workspace.findFiles "**/*.cljs")]
-  (count files))
+  (vscode/window.showInformationMessage (str "Found " (count files) " files")))
 ```
 
 ### Error Handling
@@ -168,6 +208,8 @@ joyride/user-joyride-dir          ; User joyride directory
 
 ### Workspace Analysis
 ```clojure
+(require '["vscode" :as vscode])
+
 ;; Get workspace overview
 {:folders (map #(.-fsPath (.-uri %)) vscode/workspace.workspaceFolders)
  :active-file (when-let [editor vscode/window.activeTextEditor]
@@ -178,6 +220,8 @@ joyride/user-joyride-dir          ; User joyride directory
 
 ### Extension Availability Check
 ```clojure
+(require '["vscode" :as vscode])
+
 ;; Check if extension is available before using
 (when-let [ext (vscode/extensions.getExtension "ms-python.python")]
   (when (.-isActive ext)
@@ -189,6 +233,8 @@ joyride/user-joyride-dir          ; User joyride directory
 
 ### Configuration Inspection
 ```clojure
+(require '["vscode" :as vscode])
+
 ;; Get current editor configuration
 (let [config (vscode/workspace.getConfiguration "editor")]
   {:font-size (.get config "fontSize")
@@ -209,6 +255,8 @@ joyride/user-joyride-dir          ; User joyride directory
 
 ### Validation Before Action
 ```clojure
+(require '["vscode" :as vscode])
+
 ;; Always check preconditions
 (cond
   (not vscode/window.activeTextEditor)
@@ -228,5 +276,12 @@ joyride/user-joyride-dir          ; User joyride directory
 3. **Validate Continuously**: Check that each step works before proceeding
 4. **Provide Context**: Include inspection results when suggesting solutions
 5. **Handle Edge Cases**: Test with empty workspaces, no active files, etc.
+
+## Important Notes for Agents
+
+- **Promise Results**: In the evaluation tool, async operations may not return results in the same way as in a full REPL. Use `awaitResult: true` when you need the actual async result.
+- **awaitResult Usage**: Set `awaitResult: true` for user interactions, file operations, and any async calls where you need the resolved value. Use `awaitResult: false` (default) for synchronous operations to avoid blocking.
+- **Error Handling**: JS property access that doesn't exist returns `nil` rather than throwing errors in many cases.
+- **Extension Timing**: Always check if extensions are loaded and active before accessing their APIs.
 
 This evaluation tool enables you to provide tested, working solutions rather than theoretical code suggestions.
