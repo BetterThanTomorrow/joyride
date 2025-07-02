@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Give the AI agent a tool for learning the basics about Joyride](https://github.com/BetterThanTomorrow/joyride/issues/214)
+
 ## [0.0.53] - 2025-06-28
 
 - Fix: [Activation fails because `.gitignore` is created as a directory](https://github.com/BetterThanTomorrow/joyride/issues/212)
