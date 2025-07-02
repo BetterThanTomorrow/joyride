@@ -8,22 +8,66 @@ Joyride makes VS Code scriptable using ClojureScript and the Small Clojure Inter
 
 ## User Script Types and Organization
 
-### Script Locations
+### Important Distinction: Scripts vs Source Files
 
-**User Scripts (Global)**
-- Location: `<user-home>/.config/joyride/scripts`
-- Scope: Available across all VS Code workspaces
-- Use for: Personal customizations, global utilities
+**Joyride Scripts** - Files in `scripts/` directories:
+- **Purpose**: Runnable files that appear in `Joyride: Run User Script` and `Joyride: Run Workspace Script` menus
+- **Location**: `<user-home>/.config/joyride/scripts` or `<workspace-root>/.joyride/scripts`
+- **Usage**: Choose this when you want something directly runnable from Joyride's Run menus
+- **Scope**: User scripts are global across all VS Code workspaces; Workspace scripts are project-specific
 
-**Workspace Scripts**
-- Location: `<workspace-root>/.joyride/scripts`
-- Scope: Specific to the current workspace
-- Use for: Project-specific automation, team-shared scripts
+**Joyride Source Files** - Files in `src/` directories:
+- **Purpose**: Library functions and reusable code that other code can require/call
+- **Location**: `<user-home>/.config/joyride/src` or `<workspace-root>/.joyride/src`
+- **Usage**: Functions here need to be called by something else:
+  - Keyboard shortcuts using `joyride.runCode` command
+  - Other scripts that require them
+  - Status bar buttons or custom UI elements you create
+- **Scope**: User scripts are global across all VS Code workspaces; Workspace scripts are project-specific
 
-**Source Files**
-- User: `<user-home>/.config/joyride/src`
-- Workspace: `<workspace-root>/.joyride/src`
-- Use for: Reusable namespaces and libraries
+### Script vs Function Choice
+- **Make it a Script**: When you want to run it directly from Joyride's Run menus
+- **Make it a Function**: When you want to call it from keyboard shortcuts, other scripts, or custom UI
+
+### Practical Example: Same Functionality, Different Approaches
+
+**As a Script** (`scripts/toggle_font.cljs`):
+```clojure
+(ns toggle-font
+  (:require ["vscode" :as vscode]
+            [joyride.core :as joyride]))
+
+(defn toggle-large-font []
+  (let [config (vscode/workspace.getConfiguration "editor")
+        current (.get config "fontSize")]
+    (if (> current 16)
+      (.update config "fontSize" 14 vscode/ConfigurationTarget.Global)
+      (.update config "fontSize" 20 vscode/ConfigurationTarget.Global))))
+
+;; Makes this runnable from "Joyride: Run User Script" menu
+(when (= (joyride/invoked-script) joyride/*file*)
+  (toggle-large-font))
+```
+
+**As a Source Function** (`src/my_utils.cljs`):
+```clojure
+(ns my-utils
+  (:require ["vscode" :as vscode]))
+
+(defn toggle-large-font []
+  (let [config (vscode/workspace.getConfiguration "editor")
+        current (.get config "fontSize")]
+    (if (> current 16)
+      (.update config "fontSize" 14 vscode/ConfigurationTarget.Global)
+      (.update config "fontSize" 20 vscode/ConfigurationTarget.Global))))
+
+;; Called from keyboard shortcut:
+;; {
+;;   "key": "ctrl+alt+f",
+;;   "command": "joyride.runCode",
+;;   "args": "(require 'my-utils) (my-utils/toggle-large-font)"
+;; }
+```
 
 ### Getting Started Structure
 When helping new users, recommend this structure:
@@ -31,16 +75,16 @@ When helping new users, recommend this structure:
 ~/.config/joyride/
 ├── scripts/
 │   ├── user_activate.cljs     # Auto-runs when Joyride starts
-│   └── my-utilities.cljs      # Custom utility scripts
+│   └── my_quick_actions.cljs  # Runnable from "Run User Script" menu
 └── src/
-    └── my-lib.cljs            # Reusable functions
+    └── my_lib.cljs            # Functions called by shortcuts or other code
 
 <workspace>/.joyride/
 ├── scripts/
 │   ├── workspace_activate.cljs # Project-specific startup
-│   └── project-tools.cljs      # Project automation
+│   └── project_tools.cljs      # Runnable project automation
 └── src/
-    └── project-utils.cljs      # Project-specific utilities
+    └── project_utils.cljs      # Project utility functions
 ```
 
 ## Essential APIs for User Scripts
@@ -325,18 +369,39 @@ npm install lodash
     (vscode/window.showErrorMessage (str "Oops! " (.-message error)))))
 ```
 
-### Resource Management
+### Resource Management (Making Scripts Reloadable)
 ```clojure
-;; Always clean up resources
+;; Pattern for reloadable scripts that create disposables
 (defonce !disposables (atom []))
 
+(defn clear-disposables! []
+  "Dispose all existing disposables and clear the list"
+  (run! #(.dispose %) @!disposables)
+  (reset! !disposables []))
+
 (defn register-disposable! [disposable]
+  "Register a disposable for cleanup and with VS Code"
   (swap! !disposables conj disposable)
   (.push (.-subscriptions (joyride/extension-context)) disposable))
 
-;; Use in activation scripts
-(register-disposable!
-  (vscode/workspace.onDidOpenTextDocument my-handler))
+(defn main []
+  ;; Clear any existing disposables first (makes script reloadable)
+  (clear-disposables!)
+
+  ;; Now create new disposables
+  (register-disposable!
+    (vscode/workspace.onDidOpenTextDocument my-handler))
+
+  ;; Create status bar button (will be recreated on re-run)
+  (register-disposable!
+    (doto (vscode/window.createStatusBarItem vscode/StatusBarAlignment.Left)
+      (aset "text" "My Button")
+      (aset "command" "my.command")
+      (.show))))
+
+;; Use in activation scripts and regular scripts
+(when (= (joyride/invoked-script) joyride/*file*)
+  (main))
 ```
 
 ### Namespace Organization
@@ -352,6 +417,20 @@ npm install lodash
 4. **Namespace conflicts**: Same namespace names overwrite each other
 5. **Promise handling**: Forgetting to use `promesa.core` for async operations
 6. **File paths**: Need absolute paths for VS Code APIs
+7. **Docstring placement**: Putting docstrings in wrong place (common Clojure beginner mistake)
+
+```clojure
+;; WRONG - docstring after parameter vector
+(defn my-function [param]
+  "This function does something"  ; ❌ Wrong position
+  (do-something param))
+
+;; RIGHT - docstring before parameter vector
+(defn my-function
+  "This function does something"  ; ✅ Correct position
+  [param]
+  (do-something param))
+```
 
 ## Learning Path for New Users
 
