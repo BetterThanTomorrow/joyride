@@ -99,7 +99,7 @@
     (register-command! extension-context "joyride.startNReplServer" #'start-nrepl-server+)
     (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server+)    (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
     (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)    (when-contexts/set-context! ::when-contexts/joyride.isActive true)
-    (doseq [lm-disposable (lm/register-tools!)]
+    (doseq [lm-disposable (lm/register-tools! extension-context)]
       (swap! db/!app-db update :disposables conj lm-disposable)
       (.push (.-subscriptions ^js extension-context) lm-disposable))
     (when context (-> (content-utils/maybe-create-user-project+)

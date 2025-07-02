@@ -2,7 +2,6 @@
   "Documentation tools for language models"
   (:require
    ["vscode" :as vscode]
-   [joyride.db :as db]
    [joyride.lm.core :as core]
    [promesa.core :as p]))
 
@@ -13,11 +12,7 @@
 (def ^:private LOCAL-AGENT-GUIDE-PATH
   "assets/llm-contexts/agent-joyride-eval.md")
 
-(defn- fetch-agent-guide
-  "Fetch the Joyride agent guide content.
-   First tries the GitHub URL, then falls back to local file.
-   Returns a promise that resolves to {:type \"success\"|\"error\" :content str :source \"github\"|\"local\"}"
-  []
+(defn- fetch-agent-guide [extension-context]
   (let [timeout-ms 10000
         controller (js/AbortController.)
         signal (.-signal controller)
@@ -33,7 +28,7 @@
         (p/catch
          (fn [error]
            (js/console.warn "Failed to fetch agent guide from GitHub" (.-message error))
-           (p/let [text (core/read-extension-file @db/!app-db LOCAL-AGENT-GUIDE-PATH)]
+           (p/let [text (core/read-extension-file extension-context LOCAL-AGENT-GUIDE-PATH)]
              {:type "success"
               :content text
               :source "local"})))
@@ -45,20 +40,20 @@
         ;; Add timeout cancellation to avoid hanging
         (p/finally (fn [] (js/clearTimeout timeout-id))))))
 
-(defn handle-basics-for-agents
-  "Handle joyride_basics_for_agents tool requests"
-  [_options _token]
-  (p/let [result (fetch-agent-guide)]
-    (if (= (:type result) "success")
-      (core/create-success-result (:content result))
-      (core/create-error-result (:message result)))))
+(defn- handle-basics-for-agents [options _token]
+  (let [extension-context (.-extensionContext ^js options)]
+    (p/let [result (fetch-agent-guide extension-context)]
+      (if (= (:type result) "success")
+        (core/create-success-result (:content result))
+        (core/create-error-result (:message result))))))
 
 (defn register-tool!
   "Register the Joyride Basics for Agents tool with VS Code's Language Model API.
    Returns the disposable for proper lifecycle management."
-  []
+  [extension-context]
   (try
-    (let [tool-impl #js {:invoke handle-basics-for-agents}
+    (let [tool-impl #js {:extensionContext extension-context
+                          :invoke handle-basics-for-agents}
           disposable (vscode/lm.registerTool "joyride_basics_for_agents" tool-impl)]
       (js/console.log "Joyride Basics for Agents LM Tool registered successfully")
       disposable)

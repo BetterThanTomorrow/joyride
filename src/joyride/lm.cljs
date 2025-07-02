@@ -7,10 +7,10 @@
 (defn register-tools!
   "Register all Language Model tools with VS Code's API.
    Returns a collection of disposables for lifecycle management."
-  []
+  [extension-context]
   (try
     (let [eval-disposable (eval/register-tool!)
-          docs-disposable (docs/register-tool!)]
+          docs-disposable (docs/register-tool! extension-context)]
       (js/console.log "Joyride LM Tools registered successfully")
       [eval-disposable docs-disposable])
     (catch js/Error e

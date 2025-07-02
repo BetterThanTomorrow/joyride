@@ -20,12 +20,11 @@
 (defn read-extension-file
   "Read a file from the extension directory.
    Returns a promise that resolves to the file content as string."
-  [app-db-state file-path]
+  [extension-context file-path]
   (p/create
    (fn [resolve reject]
      (try
-       (let [extension-context (:extension-context app-db-state)
-             extension-path (when extension-context
+       (let [extension-path (when extension-context
                               (str (.-extensionPath ^js extension-context) "/" file-path))]
          (if extension-path
            (-> js/vscode .-workspace
