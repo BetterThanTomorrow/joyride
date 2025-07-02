@@ -1,7 +1,7 @@
-(ns joyride.lm-tool
+(ns joyride.lm.eval
   (:require
    ["vscode" :as vscode]
-   [joyride.lm-tool.core :as core]
+   [joyride.lm.eval.core :as core]
    [joyride.repl-utils :as repl-utils]
    [joyride.sci :as joyride-sci]
    [promesa.core :as p]
@@ -151,8 +151,8 @@
   []
   (try
     (let [disposable (vscode/lm.registerTool "joyride_evaluate_code" (create-joyride-tool))]
-      (js/console.log "Joyride LM Tool registered successfully")
+      (js/console.log "Joyride Eval LM Tool registered successfully")
       disposable)
     (catch js/Error e
-      (js/console.error "Failed to register Joyride LM Tool:" (.-message e))
+      (js/console.error "Failed to register Joyride Eval LM Tool:" (.-message e))
       nil)))
