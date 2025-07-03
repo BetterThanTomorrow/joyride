@@ -25,6 +25,15 @@ Joyride makes VS Code scriptable using ClojureScript and the Small Clojure Inter
   - Status bar buttons or custom UI elements you create
 - **Scope**: User scripts are global across all VS Code workspaces; Workspace scripts are project-specific
 
+### Classpath Resolution Order
+Joyride resolves files in this specific order:
+1. `<workspace-root>/.joyride/src`
+2. `<workspace-root>/.joyride/scripts`
+3. `<user-home>/.config/joyride/src`
+4. `<user-home>/.config/joyride/scripts`
+
+This means workspace files take precedence over user files, and `src` directories are checked before `scripts` directories.
+
 ### Script vs Function Choice
 - **Make it a Script**: When you want to run it directly from Joyride's Run menus
 - **Make it a Function**: When you want to call it from keyboard shortcuts, other scripts, or custom UI
@@ -86,6 +95,44 @@ When helping new users, recommend this structure:
 └── src/
     └── project_utils.cljs      # Project utility functions
 ```
+
+### Creating Scripts with VS Code Commands
+Use these specific VS Code commands to create your first scripts:
+- **Joyride: Create User Activate Script** - Creates `user_activate.cljs` that runs automatically when Joyride starts
+- **Joyride: Create Hello Joyride User Script** - Creates example script for manual execution
+- **Joyride: Create User Source File...** - Creates library files in the `src` directory
+
+### Real-World Example: git-fuzzy Script
+Here's a complete example of installing and using a practical Joyride script:
+
+1. **Install the script**:
+   - Copy code from [Joyride Examples: git_fuzzy.cljs](https://raw.githubusercontent.com/BetterThanTomorrow/joyride/refs/heads/master/examples/.joyride/src/git_fuzzy.cljs)
+   - Run `Joyride: Create User Source File...` command
+   - Enter `git-fuzzy` as the filename
+   - Paste the copied code
+
+2. **Configure keyboard shortcut** (in `keybindings.json`):
+   ```json
+   {
+     "key": "ctrl+alt+j ctrl+alt+g",
+     "command": "joyride.runCode",
+     "args": "(require '[git-fuzzy :as gz] :reload) (gz/show-git-history!+)"
+   }
+   ```
+
+This example shows:
+- Multi-key keyboard shortcuts (`ctrl+alt+j ctrl+alt+g`)
+- Using `:reload` to refresh code during development
+- Function naming conventions with `!+` suffix
+- Real git repository interaction
+
+### Development Environment Setup
+- **Calva extension**: Provides syntax highlighting and REPL support
+- **Source control**: Put your user Joyride directory under version control (recommended)
+
+### Dependencies Management
+- **deps.edn**: Created automatically when needed for Clojure dependencies
+- **package.json**: For npm dependencies (install in joyride directories)
 
 ## Essential APIs for User Scripts
 
@@ -484,3 +531,20 @@ npm install lodash
 5. **"File access denied"**: Ensure VS Code has proper file permissions
 
 When helping users troubleshoot, always suggest testing with the Joyride evaluation tool first to isolate issues.
+
+## Community Resources
+
+### Documentation and Examples
+- **Main documentation**: https://github.com/BetterThanTomorrow/joyride
+- **Examples repository**: https://github.com/BetterThanTomorrow/joyride/tree/master/examples
+- **API documentation**: https://github.com/BetterThanTomorrow/joyride/blob/master/doc/api.md
+
+### Community Support
+- **Joyride community**: [Clojurians Slack](http://clojurians.net) - #joyride channel
+- **Calva community**: [Clojurians Slack](http://clojurians.net) - #calva channel
+- **General Clojure help**: [Clojurians Slack](http://clojurians.net) - #beginners channel
+
+### Learning Resources
+- Ask modern AI assistants (Claude, GPT-4) for help with Joyride - they're generally knowledgeable about the ecosystem
+- Explore existing scripts in the examples repository for patterns and inspiration
+- Join the community discussions to learn from other users' experiences
