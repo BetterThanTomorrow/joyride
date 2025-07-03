@@ -9,10 +9,11 @@
    Returns a collection of disposables for lifecycle management."
   [extension-context]
   (try
-    (let [eval-disposable (eval/register-tool!)
-          docs-disposable (docs/register-tool! extension-context "joyride_basics_for_agents" docs/agent-guide-path)]
+    (let [eval (eval/register-tool!)
+          agent-guide (docs/register-tool! extension-context "joyride_basics_for_agents" docs/agent-guide-path)
+          user-assistance (docs/register-tool! extension-context "joyride_assisting_users_guide" docs/user-assistance-guide-path)]
       (js/console.log "Joyride LM Tools registered successfully")
-      [eval-disposable docs-disposable])
+      [agent-guide eval user-assistance])
     (catch js/Error e
       (js/console.error "Failed to register Joyride LM Tools:" (.-message e))
       [])))

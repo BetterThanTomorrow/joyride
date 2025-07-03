@@ -10,6 +10,9 @@
 (def agent-guide-path
   "assets/llm-contexts/agent-joyride-eval.md")
 
+(def user-assistance-guide-path
+  "assets/llm-contexts/user-assistance.md")
+
 (def ^:private github-base-url
   "https://raw.githubusercontent.com/BetterThanTomorrow/joyride/refs/heads/master")
 
