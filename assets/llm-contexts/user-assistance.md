@@ -245,6 +245,7 @@ Since Joyride doesn't support top-level await, use this pattern for interactive 
     (def choice choice))
   ;; Now inspect `choice` directly
   )
+```
 
 ## User Development Workflow
 
@@ -260,6 +261,7 @@ Since Joyride doesn't support top-level await, use this pattern for interactive 
 - `joyride.runWorkspaceScript` - Run workspace script by name
 
 ### Keyboard Shortcuts Setup
+
 Help users add to VS Code's `keybindings.json`:
 ```json
 {
