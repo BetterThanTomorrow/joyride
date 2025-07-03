@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.54] - 2025-07-03
+
 - [Give the AI agent a tool for learning the basics about Joyride](https://github.com/BetterThanTomorrow/joyride/issues/214)
 - [Give the AI agent a tool for helping the user to learn the basics about Joyride](https://github.com/BetterThanTomorrow/joyride/issues/215)
 
