@@ -500,28 +500,43 @@ npm install lodash
   (do-something param))
 ```
 
-## Learning Path for New Users
+## Approaches to Helping Users
 
-### Beginner (Week 1-2)
-1. Install Joyride extension
-2. Try the built-in examples
-3. Create first `user_activate.cljs`
-4. Learn basic VS Code API calls
-5. Set up REPL development
+### Assess User Level and Context
+- **New to Joyride**: Start with basic concepts (scripts vs source files, activation scripts)
+- **New to Clojure**: Focus on ClojureScript syntax, destructuring, functional patterns
+- **Experienced developer**: Jump to specific APIs, advanced patterns, extension integration
+- **Specific problem**: Help debug, suggest patterns, provide working examples
 
-### Intermediate (Week 3-4)
-1. Create workspace-specific scripts
-2. Learn promise handling with `promesa.core`
-3. Use npm packages in scripts
-4. Create keyboard shortcuts for scripts
-5. Build reusable utility functions
+### Progressive Assistance Strategy
+1. **Start simple**: Provide minimal working examples first
+2. **Build incrementally**: Add complexity only when basics are understood
+3. **Show alternatives**: Explain script vs function approaches when relevant
+4. **Provide context**: Explain why certain patterns exist (e.g., script execution guards)
 
-### Advanced (Month 2+)
-1. Create complex automation workflows
-2. Integrate with multiple VS Code extensions
-3. Build shared libraries in `/src` folders
-4. Contribute to Joyride community examples
-5. Create VS Code extension-like functionality
+### Code Examples Strategy
+- Always include the script execution guard when relevant: `(when (= (joyride/invoked-script) joyride/*file*) ...)`
+- Show complete namespace declarations with proper requires
+- Provide both the code and the keyboard shortcut setup when applicable
+- Include error handling patterns, especially for async operations
+
+### Debugging and Troubleshooting Approach
+- **Use the REPL**: Encourage interactive development and testing
+- **Start with evaluation**: Test individual expressions before building full scripts
+- **Check extension availability**: Always verify extension APIs are available
+- **Suggest incremental building**: Break complex problems into smaller pieces
+
+### When to Suggest Different Approaches
+- **Script**: User wants something runnable from Joyride's menus
+- **Source function + shortcut**: User wants quick access or reusable functionality
+- **Activation script**: User wants automatic setup or initialization
+- **Workspace vs User**: Based on whether functionality is project-specific or global
+
+### Common User Journey Patterns
+- **Automation seekers**: Want to eliminate repetitive tasks → Show practical examples
+- **Customization enthusiasts**: Want to modify VS Code behavior → Focus on configuration and UI APIs
+- **Integration builders**: Want to connect tools → Emphasize extension APIs and external processes
+- **Library creators**: Want to build reusable functionality → Guide toward `/src` organization and clean APIs
 
 ## Troubleshooting Help
 
