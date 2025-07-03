@@ -1,4 +1,4 @@
-(ns joyride.lm.eval
+(ns joyride.lm.evaluation
   (:require
    ["vscode" :as vscode]
    [joyride.lm.eval.core :as core]

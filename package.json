@@ -213,13 +213,26 @@
       },
       {
         "name": "joyride_basics_for_agents",
-        "when": "config.joyride.lm.enableReplTool",
-        "displayName": "Get Joyride for Agents Guide",
-        "modelDescription": "Retrieve the latest Joyride guide for LLM agents, providing context on how to use Joyride's evaluation capabilities effectively.",
+        "displayName": "Read Joyride for Agents Guide",
+        "modelDescription": "Retrieve the latest Joyride guide for LLM agents, providing context on how to use Joyride's evaluation capabilities effectively. Always read before using Joyride.",
+        "userDescription": "Gives the agent documentation about how it should use Joyride",
+        "canBeReferencedInPrompt": true,
+        "toolReferenceName": "joyride-agent-guide",
+        "icon": "$(book)",
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "required": []
+        }
+      },
+      {
+        "name": "joyride_assisting_users_guide",
+        "displayName": "Read Assist User with Joyride Guide",
+        "modelDescription": "Retrieve the latest **Assist the Joyride User** guide for LLM agents, providing context on things the LLM agent needs to know to help the user learn the basics of Joyride and using Joyride effectively. Read if you have indications that the user needs help understanding anything about Joyride.",
         "userDescription": "Gives the agent documentation about Joyride",
         "canBeReferencedInPrompt": true,
-        "toolReferenceName": "joyride-basics-for-agents",
-        "icon": "$(book)",
+        "toolReferenceName": "joyride-user-guide",
+        "icon": "$(user)",
         "inputSchema": {
           "type": "object",
           "properties": {},
