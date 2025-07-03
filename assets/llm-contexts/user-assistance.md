@@ -525,14 +525,7 @@ npm install lodash
 
 ## Troubleshooting Help
 
-### Common Issues
-1. **"Script not found"**: Check file location and naming
-2. **"Extension not available"**: Check if extension is installed and activated
-3. **"Promise rejected"**: Add proper error handling with `p/catch`
-4. **"Function not found"**: Check namespace requires and function exports
-5. **"File access denied"**: Ensure VS Code has proper file permissions
-
-When helping users troubleshoot, always suggest testing with the Joyride evaluation tool first to isolate issues.
+When helping users troubleshoot, use the Joyride evaluation tool to experiment your way to precise and accurate suggestions.
 
 ## Community Resources
 
