@@ -205,6 +205,21 @@ joyride/user-joyride-dir          ; User joyride directory
 
 ## JavaScript Interop for Agents
 
+### Node access
+
+```clojure
+(ns ...
+  (:require
+   ["fs" :as fs]
+   ["path" :as path]
+   ...))
+
+(path/join segment-1 segment-2)
+
+(fs/existsSync dir-path)
+```
+
+
 ### Object Inspection
 ```clojure
 ;; Get all properties of a JS object
