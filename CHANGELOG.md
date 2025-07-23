@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: [Joyride: Run Workspace Script... error on windows](https://github.com/BetterThanTomorrow/joyride/issues/183)
+
 ## [0.0.54] - 2025-07-03
 
 - [Give the AI agent a tool for learning the basics about Joyride](https://github.com/BetterThanTomorrow/joyride/issues/214)
