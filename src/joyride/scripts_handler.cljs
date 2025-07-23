@@ -88,11 +88,12 @@
           function (function))))))
 
 (defn- cljs-snippet-requiring-js [abs-path]
-  (str "(require '[\"module\" :as module])
+  (let [quoted-path (string/replace abs-path #"\\" "\\\\")]
+    (str "(require '[\"module\" :as module])
         (let [req (module/createRequire \"/\")
-              resolved (.resolve req \"" abs-path "\")]
+              resolved (.resolve req \"" quoted-path "\")]
           (aset (.-cache req) resolved js/undefined)
-          (js/require resolved))"))
+          (js/require resolved))")))
 
 (defn run-script+
   ([menu-conf+ base-path scripts-path]
