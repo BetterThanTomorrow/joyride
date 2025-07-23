@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.55] - 2025-07-23
+
 - Fix: [Joyride: Run Workspace Script... error on windows](https://github.com/BetterThanTomorrow/joyride/issues/183)
 
 ## [0.0.54] - 2025-07-03
