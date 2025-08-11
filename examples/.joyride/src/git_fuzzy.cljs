@@ -107,6 +107,8 @@
     (.show quick-pick)
     (set! (.-title quick-pick) "Git History Search")
     (set! (.-placeholder quick-pick) "Loading commit history... Please wait")
+    ;; Preserve original item order during filtering
+    (set! (.-sortByLabel quick-pick) false)
 
     (p/let [commits (get-commit-history!+ repo)
             total-commits (count commits)
@@ -142,6 +144,8 @@
       (set! (.-placeholder quick-pick) "Fuzzy search commit messages")
       (set! (.-matchOnDescription quick-pick) true)
       (set! (.-matchOnDetail quick-pick) true)
+      ;; Keep the result order as provided
+      (set! (.-sortByLabel quick-pick) false)
 
       (.onDidChangeActive quick-pick (fn [active-items]
                                        (let [first-item (first active-items)]
