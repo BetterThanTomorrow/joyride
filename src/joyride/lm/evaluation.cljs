@@ -44,7 +44,7 @@
                                :stderr @stderr-buffer}
                         balancing-occurred?
                         (merge
-                         {:balancing-note "The code provided for evaluation had unbalanced brackets. The code was automatically balanced before evaluation. Use the code in the `balanced-code` to correct your code on record."
+                         {:balancing-note "The code provided for evaluation had unbalanced brackets and was automatically balanced before evaluation. Please update your code records with the corrected version from `balanced-code` in this response."
                           :balanced-code balanced-code})))]
     (when balancing-occurred?
       (js/console.log "[Evaluation] Code was unbalanced:" code "balanced-code:" balanced-code))
