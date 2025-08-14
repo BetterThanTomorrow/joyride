@@ -127,7 +127,7 @@
             ;; Async case - result is a promise, use p/let
             (p/let [resolved-result result]
               (if (:error resolved-result)
-                (let [error-data (core/format-error-message (merge (:code input-data)
+                (let [error-data (core/format-error-message (merge {:code (:code input-data)}
                                                                    resolved-result))]
                   (vscode/LanguageModelToolResult.
                    #js [(vscode/LanguageModelTextPart.
@@ -137,7 +137,7 @@
                                                          (js/JSON.stringify (clj->js result-data)))]))))
             ;; Sync case - result is immediate, no promises
             (if (:error result)
-              (let [error-data (core/format-error-message (merge (:code input-data)
+              (let [error-data (core/format-error-message (merge {:code (:code input-data)}
                                                                  result))]
                 (vscode/LanguageModelToolResult.
                  #js [(vscode/LanguageModelTextPart.
@@ -149,7 +149,7 @@
         (catch js/Error e
           ;; Enhanced error information
           (let [error-data (core/format-error-message {:error (.-message e)
-                                                       :code input-data
+                                                       :code (:code input-data)
                                                        :stdout ""
                                                        :stderr ""})
                 error-markdown (core/error-message->markdown error-data)]
