@@ -13,11 +13,10 @@
 
 (defn format-result-message
   "Format successful execution result as structured data"
-  [result stdout stderr]
-  {:type :success
-   :result result
-   :stdout stdout
-   :stderr stderr})
+  [result]
+  (merge
+   {:type :success}
+   result))
 
 (defn format-error-message
   "Format error message as structured data"

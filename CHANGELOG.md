@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Balance brackets before evaluating code](https://github.com/BetterThanTomorrow/joyride/issues/222)
+
 ## [0.0.56] - 2025-08-12
 
 - [Add a Human Intelligence Copilot tool](https://github.com/BetterThanTomorrow/joyride/issues/220)

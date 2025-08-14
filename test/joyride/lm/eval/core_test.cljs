@@ -23,7 +23,9 @@
     (let [result "6"
           stdout "Hello from stdout!"
           stderr ""
-          formatted (core/format-result-message result stdout stderr)]
+          formatted (core/format-result-message {:result result
+                                                 :stdout stdout
+                                                 :stderr stderr})]
       (is (map? formatted))
       (is (= :success (:type formatted)))
       (is (= result (:result formatted)))
