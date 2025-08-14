@@ -3,13 +3,12 @@
 
 (defn format-confirmation-message
   "Generate confirmation message data for code execution"
-  [code namespace wait-for-promise?]
-  {:type :confirmation
-   :title "Run Joyride Code"
-   :code code
-   :ns namespace
-   :wait-for-promise? wait-for-promise?
-   :description "This will run in Joyride's SCI environment with full VS Code API access."})
+  [m]
+  (merge
+   {:type :confirmation
+    :title "Run Joyride Code"
+    :description "This will run in Joyride's SCI environment with full VS Code API access."}
+   m))
 
 (defn format-result-message
   "Format successful execution result as structured data"
@@ -20,12 +19,10 @@
 
 (defn format-error-message
   "Format error message as structured data"
-  [error code stdout stderr]
-  {:type :error
-   :error error
-   :code code
-   :stdout stdout
-   :stderr stderr})
+  [m]
+  (merge
+   {:type :error}
+   m))
 
 (defn extract-input-data
   "Extract code and namespace from LM tool input options"

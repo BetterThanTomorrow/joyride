@@ -9,7 +9,9 @@
     (let [code "(+ 1 2 3)"
           ns "user"
           wait-for-promise? false
-          result (core/format-confirmation-message code ns wait-for-promise?)]
+          result (core/format-confirmation-message {:code code
+                                                    :ns ns
+                                                    :wait-for-promise? wait-for-promise?})]
       (is (map? result))
       (is (= :confirmation (:type result)))
       (is (= "Run Joyride Code" (:title result)))
@@ -38,7 +40,10 @@
           code "(unknown-fn 1)"
           stdout "Some output"
           stderr "Warning message"
-          formatted (core/format-error-message error code stdout stderr)]
+          formatted (core/format-error-message {:error error
+                                                :code code
+                                                :stdout stdout
+                                                :stderr stderr})]
       (is (map? formatted))
       (is (= :error (:type formatted)))
       (is (= error (:error formatted)))

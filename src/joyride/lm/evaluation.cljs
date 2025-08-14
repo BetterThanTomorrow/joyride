@@ -96,7 +96,9 @@
   (let [input-data (core/extract-input-data ^js (.-input options))
         validation (core/validate-input input-data)]
     (if (:valid? validation)
-      (let [confirmation-data (core/format-confirmation-message (:code input-data) (:ns input-data) (:wait-for-promise? input-data))]
+      (let [confirmation-data (core/format-confirmation-message {:code input-data
+                                                                 :ns input-data
+                                                                 :wait-for-promise? input-data})]
         #js {:invocationMessage "Running Joyride code in the VS Code environment"
              :confirmationMessages
              #js {:title (:title confirmation-data)
@@ -110,7 +112,10 @@
   (let [input-data (core/extract-input-data ^js (.-input options))
         validation (core/validate-input input-data)]
     (if-not (:valid? validation)
-      (let [error-data (core/format-error-message (:error validation) (:code input-data) "" "")
+      (let [error-data (core/format-error-message {:error validation
+                                                   :code input-data
+                                                   :stdout ""
+                                                   :stderr ""})
             error-markdown (core/error-message->markdown error-data)]
         (vscode/LanguageModelToolResult. #js [(vscode/LanguageModelTextPart. error-markdown)]))
       (try
@@ -124,8 +129,10 @@
             ;; Async case - result is a promise, use p/let
             (p/let [resolved-result result]
               (if (:error resolved-result)
-                (let [error-data (core/format-error-message (:error resolved-result) (:code input-data)
-                                                            (:stdout resolved-result) (:stderr resolved-result))]
+                (let [error-data (core/format-error-message {:error resolved-result
+                                                             :code input-data
+                                                             :stdout resolved-result
+                                                             :stderr resolved-result})]
                   (vscode/LanguageModelToolResult.
                    #js [(vscode/LanguageModelTextPart.
                          (js/JSON.stringify (clj->js error-data)))]))
@@ -134,8 +141,10 @@
                                                          (js/JSON.stringify (clj->js result-data)))]))))
             ;; Sync case - result is immediate, no promises
             (if (:error result)
-              (let [error-data (core/format-error-message (:error result) (:code input-data)
-                                                          (:stdout result) (:stderr result))]
+              (let [error-data (core/format-error-message {:error result
+                                                           :code input-data
+                                                           :stdout result
+                                                           :stderr result})]
                 (vscode/LanguageModelToolResult.
                  #js [(vscode/LanguageModelTextPart.
                        (js/JSON.stringify (clj->js error-data)))]))
@@ -145,7 +154,10 @@
 
         (catch js/Error e
           ;; Enhanced error information
-          (let [error-data (core/format-error-message (.-message e) (:code input-data) "" "")
+          (let [error-data (core/format-error-message {:error (.-message e)
+                                                       :code input-data
+                                                       :stdout ""
+                                                       :stderr""})
                 error-markdown (core/error-message->markdown error-data)]
             (vscode/LanguageModelToolResult. #js [(vscode/LanguageModelTextPart. error-markdown)])))))))
 
