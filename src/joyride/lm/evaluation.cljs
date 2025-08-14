@@ -1,6 +1,7 @@
 (ns joyride.lm.evaluation
   (:require
    ["vscode" :as vscode]
+   [joyride.balance :as balance]
    [joyride.lm.eval.core :as core]
    [joyride.repl-utils :as repl-utils]
    [joyride.sci :as joyride-sci]
@@ -14,7 +15,12 @@
    Uses Joyride's full SCI context with VS Code API access and extensions.
    When wait-for-promise? is false, returns result synchronously (no promise)."
   [{:keys [code ns wait-for-promise?]}]
-  (let [stdout-buffer (atom "")
+  (let [inferred (balance/infer-parens code)
+        balanced-code (if (:success inferred)
+                        (:text inferred)
+                        code)
+        balancing-occurred? (not= code balanced-code)
+        stdout-buffer (atom "")
         stderr-buffer (atom "")
         original-print-fn @sci/print-fn
         original-print-err-fn @sci/print-err-fn
@@ -25,17 +31,23 @@
                        (sci/alter-var-root sci/print-fn (constantly original-print-fn))
                        (sci/alter-var-root sci/print-err-fn (constantly original-print-err-fn)))
         make-result (fn [result error wait-for-promise?]
-                      {:result (if (and (not wait-for-promise?)
-                                        (not error)
-                                        (instance? js/Promise result))
-                                 {:type "promise"
-                                  :message "Promise returned but not awaited (fire-and-forget mode)"
-                                  :toString (str result)}
-                                 result)
-                       :error error
-                       :ns (str @sci/ns)
-                       :stdout @stdout-buffer
-                       :stderr @stderr-buffer})]
+                      (cond-> {:result (if (and (not wait-for-promise?)
+                                                (not error)
+                                                (instance? js/Promise result))
+                                         {:type "promise"
+                                          :message "Promise returned but not awaited (fire-and-forget mode)"
+                                          :toString (str result)}
+                                         result)
+                               :error error
+                               :ns (str @sci/ns)
+                               :stdout @stdout-buffer
+                               :stderr @stderr-buffer}
+                        balancing-occurred?
+                        (merge
+                         {:balancing-note "The code provided for evaluation had unbalanced brackets and was automatically balanced before evaluation. Please update your code records with the corrected version from `balanced-code` in this response."
+                          :balanced-code balanced-code})))]
+    (when balancing-occurred?
+      (js/console.log "[Evaluation] Code was unbalanced:" code "balanced-code:" balanced-code))
     (if wait-for-promise?
       ;; Async path with p/let (existing behavior)
       (try
@@ -50,7 +62,7 @@
                                         (catch js/Error _
                                           @joyride-sci/!last-ns))))
                       result (sci/binding [sci/ns resolved-ns]
-                               (joyride-sci/eval-string code))]
+                               (joyride-sci/eval-string balanced-code))]
                 (make-result result nil wait-for-promise?))
               (p/catch (fn [e] ;; Todo, this doesn't catch evalutation errors
                          (make-result nil (.-message e) wait-for-promise?)))
@@ -71,7 +83,7 @@
                                 (catch js/Error _
                                   @joyride-sci/!last-ns))))
               result (sci/binding [sci/ns resolved-ns]
-                       (joyride-sci/eval-string code))]
+                       (joyride-sci/eval-string balanced-code))]
           (make-result result nil wait-for-promise?))
         (catch js/Error e
           (make-result nil (.-message e) wait-for-promise?))
@@ -84,7 +96,7 @@
   (let [input-data (core/extract-input-data ^js (.-input options))
         validation (core/validate-input input-data)]
     (if (:valid? validation)
-      (let [confirmation-data (core/format-confirmation-message (:code input-data) (:ns input-data) (:wait-for-promise? input-data))]
+      (let [confirmation-data (core/format-confirmation-message input-data)]
         #js {:invocationMessage "Running Joyride code in the VS Code environment"
              :confirmationMessages
              #js {:title (:title confirmation-data)
@@ -98,7 +110,10 @@
   (let [input-data (core/extract-input-data ^js (.-input options))
         validation (core/validate-input input-data)]
     (if-not (:valid? validation)
-      (let [error-data (core/format-error-message (:error validation) (:code input-data) "" "")
+      (let [error-data (core/format-error-message {:error (:error validation)
+                                                   :code (:code input-data)
+                                                   :stdout ""
+                                                   :stderr ""})
             error-markdown (core/error-message->markdown error-data)]
         (vscode/LanguageModelToolResult. #js [(vscode/LanguageModelTextPart. error-markdown)]))
       (try
@@ -112,30 +127,31 @@
             ;; Async case - result is a promise, use p/let
             (p/let [resolved-result result]
               (if (:error resolved-result)
-                (let [error-data (core/format-error-message (:error resolved-result) (:code input-data)
-                                                            (:stdout resolved-result) (:stderr resolved-result))]
+                (let [error-data (core/format-error-message (merge {:code (:code input-data)}
+                                                                   resolved-result))]
                   (vscode/LanguageModelToolResult.
                    #js [(vscode/LanguageModelTextPart.
                          (js/JSON.stringify (clj->js error-data)))]))
-                (let [result-data (core/format-result-message (:result resolved-result)
-                                                              (:stdout resolved-result) (:stderr resolved-result))]
+                (let [result-data (core/format-result-message resolved-result)]
                   (vscode/LanguageModelToolResult. #js [(vscode/LanguageModelTextPart.
                                                          (js/JSON.stringify (clj->js result-data)))]))))
             ;; Sync case - result is immediate, no promises
             (if (:error result)
-              (let [error-data (core/format-error-message (:error result) (:code input-data)
-                                                          (:stdout result) (:stderr result))]
+              (let [error-data (core/format-error-message (merge {:code (:code input-data)}
+                                                                 result))]
                 (vscode/LanguageModelToolResult.
                  #js [(vscode/LanguageModelTextPart.
                        (js/JSON.stringify (clj->js error-data)))]))
-              (let [result-data (core/format-result-message (:result result)
-                                                            (:stdout result) (:stderr result))]
+              (let [result-data (core/format-result-message result)]
                 (vscode/LanguageModelToolResult. #js [(vscode/LanguageModelTextPart.
                                                        (js/JSON.stringify (clj->js result-data)))])))))
 
         (catch js/Error e
           ;; Enhanced error information
-          (let [error-data (core/format-error-message (.-message e) (:code input-data) "" "")
+          (let [error-data (core/format-error-message {:error (.-message e)
+                                                       :code (:code input-data)
+                                                       :stdout ""
+                                                       :stderr ""})
                 error-markdown (core/error-message->markdown error-data)]
             (vscode/LanguageModelToolResult. #js [(vscode/LanguageModelTextPart. error-markdown)])))))))
 
