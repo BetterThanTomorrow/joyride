@@ -279,13 +279,13 @@
     "@vscode/codicons": "^0.0.30",
     "fdir": "^5.2.0",
     "picomatch": "^2.3.1"
-  },
+   },
   "devDependencies": {
     "@vscode/test-electron": "^2.2.3",
     "axios": "^1.1.2",
     "moment": "^2.29.4",
     "rimraf": "^3.0.2",
     "shadow-cljs": "^2.18.0",
-    "vsce": "^2.15.0"
+    "@vscode/vsce": "^3.6.0"
   }
 }
