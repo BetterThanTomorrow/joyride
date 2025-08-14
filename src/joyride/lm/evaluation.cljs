@@ -47,7 +47,7 @@
                          {:balancing-note "The code provided for evaluation had unbalanced brackets. The code was automatically balanced before evaluation. Use the code in the `balanced-code` to correct your code on record."
                           :balanced-code balanced-code})))]
     (when balancing-occurred?
-      (js/console.log "[Evaluation] Code was unbalanced:" code "balancded-code:" balanced-code))
+      (js/console.log "[Evaluation] Code was unbalanced:" code "balanced-code:" balanced-code))
     (if wait-for-promise?
       ;; Async path with p/let (existing behavior)
       (try
@@ -96,9 +96,7 @@
   (let [input-data (core/extract-input-data ^js (.-input options))
         validation (core/validate-input input-data)]
     (if (:valid? validation)
-      (let [confirmation-data (core/format-confirmation-message {:code input-data
-                                                                 :ns input-data
-                                                                 :wait-for-promise? input-data})]
+      (let [confirmation-data (core/format-confirmation-message input-data)]
         #js {:invocationMessage "Running Joyride code in the VS Code environment"
              :confirmationMessages
              #js {:title (:title confirmation-data)
@@ -112,8 +110,8 @@
   (let [input-data (core/extract-input-data ^js (.-input options))
         validation (core/validate-input input-data)]
     (if-not (:valid? validation)
-      (let [error-data (core/format-error-message {:error validation
-                                                   :code input-data
+      (let [error-data (core/format-error-message {:error (:error validation)
+                                                   :code (:code input-data)
                                                    :stdout ""
                                                    :stderr ""})
             error-markdown (core/error-message->markdown error-data)]
@@ -129,10 +127,8 @@
             ;; Async case - result is a promise, use p/let
             (p/let [resolved-result result]
               (if (:error resolved-result)
-                (let [error-data (core/format-error-message {:error resolved-result
-                                                             :code input-data
-                                                             :stdout resolved-result
-                                                             :stderr resolved-result})]
+                (let [error-data (core/format-error-message (merge (:code input-data)
+                                                                   resolved-result))]
                   (vscode/LanguageModelToolResult.
                    #js [(vscode/LanguageModelTextPart.
                          (js/JSON.stringify (clj->js error-data)))]))
@@ -141,10 +137,8 @@
                                                          (js/JSON.stringify (clj->js result-data)))]))))
             ;; Sync case - result is immediate, no promises
             (if (:error result)
-              (let [error-data (core/format-error-message {:error result
-                                                           :code input-data
-                                                           :stdout result
-                                                           :stderr result})]
+              (let [error-data (core/format-error-message (merge (:code input-data)
+                                                                 result))]
                 (vscode/LanguageModelToolResult.
                  #js [(vscode/LanguageModelTextPart.
                        (js/JSON.stringify (clj->js error-data)))]))
@@ -157,7 +151,7 @@
           (let [error-data (core/format-error-message {:error (.-message e)
                                                        :code input-data
                                                        :stdout ""
-                                                       :stderr""})
+                                                       :stderr ""})
                 error-markdown (core/error-message->markdown error-data)]
             (vscode/LanguageModelToolResult. #js [(vscode/LanguageModelTextPart. error-markdown)])))))))
 
