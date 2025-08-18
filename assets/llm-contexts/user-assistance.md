@@ -1,10 +1,10 @@
 # Joyride User Assistance Guide
 
-This document provides essential context for Language Learning Models (LLMs) to effectively help users learn and use Joyride for VS Code automation and customization.
+Critically important contexts for agents to effectively help users learn and use Joyride for VS Code automation and customization.
 
 ## What is Joyride?
 
-Joyride makes VS Code scriptable using ClojureScript and the Small Clojure Interpreter (SCI). It provides access to the full VS Code API and extension APIs, enabling users to hack their editor while it's running - similar to how Emacs users customize their environment.
+Joyride makes VS Code scriptable in user space. It provides access to the full VS Code API and extension APIs, enabling users to hack their editor while it's running - similar to how Emacs users customize their environment.
 
 ## User Script Types and Organization
 
@@ -19,10 +19,9 @@ Joyride makes VS Code scriptable using ClojureScript and the Small Clojure Inter
 **Joyride Source Files** - Files in `src/` directories:
 - **Purpose**: Library functions and reusable code that other code can require/call
 - **Location**: `<user-home>/.config/joyride/src` or `<workspace-root>/.joyride/src`
-- **Usage**: Functions here need to be called by something else:
+- **Example Usage**: Functions here need to be called by something else:
   - Keyboard shortcuts using `joyride.runCode` command
-  - Other scripts that require them
-  - Status bar buttons or custom UI elements you create
+  - Other scripts
 - **Scope**: User scripts are global across all VS Code workspaces; Workspace scripts are project-specific
 
 ### Classpath Resolution Order
@@ -36,7 +35,8 @@ This means workspace files take precedence over user files, and `src` directorie
 
 ### Script vs Function Choice
 - **Make it a Script**: When you want to run it directly from Joyride's Run menus
-- **Make it a Function**: When you want to call it from keyboard shortcuts, other scripts, or custom UI
+  - **Make it an Activation Script**: When you want it to run when VS Code starts
+- **Make it a Function in the `src` tree**: When you want to call it from keyboard shortcuts, other scripts, or custom UI
 
 ### Practical Example: Same Functionality, Different Approaches
 
@@ -102,10 +102,62 @@ Use these specific VS Code commands to create your first scripts:
 - **Joyride: Create Hello Joyride User Script** - Creates example script for manual execution
 - **Joyride: Create User Source File...** - Creates library files in the `src` directory
 
-### Real-World Example: git-fuzzy Script
-Here's a complete example of installing and using a practical Joyride script:
+### Real-World Example: Awesome Copilot Script
+Here's a complete example of a sophisticated Joyride script that demonstrates many advanced patterns:
 
-1. **Install the script**:
+**The Awesome Copilot Script** - A tool for exploring and installing GitHub Copilot instructions, prompts, and chatmodes from the [Awesome Copilot](https://github.com/github/awesome-copilot) repository.
+
+For a new user who asks for help getting started with Joyride, consider recommending to install this script. It is very useful and awesome-copilot has some joyride content that can come in handy too.
+
+#### Installation:
+1. **Get the script**: Copy from [Awesome Copilot Joyride Script](https://pez.github.io/awesome-copilot-index/awesome-copilot-script)
+2. **Install in Joyride**:
+   - Command Palette: `Joyride: Create User Script...`
+   - Name it: `awesome-copilot`
+   - Paste the script code
+
+#### Usage:
+- Command Palette: `Joyride: Run User Script...`
+- Select: `awesome_copilot.cljs`
+
+#### What This Script Demonstrates:
+- **HTTP requests**: Fetching data from external APIs
+- **File system operations**: Reading/writing files with Node.js APIs
+- **Complex UI patterns**: Multi-step wizard with QuickPick menus
+- **State management**: Persistent preferences using VS Code's global state
+- **Promise handling**: Extensive use of `promesa.core` for async operations
+- **Error handling**: Comprehensive error management patterns
+- **Workspace integration**: Installing files to `.github/` directories
+- **Memory features**: Remembering last selections across runs
+- **Real-world utility**: Actual tool for managing Copilot configurations
+
+This example showcases advanced Joyride patterns like:
+```clojure
+;; Persistent preferences using VS Code global state
+(defn save-preference [key value]
+  (let [context (joyride/extension-context)
+        global-state (.-globalState context)
+        current-prefs (get-preferences)
+        updated-prefs (assoc current-prefs key value)]
+    (.update global-state PREFS-KEY (js/JSON.stringify (clj->js updated-prefs)))))
+
+;; Custom QuickPick with memory and fuzzy search
+(defn show-picker-with-memory+ [items opts]
+  ;; Advanced picker implementation with state restoration
+  )
+
+;; File system operations with error handling
+(p/catch
+  (install-globally! content item category)
+  (fn [err]
+    (vscode/window.showErrorMessage
+     (str "Failed to install: " (.-message err)))))
+```
+
+### Real-World Example: git-fuzzy function
+Here's a complete example of installing and using a practical Joyride function:
+
+1. **Install the function**:
    - Copy code from [Joyride Examples: git_fuzzy.cljs](https://raw.githubusercontent.com/BetterThanTomorrow/joyride/refs/heads/master/examples/.joyride/src/git_fuzzy.cljs)
    - Run `Joyride: Create User Source File...` command
    - Enter `git-fuzzy` as the filename
@@ -555,6 +607,6 @@ When helping users troubleshoot, use the Joyride evaluation tool to experiment y
 - **General Clojure help**: [Clojurians Slack](http://clojurians.net) - #beginners channel
 
 ### Learning Resources
-- Ask modern AI assistants (Claude, GPT-4) for help with Joyride - they're generally knowledgeable about the ecosystem
+- Ask modern AI assistants (Claude, ChatGPT, Grok) for help with Joyride - they're generally knowledgeable about the ecosystem
 - Explore existing scripts in the examples repository for patterns and inspiration
 - Join the community discussions to learn from other users' experiences
