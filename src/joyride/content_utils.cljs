@@ -8,7 +8,7 @@
    [promesa.core :as p]))
 
 (def ^:private github-base-url
-  "https://raw.githubusercontent.com/BetterThanTomorrow/joyride/refs/heads/master")
+  "https://raw.githubusercontent.com/BetterThanTomorrow/joyride/master")
 
 (defn- source-uri-to-github-url
   "Convert a local source URI to a GitHub raw URL"
@@ -20,15 +20,15 @@
       (let [relative-path (.substring fs-path assets-index)]
         (str github-base-url "/" relative-path)))))
 
+(def ^:private fetch-timeout-ms 10000)
+
 (defn- fetch-content-from-github
   "Fetch content from GitHub with timeout and error handling"
   [github-url]
-  (let [timeout-ms 10000
-        controller (js/AbortController.)
+  (let [controller (js/AbortController.)
         signal (.-signal controller)
-        timeout-id (js/setTimeout #(.abort controller) timeout-ms)]
+        timeout-id (js/setTimeout #(.abort controller) fetch-timeout-ms)]
     (-> (p/let [response (js/fetch github-url #js {:signal signal})
-                _ (js/clearTimeout timeout-id)
                 _ (when-not (.-ok response)
                     (throw (js/Error. (str "GitHub fetch failed: " (.-status response)))))
                 arrayBuffer (.arrayBuffer response)
