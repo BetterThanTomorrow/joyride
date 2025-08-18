@@ -38,7 +38,6 @@ Use VS Code commands to create your first Joyride scripts:
 
 **The Awesome Copilot Script** - A tool for exploring and installing GitHub Copilot instructions, prompts, and chatmodes from the [Awesome Copilot](https://github.com/github/awesome-copilot) repository.
 
-##### Installation:
 1. **Get the script**: Copy from [Awesome Copilot Joyride Script](https://pez.github.io/awesome-copilot-index/awesome-copilot-script)
 2. **Install in Joyride**:
    - Command Palette: `Joyride: Create User Script...`

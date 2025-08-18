@@ -7,6 +7,42 @@
    [joyride.when-contexts :as when-contexts]
    [promesa.core :as p]))
 
+(def ^:private github-base-url
+  "https://raw.githubusercontent.com/BetterThanTomorrow/joyride/refs/heads/master")
+
+(defn- source-uri-to-github-url
+  "Convert a local source URI to a GitHub raw URL"
+  [^js source-uri]
+  (let [fs-path (.-fsPath source-uri)
+        assets-marker "assets/getting-started-content"
+        assets-index (.indexOf fs-path assets-marker)]
+    (when (>= assets-index 0)
+      (let [relative-path (.substring fs-path assets-index)]
+        (str github-base-url "/" relative-path)))))
+
+(defn- fetch-content-from-github
+  "Fetch content from GitHub with timeout and error handling"
+  [github-url]
+  (let [timeout-ms 10000
+        controller (js/AbortController.)
+        signal (.-signal controller)
+        timeout-id (js/setTimeout #(.abort controller) timeout-ms)]
+    (-> (p/let [response (js/fetch github-url #js {:signal signal})
+                _ (js/clearTimeout timeout-id)
+                _ (when-not (.-ok response)
+                    (throw (js/Error. (str "GitHub fetch failed: " (.-status response)))))
+                arrayBuffer (.arrayBuffer response)
+                uint8Array (js/Uint8Array. arrayBuffer)]
+          {:type "success"
+           :content uint8Array
+           :source "github"})
+        (p/catch
+         (fn [error]
+           (js/console.warn "Failed to fetch content from GitHub" (.-message error))
+           {:type "error"
+            :message (str "Failed to fetch from GitHub: " (.-message error))}))
+        (p/finally (fn [] (js/clearTimeout timeout-id))))))
+
 (defn update-script-contexts!
   "Updates VS Code context variables based on current script file existence"
   []
@@ -31,13 +67,22 @@
 
 (defn create-content-file+ [source-uri ^js destination-uri]
   (js/console.info "Creating " ^String (.-fsPath destination-uri))
-  (p/do (vscode/workspace.fs.createDirectory (->> destination-uri
-                                                  .-fsPath
-                                                  path/dirname
-                                                  vscode/Uri.file))
-        (vscode/workspace.fs.copy source-uri destination-uri)
-        (update-script-contexts!)
-        destination-uri))
+  (p/let [github-url (source-uri-to-github-url source-uri)
+          github-result (when github-url
+                          (fetch-content-from-github github-url))
+          _ (vscode/workspace.fs.createDirectory (->> destination-uri
+                                                      .-fsPath
+                                                      path/dirname
+                                                      vscode/Uri.file))]
+    (if (and github-result (= (:type github-result) "success"))
+      ;; GitHub fetch succeeded, write the content
+      (p/do (vscode/workspace.fs.writeFile destination-uri (:content github-result))
+            (update-script-contexts!)
+            destination-uri)
+      ;; Fallback to current behavior (copy from local assets)
+      (p/do (vscode/workspace.fs.copy source-uri destination-uri)
+            (update-script-contexts!)
+            destination-uri))))
 
 (defn maybe-create-content+
   "Copies `source-uri` to `destination-uri` if the latter does not exist.

@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Default content: Try downloaded from GitHub first](https://github.com/BetterThanTomorrow/joyride/issues/224)
+
 ## [0.0.57] - 2025-08-14
 
 - [Balance brackets before evaluating code](https://github.com/BetterThanTomorrow/joyride/issues/222)
