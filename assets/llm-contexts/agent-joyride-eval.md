@@ -1,37 +1,40 @@
 # Joyride Evaluation Tool - Agent Guide
 
-This document provides essential context for Language Learning Models (LLMs) to effectively use Joyride's evaluation capabilities for testing, exploring, and automating VS Code.
+Critically important contexts for agents to effectively use Joyride's evaluation capabilities for testing, exploring, and automating VS Code.
 
 ## What is Joyride Evaluation?
 
-Joyride provides a Language Model Tool that allows agents to execute ClojureScript code directly in VS Code's runtime environment. This enables real-time testing, inspection, and automation of the editor.
+Joyride provides an AI agent tool that allows the agent to execute ClojureScript code directly in VS Code's runtime environment. This enables real-time testing, inspection, and automation of the editor. This enables Interactive Programming (aka REPL Driven Development).
 
 ## Core Evaluation Capabilities
 
 ### Code Execution Environment
 - **Runtime**: Small Clojure Interpreter (SCI) with ClojureScript
 - **Context**: Full VS Code Extension Host environment
-- **APIs Available**: Complete VS Code API + Extension APIs
+- **APIs Available**: Complete VS Code Extension API + APIS exposed by any active extension
 - **Execution Mode**: Synchronous and asynchronous support
 
 ### Async Operation Handling
 The evaluation tool has an `awaitResult` parameter for handling async operations:
 
-- **`awaitResult: false` (default)**: Returns immediately, suitable for synchronous operations, or fire-and-forget asynch evaluations.
-- **`awaitResult: true`**: Waits for async operations to complete before returning results
+- **`awaitResult: false` (default)**: Returns immediately, suitable for
+  * synchronous operations, returns the value of resulting from the evaluation
+  * fire-and-forget asynch evaluations, returns a serialized represntation of the promise)
+- **`awaitResult: true`**: Waits for async operations to complete before returning results, returns the resolved value of the promise
 
 **When to use `awaitResult: true`:**
-- User input dialogs where you need the response (`showInputBox`, `showQuickPick`)
-- File operations where you need the results (`findFiles`, `readFile`)
-- Extension API calls that return data you need to inspect
-- Information messages with buttons where you need to know which was clicked
-- Any operation where you need the actual resolved value for further processing
+- Any operation returning a promise/thenable where you need the actual resolved value for further processing, e.g.
+  - User input dialogs where you need the response (`showInputBox`, `showQuickPick`)
+  - Asynch file operations where you need the results (`findFiles`, `readFile`)
+  - Extension API calls
+  - Information messages with buttons where you need to know which was clicked
+  - Etcetera
 
 **When to use `awaitResult: false` (default):**
-- Fire-and-forget operations like simple information messages
-- Side-effect operations where you don't need the return value
-- Synchronous operations (most inspection/read operations)
 - When you want non-blocking behavior
+- Synchronous operations
+- Fire-and-forget asynch operations like information messages. Here it is crucial to not block on the message being dismissed, because the user may not even see the message.
+- Side-effect asynch operations where you don't need the return value
 
 **Example with awaitResult:**
 ```clojure
@@ -41,7 +44,7 @@ The evaluation tool has an `awaitResult` parameter for handling async operations
 ;; Use awaitResult: true to get the actual input value
 ```
 
-### What You Can Do
+### Examples of What You Can Do
 1. **Test code snippets** before suggesting them to users
 2. **Inspect VS Code state** (open files, workspace, configuration)
 3. **Execute automation scripts** (file operations, UI interactions)
@@ -55,8 +58,8 @@ The evaluation tool has an `awaitResult` parameter for handling async operations
 (require '["vscode" :as vscode])
 
 ;; Common inspection patterns
-(-> vscode/window.activeTextEditor .-document .-fileName)
-(-> vscode/workspace.workspaceFolders first .-uri .-fsPath)
+vscode/window.activeTextEditor.document.fileName ;; may bomb, but in the repl it may be fine
+(some-> vscode/window.activeTextEditor .-document .-fileName) ;; nil safe access
 (vscode/workspace.getConfiguration "editor")
 ```
 
@@ -71,11 +74,11 @@ joyride/*file*                    ; Current file path
 joyride/user-joyride-dir          ; User joyride directory
 ```
 
-### Extension APIs
+### VS Code Extension API
 ```clojure
 (require '["vscode" :as vscode])
 
-;; Better approach - get extension and check if active
+;; Get extension and check if active
 (when-let [ext (vscode/extensions.getExtension "ms-python.python")]
   (when (.-isActive ext)
     (let [python-api (.-exports ext)]
@@ -99,9 +102,9 @@ joyride/user-joyride-dir          ; User joyride directory
 
 ;; Check what's currently open
 (when-let [editor vscode/window.activeTextEditor]
-  {:file (.-fileName (.-document editor))
-   :language (.-languageId (.-document editor))
-   :line-count (.-lineCount (.-document editor))})
+  {:file (some-> editor .-document .-fileName)
+   :language (some-> editor .-document .-languageId)
+   :line-count (some-> editor .-document .-lineCount)})
 
 ;; Check workspace
 (map #(.-fsPath (.-uri %)) vscode/workspace.workspaceFolders)
@@ -117,7 +120,7 @@ joyride/user-joyride-dir          ; User joyride directory
 
 ;; Safe file reading
 (when-let [folders vscode/workspace.workspaceFolders]
-  (let [root-path (-> folders first .-uri .-fsPath)]
+  (let [root-path (some-> folders first .-uri .-fsPath)]
     ;; Test if file exists before operations
     ))
 ```
@@ -128,21 +131,24 @@ joyride/user-joyride-dir          ; User joyride directory
 (require '["vscode" :as vscode])
 
 ;; For testing async operations in evaluation tool, use this pattern:
-(comment
-  ;; Pattern for unwrapping async results when exploring
-  (p/let [files (vscode/workspace.findFiles "**/*.cljs")]
-    (def found-files files))
-  ;; Now inspect `found-files` directly
+;; Pattern for unwrapping async results when exploring, (use awaitResult: true)
+(vscode/workspace.findFiles "**/*.cljs")
 
-  ;; Test user interactions (use awaitResult: true)
-  (p/let [input (vscode/window.showInputBox #js {:prompt "Enter value:"})]
-    (def user-input input))
-  ;; Now `user-input` contains the result
-  )
+;; If you want to define the file vector in the REPL for later use, (still use awaitResult: true):
+(p/let [files (vscode/workspace.findFiles "**/*.cljs")]
+  (def found-files files))
+;; Now `found-files` is defined in the namespace in the REPL
+found-files ;=> the vector of file objects
+
+;; Another example of the same thing: Test user interactions (use awaitResult: true)
+(p/let [input (vscode/window.showInputBox #js {:prompt "Enter value:"})]
+  (def user-input input))
+;; Now `user-input` contains the result
 
 ;; Fire-and-forget: Show message and continue (awaitResult: false)
 (p/let [files (vscode/workspace.findFiles "**/*.cljs")]
   (vscode/window.showInformationMessage (str "Found " (count files) " files")))
+;; (Technically this continues, i.e. unblocks you, and then  the message is displayed asynch when the promise resolves.)
 
 ;; Wait for user response: Get which button was clicked (awaitResult: true)
 (p/let [files (vscode/workspace.findFiles "**/*.cljs")
@@ -181,25 +187,12 @@ joyride/user-joyride-dir          ; User joyride directory
     {:success true :file (.-fileName doc)}))
 ```
 
-## Safe Exploration Guidelines
-
-### Read-Only Operations (Always Safe)
-- Inspecting workspace folders
-- Reading file contents
-- Checking configuration
-- Querying editor state
-- Exploring available APIs
-
-### Write Operations (Use Carefully)
-- File modifications
-- Configuration changes
-- UI state changes
-- Installing event handlers
+## Exploration Guidelines
 
 ### Best Practices for Agents
-1. **Start with inspection** before suggesting modifications
+1. **SIf possible: tart with REPL exploration** before suggesting modifications
 2. **Test incrementally** - small steps first
-3. **Validate assumptions** about workspace state
+3. **Validate assumptions** in the REPL
 4. **Handle errors gracefully** in suggestions
 5. **Check extension availability** before using extension APIs
 
@@ -243,10 +236,8 @@ joyride/user-joyride-dir          ; User joyride directory
 
 ;; Get workspace overview
 {:folders (map #(.-fsPath (.-uri %)) vscode/workspace.workspaceFolders)
- :active-file (when-let [editor vscode/window.activeTextEditor]
-                (.-fileName (.-document editor)))
- :language (when-let [editor vscode/window.activeTextEditor]
-             (.-languageId (.-document editor)))}
+ :active-file (some-> vscode/window.activeTextEditor .-document .-fileName)
+ :language (some-> vscode/window.activeTextEditor .-document .-languageId)}
 ```
 
 ### Extension Availability Check
@@ -303,6 +294,7 @@ joyride/user-joyride-dir          ; User joyride directory
 ## Agent Workflow Recommendations
 
 1. **Explore First**: Use evaluation to understand the current VS Code state
+   * Show the user what you are evaluating by placing it in a code block in the chat before the evaluation tool use.
 2. **Test Incrementally**: Build up complex operations from simple, tested parts
 3. **Validate Continuously**: Check that each step works before proceeding
 4. **Provide Context**: Include inspection results when suggesting solutions
@@ -310,9 +302,9 @@ joyride/user-joyride-dir          ; User joyride directory
 
 ## Important Notes for Agents
 
-- **Promise Results**: In the evaluation tool, async operations may not return results in the same way as in a full REPL. Use `awaitResult: true` when you need the actual async result.
-- **awaitResult Usage**: Set `awaitResult: true` for user interactions, file operations, and any async calls where you need the resolved value. Use `awaitResult: false` (default) for synchronous operations to avoid blocking.
+- **Promise Results**: Use `awaitResult: true` when you need the actual async result.
+- **awaitResult Usage**: Set `awaitResult: true` for user interactions, file operations, and any async calls where you need the resolved value. Use `awaitResult: false` (default) asynchronous operations where you are _not_ interested in the result, to avoid blocking.
 - **Error Handling**: JS property access that doesn't exist returns `nil` rather than throwing errors in many cases.
 - **Extension Timing**: Always check if extensions are loaded and active before accessing their APIs.
 
-This evaluation tool enables you to provide tested, working solutions rather than theoretical code suggestions.
+The evaluation tool enables you to provide tested, working solutions rather than theoretical code suggestions. It is the ultimate reality check.
