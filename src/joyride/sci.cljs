@@ -115,16 +115,13 @@
             (recur (sci/eval-form (store/get-ctx) form))))))))
 
 (defn slurp
-  "Asynchronously returns string from file f. Returns promise."
+  "Asynchronously returns string from file f using vscode.workspace.fs. Returns promise."
   [f]
-  (js/Promise.
-   (fn [resolve reject]
-     (fs/readFile f
-                  "utf-8"
-                  (fn [error contents]
-                    (if error
-                      (reject error)
-                      (resolve (str contents))))))))
+  (-> (vscode/workspace.fs.readFile (vscode/Uri.file f))
+      (.then (fn [uint8-array]
+               ;; Convert Uint8Array to string using TextDecoder
+               (let [decoder (js/TextDecoder.)]
+                 (.decode decoder uint8-array))))))
 
 (defn joyride-load-file
   "Asynchronously evaluate the content of the file at `file-path`.
