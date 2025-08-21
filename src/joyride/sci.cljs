@@ -115,11 +115,14 @@
             (recur (sci/eval-form (store/get-ctx) form))))))))
 
 (defn joyride-load-file
-  "Sequentially read and evaluate the set of forms contained in the file."
-  [filename]
-  (let [absolute-path (if (path/isAbsolute filename)
-                        filename
-                        (path/resolve filename))
+  "Evaluate the content of the file at `file-path`.
+   Relative paths are resolved relative to the workspace root."
+  [file-path]
+  (let [absolute-path (if (path/isAbsolute file-path)
+                        file-path
+                        (if-let [workspace-root (:workspace-root-path @db/!app-db)]
+                          (path/join workspace-root file-path)
+                          (path/resolve file-path)))
         source (str (fs/readFileSync absolute-path))]
     (sci/with-bindings {sci/file absolute-path}
       (eval-string source))))
