@@ -101,6 +101,29 @@
 
 (def pst-nyip (fn [_] (throw (js/Error. "pst not yet implemented"))))
 
+(def !last-ns (volatile! @sci/ns))
+
+(defn eval-string [s]
+  (sci/binding [sci/ns @!last-ns]
+    (let [rdr (sci/reader s)]
+      (loop [res nil]
+        (let [form (sci/parse-next (store/get-ctx) rdr)]
+          (if (= :sci.core/eof form)
+            (do
+              (vreset! !last-ns @sci/ns)
+              res)
+            (recur (sci/eval-form (store/get-ctx) form))))))))
+
+(defn joyride-load-file
+  "Sequentially read and evaluate the set of forms contained in the file."
+  [filename]
+  (let [absolute-path (if (path/isAbsolute filename)
+                        filename
+                        (path/resolve filename))
+        source (str (fs/readFileSync absolute-path))]
+    (sci/with-bindings {sci/file absolute-path}
+      (eval-string source))))
+
 (def joyride-code
   {'*file* sci/file
    'extension-context (sci/copy-var db/extension-context joyride-ns)
@@ -118,7 +141,8 @@
                                         'tap> (sci/copy-var tap> core-namespace)
                                         'add-tap (sci/copy-var add-tap core-namespace)
                                         'remove-tap (sci/copy-var remove-tap core-namespace)
-                                        'uuid (sci/copy-var uuid core-namespace)}
+                                        'uuid (sci/copy-var uuid core-namespace)
+                                        'load-file (sci/copy-var joyride-load-file core-namespace)}
                          'clojure.zip zip-namespace
                          'clojure.repl {'pst pst-nyip}
                          'cljs.test cljs-test-config/cljs-test-namespace
@@ -164,15 +188,3 @@
                                                   ns-sym))
                              {:handled true}))))}))
 
-(def !last-ns (volatile! @sci/ns))
-
-(defn eval-string [s]
-  (sci/binding [sci/ns @!last-ns]
-    (let [rdr (sci/reader s)]
-      (loop [res nil]
-        (let [form (sci/parse-next (store/get-ctx) rdr)]
-          (if (= :sci.core/eof form)
-            (do
-              (vreset! !last-ns @sci/ns)
-              res)
-            (recur (sci/eval-form (store/get-ctx) form))))))))
