@@ -129,10 +129,19 @@
    Relative paths are resolved relative to the workspace root.
    Returns a promise."
   [file-path]
+  (println "BOOM! file-path" file-path)
   (let [absolute-path (util/as-workspace-abs-path file-path)]
+    (println "BOOM! absolute-path" absolute-path)
     (p/let [source (slurp+ absolute-path)]
-      (sci/with-bindings {sci/file absolute-path}
-        (eval-string source)))))
+      (println "BOOM! source" source)
+      ;; Evaluate in the current REPL namespace context
+      (sci/binding [sci/ns @!last-ns]
+        (sci/with-bindings {sci/file absolute-path}
+          (let [result (eval-string source)]
+            (println "BOOM! result result")
+            ;; Make sure namespace changes persist in the REPL
+            (vreset! !last-ns @sci/ns)
+            result))))))
 
 (def joyride-code
   {'*file* sci/file
