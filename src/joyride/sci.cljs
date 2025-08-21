@@ -117,20 +117,19 @@
             (recur (sci/eval-form (store/get-ctx) form))))))))
 
 (defn slurp+
-  "Asynchronously returns string from file f using vscode.workspace.fs. Returns promise."
-  [f]
-  (util/vscode-read-uri+ f))
+  "Asynchronously returns string from file f using vscode.workspace.fs.
+   Relative paths are resolved relative to the workspace root.
+   Returns a promise."
+  [file-path]
+  (let [absolute-path (util/as-workspace-abs-path file-path)]
+    (util/vscode-read-uri+ (util/as-workspace-abs-path absolute-path))))
 
-(defn load-file+
+(defn joyride-load-file
   "Asynchronously evaluate the content of the file at `file-path`.
    Relative paths are resolved relative to the workspace root.
    Returns a promise."
   [file-path]
-  (let [absolute-path (if (path/isAbsolute file-path)
-                        file-path
-                        (if-let [workspace-root (:workspace-root-path @db/!app-db)]
-                          (path/join workspace-root file-path)
-                          (path/resolve file-path)))]
+  (let [absolute-path (util/as-workspace-abs-path file-path)]
     (p/let [source (slurp+ absolute-path)]
       (sci/with-bindings {sci/file absolute-path}
         (eval-string source)))))
@@ -154,7 +153,7 @@
                                         'remove-tap (sci/copy-var remove-tap core-namespace)
                                         'uuid (sci/copy-var uuid core-namespace)
                                         'slurp (sci/copy-var slurp+ core-namespace)
-                                        'load-file (sci/copy-var load-file+ core-namespace)}
+                                        'load-file (sci/copy-var joyride-load-file core-namespace)}
                          'clojure.zip zip-namespace
                          'clojure.repl {'pst pst-nyip}
                          'cljs.test cljs-test-config/cljs-test-namespace
