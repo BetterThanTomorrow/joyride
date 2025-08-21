@@ -10,11 +10,13 @@
    [joyride.config :as conf]
    [joyride.db :as db]
    [joyride.repl-utils :as repl-utils]
+   [joyride.utils :as util]
    [sci.configs.cljs.test :as cljs-test-config]
    [sci.configs.cljs.pprint :as cljs-pprint-config]
    [sci.configs.funcool.promesa :as promesa-config]
    [sci.core :as sci]
    [sci.ctx-store :as store]
+   [promesa.core :as p]
    [rewrite-clj.node]
    [rewrite-clj.parser]
    [rewrite-clj.zip]))
@@ -114,16 +116,12 @@
               res)
             (recur (sci/eval-form (store/get-ctx) form))))))))
 
-(defn slurp
+(defn slurp+
   "Asynchronously returns string from file f using vscode.workspace.fs. Returns promise."
   [f]
-  (-> (vscode/workspace.fs.readFile (vscode/Uri.file f))
-      (.then (fn [uint8-array]
-               ;; Convert Uint8Array to string using TextDecoder
-               (let [decoder (js/TextDecoder.)]
-                 (.decode decoder uint8-array))))))
+  (util/vscode-read-uri+ f))
 
-(defn joyride-load-file
+(defn load-file+
   "Asynchronously evaluate the content of the file at `file-path`.
    Relative paths are resolved relative to the workspace root.
    Returns a promise."
@@ -133,10 +131,9 @@
                         (if-let [workspace-root (:workspace-root-path @db/!app-db)]
                           (path/join workspace-root file-path)
                           (path/resolve file-path)))]
-    (-> (slurp absolute-path)
-        (.then (fn [source]
-                 (sci/with-bindings {sci/file absolute-path}
-                   (eval-string source)))))))
+    (p/let [source (slurp+ absolute-path)]
+      (sci/with-bindings {sci/file absolute-path}
+        (eval-string source)))))
 
 (def joyride-code
   {'*file* sci/file
@@ -156,8 +153,8 @@
                                         'add-tap (sci/copy-var add-tap core-namespace)
                                         'remove-tap (sci/copy-var remove-tap core-namespace)
                                         'uuid (sci/copy-var uuid core-namespace)
-                                        'slurp (sci/copy-var slurp core-namespace)
-                                        'load-file (sci/copy-var joyride-load-file core-namespace)}
+                                        'slurp (sci/copy-var slurp+ core-namespace)
+                                        'load-file (sci/copy-var load-file+ core-namespace)}
                          'clojure.zip zip-namespace
                          'clojure.repl {'pst pst-nyip}
                          'cljs.test cljs-test-config/cljs-test-namespace
