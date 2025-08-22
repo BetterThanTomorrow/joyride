@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.60] - 2025-08-22
+
 - [`load-file` changes namespace to that of the loaded file's](https://github.com/BetterThanTomorrow/joyride/issues/229)
 
 ## [0.0.59] - 2025-08-22
