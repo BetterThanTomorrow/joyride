@@ -108,6 +108,6 @@
   [file-path]
   (if (path/isAbsolute file-path)
     file-path
-    (if-let [workspace-root (config/worskacpe-abs-path)]
+    (if-let [workspace-root (config/workspace-abs-path)]
       (path/join workspace-root file-path)
       file-path)))

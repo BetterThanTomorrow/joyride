@@ -28,14 +28,14 @@
 
 (def workspace-joyride-path ".joyride")
 
-(defn worskacpe-abs-path []
+(defn workspace-abs-path []
   (:workspace-root-path @db/!app-db))
 
 (defn workspace-abs-joyride-path
   "Returns the absolute path to the Workspace Joyride directory
    returns `nil` if there is not workspace root"
   []
-  (when-let [workspace-root (workspace-abs-joyride-path)]
+  (when-let [workspace-root (workspace-abs-path)]
     (path/join workspace-root workspace-joyride-path)))
 
 (def workspace-scripts-path (path/join workspace-joyride-path "scripts"))
