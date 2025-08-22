@@ -111,7 +111,7 @@
    Returns a promise."
   [file-path]
   (let [absolute-path (util/as-workspace-abs-path file-path)]
-    (util/vscode-read-uri+ (util/as-workspace-abs-path absolute-path))))
+    (util/vscode-read-uri+ absolute-path)))
 
 (defn- load-file+
   "Asynchronously evaluate the content of the file at `file-path`.
@@ -120,14 +120,12 @@
   [file-path]
   (let [absolute-path (util/as-workspace-abs-path file-path)]
     (p/let [source (slurp+ absolute-path)]
-      (println "BOOM! source" source)
       (sci/binding [sci/ns @!last-ns]
         (sci/with-bindings {sci/file absolute-path}
           (let [{:keys [ns val] :as result} (sci/eval-string+ (store/get-ctx) source)]
             (println "BOOM! result" result ns val)
             (vreset! !last-ns ns)
             val))))))
-
 (def joyride-code
   {'*file* sci/file
    'extension-context (sci/copy-var db/extension-context joyride-ns)
