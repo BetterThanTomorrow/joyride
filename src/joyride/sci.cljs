@@ -122,9 +122,7 @@
     (p/let [source (slurp+ absolute-path)]
       (sci/binding [sci/ns @!last-ns]
         (sci/with-bindings {sci/file absolute-path}
-          (let [{:keys [val]} (sci/eval-string+ (store/get-ctx) source)]
-            (vreset! !last-ns @sci/ns)
-            val))))))
+          (:val (sci/eval-string+ (store/get-ctx) source)))))))
 
 (def joyride-code
   {'*file* sci/file

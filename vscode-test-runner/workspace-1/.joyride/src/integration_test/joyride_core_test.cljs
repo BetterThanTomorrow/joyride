@@ -42,21 +42,21 @@
 
 (deftest-async slurp-relative-path
   (testing "slurp can read a file using relative path from workspace root"
-    (p/let [content (joy/slurp "test-data.txt")]
+    (p/let [content (joy/slurp ".joyride/etc/test-data.txt")]
       (is (clojure.string/includes? content "Hello from Joyride slurp test!"))
       (is (clojure.string/includes? content "åäö 🎉")))))
 
 (deftest-async slurp-absolute-path
   (testing "slurp can read a file using absolute path"
     (p/let [workspace-root vscode/workspace.rootPath
-            absolute-path (path/join workspace-root "test-data.txt")
+            absolute-path (path/join workspace-root ".joyride/etc/test-data.txt")
             content (joy/slurp absolute-path)]
       (is (clojure.string/includes? content "Hello from Joyride slurp test!"))
       (is (clojure.string/includes? content "multiple lines")))))
 
 (deftest-async load-file-relative-path
   (testing "load-file can evaluate a file using relative path from workspace root"
-    (p/let [_ (joy/load-file "test_data.cljs")]
+    (p/let [_ (joy/load-file ".joyride/etc/test_data.cljs")]
       (is (= :load-file-success @(resolve 'test-data/test-symbol)))
       (is (= "Hello from load-file!" (:message @(resolve 'test-data/test-data))))
       (is (= 42 (:number @(resolve 'test-data/test-data))))
@@ -65,7 +65,7 @@
 (deftest-async load-file-absolute-path
   (testing "load-file can evaluate a file using absolute path"
     (p/let [workspace-root vscode/workspace.rootPath
-            absolute-path (path/join workspace-root "test_data.cljs")
+            absolute-path (path/join workspace-root ".joyride/etc/test_data.cljs")
             _ (joy/load-file absolute-path)]
       (is (= :load-file-success @(resolve 'test-data/test-symbol)))
       (is (= [1 2 3] (:vector @(resolve 'test-data/test-data)))))))
@@ -77,7 +77,7 @@
 #_(deftest-async load-file-should-not-change-ns
     (testing "load-file should not change current *ns* (expected to fail until fixed)"
       (let [before (str *ns*)]
-        (p/let [_ (joy/load-file "test_data.cljs")
+        (p/let [_ (joy/load-file ".joyride/etc/test_data.cljs")
                 after (str *ns*)]
           (is (= before after) (str "Namespace shouldn't change, was: " before ", now: " after))
           (is (= :load-file-success @(resolve 'test-data/test-symbol)))))))
@@ -86,7 +86,7 @@
 #_(deftest-async load-file-should-not-change-ns-across-evals
     (testing "load-file should not persistently change *ns* across separate evals"
       (let [before (str *ns*)]
-        (p/let [_ (joy/load-file "test_data.cljs")
+        (p/let [_ (joy/load-file ".joyride/etc/test_data.cljs")
                 reported-ns (vscode/commands.executeCommand "joyride.runCode" "(str *ns*)")]
           (is (= before reported-ns)
               (str "Namespace should not leak when loading a file: was: " before ", now: " reported-ns))))))
