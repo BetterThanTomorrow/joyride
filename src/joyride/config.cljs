@@ -44,11 +44,11 @@
   "Returns the absolute path to the Workspace scripts directory
    returns `nil` if there is not workspace root"
   []
-  (when-let [workspace-root (workspace-abs-joyride-path)]
+  (when-let [workspace-root (workspace-abs-path)]
     (path/join workspace-root workspace-scripts-path)))
 
 (defn workspace-abs-src-path
   "Returns the absolute path to the WOrkspace src directory"
   []
-  (when-let [workspace-root (workspace-abs-joyride-path)]
+  (when-let [workspace-root (workspace-abs-path)]
     (path/join workspace-root (path/join ".joyride" "src"))))
