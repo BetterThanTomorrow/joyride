@@ -164,7 +164,7 @@ See [examples/.joyride/src/problem_hover.cljs](../examples/.joyride/src/problem_
 In addition to `clojure.core`, `clojure.set`, `clojure.edn`, `clojure.string`,
 `clojure.walk`, `clojure.data`, `cljs.test`, and `clojure.zip`, Joyride makes the following libraries available:
 
-* [Promesa](https://cljdoc.org/d/funcool/promesa/) (partly, see [below](#promesacore))
+* [Promesa](https://cljdoc.org/d/funcool/promesa/) (partly, see [below](#promesacore)
 * [rewrite-clj](https://github.com/clj-commons/rewrite-clj)
 
 Lacking some particular library? Please consider contributing to [babashka/sci.configs](https://github.com/babashka/sci.configs)!
