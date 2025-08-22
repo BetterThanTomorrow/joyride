@@ -105,17 +105,6 @@
 
 (def !last-ns (volatile! @sci/ns))
 
-(defn eval-string [s]
-  (sci/binding [sci/ns @!last-ns]
-    (let [rdr (sci/reader s)]
-      (loop [res nil]
-        (let [form (sci/parse-next (store/get-ctx) rdr)]
-          (if (= :sci.core/eof form)
-            (do
-              (vreset! !last-ns @sci/ns)
-              res)
-            (recur (sci/eval-form (store/get-ctx) form))))))))
-
 (defn slurp+
   "Asynchronously returns string from file f using vscode.workspace.fs.
    Relative paths are resolved relative to the workspace root.
@@ -124,24 +113,20 @@
   (let [absolute-path (util/as-workspace-abs-path file-path)]
     (util/vscode-read-uri+ (util/as-workspace-abs-path absolute-path))))
 
-(defn joyride-load-file
+(defn- load-file+
   "Asynchronously evaluate the content of the file at `file-path`.
    Relative paths are resolved relative to the workspace root.
    Returns a promise."
   [file-path]
-  (println "BOOM! file-path" file-path)
   (let [absolute-path (util/as-workspace-abs-path file-path)]
-    (println "BOOM! absolute-path" absolute-path)
     (p/let [source (slurp+ absolute-path)]
       (println "BOOM! source" source)
-      ;; Evaluate in the current REPL namespace context
       (sci/binding [sci/ns @!last-ns]
         (sci/with-bindings {sci/file absolute-path}
-          (let [result (eval-string source)]
-            (println "BOOM! result result")
-            ;; Make sure namespace changes persist in the REPL
-            (vreset! !last-ns @sci/ns)
-            result))))))
+          (let [{:keys [ns val] :as result} (sci/eval-string+ (store/get-ctx) source)]
+            (println "BOOM! result" result ns val)
+            (vreset! !last-ns ns)
+            val))))))
 
 (def joyride-code
   {'*file* sci/file
@@ -149,7 +134,9 @@
    'invoked-script (sci/copy-var db/invoked-script joyride-ns)
    'output-channel (sci/copy-var db/output-channel joyride-ns)
    'js-properties repl-utils/instance-properties
-   'user-joyride-dir (conf/user-abs-joyride-path)})
+   'user-joyride-dir (conf/user-abs-joyride-path)
+   'slurp (sci/copy-var slurp+ core-namespace)
+   'load-file (sci/copy-var load-file+ core-namespace)})
 
 (store/reset-ctx!
  (sci/init {:classes {'js (doto goog/global
@@ -160,9 +147,7 @@
                                         'tap> (sci/copy-var tap> core-namespace)
                                         'add-tap (sci/copy-var add-tap core-namespace)
                                         'remove-tap (sci/copy-var remove-tap core-namespace)
-                                        'uuid (sci/copy-var uuid core-namespace)
-                                        'slurp (sci/copy-var slurp+ core-namespace)
-                                        'load-file (sci/copy-var joyride-load-file core-namespace)}
+                                        'uuid (sci/copy-var uuid core-namespace)}
                          'clojure.zip zip-namespace
                          'clojure.repl {'pst pst-nyip}
                          'cljs.test cljs-test-config/cljs-test-namespace
@@ -208,3 +193,13 @@
                                                   ns-sym))
                              {:handled true}))))}))
 
+(defn eval-string [s]
+  (sci/binding [sci/ns @!last-ns]
+    (let [rdr (sci/reader s)]
+      (loop [res nil]
+        (let [form (sci/parse-next (store/get-ctx) rdr)]
+          (if (= :sci.core/eof form)
+            (do
+              (vreset! !last-ns @sci/ns)
+              res)
+            (recur (sci/eval-form (store/get-ctx) form))))))))
