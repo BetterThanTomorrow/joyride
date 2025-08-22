@@ -1,6 +1,6 @@
 # APIs
 
-The Joyride API consist of:
+The Joyride API consists of:
 
 1. The Joyride *Extension API*
    * `exports`
@@ -49,7 +49,7 @@ const toJS = await joyride.runCode("clj->js");
 const exData = await joyride.runCode("ex-data");
 
 const r = joyride.runCode("{:a (some-fn)}")
-  .catch(e => vscode.windiow.showErrorMessage(JSON.stringify(toJS(exData(e)))));
+  .catch(e => vscode.window.showErrorMessage(JSON.stringify(toJS(exData(e)))));
 
 if (r) {
   const js_r = await toJS(r);
@@ -66,7 +66,7 @@ Select Joyride from the VS Code Extension pane to see which commands it provides
 * `joyride.runUserScript`
 * `joyride.runWorkspaceScript`
 
-The same note about ClojureScript applias for the `joyride.runCode` command as for the corresponding API export, mentioned above. Fetching the `clj->js` function looks more like so in this case:
+The same note about ClojureScript applies for the `joyride.runCode` command as for the corresponding API export, mentioned above. Fetching the `clj->js` function looks more like so in this case:
 
 ``` js
 const toJS = await vscode.commands.executeCommand('joyride.runCode', "clj->js");
@@ -96,7 +96,7 @@ The first file found will be used.
 
 ### Scripting lifecycle
 
-You can make some code run when Joyride activates. The activations script will be run in the order:
+You can make some code run when Joyride activates. The activation scripts will be run in the order:
 
 1. `<User scripts directory>/user_activate.cljs`
 1. `<Workspace scripts directory>/workspace_activate.cljs`
@@ -164,7 +164,7 @@ See [examples/.joyride/src/problem_hover.cljs](../examples/.joyride/src/problem_
 In addition to `clojure.core`, `clojure.set`, `clojure.edn`, `clojure.string`,
 `clojure.walk`, `clojure.data`, `cljs.test`, and `clojure.zip`, Joyride makes the following libraries available:
 
-* [Promesa](https://cljdoc.org/d/funcool/promesa/ (partly, see [below](#promesacore))
+* [Promesa](https://cljdoc.org/d/funcool/promesa/) (partly, see [below](#promesacore))
 * [rewrite-clj](https://github.com/clj-commons/rewrite-clj)
 
 Lacking some particular library? Please consider contributing to [babashka/sci.configs](https://github.com/babashka/sci.configs)!
@@ -183,6 +183,8 @@ In addition to these there is also `joyride.core`:
 - `output-channel`: function returning the Joyride [OutputChannel](https://code.visualstudio.com/api/references/vscode-api#OutputChannel) instance
 - `js-properties`: a function returning a sequence of the full JS API of the provided JS object/instance. For use instead of `cljs.core/js-keys` when it doesn't return the full API.
 - `user-joyride-dir`: a string path with the user/global joyride directory.
+- `slurp`: similar to Clojure `slurp`, but is asynchronous and returns a promise. Resolves relative paths using the workspace root.
+- `load-file`: similar to Clojure `load-file`, but is asynchronous and returns a promise. Resolves relative paths using the workspace root.
 
 Here's a snippet from the [joyride_api.cljs](../examples/.joyride/scripts/joyride_api.cljs) example.
 
