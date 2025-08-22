@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [`load-file` changes namespace to that of the loaded file's](https://github.com/BetterThanTomorrow/joyride/issues/229)
+
 ## [0.0.59] - 2025-08-22
 
 - [Add `joyride.core/load-file` and `joyride.core/slurp`](https://github.com/BetterThanTomorrow/joyride/issues/226)

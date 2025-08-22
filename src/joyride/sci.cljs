@@ -122,10 +122,10 @@
     (p/let [source (slurp+ absolute-path)]
       (sci/binding [sci/ns @!last-ns]
         (sci/with-bindings {sci/file absolute-path}
-          (let [{:keys [ns val] :as result} (sci/eval-string+ (store/get-ctx) source)]
-            (println "BOOM! result" result ns val)
-            (vreset! !last-ns ns)
+          (let [{:keys [val]} (sci/eval-string+ (store/get-ctx) source)]
+            (vreset! !last-ns @sci/ns)
             val))))))
+
 (def joyride-code
   {'*file* sci/file
    'extension-context (sci/copy-var db/extension-context joyride-ns)
