@@ -7,7 +7,10 @@
    ["vscode" :as vscode]
    [cljs.test :refer [deftest is testing]]
    [clojure.set]
-   [joyride.core :as joy]))
+   [clojure.string]
+   [joyride.core :as joy]
+   [promesa.core :as p]
+   [integration-test.macros :refer [deftest-async]]))
 
 #_{:clj-kondo/ignore [:duplicate-require]}
 (require '["ext://betterthantomorrow.joyride" :as top-level-required-extension-api])
@@ -36,6 +39,36 @@
   (is (= (path/join (aget process/env "VSCODE_JOYRIDE_USER_CONFIG_PATH") "joyride")
          joy/user-joyride-dir)
       "joyride.core/user-joyride-dir is defined and points to the right directory"))
+
+(deftest-async slurp-relative-path
+  (testing "slurp can read a file using relative path from workspace root"
+    (p/let [content (joy/slurp "test-data.txt")]
+      (is (clojure.string/includes? content "Hello from Joyride slurp test!"))
+      (is (clojure.string/includes? content "åäö 🎉")))))
+
+(deftest-async slurp-absolute-path
+  (testing "slurp can read a file using absolute path"
+    (p/let [workspace-root vscode/workspace.rootPath
+            absolute-path (path/join workspace-root "test-data.txt")
+            content (joy/slurp absolute-path)]
+      (is (clojure.string/includes? content "Hello from Joyride slurp test!"))
+      (is (clojure.string/includes? content "multiple lines")))))
+
+(deftest-async load-file-relative-path
+  (testing "load-file can evaluate a file using relative path from workspace root"
+    (p/let [_ (joy/load-file "test_data.cljs")]
+      (is (= :load-file-success @(resolve 'test-data/test-symbol)))
+      (is (= "Hello from load-file!" (:message @(resolve 'test-data/test-data))))
+      (is (= 42 (:number @(resolve 'test-data/test-data))))
+      (is (fn? @(resolve 'test-data/test-function))))))
+
+(deftest-async load-file-absolute-path
+  (testing "load-file can evaluate a file using absolute path"
+    (p/let [workspace-root vscode/workspace.rootPath
+            absolute-path (path/join workspace-root "test_data.cljs")
+            _ (joy/load-file absolute-path)]
+      (is (= :load-file-success @(resolve 'test-data/test-symbol)))
+      (is (= [1 2 3] (:vector @(resolve 'test-data/test-data)))))))
 
 (comment
   ;; TODO: Is this a bug?
