@@ -24,7 +24,6 @@
 (sci/enable-unrestricted-access!) ;; allows mutating and set!-ing all vars from inside SCI
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
 (sci/alter-var-root sci/print-err-fn (constantly *print-err-fn*))
-(sci/alter-var-root sci/ns (constantly *ns*))
 
 (def joyride-ns (sci/create-ns 'joyride.core nil))
 
@@ -192,5 +191,7 @@
     (loop [res nil]
       (let [form (sci/parse-next (store/get-ctx) rdr)]
         (if (= :sci.core/eof form)
-          res
+          (do
+            (sci/alter-var-root sci/ns (constantly @sci/ns))
+            res)
           (recur (sci/eval-form (store/get-ctx) form)))))))
