@@ -19,13 +19,13 @@ The evaluation tool has an `awaitResult` parameter for handling async operations
 
 - **`awaitResult: false` (default)**: Returns immediately, suitable for
   * synchronous operations, returns the value of resulting from the evaluation
-  * fire-and-forget asynch evaluations, returns a serialized represntation of the promise)
+  * fire-and-forget async evaluations, returns a serialized representation of the promise)
 - **`awaitResult: true`**: Waits for async operations to complete before returning results, returns the resolved value of the promise
 
 **When to use `awaitResult: true`:**
 - Any operation returning a promise/thenable where you need the actual resolved value for further processing, e.g.
   - User input dialogs where you need the response (`showInputBox`, `showQuickPick`)
-  - Asynch file operations where you need the results (`findFiles`, `readFile`)
+  - Async file operations where you need the results (`findFiles`, `readFile`)
   - Extension API calls
   - Information messages with buttons where you need to know which was clicked
   - Etcetera
@@ -33,8 +33,8 @@ The evaluation tool has an `awaitResult` parameter for handling async operations
 **When to use `awaitResult: false` (default):**
 - When you want non-blocking behavior
 - Synchronous operations
-- Fire-and-forget asynch operations like information messages. Here it is crucial to not block on the message being dismissed, because the user may not even see the message.
-- Side-effect asynch operations where you don't need the return value
+- Fire-and-forget async operations like information messages. Here it is crucial to not block on the message being dismissed, because the user may not even see the message.
+- Side-effect async operations where you don't need the return value
 
 **Example with awaitResult:**
 ```clojure
@@ -52,6 +52,8 @@ The evaluation tool has an `awaitResult` parameter for handling async operations
 5. **Explore VS Code APIs** interactively
 
 ## Essential APIs for Agents
+
+**Important for agents**: To load namespaces/files into the REPL, instead of `load-file` (which isn't implemented in SCI) use the Joyride async version: `joyride.core/load-file`.
 
 ### VS Code API Access
 ```clojure
@@ -72,6 +74,8 @@ joyride/*file*                    ; Current file path
 (joyride/extension-context)       ; VS Code extension context
 (joyride/output-channel)          ; Joyride's output channel
 joyride/user-joyride-dir          ; User joyride directory
+joyride/slurp                     ; Similar to Clojure `slurp`, but is async. Accepts absolute or relative (to workspace) path. Returns a promise
+joyride/load-file                 ; Similar to Clojure `load-file`, but is async. Accepts absolute or relative (to workspace) path. Returns a promise
 ```
 
 ### VS Code Extension API
@@ -145,10 +149,20 @@ found-files ;=> the vector of file objects
   (def user-input input))
 ;; Now `user-input` contains the result
 
+;; File operations with joyride.core/slurp (use awaitResult: true)
+(p/let [content (joyride.core/slurp "some/file/in/the/workspace.csv")]
+  (def file-content content) ; if you want to use/inspect `content` later in the session
+  ; Do something with the content
+  )
+
+;; Loading namespaces/files with joyride.core/load-file (use awaitResult: true)
+(joyride.core/load-file "src/my_namespace.cljs")
+;; File is now loaded and available
+
 ;; Fire-and-forget: Show message and continue (awaitResult: false)
 (p/let [files (vscode/workspace.findFiles "**/*.cljs")]
   (vscode/window.showInformationMessage (str "Found " (count files) " files")))
-;; (Technically this continues, i.e. unblocks you, and then  the message is displayed asynch when the promise resolves.)
+;; (Technically this continues, i.e. unblocks you, and then the message is displayed async when the promise resolves.)
 
 ;; Wait for user response: Get which button was clicked (awaitResult: true)
 (p/let [files (vscode/workspace.findFiles "**/*.cljs")
@@ -190,7 +204,7 @@ found-files ;=> the vector of file objects
 ## Exploration Guidelines
 
 ### Best Practices for Agents
-1. **SIf possible: tart with REPL exploration** before suggesting modifications
+1. **If possible: Start with REPL exploration** before suggesting modifications
 2. **Test incrementally** - small steps first
 3. **Validate assumptions** in the REPL
 4. **Handle errors gracefully** in suggestions

@@ -1,10 +1,13 @@
 (ns joyride.utils
-  (:require ["fdir" :refer [fdir]]
-            ["vscode" :as vscode]
-            [clojure.pprint :as pprint]
-            [clojure.string :as str]
-            [joyride.db :as db]
-            [promesa.core :as p]))
+  (:require
+   ["fdir" :refer [fdir]]
+   ["path" :as path]
+   ["vscode" :as vscode]
+   [clojure.pprint :as pprint]
+   [clojure.string :as str]
+   [joyride.config :as config]
+   [joyride.db :as db]
+   [promesa.core :as p]))
 
 (defn jsify [clj-thing]
   (clj->js clj-thing))
@@ -99,3 +102,12 @@
   "Creates a VS Code URI by joining a base path with sub-path components"
   [base-path sub-path]
   (apply (.-joinPath vscode/Uri) (vscode/Uri.file base-path) sub-path))
+
+(defn as-workspace-abs-path
+  "Returns the absolute path of file-path, assuming relative paths are relative to the worksspace."
+  [file-path]
+  (if (path/isAbsolute file-path)
+    file-path
+    (if-let [workspace-root (config/workspace-abs-path)]
+      (path/join workspace-root file-path)
+      file-path)))

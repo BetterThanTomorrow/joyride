@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Add `joyride.core/load-file` and `joyride.core/slurp`](https://github.com/BetterThanTomorrow/joyride/issues/226)
+
 ## [0.0.58] - 2025-08-18
 
 - [Default content: Try downloaded from GitHub first](https://github.com/BetterThanTomorrow/joyride/issues/224)

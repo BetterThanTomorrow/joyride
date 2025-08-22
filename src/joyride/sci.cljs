@@ -10,11 +10,13 @@
    [joyride.config :as conf]
    [joyride.db :as db]
    [joyride.repl-utils :as repl-utils]
+   [joyride.utils :as util]
    [sci.configs.cljs.test :as cljs-test-config]
    [sci.configs.cljs.pprint :as cljs-pprint-config]
    [sci.configs.funcool.promesa :as promesa-config]
    [sci.core :as sci]
    [sci.ctx-store :as store]
+   [promesa.core :as p]
    [rewrite-clj.node]
    [rewrite-clj.parser]
    [rewrite-clj.zip]))
@@ -101,13 +103,38 @@
 
 (def pst-nyip (fn [_] (throw (js/Error. "pst not yet implemented"))))
 
+(def !last-ns (volatile! @sci/ns))
+
+(defn slurp+
+  "Asynchronously returns string from file f using vscode.workspace.fs.
+   Relative paths are resolved relative to the workspace root.
+   Returns a promise."
+  [file-path]
+  (let [absolute-path (util/as-workspace-abs-path file-path)]
+    (util/vscode-read-uri+ absolute-path)))
+
+(defn- load-file+
+  "Asynchronously evaluate the content of the file at `file-path`.
+   Relative paths are resolved relative to the workspace root.
+   Returns a promise."
+  [file-path]
+  (let [absolute-path (util/as-workspace-abs-path file-path)]
+    (p/let [source (slurp+ absolute-path)]
+      (sci/binding [sci/ns @!last-ns]
+        (sci/with-bindings {sci/file absolute-path}
+          (let [{:keys [ns val] :as result} (sci/eval-string+ (store/get-ctx) source)]
+            (println "BOOM! result" result ns val)
+            (vreset! !last-ns ns)
+            val))))))
 (def joyride-code
   {'*file* sci/file
    'extension-context (sci/copy-var db/extension-context joyride-ns)
    'invoked-script (sci/copy-var db/invoked-script joyride-ns)
    'output-channel (sci/copy-var db/output-channel joyride-ns)
    'js-properties repl-utils/instance-properties
-   'user-joyride-dir (conf/user-abs-joyride-path)})
+   'user-joyride-dir (conf/user-abs-joyride-path)
+   'slurp (sci/copy-var slurp+ core-namespace)
+   'load-file (sci/copy-var load-file+ core-namespace)})
 
 (store/reset-ctx!
  (sci/init {:classes {'js (doto goog/global
@@ -163,8 +190,6 @@
                                               (or (:as opts)
                                                   ns-sym))
                              {:handled true}))))}))
-
-(def !last-ns (volatile! @sci/ns))
 
 (defn eval-string [s]
   (sci/binding [sci/ns @!last-ns]

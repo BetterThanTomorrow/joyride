@@ -1,0 +1,3 @@
+Hello from Joyride slurp test!
+This is a simple text file for testing the slurp function.
+It contains multiple lines and some special characters: åäö 🎉
