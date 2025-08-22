@@ -74,7 +74,7 @@
 ;; These are tested manuallu in the repl to work: 2025-08-22 15:15
 
 ;; This is probably not how to test this, even if the test actually passes
-#_(deftest-async load-file-should-not-change-ns
+(deftest-async load-file-should-not-change-ns
     (testing "load-file should not change current *ns* (expected to fail until fixed)"
       (let [before (str *ns*)]
         (p/let [_ (joy/load-file ".joyride/etc/test_data.cljs")

@@ -24,6 +24,7 @@
 (sci/enable-unrestricted-access!) ;; allows mutating and set!-ing all vars from inside SCI
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
 (sci/alter-var-root sci/print-err-fn (constantly *print-err-fn*))
+(sci/alter-var-root sci/ns (constantly *ns*))
 
 (def joyride-ns (sci/create-ns 'joyride.core nil))
 
@@ -103,8 +104,6 @@
 
 (def pst-nyip (fn [_] (throw (js/Error. "pst not yet implemented"))))
 
-(def !last-ns (volatile! @sci/ns))
-
 (defn slurp+
   "Asynchronously returns string from file f using vscode.workspace.fs.
    Relative paths are resolved relative to the workspace root.
@@ -120,9 +119,8 @@
   [file-path]
   (let [absolute-path (util/as-workspace-abs-path file-path)]
     (p/let [source (slurp+ absolute-path)]
-      (sci/binding [sci/ns @!last-ns]
-        (sci/with-bindings {sci/file absolute-path}
-          (:val (sci/eval-string+ (store/get-ctx) source)))))))
+      (sci/with-bindings {sci/file absolute-path}
+        (:val (sci/eval-string+ (store/get-ctx) source))))))
 
 (def joyride-code
   {'*file* sci/file
@@ -190,12 +188,9 @@
                              {:handled true}))))}))
 
 (defn eval-string [s]
-  (sci/binding [sci/ns @!last-ns]
-    (let [rdr (sci/reader s)]
-      (loop [res nil]
-        (let [form (sci/parse-next (store/get-ctx) rdr)]
-          (if (= :sci.core/eof form)
-            (do
-              (vreset! !last-ns @sci/ns)
-              res)
-            (recur (sci/eval-form (store/get-ctx) form))))))))
+  (let [rdr (sci/reader s)]
+    (loop [res nil]
+      (let [form (sci/parse-next (store/get-ctx) rdr)]
+        (if (= :sci.core/eof form)
+          res
+          (recur (sci/eval-form (store/get-ctx) form)))))))

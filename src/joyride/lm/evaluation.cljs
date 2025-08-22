@@ -60,7 +60,7 @@
                                         (sci/eval-form (store/get-ctx)
                                                        (list 'clojure.core/create-ns (list 'quote target-ns)))
                                         (catch js/Error _
-                                          @joyride-sci/!last-ns))))
+                                          @sci/ns))))
                       result (sci/binding [sci/ns resolved-ns]
                                (joyride-sci/eval-string balanced-code))]
                 (make-result result nil wait-for-promise?))
@@ -81,7 +81,7 @@
                                 (sci/eval-form (store/get-ctx)
                                                (list 'clojure.core/create-ns (list 'quote target-ns)))
                                 (catch js/Error _
-                                  @joyride-sci/!last-ns))))
+                                  @sci/ns))))
               result (sci/binding [sci/ns resolved-ns]
                        (joyride-sci/eval-string balanced-code))]
           (make-result result nil wait-for-promise?))
