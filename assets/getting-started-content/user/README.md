@@ -40,9 +40,10 @@ Use VS Code commands to create your first Joyride scripts:
 
 1. **Get the script**: Copy from [Awesome Copilot Joyride Script](https://pez.github.io/awesome-copilot-index/awesome-copilot-script)
 2. **Install in Joyride**:
-   - Command Palette: `Joyride: Create User Script...`
-   - Name it: `awesome-copilot`
-   - Paste the script code
+   1. Command Palette: `Joyride: Create User Script...`
+   2. Name it: `awesome-copilot` (**NB: It's important that you name it exactly this, because reasons.**)
+   3. Paste the script code
+   4. Save the file
 3. **Use the script**:
    1. Command Palette: `Joyride: Run User Script...`
    2. Select: `awesome_copilot.cljs`
