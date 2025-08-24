@@ -51,12 +51,12 @@ Use VS Code commands to create your first Joyride scripts:
 
 #### 1.c Install the example `git-fuzzy` search function/command
 
-The `git-fuzzy` script is a simple way to search through your Git commit history using a fuzzy search. It will open previews highlight the changes as you seacrh and naviaget the results. It is a super fast way to find changes.
+The `git-fuzzy` script is a simple way to search through your Git commit history using a fuzzy search. It will open previews highlight the changes as you search and navigate the results. It is a super fast way to find changes.
 
 1. Copy the code from [Joyride Example: git_fuzzy.cljs](https://raw.githubusercontent.com/BetterThanTomorrow/joyride/refs/heads/master/examples/.joyride/src/git_fuzzy.cljs)
 1. Run the VS Code command: <kbd>Joyride: Create User Source File...</kbd>
     1. Enter `git-fuzzy` in the input box that pops up, and submit
-1. In the editor that opens, **Select All** and paste the code your copied.
+1. In the editor that opens, **Select All** and paste the code you copied.
 1. Configure a keyboard shortcut:
   ```json
   {
@@ -68,11 +68,11 @@ The `git-fuzzy` script is a simple way to search through your Git commit history
 
 If you use the keyboard shortcut in this project it will either:
 1. Show an error (if you haven't initialized this project for Git yet)
-1. Be bording (because you don't have many commits)
+1. Be boring (because you don't have many commits)
 
 So, open some other project in a VS Code window, and try it from there.
 
-The code for **git-fuzzy** is pretty simple and could probably have plenty of more features. Like supporting to search all git repos in a multi-folder workspace. Make the script your own by hackig away on it. You can ask CoPilot for help, modern Claude models are pretty good with Joyride.
+The code for **git-fuzzy** is pretty simple and could probably have plenty of more features. Like supporting to search all git repos in a multi-folder workspace. Make the script your own by hacking away on it. You can ask CoPilot for help, modern Claude models are pretty good with Joyride.
 
 ### 2. Install Calva (Recommended)
 For the best Joyride development experience, install the Calva extension:
