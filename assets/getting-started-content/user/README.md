@@ -24,8 +24,8 @@ This is your user Joyride directory where you can create scripts that are global
   1. `<user-home>/.config/joyride/src`
   1. `<user-home>/.config/joyride/scripts`
 - Note that this project has both workspace and user content:
-  - **Workspace** content (in [.joyride](.joyride/)), relevant only to this project
-  - **User** content (in the [scripts](scripts/), and [src](src/)), relevant to all projects you open with VS Code
+  - **Workspace** content (in the [.joyride](.joyride/) directory), relevant only to this project
+  - **User** content (in the [scripts](scripts/), and [src](src/) directories), relevant to all projects you open with VS Code
 
 ## Getting Started
 
@@ -53,7 +53,7 @@ Use VS Code commands to create your first Joyride scripts:
 
 #### 1.c Install the example `git-fuzzy` search function/command
 
-The `git-fuzzy` script is a simple way to search through your Git commit history using a fuzzy search. It will open previews highlight the changes as you search and navigate the results. It is a super fast way to find changes.
+The `git-fuzzy` script is a simple way to search through your Git commit history using a fuzzy search. It will open previews and highlight the changes as you search and navigate the results. It is a super fast way to find changes.
 
 1. Copy the code from [Joyride Example: git_fuzzy.cljs](https://raw.githubusercontent.com/BetterThanTomorrow/joyride/refs/heads/master/examples/.joyride/src/git_fuzzy.cljs)
 1. Run the VS Code command: <kbd>Joyride: Create User Source File...</kbd>
