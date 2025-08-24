@@ -10,7 +10,7 @@ This is your user Joyride directory where you can create scripts that are global
   run from the **Joyride: Run User Script...** menu.
 - A **Joyride Source file** is a file in the `src` subdirectory. It can be library
   functions for **Scripts**, and can also expose functions that you can call
-  from keyboard shortcut bindings, using `joyride.runCode` command.
+  from keyboard shortcut bindings, using the `joyride.runCode` command.
 - **User** scripts and source files. Code in this directory that can be accessed
   and run from the Joyride **User** commands. User code is global to all VS Code
   windows.
@@ -23,10 +23,13 @@ This is your user Joyride directory where you can create scripts that are global
   1. `<workspace-root>/.joyride/scripts`
   1. `<user-home>/.config/joyride/src`
   1. `<user-home>/.config/joyride/scripts`
+- Note that this project has both workspace and user content:
+  - **Workspace** content (in [.joyride](.joyride/)), relevant only to this project
+  - **User** content (in the [scripts](scripts/), and [src](src/)), relevant to all projects you open with VS Code
 
 ## Getting Started
 
-You probably want to have this project under source control.
+0. You probably want to have this project under source control.
 
 ### 1. Create Your First Script
 Use VS Code commands to create your first Joyride scripts:
