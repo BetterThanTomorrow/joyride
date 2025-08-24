@@ -12,8 +12,8 @@ This is your user Joyride directory where you can create scripts that are global
   functions for **Scripts**, and can also expose functions that you can call
   from keyboard shortcut bindings, using the `joyride.runCode` command.
 - **User** scripts and source files. Code in this directory that can be accessed
-  and run from the Joyride **User** commands. User code is global to all VS Code
-  windows.
+  and run from the Joyride **User** commands. User code is global (available to all VS Code
+  windows).
 - **Workspace** scripts and source files. Code in the `./joyride` subdirectory of
   projects you have opened in a VS Code window. Workspace code is local to the,
   well, workspace.
