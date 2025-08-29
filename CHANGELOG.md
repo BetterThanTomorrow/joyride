@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.62] - 2025-08-29
+
 - [nREPL server: Implement `session-close` confirmation](https://github.com/BetterThanTomorrow/joyride/pull/233)
 
 ## [0.0.61] - 2025-08-22
