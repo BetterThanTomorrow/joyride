@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [nREPL server: Implement `session-close` confirmation](https://github.com/BetterThanTomorrow/joyride/pull/233)
+
 ## [0.0.61] - 2025-08-22
 
 - Fix: [load-file is still tampering with current ns. (Issue #229 not fixed)](https://github.com/BetterThanTomorrow/joyride/issues/231)
