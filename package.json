@@ -185,7 +185,7 @@
         "name": "joyride_evaluate_code",
         "when": "config.joyride.lm.enableReplTool",
         "displayName": "Run Joyride Code",
-        "modelDescription": "Execute ClojureScript code in VS Code's Extension API environment via Joyride. Thus, you can modify editor behavior, manipulate files, invoke VS Code APIs, and create dynamic workflows. Runs synchronously by default - if you evaluate async code and need the unwrapped result, use the `awaitResult` parameter.",
+        "modelDescription": "**Joyride evaluation** - Execute ClojureScript code in VS Code's Extension API environment via Joyride. Use Joyride evaluation to modify editor behavior, manipulate files, invoke VS Code APIs, and create dynamic workflows. It us a DIY tool for both the human and for you to reach and compose with VS Code features and API. Make use of it!\n\n**Important**: Runs synchronously by default - if you evaluate async code and need the unwrapped result, provide the `awaitResult` parameter as `true`.",
         "userDescription": "Execute code with full VS Code API access (inspecting and/or modifying your VS Code environment)",
         "canBeReferencedInPrompt": true,
         "toolReferenceName": "joyride-eval",
