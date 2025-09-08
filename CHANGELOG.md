@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.63] - 2025-09-08
+
 - [AI: Establish human language names for the tools](https://github.com/BetterThanTomorrow/joyride/pull/234)
 
 ## [0.0.62] - 2025-08-29
