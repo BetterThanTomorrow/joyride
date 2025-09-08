@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [AI: Establish human language names for the tools](https://github.com/BetterThanTomorrow/joyride/pull/234)
+
 ## [0.0.62] - 2025-08-29
 
 - [nREPL server: Implement `session-close` confirmation](https://github.com/BetterThanTomorrow/joyride/pull/233)
