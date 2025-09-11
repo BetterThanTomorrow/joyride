@@ -25,6 +25,16 @@
       (.then (fn []
                (swap! db/!app-db assoc :disposables [])))))
 
+(def ^:private serializable-predicates
+  "A private set of predicates for simple, serializable data types."
+  #{nil? string? number? boolean? keyword? symbol?
+    vector? map? list? set?})
+
+(defn- serializable?
+  "Checks if a value is a simple, serializable data type."
+  [x]
+  (some #(% x) serializable-predicates))
+
 (defn run-code+
   ([]
    (p/let [input (vscode/window.showInputBox #js {:title "Run Code"
@@ -35,9 +45,16 @@
        (run-code+ input))))
   ([code]
    (-> (p/let [result (jsci/eval-string code)]
-         ;; Maybe we should skip printing here?
-         (utils/say-result result)
-         result)
+         ;; Print the result only if it's a serializable value,
+         ;; otherwise print and return a placeholder value
+         (if (serializable? result)
+           (do
+             (utils/say-result result)
+             result)
+           (do
+             (utils/say-result "[non-serializable value]")
+             ;; Return nil for any non-serializable type
+             nil)))
        (p/catch (fn [e]
                   (utils/say-error (str (ex-message e) "\n  " (ex-data e)))
                   (throw e))))))
