@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: [`Maximum call stack size exceeded` error when a script returns a non-serializable value, like a Promise.](https://github.com/BetterThanTomorrow/joyride/issues/218)
+
 ## [0.0.63] - 2025-09-08
 
 - [AI: Establish human language names for the tools](https://github.com/BetterThanTomorrow/joyride/pull/234)
