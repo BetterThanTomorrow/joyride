@@ -94,3 +94,9 @@
     (p/let [result (vscode/commands.executeCommand "joyride.runWorkspaceScript" "a_cljc_script.cljc")]
       (is (= :a-cljc-script
              result)))))
+
+(deftest-async run-a-non-serializable-return-value
+  (testing "Scripts returning a Promise should succeed without error"
+    (p/let [result (vscode/commands.executeCommand "joyride.runUserScript"
+                                                   "a_non_serializable_return_value.cljs")]
+      (is (nil? result) "The command should complete and return a safe value (nil)"))))
