@@ -11,11 +11,6 @@
 (defonce !flare-panels (atom {}))
 (defonce !flare-sidebar-views (atom {}))
 
-(defn hiccup?
-  "Check if data is a Hiccup structure (vector starting with keyword)"
-  [data]
-  (and (vector? data)
-       (keyword? (first data))))
 
 (defn render-hiccup
   "Render Hiccup data structure to HTML string using Replicant"
@@ -67,7 +62,7 @@
     ;; HTML content - check if it's Hiccup or HTML string
     (:html content-data)
     (let [html-content (:html content-data)]
-      (if (hiccup? html-content)
+      (if (vector? html-content)
         (render-hiccup html-content)
         html-content))
 
