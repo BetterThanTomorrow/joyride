@@ -10,15 +10,12 @@
 
 ;; Panel registry for key-based reuse
 (defonce !flare-panels (atom {}))
-(defonce !flare-sidebar-views (atom {}))
 
 
 (defn render-hiccup
   "Render Hiccup data structure to HTML string using Replicant"
   [hiccup-data]
   (try
-    ;; Use Replicant's string rendering for server-side HTML generation
-    ;; This is the correct API for Hiccup-to-HTML conversion
     (replicant/render hiccup-data)
     (catch js/Error e
       (throw (ex-info "Failed to render Hiccup data"
@@ -56,18 +53,15 @@
   "Handle different content types and generate appropriate HTML"
   [content-data title]
   (cond
-    ;; URL content - create iframe wrapper
     (:url content-data)
     (generate-iframe-content (:url content-data) title)
 
-    ;; HTML content - check if it's Hiccup or HTML string
     (:html content-data)
     (let [html-content (:html content-data)]
       (if (vector? html-content)
         (render-hiccup html-content)
         html-content))
 
-    ;; Default case
     :else
     (throw (ex-info "Invalid flare content: must specify either :html or :url"
                     {:content content-data}))))
@@ -82,25 +76,21 @@
   (let [panel-key (or key (gensym "flare-panel-"))
         ^js existing-panel (get @!flare-panels panel-key)]
 
-    ;; If panel exists and is not disposed, reuse it
     (if (and existing-panel (not (.-disposed existing-panel)))
       (do
         (when reveal
           (.reveal existing-panel column))
         existing-panel)
 
-      ;; Create new panel
       (let [panel (vscode/window.createWebviewPanel
                    "joyride.flare"
                    title
                    column
                    (clj->js opts))]
 
-        ;; Set up disposal handling - onDidDispose is on the panel, not webview
         (.onDidDispose panel
                        #(swap! !flare-panels dissoc panel-key))
 
-        ;; Store in registry
         (swap! !flare-panels assoc panel-key panel)
 
         panel))))
@@ -136,7 +126,6 @@
   [options]
   (let [{:keys [sidebar-panel?] :as opts} options]
     (if sidebar-panel?
-      ;; Create sidebar view
       (let [html-content (render-content opts (:title opts "Flare"))
             title (:title opts "Flare")
             reveal (:reveal opts true)
@@ -144,8 +133,6 @@
         (if (= result :pending)
           {:view :pending :type :sidebar}
           {:view result :type :sidebar}))
-
-      ;; Create regular panel
       (let [panel (create-webview-panel! opts)]
         (update-panel-content! panel opts (:title opts "WebView"))
         {:panel panel :type :panel}))))
@@ -161,20 +148,17 @@
   "Update the content of an existing flare panel or sidebar view"
   [flare-handle new-content-data]
   (cond
-    ;; Handle panel updates
     (and (map? flare-handle) (= (:type flare-handle) :panel))
     (let [panel (:panel flare-handle)
           title (or (:title new-content-data) "WebView")]
       (update-panel-content! panel new-content-data title)
       flare-handle)
 
-    ;; Handle sidebar updates
     (and (map? flare-handle) (= (:type flare-handle) :sidebar))
     (let [html-content (render-content new-content-data "Flare")]
       (sidebar/update-sidebar-flare! html-content)
       flare-handle)
 
-    ;; Invalid handle
     :else
     (throw (ex-info "Invalid flare handle: must be a flare result map"
                     {:provided flare-handle
@@ -184,20 +168,17 @@
   "Close/dispose a flare panel (sidebar views cannot be programmatically closed)"
   [flare-handle]
   (cond
-    ;; Handle panel disposal
     (and (map? flare-handle) (= (:type flare-handle) :panel))
     (let [^js panel (:panel flare-handle)]
       (when (and panel (not (.-disposed panel)))
         (.dispose panel))
       true)
 
-    ;; Sidebar views cannot be closed programmatically
     (and (map? flare-handle) (= (:type flare-handle) :sidebar))
     (throw (ex-info "Sidebar flare views cannot be programmatically closed"
                     {:flare-handle flare-handle
                      :suggestion "User must close the sidebar view manually"}))
 
-    ;; Invalid handle
     :else
     (throw (ex-info "Invalid flare handle: must be a flare result map"
                     {:provided flare-handle
