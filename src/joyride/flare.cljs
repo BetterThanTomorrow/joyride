@@ -5,7 +5,7 @@
    [clojure.string :as str]
    [clojure.edn :as edn]
    [joyride.flare.sidebar-provider :as sidebar]
-   [replicant.dom :as replicant]))
+   [replicant.string :as replicant]))
 
 ;; Panel registry for key-based reuse
 (defonce !flare-panels (atom {}))
@@ -21,9 +21,9 @@
   "Render Hiccup data structure to HTML string using Replicant"
   [hiccup-data]
   (try
-    ;; Use Replicant's DOM rendering for server-side HTML generation
-    ;; This should be the correct API for Hiccup-to-HTML conversion
-    (str (replicant/render hiccup-data))
+    ;; Use Replicant's string rendering for server-side HTML generation
+    ;; This is the correct API for Hiccup-to-HTML conversion
+    (replicant/render hiccup-data)
     (catch js/Error e
       (throw (ex-info "Failed to render Hiccup data"
                       {:hiccup hiccup-data
@@ -82,8 +82,7 @@
     :or {title "WebView"
          column vscode/ViewColumn.Beside
          opts {:enableScripts true}
-         reveal true}
-    :as options}]
+         reveal true}}]
   (let [panel-key (or key (gensym "flare-panel-"))
         existing-panel (get @!flare-panels panel-key)]
 
