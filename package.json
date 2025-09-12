@@ -70,9 +70,16 @@
       }
     ],
     "viewsContainers": {
-      "panel": [
+      "activitybar": [
         {
           "id": "joyride",
+          "title": "Joyride",
+          "icon": "$(play)"
+        }
+      ],
+      "panel": [
+        {
+          "id": "joyride-panel",
           "title": "Joyride",
           "icon": "$(play)"
         }
@@ -84,8 +91,7 @@
           "type": "webview",
           "id": "joyride.flare",
           "name": "Flare",
-          "icon": "$(browser)",
-          "when": "joyride.flareViewVisible"
+          "icon": "$(browser)"
         }
       ]
     },

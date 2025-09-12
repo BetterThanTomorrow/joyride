@@ -140,8 +140,10 @@
       (let [html-content (render-content opts (:title opts "Flare"))]
         (if-let [view (sidebar/update-sidebar-flare! html-content)]
           {:view view :type :sidebar}
-          (throw (ex-info "Failed to create sidebar flare: sidebar view not available"
-                          {:options options}))))
+          (throw (ex-info "Sidebar flare view not yet available. The Joyride sidebar view needs to be opened first."
+                         {:options options
+                          :suggestion "Open the Joyride view in the sidebar (View -> Open View -> Joyride: Flare)"
+                          :alternative "Use :sidebar-panel? false to create a regular panel instead"}))))
 
       ;; Create regular panel
       (let [panel (create-webview-panel! opts)]
