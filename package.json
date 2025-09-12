@@ -69,7 +69,32 @@
         }
       }
     ],
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "joyride",
+          "title": "Joyride",
+          "icon": "$(play)"
+        }
+      ]
+    },
+    "views": {
+      "joyride": [
+        {
+          "type": "webview",
+          "id": "joyride.flare",
+          "name": "Flare",
+          "icon": "$(browser)",
+          "when": "joyride.flareViewVisible"
+        }
+      ]
+    },
     "commands": [
+      {
+        "command": "joyride.flare.focus",
+        "title": "Focus Flare View",
+        "category": "Joyride"
+      },
       {
         "command": "joyride.runCode",
         "title": "Run Clojure Code...",
