@@ -37,7 +37,7 @@
   (try
     (replicant/render hiccup-data)
     (catch js/Error e
-      (throw (ex-info "Failed to render Hiccup data"
+      (throw (ex-info (str "Failed to render Hiccup data " (.-message e))
                       {:hiccup hiccup-data
                        :error (.-message e)})))))
 
@@ -48,7 +48,7 @@
 <html>
 <head>
     <meta charset=\"UTF-8\">
-    <title>" (or title "WebView") "</title>
+    <title>" (or title "Flare") "</title>
     <style>
         body, html {
             margin: 0;
