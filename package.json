@@ -76,13 +76,6 @@
           "title": "Joyride",
           "icon": "assets/j-icon-white.svg"
         }
-      ],
-      "panel": [
-        {
-          "id": "joyride-panel",
-          "title": "Joyride",
-          "icon": "assets/j-icon-white.svg"
-        }
       ]
     },
     "views": {
