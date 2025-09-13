@@ -143,7 +143,7 @@
   {'flare! (sci/copy-var flare/flare! joyride-ns)
    'close! (sci/copy-var flare/close! joyride-ns)
    'close-all! (sci/copy-var flare/close-all! joyride-ns)
-   'list-active (sci/copy-var flare/list-active joyride-ns)
+   'ls (sci/copy-var flare/ls joyride-ns)
    'get-flare (sci/copy-var flare/get-flare joyride-ns)})
 
 (store/reset-ctx!

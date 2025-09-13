@@ -215,7 +215,7 @@ WebView panel and sidebar view creation using Hiccup.
 - `flare!`: Create or update a flare. Options map with `:html` (Hiccup), `:title`, `:key` (for reuse), `:icon` (tab icon), `:sidebar-panel?` (display in sidebar panel).
 - `close!`: Close a specific flare by key.
 - `close-all!`: Close all active flares.
-- `list-active`: List all active flare keys.
+- `ls`: List all active flare keys.
 - `get-flare`: Get flare by key for inspection.
 
 **Icon Options:**

@@ -141,7 +141,7 @@ Joyride Flares provide a powerful way to create WebView panels and sidebar views
 (flare/close! "my-key")
 
 ;; List active flares
-(flare/list-active)
+(flare/ls)
 
 ;; Close all flares
 (flare/close-all!)

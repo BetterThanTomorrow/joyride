@@ -165,7 +165,7 @@ Joyride Flares provide a powerful way to create visual interfaces and display ri
                :title "SVG Demo"})
 
 ;; Manage flares
-(flare/list-active)              ; List all active flares
+(flare/ls)              ; List all active flares
 (flare/close! "greeting")        ; Close specific flare by key
 (flare/close-all!)               ; Close all flares
 ```
@@ -190,3 +190,7 @@ Joyride Flares provide a powerful way to create visual interfaces and display ri
 (let [disposable (vscode/workspace.onDidOpenTextDocument handler)]
   (.push (.-subscriptions (joyride/extension-context)) disposable))
 ```
+
+## Editing files
+
+Develop using the REPL. Yet, sometimes you need to edit file. And when you do, prefer structural editing tools.

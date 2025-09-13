@@ -2,27 +2,88 @@
   "Demonstrates Joyride Flares for creating WebView panels and sidebar views"
   (:require [joyride.flare :as flare]))
 
-;; SVG visualization with multiple shapes
-(defn create-svg []
-  [:svg {:height 200 :width 200 :style {:border "1px solid #ccc"}}
-   [:circle {:r 30 :cx 50 :cy 50 :fill "red" :opacity 0.7}]
-   [:rect {:x 70 :y 70 :width 60 :height 40 :fill :blue :opacity 0.7}]
-   [:line {:x1 10 :y1 180 :x2 190 :y2 20 :stroke :green :stroke-width 3}]
-   [:text {:x 100 :y 190 :text-anchor :middle :fill :purple} "Joyride!"]])
+(comment
+  ;; Simple greeting panel
+  (flare/flare! {:html [:h1 "Hello, Joyride Flares!"]
+                 :title "Greeting"
+                 :key "greeting"})
+
+  ;; Sidebar example
+  (flare/flare! {:html [:div {:style {:padding "10px"}}
+                        [:h3 "Joyride Sidebar"]
+                        [:p "This flare appears in the sidebar instead of a separate panel."]
+                        [:ul
+                         [:li "Useful for quick info"]
+                         [:li "Persistent views"]
+                         [:li "Space-efficient"]]
+                        [:hr]
+                        [:small "Use " [:code ":sidebar-panel? true"] " option"]]
+                 :title "Sidebar Demo"
+                 :sidebar-panel? true})
+
+  ;; Icon example
+  (flare/flare! {:html [:img {:src "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"}]
+                 :title "Awesome"
+                 :icon "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"})
+
+
+  (flare/flare! {:html [:svg {:height 200 :width 200 :style {:border "1px solid #ccc"}}
+                        [:circle {:r 30 :cx 50 :cy 50 :fill "red" :opacity 0.7}]
+                        [:rect {:x 70 :y 70 :width 60 :height 40 :fill :blue :opacity 0.7}]
+                        [:line {:x1 10 :y1 180 :x2 190 :y2 20 :stroke :green :stroke-width 3}]
+                        [:text {:x 100 :y 190 :text-anchor :middle :fill :purple} "Joyride!"]]
+                 :title "SVG Shapes"
+                 :key :some-svg})
+
+  :rcf)
+
+(def j-icon-svg
+  [:svg {:width "256"
+         :height "256"
+         :viewBox "0 0 2132 2132"
+         :fill "none"
+         :xmlns "http://www.w3.org/2000/svg"}
+   [:path
+    {:d
+     "M1193.77 193.156L1156.35 203.053L1158.62 241.698C1162.17 301.978 1163.95 365.96 1163.95 433.661C1163.95 686.826 1140.78 925.228 1094.6 1148.98C1071.71 1259.89 1041.91 1340.7 1007.18 1394.59C973.11 1447.47 936.705 1471.12 899.172 1476.8C883.031 1478.8 879.876 1474.75 879.128 1473.8C879.098 1473.75 879.068 1473.71 879.039 1473.68C875.724 1469.72 869.129 1456.57 869.129 1423.62C869.129 1369.47 882.817 1298.28 912.681 1208.67L947.209 1105.1L848.01 1150.7L512.613 1304.87L492.302 1314.21L486.611 1335.83C467.475 1408.55 458 1484.74 458 1564.26C458 1699.5 488.547 1817.16 552.256 1914.72L552.565 1915.19L552.886 1915.65C623.717 2018.68 738.183 2066 884.005 2066C1064.46 2066 1210.28 1962.97 1322.18 1775.28C1434.13 1590.5 1516.76 1353.04 1571.52 1064.73C1627.95 777.03 1661.54 465.266 1672.43 129.554L1674.49 66L1613.01 82.2598L1193.77 193.156Z"
+     :fill "#FEE719"
+     :stroke "black"
+     :stroke-width "97.7548"}]
+   [:path
+    {:d
+     "M1193.77 193.156L1156.35 203.053L1158.62 241.698C1162.17 301.978 1163.95 365.96 1163.95 433.661C1163.95 686.826 1140.78 925.228 1094.6 1148.98C1071.71 1259.89 1041.91 1340.7 1007.18 1394.59C973.11 1447.47 936.705 1471.12 899.172 1476.8C883.031 1478.8 879.876 1474.75 879.128 1473.8C879.098 1473.75 879.068 1473.71 879.039 1473.68C875.724 1469.72 869.129 1456.57 869.129 1423.62C869.129 1369.47 882.817 1298.28 912.681 1208.67L947.209 1105.1L848.01 1150.7L512.613 1304.87L492.302 1314.21L486.611 1335.83C467.475 1408.55 458 1484.74 458 1564.26C458 1699.5 488.547 1817.16 552.256 1914.72L552.565 1915.19L552.886 1915.65C623.717 2018.68 738.183 2066 884.005 2066C1064.46 2066 1210.28 1962.97 1322.18 1775.28C1434.13 1590.5 1516.76 1353.04 1571.52 1064.73C1627.95 777.03 1661.54 465.266 1672.43 129.554L1674.49 66L1613.01 82.2598L1193.77 193.156Z"
+     :fill "#FEE719"
+     :stroke "black"
+     :stroke-width "97.7548"}]
+   [:path
+    {:d
+     "M1500.08 1184.37C1497.61 1193.45 1453.33 1380.68 1455.97 1343.23C1408.91 1500.86 1350.79 1636.75 1281.61 1750.89C1175.22 1929.41 1042.69 2018.66 884.005 2018.66C748.77 2018.66 651.395 1975.39 591.887 1888.84C534.184 1800.48 505.336 1692.29 505.336 1564.26C505.336 1538 506.423 1512.17 508.591 1486.77C609.168 1447.94 714.611 1410.94 824.544 1375.9C822.714 1392.72 821.794 1408.63 821.794 1423.62C821.794 1497.54 849.745 1530.91 905.647 1523.69C991.414 1511.03 1058 1434.24 1105.39 1293.31C1328.14 1232.99 1249.65 1240.05 1500.08 1184.37Z"
+     :fill "#F00C18"
+     :fill-opacity "0.21"}]])
+
+(comment
+  (flare/flare! {:html [:div {:style {:text-align :center}}
+                        j-icon-svg]
+                 :title "J-icon"
+                 :key :j-icon-svg
+                 :sidebar-panel? true})
+  :rcf)
 
 ;; Data table example
 (defn data-table [data]
-  [:table {:style "border-collapse: collapse; width: 100%;"}
+  [:table {:style {:border-collapse :collapse :width "100%"}}
    [:thead
     [:tr
      (for [header (keys (first data))]
-       [:th {:style "border: 1px solid #ddd; padding: 8px; background: #f2f2f2;"}
+       [:th {:style {:border "1px solid #ddd; padding: 8px"
+                     :color :darkgrey
+                     :background "#f2f2f2"}}
         (name header)])]]
    [:tbody
     (for [row data]
       [:tr
        (for [value (vals row)]
-         [:td {:style "border: 1px solid #ddd; padding: 8px;"}
+         [:td {:style {:border "1px solid #ddd; padding: 8px"}}
           (str value)])])]])
 
 (def sample-data
@@ -30,7 +91,15 @@
    {:name "Bob" :age 25 :city "San Francisco"}
    {:name "Carol" :age 35 :city "Chicago"}])
 
-;; Fancy animated flare with modern design
+(comment
+  (flare/flare! {:html [:div
+                        [:h2 "Sample Data"]
+                        (data-table sample-data)]
+                 :title "Data Table"
+                 :key "data-table"})
+  :rcf)
+
+;; Fancy animated flare (vibe coded)
 (def fancy-html
   [:div
    ;; Add CSS animations in a style tag
@@ -147,7 +216,16 @@
      [:p {:style {:margin "10px 0 0 0" :font-size "0.85em" :opacity "0.6"}}
       "Interactive ClojureScript in VS Code"]]]])
 
+(comment
+  ;; Fancy animated flare with modern design and CSS animations
+  (flare/flare! {:html fancy-html
+                 :title "Fancy Joyride Flare"
+                 :key "fancy-flare"})
+
+  :rcf)
+
 ;; Fancy SVG flare with animations and beautiful graphics
+;; (Yes, vibe coded)
 (def fancy-svg
   [:div {:style {:background "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)"
                  :padding "30px"
@@ -262,55 +340,18 @@
     "Smooth SVG animations powered by Joyride Flares ✨"]])
 
 (comment
-
-  ;; Simple greeting panel
-  (flare/flare! {:html [:h1 "Hello, Joyride Flares!"]
-                 :title "Greeting"
-                 :key "greeting"})
-
-  (flare/flare! {:html (create-svg)
-                 :title "SVG Shapes"
-                 :key "svg-demo"})
-
-  (flare/flare! {:html [:div
-                        [:h2 "Sample Data"]
-                        (data-table sample-data)]
-                 :title "Data Table"
-                 :key "data-table"})
-
-  ;; Fancy animated flare with modern design and CSS animations
-  (flare/flare! {:html fancy-html
-                 :title "Fancy Joyride Flare"
-                 :key "fancy-flare"})
-
-  ;; Fancy SVG flare with animations and beautiful graphics
+  ;; Fancy SVG flare with animations
   (flare/flare! {:html fancy-svg
                  :title "Fancy SVG Showcase"
                  :key "fancy-svg"})
+  :rcf)
 
-  ;; Sidebar example
-  (flare/flare! {:html [:div {:style {:padding "10px"}}
-                        [:h3 "Joyride Sidebar"]
-                        [:p "This flare appears in the sidebar instead of a separate panel."]
-                        [:ul
-                         [:li "Useful for quick info"]
-                         [:li "Persistent views"]
-                         [:li "Space-efficient"]]
-                        [:hr]
-                        [:small "Use " [:code ":sidebar-panel? true"] " option"]]
-                 :title "Sidebar Demo"
-                 :sidebar-panel? true})
-
-  ;; Icon examples - URLs work directly!
-  (flare/flare! {:html [:img {:src "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"}]
-                 :title "Awesome"
-                 :icon "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"})
-
-  (flare/list-active)
+(comment
+  (flare/ls)
 
   (flare/close! "greeting")
 
-  (flare/list-active)
+  (flare/ls)
 
   (flare/close-all!)
 

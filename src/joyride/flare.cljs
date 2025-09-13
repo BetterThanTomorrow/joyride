@@ -172,7 +172,7 @@
       (do (.dispose panel) true))
     false))
 
-(defn list-active
+(defn ls
   "List all currently active flare panels"
   []
   (->> @!flare-panels
@@ -182,7 +182,7 @@
 (defn close-all!
   "Close all active flare panels"
   []
-  (let [active-panels (list-active)]
+  (let [active-panels (ls)]
     (doseq [[_key ^js panel] active-panels]
       (when (not (.-disposed panel))
         (.dispose panel)))
