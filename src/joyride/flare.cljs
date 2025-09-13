@@ -6,9 +6,6 @@
    [joyride.flare.sidebar-provider :as sidebar]
    [replicant.string :as replicant]))
 
-;; Panel registry for key-based reuse
-(defonce !flare-panels (atom {}))
-
 (defn resolve-icon-path
   "Convert icon specification to VS Code Uri or themed icon object"
   [icon-spec]
@@ -96,9 +93,8 @@
          opts {:enableScripts true}
          reveal true
          icon :flare/icon-default}}]
-  (def icon icon)
   (let [panel-key (or key (keyword "joyride.flare" (str "flare-" (gensym))))
-        ^js existing-panel (get @!flare-panels panel-key)]
+        ^js existing-panel (get (db/flare-panels) panel-key)]
 
     (if (and existing-panel (not (.-disposed existing-panel)))
       (do
@@ -117,9 +113,9 @@
           (set! (.-iconPath panel) (resolve-icon-path icon)))
 
         (.onDidDispose panel
-                       #(swap! !flare-panels dissoc panel-key))
+                       #(swap! db/!app-db update :flare-panels dissoc panel-key))
 
-        (swap! !flare-panels assoc panel-key panel)
+        (swap! db/!app-db assoc-in [:flare-panels panel-key] panel)
 
         panel))))
 
@@ -166,7 +162,7 @@
 (defn close!
   "Close/dispose a flare panel by key"
   [flare-key]
-  (if-let [^js panel (get @!flare-panels flare-key)]
+  (if-let [^js panel (get (db/flare-panels) flare-key)]
     (if (.-disposed panel)
       false
       (do (.dispose panel) true))
@@ -175,7 +171,7 @@
 (defn ls
   "List all currently active flare panels"
   []
-  (->> @!flare-panels
+  (->> (db/flare-panels)
        (filter (fn [[_key ^js panel]] (not (.-disposed panel))))
        (into {})))
 
@@ -186,12 +182,12 @@
     (doseq [[_key ^js panel] active-panels]
       (when (not (.-disposed panel))
         (.dispose panel)))
-    (reset! !flare-panels {})
+    (swap! db/!app-db assoc :flare-panels {})
     (count active-panels)))
 
 (defn get-flare
   "Get a flare by its key"
   [flare-key]
-  (when-let [^js panel (get @!flare-panels flare-key)]
+  (when-let [^js panel (get (db/flare-panels) flare-key)]
     (when (not (.-disposed panel))
       {:panel panel :type :panel})))
