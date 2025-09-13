@@ -301,6 +301,11 @@
                  :title "Sidebar Demo"
                  :sidebar-panel? true})
 
+  ;; Icon examples - URLs work directly!
+  (flare/flare! {:html [:img {:src "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"}]
+                 :title "Awesome"
+                 :icon "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"})
+
   (flare/list-active)
 
   (flare/close! "greeting")

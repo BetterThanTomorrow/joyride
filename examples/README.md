@@ -85,6 +85,11 @@ Createing Webviews is such a common thing, that Joyride has a way to quickly cre
                       [:circle {:r 40 :cx 50 :cy 50 :fill "blue"}]]
                :title "Blue Circle"})
 
+;; Custom tab icon
+(flare/flare! {:html [:img {:src "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"}]
+               :title "Awesome"
+               :icon "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"})
+
 ;; Display in sidebar instead of panel
 (flare/flare! {:html [:div
                       [:h2 "Sidebar View"]

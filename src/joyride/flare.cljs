@@ -12,19 +12,23 @@
 (defn resolve-icon-path
   "Convert icon specification to VS Code Uri or themed icon object"
   [icon-spec]
-  (let [ext-uri (.-extensionUri ^js (db/extension-context))]
+  (let [ext-uri (.-extensionUri ^js (db/extension-context))
+        resolve-path (fn [path]
+                       (if (or (.startsWith path "http://") (.startsWith path "https://"))
+                         (vscode/Uri.parse path)
+                         (vscode/Uri.file path)))]
     (cond
       (= icon-spec :flare/icon-default)
       (vscode/Uri.joinPath ext-uri "assets" "j-icon.svg")
 
-      ;; String path - absolute path
+      ;; String path - absolute path or URL
       (string? icon-spec)
-      (vscode/Uri.file icon-spec)
+      (resolve-path icon-spec)
 
-      ;; Map with :light and :dark - absolute paths
+      ;; Map with :light and :dark - absolute paths or URLs
       (and (map? icon-spec) (:light icon-spec) (:dark icon-spec))
-      #js {:light (vscode/Uri.file (:light icon-spec))
-           :dark (vscode/Uri.file (:dark icon-spec))}
+      #js {:light (resolve-path (:light icon-spec))
+           :dark (resolve-path (:dark icon-spec))}
 
       ;; Already a Uri - pass through
       :else icon-spec)))
@@ -133,31 +137,14 @@
    - :url - URL to display in iframe
    - :title - Panel/view title (default: 'WebView')
    - :key - Identifier for reusing panels
-   - :icon - Icon for the panel tab (default: :themed). Can be:
-     * :themed - Uses joyride.png for light theme, j-icon-white.svg for dark (default)
-     * :default - Uses j-icon-white.svg only
-     * String - Absolute path to icon file
-     * Map - {:light \"/path/to/light.svg\" :dark \"/path/to/dark.svg\"} for themed icons
-   - :reload - Force reload even if content unchanged (default: false)
-   - :reveal - Show/focus the panel (default: true)
-   - :column - VS Code ViewColumn (default: vscode.ViewColumn.Beside)
-   - :opts - WebView options (default: {:enableScripts true})
+   - :icon - Icon for panel tab. String (path/URL) or map {:light \"...\" :dark \"...\"}
    - :sidebar-panel? - Display in sidebar vs separate panel (default: false)
 
-   Content Examples:
-   - HTML string: {:html \"<h1>Hello</h1>\"}
-   - Hiccup data: {:html [:div [:h1 \"Hello\"] [:p \"World\"]]}
-   - URL: {:url \"https://example.com\"}
+   Examples:
+   - {:html [:h1 \"Hello\"] :icon \"https://example.com/icon.png\"}
+   - {:icon {:light \"https://light.png\" :dark \"https://dark.png\"}}
 
-   Icon Examples:
-   - Default themed: {:icon :themed} or omit :icon
-   - Single icon: {:icon :default}
-   - Custom absolute path: {:icon \"/Users/me/my-icon.svg\"}
-   - Themed custom: {:icon {:light \"/Users/me/light.svg\" :dark \"/Users/me/dark.svg\"}}
-
-   Returns:
-   - {:panel <webview-panel> :type :panel} for panels
-   - {:view <webview-view> :type :sidebar} for sidebar views"
+   Returns: {:panel <webview-panel> :type :panel} or {:view <webview-view> :type :sidebar}"
   [options]
   (let [{:keys [sidebar-panel?] :as opts} options]
     (if sidebar-panel?

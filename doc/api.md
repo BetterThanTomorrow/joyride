@@ -212,11 +212,15 @@ Here's a snippet from the [joyride_api.cljs](../examples/.joyride/scripts/joyrid
 
 WebView panel and sidebar view creation using Hiccup.
 
-- `flare!`: Create or update a flare. Options map with `:html` (Hiccup), `:title`, `:key` (for reuse), `:sidebar-panel?` (display in sidebar panel).
+- `flare!`: Create or update a flare. Options map with `:html` (Hiccup), `:title`, `:key` (for reuse), `:icon` (tab icon), `:sidebar-panel?` (display in sidebar panel).
 - `close!`: Close a specific flare by key.
 - `close-all!`: Close all active flares.
 - `list-active`: List all active flare keys.
 - `get-flare`: Get flare by key for inspection.
+
+**Icon Options:**
+- String - Path or URL to icon file
+- Map - `{:light "path-or-url" :dark "path-or-url"}` for themed icons
 
 See the [examples README](../examples/README.md#flares).
 
