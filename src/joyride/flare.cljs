@@ -2,11 +2,32 @@
   "Joyride Flares - WebView panel and sidebar view creation"
   (:require
    ["vscode" :as vscode]
+   [joyride.db :as db]
    [joyride.flare.sidebar-provider :as sidebar]
    [replicant.string :as replicant]))
 
 ;; Panel registry for key-based reuse
 (defonce !flare-panels (atom {}))
+
+(defn resolve-icon-path
+  "Convert icon specification to VS Code Uri or themed icon object"
+  [icon-spec]
+  (let [ext-uri (.-extensionUri ^js (db/extension-context))]
+    (cond
+      (= icon-spec :flare/icon-default)
+      (vscode/Uri.joinPath ext-uri "assets" "j-icon.svg")
+
+      ;; String path - absolute path
+      (string? icon-spec)
+      (vscode/Uri.file icon-spec)
+
+      ;; Map with :light and :dark - absolute paths
+      (and (map? icon-spec) (:light icon-spec) (:dark icon-spec))
+      #js {:light (vscode/Uri.file (:light icon-spec))
+           :dark (vscode/Uri.file (:dark icon-spec))}
+
+      ;; Already a Uri - pass through
+      :else icon-spec)))
 
 
 (defn render-hiccup
@@ -65,11 +86,13 @@
 
 (defn create-webview-panel!
   "Create or reuse a WebView panel based on options"
-  [{:keys [key title column opts reveal]
+  [{:keys [key title column opts reveal icon]
     :or {title "WebView"
          column vscode/ViewColumn.Beside
          opts {:enableScripts true}
-         reveal true}}]
+         reveal true
+         icon :flare/icon-default}}]
+  (def icon icon)
   (let [panel-key (or key (keyword "joyride.flare" (str "flare-" (gensym))))
         ^js existing-panel (get @!flare-panels panel-key)]
 
@@ -84,6 +107,10 @@
                    title
                    column
                    (clj->js opts))]
+
+        ;; Set icon (default or custom)
+        (when icon
+          (set! (.-iconPath panel) (resolve-icon-path icon)))
 
         (.onDidDispose panel
                        #(swap! !flare-panels dissoc panel-key))
@@ -106,6 +133,11 @@
    - :url - URL to display in iframe
    - :title - Panel/view title (default: 'WebView')
    - :key - Identifier for reusing panels
+   - :icon - Icon for the panel tab (default: :themed). Can be:
+     * :themed - Uses joyride.png for light theme, j-icon-white.svg for dark (default)
+     * :default - Uses j-icon-white.svg only
+     * String - Absolute path to icon file
+     * Map - {:light \"/path/to/light.svg\" :dark \"/path/to/dark.svg\"} for themed icons
    - :reload - Force reload even if content unchanged (default: false)
    - :reveal - Show/focus the panel (default: true)
    - :column - VS Code ViewColumn (default: vscode.ViewColumn.Beside)
@@ -116,6 +148,12 @@
    - HTML string: {:html \"<h1>Hello</h1>\"}
    - Hiccup data: {:html [:div [:h1 \"Hello\"] [:p \"World\"]]}
    - URL: {:url \"https://example.com\"}
+
+   Icon Examples:
+   - Default themed: {:icon :themed} or omit :icon
+   - Single icon: {:icon :default}
+   - Custom absolute path: {:icon \"/Users/me/my-icon.svg\"}
+   - Themed custom: {:icon {:light \"/Users/me/light.svg\" :dark \"/Users/me/dark.svg\"}}
 
    Returns:
    - {:panel <webview-panel> :type :panel} for panels
