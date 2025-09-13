@@ -280,16 +280,16 @@
 
   ;; Fancy animated flare with modern design and CSS animations
   (flare/flare! {:html fancy-html
-                 :title "🎨 Fancy Joyride Flare"
+                 :title "Fancy Joyride Flare"
                  :key "fancy-flare"})
 
   ;; Fancy SVG flare with animations and beautiful graphics
   (flare/flare! {:html fancy-svg
-                 :title "🎨 Fancy SVG Showcase"
+                 :title "Fancy SVG Showcase"
                  :key "fancy-svg"})
 
   ;; Sidebar example
-  (flare/flare! {:html [:div {:style "padding: 10px;"}
+  (flare/flare! {:html [:div {:style {:padding "10px"}}
                         [:h3 "Joyride Sidebar"]
                         [:p "This flare appears in the sidebar instead of a separate panel."]
                         [:ul
