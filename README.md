@@ -28,7 +28,7 @@ See the [examples](./examples) for examples including:
 * Workspace activation script
 * [Add a fuzzy git commit search and lookup menu](examples/.joyride/src/git_fuzzy.cljs)
 * Creating an interactive Webview
-* WebView panels and sidebar views with Flares
+* WebView panels and sidebar views with Flares (inspired by [Calva Flares](https://calva.io/flares))
 * Using `npm` dependencies (The wonderful [posthtml-parser](https://github.com/posthtml/posthtml-parser) in this case)
 * [Contribute a File Explorer tree view and commands (and anything)](examples/.joyride/scripts/sidecar/README.md) by creating a Joyride Sidecar extension on the fly.
 * Terminal creation and control
