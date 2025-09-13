@@ -138,8 +138,14 @@
    'js-properties repl-utils/instance-properties
    'user-joyride-dir (conf/user-abs-joyride-path)
    'slurp (sci/copy-var slurp+ core-namespace)
-   'load-file (sci/copy-var load-file+ core-namespace)
-   'flare! (sci/copy-var flare/flare! joyride-ns)})
+   'load-file (sci/copy-var load-file+ core-namespace)})
+
+(def joyride-flare-ns
+  {'flare! (sci/copy-var flare/flare! joyride-ns)
+   'close! (sci/copy-var flare/close! joyride-ns)
+   'close-all! (sci/copy-var flare/close-all! joyride-ns)
+   'list-active (sci/copy-var flare/list-active joyride-ns)
+   'get-flare (sci/copy-var flare/get-flare joyride-ns)})
 
 (store/reset-ctx!
  (sci/init {:classes {'js (doto goog/global
@@ -158,6 +164,7 @@
                          'cljs.pprint cljs-pprint-config/cljs-pprint-namespace
                          'promesa.core promesa-config/promesa-namespace
                          'joyride.core joyride-code
+                         'joyride.flare joyride-flare-ns
                          'rewrite-clj.zip rewrite-clj-zip-ns
                          'rewrite-clj.parser rewrite-clj-parser-ns
                          'rewrite-clj.node rewrite-clj-node-ns

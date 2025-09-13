@@ -2,8 +2,6 @@
   "Joyride Flares - WebView panel and sidebar view creation"
   (:require
    ["vscode" :as vscode]
-   [clojure.string :as str]
-   [clojure.edn :as edn]
    [joyride.flare.sidebar-provider :as sidebar]
    [joyride.flare.error-handling :as error]
    [replicant.string :as replicant]))
@@ -73,7 +71,7 @@
          column vscode/ViewColumn.Beside
          opts {:enableScripts true}
          reveal true}}]
-  (let [panel-key (or key (gensym "flare-panel-"))
+  (let [panel-key (or key (keyword "joyride.flare" (str "flare-" (gensym))))
         ^js existing-panel (get @!flare-panels panel-key)]
 
     (if (and existing-panel (not (.-disposed existing-panel)))
@@ -144,66 +142,45 @@
 
 ;; Programmatic flare control APIs
 
-(defn update-content!
-  "Update the content of an existing flare panel or sidebar view"
-  [flare-handle new-content-data]
-  (cond
-    (and (map? flare-handle) (= (:type flare-handle) :panel))
-    (let [panel (:panel flare-handle)
-          title (or (:title new-content-data) "WebView")]
-      (update-panel-content! panel new-content-data title)
-      flare-handle)
+(defn maybe-process-tagged-literal!
+  "Process tagged literal if it's a joyride/flare, otherwise return the value unchanged"
+  [value]
+  (if (and (tagged-literal? value)
+           (= 'joyride/flare (:tag value)))
+    (do
+      (process-flare-request! (:form value))
+      value)
+    value))
 
-    (and (map? flare-handle) (= (:type flare-handle) :sidebar))
-    (let [html-content (render-content new-content-data "Flare")]
-      (sidebar/update-sidebar-flare! html-content)
-      flare-handle)
+(defn close!
+  "Close/dispose a flare panel by key"
+  [flare-key]
+  (if-let [^js panel (get @!flare-panels flare-key)]
+    (if (.-disposed panel)
+      false
+      (do (.dispose panel) true))
+    false))
 
-    :else
-    (throw (ex-info "Invalid flare handle: must be a flare result map"
-                    {:provided flare-handle
-                     :expected "map with :type and :panel/:view keys"}))))
-
-(defn close-panel!
-  "Close/dispose a flare panel (sidebar views cannot be programmatically closed)"
-  [flare-handle]
-  (cond
-    (and (map? flare-handle) (= (:type flare-handle) :panel))
-    (let [^js panel (:panel flare-handle)]
-      (when (and panel (not (.-disposed panel)))
-        (.dispose panel))
-      true)
-
-    (and (map? flare-handle) (= (:type flare-handle) :sidebar))
-    (throw (ex-info "Sidebar flare views cannot be programmatically closed"
-                    {:flare-handle flare-handle
-                     :suggestion "User must close the sidebar view manually"}))
-
-    :else
-    (throw (ex-info "Invalid flare handle: must be a flare result map"
-                    {:provided flare-handle
-                     :expected "map with :type and :panel/:view keys"}))))
-
-(defn list-active-panels
+(defn list-active
   "List all currently active flare panels"
   []
   (->> @!flare-panels
        (filter (fn [[_key ^js panel]] (not (.-disposed panel))))
        (into {})))
 
-(defn dispose-all-panels!
-  "Dispose all active flare panels"
+(defn close-all!
+  "Close all active flare panels"
   []
-  (let [active-panels (list-active-panels)]
+  (let [active-panels (list-active)]
     (doseq [[_key ^js panel] active-panels]
       (when (not (.-disposed panel))
         (.dispose panel)))
     (reset! !flare-panels {})
     (count active-panels)))
 
-(defn get-panel-by-key
-  "Get a flare panel by its key"
-  [panel-key]
-  (when-let [^js panel (get @!flare-panels panel-key)]
+(defn get-flare
+  "Get a flare by its key"
+  [flare-key]
+  (when-let [^js panel (get @!flare-panels flare-key)]
     (when (not (.-disposed panel))
       {:panel panel :type :panel})))

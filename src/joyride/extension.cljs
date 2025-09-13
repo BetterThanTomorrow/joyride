@@ -3,6 +3,7 @@
    ["vscode" :as vscode]
    [joyride.content-utils :as content-utils]
    [joyride.db :as db]
+   [joyride.flare :as flare]
    [joyride.flare.sidebar-provider :as flare-sidebar]
    [joyride.getting-started :as getting-started]
    [joyride.lifecycle :as life-cycle]
@@ -35,7 +36,8 @@
      (when input
        (run-code+ input))))
   ([code]
-   (-> (p/let [result (jsci/eval-string code)]
+   (-> (p/let [result (-> (jsci/eval-string code)
+                              (flare/maybe-process-tagged-literal!))]
          ;; Maybe we should skip printing here?
          (utils/say-result result)
          result)
