@@ -434,6 +434,33 @@ For inline code execution:
   (show-python-environments))
 ```
 
+### Creating Flares (WebViews)
+```clojure
+(ns flare-examples
+  (:require [joyride.flare :as flare]))
+
+;; Use maps for :style attributes, prefer keywords for values
+(defn create-data-view []
+  (flare/flare! {:html [:div {:style {:padding "20px"}}
+                        [:h2 "Data Dashboard"]
+                        [:table {:style {:border-collapse :collapse}}
+                         [:tr [:th "Metric"] [:th "Value"]]
+                         [:tr [:td "Files"] [:td "42"]]
+                         [:tr [:td "Lines"] [:td "1,337"]]]]
+                :title "Project Stats"
+                :key "dashboard"}))
+
+(defn create-svg-chart []
+  (flare/flare! {:html [:svg {:width 300 :height 200
+                             :style {:border "1px solid #ccc"}}
+                        [:rect {:x 50 :y 50 :width 100 :height 80 :fill :blue}]
+                        [:text {:x 100 :y 100 :text-anchor :middle :fill :white} "Chart"]]
+                :title "SVG Visualization"}))
+
+(when (= (joyride/invoked-script) joyride/*file*)
+  (create-data-view))
+```
+
 ## NPM Dependencies for Users
 
 Help users understand how to use npm packages:

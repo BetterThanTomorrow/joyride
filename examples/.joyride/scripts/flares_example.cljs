@@ -4,7 +4,7 @@
 
 ;; SVG visualization with multiple shapes
 (defn create-svg []
-  [:svg {:height 200 :width 200 :style {:border ["1px" :solid "#ccc"]}}
+  [:svg {:height 200 :width 200 :style {:border "1px solid #ccc"}}
    [:circle {:r 30 :cx 50 :cy 50 :fill "red" :opacity 0.7}]
    [:rect {:x 70 :y 70 :width 60 :height 40 :fill :blue :opacity 0.7}]
    [:line {:x1 10 :y1 180 :x2 190 :y2 20 :stroke :green :stroke-width 3}]
