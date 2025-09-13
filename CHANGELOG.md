@@ -4,7 +4,7 @@ Changes to Joyride
 
 ## [Unreleased]
 
-- [ quick way to create webview content using hiccup (flares)](https://github.com/BetterThanTomorrow/joyride/pull/237)
+- [Add quick way to create webview content using hiccup (flares)](https://github.com/BetterThanTomorrow/joyride/pull/237)
 
 ## [0.0.63] - 2025-09-08
 
