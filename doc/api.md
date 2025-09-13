@@ -206,7 +206,23 @@ Here's a snippet from the [joyride_api.cljs](../examples/.joyride/scripts/joyrid
   (.appendLine "🎉"))
 ```
 
-**NB**: Currently, using bar `*file*` works. But it will probably stop working soon. Always use it from `joyride.core`.
+**NB**: Currently, using bare `*file*` works. But it will probably stop working soon. Always use it from `joyride.core`.
+
+#### `joyride.flare`
+
+WebView panel and sidebar view creation using Hiccup.
+
+- `flare!`: Create or update a flare. Options map with `:html` (Hiccup), `:title`, `:key` (for reuse), `:icon` (tab icon), `:sidebar-panel?` (display in sidebar panel).
+- `close!`: Close a specific flare by key.
+- `close-all!`: Close all active flares.
+- `ls`: List all active flare keys.
+- `get-flare`: Get flare by key for inspection.
+
+**Icon Options:**
+- String - Path or URL to icon file
+- Map - `{:light "path-or-url" :dark "path-or-url"}` for themed icons
+
+See the [examples README](../examples/README.md#flares).
 
 #### promesa.core
 

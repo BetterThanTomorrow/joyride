@@ -11,5 +11,6 @@
         org.babashka/sci.configs
         #_{:local/root "../sci.configs"}
         {:git/url "https://github.com/babashka/sci.configs"
-         :git/sha "8253c69a537bcc82e8ff122e5f905fe9d1e303f0"}}
+         :git/sha "8253c69a537bcc82e8ff122e5f905fe9d1e303f0"}
+        no.cjohansen/replicant {:mvn/version "2025.06.21"}}
  :aliases {:dev {}}}

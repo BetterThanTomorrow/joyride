@@ -98,6 +98,70 @@ joyride/load-file                 ; Similar to Clojure `load-file`, but is async
 - `promesa.core` - Promise handling (partial support)
 - `rewrite-clj` - Code manipulation
 
+## Joyride Flares - WebView Creation
+
+Joyride Flares provide a powerful way to create WebView panels and sidebar views with HTML content or external URLs.
+
+### Basic Flare Usage
+```clojure
+(require '[joyride.flare :as flare])
+
+;; Create a simple HTML flare
+(flare/flare! {:html [:h1 "Hello World!"]
+               :title "My Flare"
+               :key "example"})
+
+;; Create a flare with external URL
+(flare/flare! {:url "https://example.com"
+               :title "External Site"})
+
+;; Create sidebar flare
+(flare/flare! {:html [:div [:h2 "Sidebar"] [:p "Content"]]
+               :sidebar-panel? true})
+```
+
+### Style Guidelines for Hiccup
+- **Use maps for `:style` attributes** (not strings)
+- **Prefer keywords for CSS values** when possible
+- **Use proper CSS strings for compound properties**
+
+```clojure
+;; Proper style patterns:
+[:div {:style {:color :red
+               :background-color :blue
+               :border "1px solid #ccc"
+               :margin "10px 20px"
+               :font-family "'SF Pro', sans-serif"
+               :border-radius "8px"}}]
+```
+
+### Flare Management
+```clojure
+;; Close specific flare
+(flare/close! "my-key")
+
+;; List active flares
+(flare/ls)
+
+;; Close all flares
+(flare/close-all!)
+```
+
+### Common Flare Examples
+```clojure
+;; Data table
+(flare/flare! {:html [:table {:style {:border-collapse :collapse}}
+                       [:tr [:th "Name"] [:th "Value"]]
+                       [:tr [:td "Item 1"] [:td "42"]]]
+               :title "Data View"})
+
+;; SVG graphics
+(flare/flare! {:html [:svg {:width 200 :height 200
+                           :style {:border "1px solid #ddd"}}
+                      [:circle {:cx 100 :cy 100 :r 50 :fill :blue}]]
+               :title "SVG Demo"})
+```
+
 ## Common Evaluation Patterns
 
 ### Environment Inspection

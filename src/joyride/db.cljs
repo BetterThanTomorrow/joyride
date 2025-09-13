@@ -4,7 +4,8 @@
               :extension-context nil
               :invoked-script nil
               :disposables []
-              :workspace-root-path nil})
+              :workspace-root-path nil
+              :flare-panels {}})
 
 (defonce !app-db (atom init-db))
 
@@ -25,3 +26,8 @@
    See: https://code.visualstudio.com/api/references/vscode-api#OutputChannel"
   []
   (:output-channel @!app-db))
+
+(defn flare-panels
+  "Returns the map of active flare panels"
+  []
+  (:flare-panels @!app-db))

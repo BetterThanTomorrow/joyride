@@ -65,6 +65,41 @@ Create a Webview. Uses [scittle](https://babashka.org/scittle/) + [reagent](http
 
 Live demo here: https://twitter.com/borkdude/status/1519607386218053632
 
+## Quick and Simple Webviews with Flares
+
+Createing Webviews is such a common thing, that Joyride has a way to quickly create simple webviews. They can also be created in as a sidebar panel view. And they support using [Replicant Hiccup](https://replicant.fun/hiccup/).
+
+```clojure
+(require '[joyride.flare :as flare])
+
+;; Display HTML in a Webview
+(flare/flare! {:html [:h1 "Hello, Joyride Flares!"]
+               :title "Greeting"
+               :key "example"})
+
+;; Close the flare
+(flare/close! "example")
+
+;; SVG visualization
+(flare/flare! {:html [:svg {:height 100 :width 100}
+                      [:circle {:r 40 :cx 50 :cy 50 :fill "blue"}]]
+               :title "Blue Circle"})
+
+;; Custom tab icon
+(flare/flare! {:html [:img {:src "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"}]
+               :title "Awesome"
+               :icon "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"})
+
+;; Display in sidebar instead of panel
+(flare/flare! {:html [:div
+                      [:h2 "Sidebar View"]
+                      [:p "This appears in the Joyride sidebar"]]
+               :title "Side Panel"
+               :sidebar-panel? true})
+```
+
+The `:key` parameter allows reusing the same panel for updates.
+
 ## Terminal
 
 `.joyride/scripts/terminal.cljs`

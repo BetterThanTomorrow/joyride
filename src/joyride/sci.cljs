@@ -9,6 +9,7 @@
    [goog.object :as gobject]
    [joyride.config :as conf]
    [joyride.db :as db]
+   [joyride.flare :as flare]
    [joyride.repl-utils :as repl-utils]
    [joyride.utils :as util]
    [sci.configs.cljs.test :as cljs-test-config]
@@ -19,7 +20,8 @@
    [promesa.core :as p]
    [rewrite-clj.node]
    [rewrite-clj.parser]
-   [rewrite-clj.zip]))
+   [rewrite-clj.zip]
+   [replicant.dom]))
 
 (sci/enable-unrestricted-access!) ;; allows mutating and set!-ing all vars from inside SCI
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
@@ -99,6 +101,9 @@
 (def rnns (sci/create-ns 'rewrite-clj.node))
 (def rewrite-clj-node-ns (sci/copy-ns rewrite-clj.node rnns))
 
+(def rns (sci/create-ns 'replicant.dom))
+(def replicant-dom-ns (sci/copy-ns replicant.dom rns))
+
 (def core-namespace (sci/create-ns 'clojure.core nil))
 
 (def pst-nyip (fn [_] (throw (js/Error. "pst not yet implemented"))))
@@ -134,6 +139,13 @@
    'slurp (sci/copy-var slurp+ core-namespace)
    'load-file (sci/copy-var load-file+ core-namespace)})
 
+(def joyride-flare-ns
+  {'flare! (sci/copy-var flare/flare! joyride-ns)
+   'close! (sci/copy-var flare/close! joyride-ns)
+   'close-all! (sci/copy-var flare/close-all! joyride-ns)
+   'ls (sci/copy-var flare/ls joyride-ns)
+   'get-flare (sci/copy-var flare/get-flare joyride-ns)})
+
 (store/reset-ctx!
  (sci/init {:classes {'js (doto goog/global
                             (aset "require" js/require))
@@ -150,9 +162,11 @@
                          'cljs.pprint cljs-pprint-config/cljs-pprint-namespace
                          'promesa.core promesa-config/promesa-namespace
                          'joyride.core joyride-code
+                         'joyride.flare joyride-flare-ns
                          'rewrite-clj.zip rewrite-clj-zip-ns
                          'rewrite-clj.parser rewrite-clj-parser-ns
-                         'rewrite-clj.node rewrite-clj-node-ns}
+                         'rewrite-clj.node rewrite-clj-node-ns
+                         'replicant.dom replicant-dom-ns}
             :ns-aliases '{clojure.test cljs.test
                           cljs.repl clojure.repl}
             :load-fn (fn [{:keys [ns libname opts]}]
