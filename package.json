@@ -74,14 +74,14 @@
         {
           "id": "joyride",
           "title": "Joyride",
-          "icon": "$(play)"
+          "icon": "assets/j-icon-white.svg"
         }
       ],
       "panel": [
         {
           "id": "joyride-panel",
           "title": "Joyride",
-          "icon": "$(play)"
+          "icon": "assets/j-icon-white.svg"
         }
       ]
     },
@@ -91,7 +91,7 @@
           "type": "webview",
           "id": "joyride.flare",
           "name": "Flare",
-          "icon": "$(browser)"
+          "icon": "assets/j-icon-white.svg"
         }
       ]
     },
