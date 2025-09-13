@@ -4,11 +4,11 @@
 
 ;; SVG visualization with multiple shapes
 (defn create-svg []
-  [:svg {:height 200 :width 200 :style {:border "1px" :solid "#ccc"}}
+  [:svg {:height 200 :width 200 :style {:border ["1px" :solid "#ccc"]}}
    [:circle {:r 30 :cx 50 :cy 50 :fill "red" :opacity 0.7}]
-   [:rect {:x 70 :y 70 :width 60 :height 40 :fill "blue" :opacity 0.7}]
-   [:line {:x1 10 :y1 180 :x2 190 :y2 20 :stroke "green" :stroke-width 3}]
-   [:text {:x 100 :y 190 :text-anchor "middle" :fill "purple"} "Joyride!"]])
+   [:rect {:x 70 :y 70 :width 60 :height 40 :fill :blue :opacity 0.7}]
+   [:line {:x1 10 :y1 180 :x2 190 :y2 20 :stroke :green :stroke-width 3}]
+   [:text {:x 100 :y 190 :text-anchor :middle :fill :purple} "Joyride!"]])
 
 ;; Data table example
 (defn data-table [data]
@@ -53,13 +53,13 @@
    ;; Main container with style map
    [:div {:style {:font-family "'SF Pro Display', system-ui, sans-serif"
                   :background "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                  :color "white"
+                  :color :white
                   :padding "30px"
                   :border-radius "16px"
                   :min-height "500px"}}
 
     ;; Header
-    [:div {:style {:text-align "center" :margin-bottom "40px"}}
+    [:div {:style {:text-align :center :margin-bottom "40px"}}
      [:h1 {:class "pulse"
            :style {:font-size "3em"
                    :margin "0"
@@ -69,9 +69,9 @@
       "A beautiful, animated HTML experience"]]
 
     ;; Feature cards
-    [:div {:style {:display "flex"
-                   :justify-content "space-around"
-                   :flex-wrap "wrap"
+    [:div {:style {:display :flex
+                   :justify-content :space-around
+                   :flex-wrap :wrap
                    :gap "20px"
                    :margin-bottom "40px"}}
 
@@ -81,7 +81,7 @@
                     :border-radius "20px"
                     :padding "25px"
                     :min-width "180px"
-                    :text-align "center"
+                    :text-align :center
                     :border "1px solid rgba(255,255,255,0.2)"
                     :box-shadow "0 8px 32px rgba(0,0,0,0.1)"}}
       [:div {:style {:font-size "3em" :margin-bottom "15px"}} "🚀"]
@@ -94,7 +94,7 @@
                     :border-radius "20px"
                     :padding "25px"
                     :min-width "180px"
-                    :text-align "center"
+                    :text-align :center
                     :border "1px solid rgba(255,255,255,0.2)"
                     :box-shadow "0 8px 32px rgba(0,0,0,0.1)"}}
       [:div {:style {:font-size "3em" :margin-bottom "15px"}} "⚡"]
@@ -107,7 +107,7 @@
                     :border-radius "20px"
                     :padding "25px"
                     :min-width "180px"
-                    :text-align "center"
+                    :text-align :center
                     :border "1px solid rgba(255,255,255,0.2)"
                     :box-shadow "0 8px 32px rgba(0,0,0,0.1)"}}
       [:div {:style {:font-size "3em" :margin-bottom "15px"}} "🎨"]
@@ -120,23 +120,23 @@
      [:div {:style {:background "rgba(255,255,255,0.2)"
                     :border-radius "30px"
                     :height "24px"
-                    :overflow "hidden"
-                    :position "relative"}}
+                    :overflow :hidden
+                    :position :relative}}
       [:div {:style {:background "linear-gradient(90deg, #00ff88, #00ccff, #8c52ff)"
                      :height "100%"
                      :width "87%"
                      :border-radius "30px"
                      :box-shadow "0 0 20px rgba(0,255,136,0.4)"}}]]
-     [:div {:style {:text-align "right" :margin-top "8px" :font-size "1em" :opacity "0.9"}} "87% Awesome"]]
+     [:div {:style {:text-align :right :margin-top "8px" :font-size "1em" :opacity "0.9"}} "87% Awesome"]]
 
     ;; Footer
-    [:div {:style {:text-align "center"
+    [:div {:style {:text-align :center
                    :margin-top "40px"
                    :padding-top "25px"
                    :border-top "1px solid rgba(255,255,255,0.2)"}}
-     [:div {:style {:display "flex"
-                    :justify-content "center"
-                    :align-items "center"
+     [:div {:style {:display :flex
+                    :justify-content :center
+                    :align-items :center
                     :gap "10px"
                     :margin-bottom "15px"}}
       [:span {:style {:font-size "1.5em"}} "❤️"]
@@ -152,7 +152,7 @@
   [:div {:style {:background "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)"
                  :padding "30px"
                  :border-radius "20px"
-                 :text-align "center"}}
+                 :text-align :center}}
 
    [:style "
      @keyframes rotate {
@@ -172,13 +172,13 @@
      .floating { animation: pulse-svg 4s ease-in-out infinite 1s; }
    "]
 
-   [:h2 {:style {:color "white" :margin-bottom "30px" :font-size "2.2em"}} "🎨 Fancy SVG Showcase"]
+   [:h2 {:style {:color :white :margin-bottom "30px" :font-size "2.2em"}} "🎨 Fancy SVG Showcase"]
 
-   [:div {:style {:display "flex" :justify-content "space-around" :flex-wrap "wrap" :gap "30px"}}
+   [:div {:style {:display :flex :justify-content :space-around :flex-wrap :wrap :gap "30px"}}
 
     ;; Animated geometric pattern
     [:div {:style {:background "rgba(255,255,255,0.1)" :border-radius "15px" :padding "20px"}}
-     [:h3 {:style {:color "white" :margin-bottom "15px"}} "Rotating Geometry"]
+     [:h3 {:style {:color :white :margin-bottom "15px"}} "Rotating Geometry"]
      [:svg {:width 200 :height 200 :style {:background "rgba(0,0,0,0.2)" :border-radius "10px"}}
       [:defs
        [:linearGradient {:id "grad1" :x1 "0%" :y1 "0%" :x2 "100%" :y2 "100%"}
@@ -194,12 +194,12 @@
                   :opacity 0.8}]
        [:circle {:cx 100 :cy 100 :r 25 :fill "url(#grad2)"}]]
 
-      [:circle {:cx 100 :cy 100 :r 85 :fill "none" :stroke "#fff" :stroke-width 2 :opacity 0.3}]
-      [:circle {:cx 100 :cy 100 :r 65 :fill "none" :stroke "#fff" :stroke-width 1 :opacity 0.2}]]]
+      [:circle {:cx 100 :cy 100 :r 85 :fill :none :stroke "#fff" :stroke-width 2 :opacity 0.3}]
+      [:circle {:cx 100 :cy 100 :r 65 :fill :none :stroke "#fff" :stroke-width 1 :opacity 0.2}]]]
 
     ;; Pulsing data visualization
     [:div {:style {:background "rgba(255,255,255,0.1)" :border-radius "15px" :padding "20px"}}
-     [:h3 {:style {:color "white" :margin-bottom "15px"}} "Data Pulse"]
+     [:h3 {:style {:color :white :margin-bottom "15px"}} "Data Pulse"]
      [:svg {:width 200 :height 200 :style {:background "rgba(0,0,0,0.2)" :border-radius "10px"}}
       [:defs
        [:linearGradient {:id "barGrad" :x1 "0%" :y1 "100%" :x2 "0%" :y2 "0%"}
@@ -228,7 +228,7 @@
 
     ;; Organic flowing shapes
     [:div {:style {:background "rgba(255,255,255,0.1)" :border-radius "15px" :padding "20px"}}
-     [:h3 {:style {:color "white" :margin-bottom "15px"}} "Organic Flow"]
+     [:h3 {:style {:color :white :margin-bottom "15px"}} "Organic Flow"]
      [:svg {:width 200 :height 200 :style {:background "rgba(0,0,0,0.2)" :border-radius "10px"}}
       [:defs
        [:linearGradient {:id "flowGrad" :x1 "0%" :y1 "0%" :x2 "100%" :y2 "100%"}
@@ -245,9 +245,9 @@
       [:circle {:cx 100 :cy 100 :r 4 :fill "#fff" :opacity 0.8 :class "pulsing"}]]]]
 
    ;; Stats section
-   [:div {:style {:margin-top "30px" :color "white"}}
+   [:div {:style {:margin-top "30px" :color :white}}
     [:h3 {:style {:margin-bottom "15px"}} "📊 SVG Performance"]
-    [:div {:style {:display "flex" :justify-content "space-around" :text-align "center"}}
+    [:div {:style {:display :flex :justify-content :space-around :text-align :center}}
      [:div
       [:div {:style {:font-size "2em" :color "#4ecdc4"}} "60"]
       [:div {:style {:font-size "0.9em" :opacity "0.8"}} "FPS"]]
@@ -258,7 +258,7 @@
       [:div {:style {:font-size "2em" :color "#ff6b6b"}} "3"]
       [:div {:style {:font-size "0.9em" :opacity "0.8"}} "Animations"]]]]
 
-   [:p {:style {:color "white" :opacity "0.8" :margin-top "20px" :font-size "0.9em"}}
+   [:p {:style {:color :white :opacity "0.8" :margin-top "20px" :font-size "0.9em"}}
     "Smooth SVG animations powered by Joyride Flares ✨"]])
 
 (comment
