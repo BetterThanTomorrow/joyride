@@ -77,17 +77,6 @@ Createing Webviews is such a common thing, that Joyride has a way to quickly cre
                :title "Greeting"
                :key "example"})
 
-;; Same thing using tagged literal
-#joyride/flare {:html [:h1 "Hello, Joyride Flares!"]
-                :title "Greeting using tagged literal"
-                :key "example"} ; Same key causes an update of the existing flare
-
-;; As well as
-(tagged-literal 'joyride/flare
-                {:html [:h1 "Hello, Joyride Flares!"]
-                 :title "Greeting using tagged literal"
-                 :key "example"})
-
 ;; Close the flare
 (flare/close! "example")
 

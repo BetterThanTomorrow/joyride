@@ -1,13 +1,14 @@
 # Joyride Flares Implementation Plan
 
+**Note**: This document originally included tagged literal support (`#flare/html`) which has been removed from the implementation. Only the function API (`flare!`) is now supported.
+
 ## Overview
 
-This plan outlines the implementation of Flares for Joyride - a powerful feature for creating custom WebView panels and sidebar views directly from ClojureScript evaluation results. Flares enable users to display HTML content, web pages, data visualizations, and custom UI components within VS Code through both tagged literals and function calls.
+This plan outlines the implementation of Flares for Joyride - a powerful feature for creating custom WebView panels and sidebar views directly from ClojureScript evaluation results. Flares enable users to display HTML content, web pages, data visualizations, and custom UI components within VS Code through function calls.
 
 ## Requirements
 
 ### Functional Requirements
-- **Tagged Literal Support**: Process `#joyride/flare {...}` literals returned from evaluations
 - **Function API**: Provide `(joyride.core/flare! {...})` function for direct invocation
 - **Hiccup Support**: Accept both HTML strings and Hiccup data structures, using Replicant for rendering
 - **Calva Compatibility**: Full compatibility with Calva's Flare specification for easy migration
@@ -107,7 +108,7 @@ This plan outlines the implementation of Flares for Joyride - a powerful feature
    [clojure.edn :as edn]))
 
 (defn joyride-flare-reader [flare-data]
-  "Tagged literal reader for #joyride/flare"
+  "Tagged literal reader for #flare/html"
   (flare/process-flare-request! flare-data))
 ```
 
@@ -407,8 +408,8 @@ The architecture readily supports additional flare types:
 
 ```clojure
 ;; Current HTML/Hiccup flares
-#joyride/flare {:html "<h1>Hello</h1>"}
-#joyride/flare {:html [:div [:h1 "Hello"] [:p "World"]]}
+#flare/html {:html "<h1>Hello</h1>"}
+#flare/html {:html [:div [:h1 "Hello"] [:p "World"]]}
 
 ;; Future flare types
 #joyride/chart {:type :bar :data [...] :title "Sales Chart"}
@@ -449,7 +450,7 @@ The architecture readily supports additional flare types:
 ## Success Criteria
 
 ### **Functional Success**
-- [ ] Tagged literals `#joyride/flare` work in all evaluation contexts
+- [ ] Tagged literals `#flare/html` work in all evaluation contexts
 - [ ] Function API `(flare! {...})` creates panels/sidebar views correctly
 - [ ] Both HTML strings and Hiccup data structures render properly
 - [ ] Replicant integration provides robust Hiccup-to-HTML conversion

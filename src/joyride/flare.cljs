@@ -3,7 +3,6 @@
   (:require
    ["vscode" :as vscode]
    [joyride.flare.sidebar-provider :as sidebar]
-   [joyride.flare.error-handling :as error]
    [replicant.string :as replicant]))
 
 ;; Panel registry for key-based reuse
@@ -135,22 +134,9 @@
         (update-panel-content! panel opts (:title opts "WebView"))
         {:panel panel :type :panel}))))
 
-(defn process-flare-request!
-  "Process a flare request from tagged literal or function call"
-  [flare-data]
-  (error/safe-flare-processing flare-data flare!))
-
 ;; Programmatic flare control APIs
 
-(defn maybe-process-tagged-literal!
-  "Process tagged literal if it's a joyride/flare, otherwise return the value unchanged"
-  [value]
-  (if (and (tagged-literal? value)
-           (= 'joyride/flare (:tag value)))
-    (do
-      (process-flare-request! (:form value))
-      value)
-    value))
+
 
 (defn close!
   "Close/dispose a flare panel by key"

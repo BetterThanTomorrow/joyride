@@ -10,7 +10,6 @@
    [joyride.config :as conf]
    [joyride.db :as db]
    [joyride.flare :as flare]
-   [joyride.flare.tagged-literal :as flare-tagged]
    [joyride.repl-utils :as repl-utils]
    [joyride.utils :as util]
    [sci.configs.cljs.test :as cljs-test-config]
@@ -152,7 +151,6 @@
                             (aset "require" js/require))
                       :allow :all}
             :features #{:joyride :cljs}
-            :readers {'joyride/flare flare-tagged/joyride-flare-reader}
             :namespaces {'clojure.core {'IFn (sci/copy-var IFn core-namespace)
                                         'tap> (sci/copy-var tap> core-namespace)
                                         'add-tap (sci/copy-var add-tap core-namespace)

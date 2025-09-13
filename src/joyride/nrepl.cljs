@@ -5,7 +5,6 @@
    ["path" :as path]
    ["vscode" :as vscode]
    [joyride.bencode :refer [encode decode-all]]
-   [joyride.flare :as flare]
    [joyride.when-contexts :as when-contexts]
    [joyride.repl-utils :as repl-utils :refer [the-sci-ns]]
    [joyride.sci :as jsci]
@@ -95,8 +94,7 @@
     (sci/alter-var-root sci/print-fn (constantly
                                       (fn [s]
                                         (send-fn request {"out" s}))))
-    (try (let [v (-> (jsci/eval-string code)
-                         (flare/maybe-process-tagged-literal!))]
+    (try (let [v (jsci/eval-string code)]
            (sci/alter-var-root sci/*3 (constantly @sci/*2))
            (sci/alter-var-root sci/*2 (constantly @sci/*1))
            (sci/alter-var-root sci/*1 (constantly v))

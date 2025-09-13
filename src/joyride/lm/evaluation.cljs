@@ -2,7 +2,6 @@
   (:require
    ["vscode" :as vscode]
    [joyride.balance :as balance]
-   [joyride.flare :as flare]
    [joyride.lm.eval.core :as core]
    [joyride.repl-utils :as repl-utils]
    [joyride.sci :as joyride-sci]
@@ -63,8 +62,7 @@
                                         (catch js/Error _
                                           @joyride-sci/!last-ns))))
                       result (sci/binding [sci/ns resolved-ns]
-                               (-> (joyride-sci/eval-string balanced-code)
-                                   (flare/maybe-process-tagged-literal!)))]
+                               (joyride-sci/eval-string balanced-code))]
                 (make-result result nil wait-for-promise?))
               (p/catch (fn [e] ;; Todo, this doesn't catch evalutation errors
                          (make-result nil (.-message e) wait-for-promise?)))
@@ -85,8 +83,7 @@
                                 (catch js/Error _
                                   @joyride-sci/!last-ns))))
               result (sci/binding [sci/ns resolved-ns]
-                       (-> (joyride-sci/eval-string balanced-code)
-                           (flare/maybe-process-tagged-literal!)))]
+                       (joyride-sci/eval-string balanced-code))]
           (make-result result nil wait-for-promise?))
         (catch js/Error e
           (make-result nil (.-message e) wait-for-promise?))

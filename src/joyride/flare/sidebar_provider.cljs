@@ -21,7 +21,7 @@
                 (when (:title content)
                   (set! (.-title webview-view) (:title content))))
               (set! (.-html (.-webview webview-view))
-                    "<h3>Joyride Flare</h3><p>No flare content yet. Create a flare using <code>flare!</code> function or <code>#joyride/flare</code> tagged literal.</p>")))]
+                    "<h3>Joyride Flare</h3><p>No flare content yet. Create a flare using <code>flare!</code> function.</p>")))]
     #js {:resolveWebviewView resolve-webview-view}))
 
 (defn register-flare-provider!

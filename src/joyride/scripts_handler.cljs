@@ -4,7 +4,6 @@
             [joyride.config :as conf]
             [joyride.constants :as const]
             [joyride.db :as db]
-            [joyride.flare :as flare]
             [joyride.getting-started :as getting-started]
             [joyride.sci :as jsci]
             [joyride.utils :as utils :refer [cljify jsify]]
@@ -107,8 +106,7 @@
                       (utils/vscode-read-uri+ script-uri))]
          (swap! db/!app-db assoc :invoked-script abs-path)
          (sci/with-bindings {sci/file abs-path}
-           (-> (jsci/eval-string code)
-               (flare/maybe-process-tagged-literal!))))
+           (jsci/eval-string code)))
        (p/handle (fn [result error]
                    (swap! db/!app-db assoc :invoked-script nil)
                    (if error
