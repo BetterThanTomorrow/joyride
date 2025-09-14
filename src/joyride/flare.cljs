@@ -32,14 +32,36 @@
 
 
 (defn render-hiccup
-  "Render Hiccup data structure to HTML string using Replicant"
+  "Render Hiccup data structure to HTML string using Replicant.
+   Automatically handles script tags safely by using :innerHTML to avoid HTML escaping."
   [hiccup-data]
-  (try
-    (replicant/render hiccup-data)
-    (catch js/Error e
-      (throw (ex-info (str "Failed to render Hiccup data " (.-message e))
-                      {:hiccup hiccup-data
-                       :error (.-message e)})))))
+  (letfn [(process-hiccup [data]
+            (cond
+              ;; Handle script tags specially - convert to use :innerHTML
+              (and (vector? data) 
+                   (= :script (first data))
+                   (> (count data) 1))
+              (let [[tag attrs & content] data
+                    ;; If attrs is a map, merge innerHTML, otherwise create attrs map
+                    script-attrs (if (map? attrs)
+                                   (assoc attrs :innerHTML (apply str content))
+                                   {:innerHTML (apply str (cons attrs content))})]
+                [tag script-attrs])
+              
+              ;; Process nested hiccup recursively
+              (vector? data)
+              (mapv process-hiccup data)
+              
+              ;; Return as-is for non-vectors
+              :else data))]
+    (try
+      (let [processed-hiccup (process-hiccup hiccup-data)]
+        (replicant/render processed-hiccup))
+      (catch js/Error e
+        (throw (ex-info (str "Failed to render Hiccup data " (.-message e))
+                        {:hiccup hiccup-data
+                         :processed (process-hiccup hiccup-data)
+                         :error (.-message e)}))))))
 
 (defn generate-iframe-content
   "Create iframe wrapper following Calva's approach"
