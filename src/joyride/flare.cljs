@@ -106,37 +106,49 @@
   "Create or reuse a WebView panel based on options"
   [{:keys [key title column opts reveal icon message-handler]
     :or {title "WebView"
-         column vscode/ViewColumn.Beside
          opts {:enableScripts true}
          reveal true
          icon :flare/icon-default}}]
   (let [panel-key (or key (keyword "joyride.flare" (str "flare-" (gensym))))
-        ^js existing-panel (get (db/flare-panels) panel-key)]
+        existing-panel-data (get (db/flare-panels) panel-key)
+        ^js existing-panel (:panel existing-panel-data)]
 
     (if (and existing-panel (not (.-disposed existing-panel)))
       (do
+        ;; Update message handler on existing panel if provided
+        (when message-handler
+          ;; Dispose old handler if it exists
+          (when-let [old-disposable (:message-handler-disposable existing-panel-data)]
+            (.dispose old-disposable))
+          ;; Add new handler
+          (let [new-disposable (.onDidReceiveMessage (.-webview existing-panel) message-handler)]
+            (swap! db/!app-db assoc-in [:flare-panels panel-key :message-handler-disposable] new-disposable)))
+
         (when reveal
-          (.reveal existing-panel column))
+          (if column
+            (.reveal existing-panel column)
+            (.reveal existing-panel)))
         existing-panel)
 
       (let [panel (vscode/window.createWebviewPanel
                    "joyride.flare"
                    title
                    column
-                   (clj->js opts))]
+                   (clj->js opts))
+            message-handler-disposable (when message-handler
+                                         (.onDidReceiveMessage (.-webview panel) message-handler))]
 
         ;; Set icon (default or custom)
         (when icon
           (set! (.-iconPath panel) (resolve-icon-path icon)))
 
-        ;; Register message handler if provided
-        (when message-handler
-          (.onDidReceiveMessage (.-webview panel) message-handler))
-
         (.onDidDispose panel
                        #(swap! db/!app-db update :flare-panels dissoc panel-key))
 
-        (swap! db/!app-db assoc-in [:flare-panels panel-key] panel)
+        ;; Store panel and message handler disposable
+        (swap! db/!app-db assoc-in [:flare-panels panel-key]
+               {:panel panel
+                :message-handler-disposable message-handler-disposable})
 
         panel))))
 
@@ -158,6 +170,11 @@
    - :message-handler - Function to handle messages from webview. Receives message object.
    - :sidebar-panel? - Display in sidebar vs separate panel (default: false)
 
+   Examples:
+   - {:html [:h1 \"Hello\"] :icon \"https://example.com/icon.png\"}
+   - {:icon {:light \"https://light.png\" :dark \"https://dark.png\"}}
+   - {:html [:button {:onclick \"acquireVsCodeApi().postMessage({type: 'click'})\"} \"Click\"]
+      :message-handler (fn [msg] (js/console.log \"Received:\" msg))}
 
    Returns: {:panel <webview-panel> :type :panel} or {:view <webview-view> :type :sidebar}"
   [options]
@@ -171,6 +188,7 @@
           {:view :pending :type :sidebar}
           {:view result :type :sidebar}))
       (let [panel (create-webview-panel! opts)]
+        ;; Always update content - this ensures fresh content and message handlers
         (update-panel-content! panel opts (:title opts "WebView"))
         {:panel panel :type :panel}))))
 
@@ -181,32 +199,43 @@
 (defn close!
   "Close/dispose a flare panel by key"
   [flare-key]
-  (if-let [^js panel (get (db/flare-panels) flare-key)]
-    (if (.-disposed panel)
-      false
-      (do (.dispose panel) true))
+  (if-let [panel-data (get (db/flare-panels) flare-key)]
+    (let [^js panel (:panel panel-data)]
+      (if (.-disposed panel)
+        false
+        (do
+          ;; Dispose message handler if it exists
+          (when-let [disposable (:message-handler-disposable panel-data)]
+            (.dispose disposable))
+          (.dispose panel)
+          true)))
     false))
 
 (defn ls
   "List all currently active flare panels"
   []
   (->> (db/flare-panels)
-       (filter (fn [[_key ^js panel]] (not (.-disposed panel))))
+       (filter (fn [[_key panel-data]] (not (.-disposed (:panel panel-data)))))
        (into {})))
 
 (defn close-all!
   "Close all active flare panels"
   []
   (let [active-panels (ls)]
-    (doseq [[_key ^js panel] active-panels]
-      (when (not (.-disposed panel))
-        (.dispose panel)))
+    (doseq [[_key panel-data] active-panels]
+      (let [^js panel (:panel panel-data)]
+        (when (not (.-disposed panel))
+          ;; Dispose message handler if it exists
+          (when-let [disposable (:message-handler-disposable panel-data)]
+            (.dispose disposable))
+          (.dispose panel))))
     (swap! db/!app-db assoc :flare-panels {})
     (count active-panels)))
 
 (defn get-flare
   "Get a flare by its key"
   [flare-key]
-  (when-let [^js panel (get (db/flare-panels) flare-key)]
-    (when (not (.-disposed panel))
-      {:panel panel :type :panel})))
+  (when-let [panel-data (get (db/flare-panels) flare-key)]
+    (let [^js panel (:panel panel-data)]
+      (when (not (.-disposed panel))
+        {:panel panel :type :panel}))))
