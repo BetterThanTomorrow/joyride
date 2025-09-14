@@ -1,6 +1,7 @@
 (ns joyride.flare.sidebar-provider
   (:require
-   ["vscode" :as vscode]))
+   ["vscode" :as vscode]
+   [joyride.db :as db]))
 
 (defonce !flare-webview-view (atom nil))
 (defonce !last-content (atom nil))
@@ -15,13 +16,18 @@
                   (clj->js {:enableScripts true
                             :localResourceRoots [(.-extensionUri extension-context)]}))
 
+            ;; Initialize with stored content or default
             (if-let [content @!last-content]
               (do
                 (set! (.-html (.-webview webview-view)) (:html content))
                 (when (:title content)
                   (set! (.-title webview-view) (:title content))))
               (set! (.-html (.-webview webview-view))
-                    "<h3>Joyride Flare</h3><p>No flare content yet. Create a flare using <code>flare!</code> function.</p>")))]
+                    "<h3>Joyride Flare</h3><p>No flare content yet. Create a flare using <code>flare!</code> function.</p>"))
+
+            ;; Initialize database entry for message handler tracking
+            (swap! db/!app-db assoc-in [:flare-sidebar :default]
+                   {:view webview-view :message-handler-disposable nil}))]
     #js {:resolveWebviewView resolve-webview-view}))
 
 (defn register-flare-provider!
@@ -31,21 +37,12 @@
         disposable (vscode/window.registerWebviewViewProvider "joyride.flare" provider)]
     disposable))
 
-(defn update-sidebar-flare!
-  "Update the content of the sidebar flare view"
-  [html-content & {:keys [title reveal] :or {reveal true}}]
-  (reset! !last-content {:html html-content :title title})
-
-  (if-let [^js view @!flare-webview-view]
-    ;; View is resolved, update immediately
+(defn ensure-sidebar-view!
+  "Ensure sidebar view is available and reveal if needed"
+  [reveal?]
+  (if-let [view @!flare-webview-view]
+    view
     (do
-      (set! (.-html (.-webview view)) html-content)
-      (when title
-        (set! (.-title view) title))
-      view)
-    ;; View not resolved yet, reveal it to trigger resolution
-    (do
-      (when reveal
+      (when reveal?
         (vscode/commands.executeCommand "joyride.flare.focus"))
-      ;; Return a placeholder that indicates content is queued
       :pending)))

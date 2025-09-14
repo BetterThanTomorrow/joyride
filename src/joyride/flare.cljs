@@ -104,29 +104,36 @@
                     {:content flare-options}))))
 
 (defn update-panel-content!
-  "Update the HTML content of a WebView panel"
-  [^js panel options]
-  (let [html-content (render-content options)]
-    (set! (.-html (.-webview panel)) html-content)))
+  "Update the HTML content of a WebView panel or sidebar view"
+  [^js webview-container options]
+  (let [^js webview (.-webview webview-container)
+        html-content (render-content options)]
+    (when webview
+      (set! (.-html webview) html-content))))
 
 (defn update-panel-with-options!
-  "Update an existing panel with all provided options"
-  [^js panel flare-options]
-  (let [{:keys [key title icon message-handler]} flare-options]
+  "Update an existing panel or sidebar view with all provided options"
+  [^js webview-container flare-options]
+  (let [{:keys [key title icon message-handler sidebar-panel?]} flare-options
+        ^js webview (.-webview webview-container)]
+
     (when title
-      (set! (.-title panel) title))
+      (set! (.-title webview-container) title))
 
-    (when icon
-      (set! (.-iconPath panel) (resolve-icon-path icon)))
+    (when (and icon (not sidebar-panel?))
+      (set! (.-iconPath webview-container) (resolve-icon-path icon)))
 
-    (when-let [existing-panel-data (get (db/flare-panels) key)]
-      (when-let [^js old-disposable (:message-handler-disposable existing-panel-data)]
-        (.dispose old-disposable)))
-    (when message-handler
-      (let [new-disposable (.onDidReceiveMessage (.-webview panel) message-handler)]
-        (swap! db/!app-db assoc-in [:flare-panels key :message-handler-disposable] new-disposable)))
+    (let [storage-key (if sidebar-panel? :flare-sidebar :flare-panels)
+          storage-path [storage-key key]]
+      (when-let [existing-data (get-in @db/!app-db storage-path)]
+        (when-let [^js old-disposable (:message-handler-disposable existing-data)]
+          (.dispose old-disposable)))
 
-    (update-panel-content! panel flare-options)))
+      (when (and message-handler webview)
+        (let [new-disposable (.onDidReceiveMessage webview message-handler)]
+          (swap! db/!app-db assoc-in (conj storage-path :message-handler-disposable) new-disposable))))
+
+    (update-panel-content! webview-container flare-options)))
 
 (defn create-webview-panel!
   "Create or reuse a WebView panel based on options"
@@ -175,24 +182,26 @@
 
    Returns: {:panel <webview-panel> :type :panel} or {:view <webview-view> :type :sidebar}"
   [options]
-  (let [flare-options (merge {:key (or key
+  (let [flare-options (merge {:key (or (:key options)
                                        (keyword "flare" (str "flare-" (gensym))))
                               :title "Flare"
                               :reveal? true
                               :webview-options #js {:enableScripts true}
                               :column js/undefined
                               :preserve-focus? true
-                              :icon :flare/icon-default}
+                              :icon :flare/icon-default
+                              :sidebar-panel? false}
                              options)
-        {:keys [sidebar-panel?]} flare-options]
+        {:keys [sidebar-panel? key reveal?]} flare-options]
     (if sidebar-panel?
-      (let [html-content (render-content flare-options)
-            title (:title flare-options "Flare")
-            reveal? (:reveal? flare-options true)
-            result (sidebar/update-sidebar-flare! html-content :title title :reveal? reveal?)]
-        (if (= result :pending)
+      (let [view (sidebar/ensure-sidebar-view! reveal?)]
+        (if (= view :pending)
           {:view :pending :type :sidebar}
-          {:view result :type :sidebar}))
+          (do
+            (swap! db/!app-db assoc-in [:flare-sidebar key]
+                   {:view view :message-handler-disposable nil})
+            (update-panel-with-options! view (assoc flare-options :sidebar-panel? true))
+            {:view view :type :sidebar})))
       (let [panel (create-webview-panel! flare-options)]
         {:panel panel :type :panel}))))
 
