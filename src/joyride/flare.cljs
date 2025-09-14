@@ -164,6 +164,28 @@
         (update-panel-with-options! panel flare-options)
         panel))))
 
+(defn post-message!
+  "Send a message from extension to flare webview.
+
+   Args:
+   - flare-key: The key of the flare to send message to
+   - message: The message data to send (will be serialized to JSON)
+
+   Returns: a map with the .postMessage promises for the :panel or :sidebar flares matching the key"
+  [flare-key message]
+  (let [panel-data (get (:flare-panels @db/!app-db) flare-key)
+        sidebar-data (get (:flare-sidebar @db/!app-db) flare-key)]
+    (cond-> {}
+      (and panel-data (not (.-disposed ^js (:panel panel-data))))
+      (assoc :panel
+             (let [^js webview (.-webview ^js (:panel panel-data))]
+               (.postMessage webview (clj->js message))))
+
+      (and sidebar-data (:view sidebar-data))
+      (assoc :sidebar
+             (let [^js webview (.-webview ^js (:view sidebar-data))]
+               (.postMessage webview (clj->js message)))))))
+
 (defn flare!
   "Create a WebView panel or sidebar view with the given options.
 

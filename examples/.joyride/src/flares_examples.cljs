@@ -48,6 +48,9 @@
             [:input {:type "text" :id "textInput" :placeholder "Type something..."}]
             [:button {:onclick "sendTextMessage()"}
              "Send Text"]]
+           [:div
+            "log:"
+            [:pre {:id "messageLog"}]]
            [:script {:type "text/javascript"}
             "
                // Acquire VS Code API once when the page loads
@@ -63,11 +66,26 @@
                  sendMessage('text-input', input.value);
                  input.value = '';
                }
+
+               function handleMessage(message) {
+                 console.log('Received message:', message);
+                 const messageLogElement = document.getElementById('messageLog');
+                 const logEntry = document.createElement('div');
+                 logEntry.textContent = `[${new Date().toLocaleTimeString()}] Type: ${message.type}, Data: ${message.data}`;
+                 messageLogElement.appendChild(logEntry);
+               }
+
+               window.addEventListener('message', event => {
+                 const message = event.data; // Message from extension
+                 handleMessage(message);
+               });
+
+
                "]]
     :title "Message Test"
     :key :message-test
-    :preserve-focus? false
-      ;:sidebar-panel? true
+    :preserve-focus? true
+    :sidebar-panel? true
     :message-handler (fn [message]
                        (let [msg-type (.-type message)
                              msg-data (.-data message)]
@@ -76,6 +94,8 @@
                            "button-click" (js/console.log "✅ Button was clicked!")
                            "text-input" (js/console.log "📝 Text input received:" msg-data)
                            (js/console.log "❓ Unknown message type:" msg-type))))})
+
+  (flare/post-message! :message-test {:type "command" :data "foo"})
 
   :rcf)
 
