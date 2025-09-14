@@ -85,6 +85,8 @@
     :title "Message Test"
     :key :message-test
     :preserve-focus? true
+    :webview-options {:enableScripts true
+                      :retainContextWhenHidden true}
     ;:sidebar? true
     :message-handler (fn [message]
                        (let [msg-type (.-type message)

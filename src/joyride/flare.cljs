@@ -114,8 +114,11 @@
 (defn update-panel-with-options!
   "Update an existing panel or sidebar view with all provided options"
   [^js webview-container flare-options]
-  (let [{:keys [key title icon message-handler sidebar?]} flare-options
+  (let [{:keys [key title icon message-handler sidebar? webview-options]} flare-options
         ^js webview (.-webview webview-container)]
+
+
+    (set! (.-options webview) webview-options)
 
     (when title
       (set! (.-title webview-container) title))
@@ -208,12 +211,13 @@
                                        (keyword "flare" (str "flare-" (gensym))))
                               :title "Flare"
                               :reveal? true
-                              :webview-options {:enableScripts true}
                               :column js/undefined
                               :preserve-focus? true
                               :icon :flare/icon-default
                               :sidebar? false}
-                             options)
+                             options
+                             {:webview-options (or (clj->js (:webview-options options))
+                                                   #js {:enableScripts true})})
         {:keys [sidebar? key reveal?]} flare-options]
     (if sidebar?
       (let [view (sidebar/ensure-sidebar-view! reveal?)]
@@ -222,7 +226,7 @@
           (do
             (swap! db/!app-db assoc-in [:flare-sidebar key]
                    {:view view :message-handler-disposable nil})
-            (update-panel-with-options! view (assoc flare-options :sidebar? true))
+            (update-panel-with-options! view flare-options)
             {:view view :type :sidebar})))
       (let [panel (create-webview-panel! flare-options)]
         {:panel panel :type :panel}))))
