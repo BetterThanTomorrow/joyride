@@ -114,16 +114,16 @@
 (defn update-panel-with-options!
   "Update an existing panel or sidebar view with all provided options"
   [^js webview-container flare-options]
-  (let [{:keys [key title icon message-handler sidebar-panel?]} flare-options
+  (let [{:keys [key title icon message-handler sidebar?]} flare-options
         ^js webview (.-webview webview-container)]
 
     (when title
       (set! (.-title webview-container) title))
 
-    (when (and icon (not sidebar-panel?))
+    (when (and icon (not sidebar?))
       (set! (.-iconPath webview-container) (resolve-icon-path icon)))
 
-    (let [storage-key (if sidebar-panel? :flare-sidebar :flare-panels)
+    (let [storage-key (if sidebar? :flare-sidebar :flare-panels)
           storage-path [storage-key key]]
       (when-let [existing-data (get-in @db/!app-db storage-path)]
         (when-let [^js old-disposable (:message-handler-disposable existing-data)]
@@ -198,9 +198,9 @@
    - :column - vscode.ViewColumn (default: js/undefined)
    - :reveal? - Whether to reveal the panel when created or reused (default: true)
    - :preserve-focus? - Whether to preserve focus when revealing the panel (default: true)
-   - webview-options - JS object vscode WebviewPanelOptions & WebviewOptions for the webview (default: #js {:enableScripts true})
+   - webview-options - JS object vscode WebviewPanelOptions & WebviewOptions for the webview (default: {:enableScripts true})
    - :message-handler - Function to handle messages from webview. Receives message object.
-   - :sidebar-panel? - Display in sidebar vs separate panel (default: false)
+   - :sidebar? - Display in sidebar vs separate panel (default: false)
 
    Returns: {:panel <webview-panel> :type :panel} or {:view <webview-view> :type :sidebar}"
   [options]
@@ -208,21 +208,21 @@
                                        (keyword "flare" (str "flare-" (gensym))))
                               :title "Flare"
                               :reveal? true
-                              :webview-options #js {:enableScripts true}
+                              :webview-options {:enableScripts true}
                               :column js/undefined
                               :preserve-focus? true
                               :icon :flare/icon-default
-                              :sidebar-panel? false}
+                              :sidebar? false}
                              options)
-        {:keys [sidebar-panel? key reveal?]} flare-options]
-    (if sidebar-panel?
+        {:keys [sidebar? key reveal?]} flare-options]
+    (if sidebar?
       (let [view (sidebar/ensure-sidebar-view! reveal?)]
         (if (= view :pending)
           {:view :pending :type :sidebar}
           (do
             (swap! db/!app-db assoc-in [:flare-sidebar key]
                    {:view view :message-handler-disposable nil})
-            (update-panel-with-options! view (assoc flare-options :sidebar-panel? true))
+            (update-panel-with-options! view (assoc flare-options :sidebar? true))
             {:view view :type :sidebar})))
       (let [panel (create-webview-panel! flare-options)]
         {:panel panel :type :panel}))))

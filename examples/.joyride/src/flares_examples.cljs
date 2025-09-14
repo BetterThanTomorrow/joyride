@@ -18,9 +18,9 @@
                          [:li "Persistent views"]
                          [:li "Space-efficient"]]
                         [:hr]
-                        [:small "Use " [:code ":sidebar-panel? true"] " option"]]
+                        [:small "Use " [:code ":sidebar? true"] " option"]]
                  :title "Sidebar Demo"
-                 :sidebar-panel? true})
+                 :sidebar? true})
 
   ;; Icon example
   (flare/flare! {:html [:img {:src "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"}]
@@ -85,7 +85,7 @@
     :title "Message Test"
     :key :message-test
     :preserve-focus? true
-    :sidebar-panel? true
+    ;:sidebar? true
     :message-handler (fn [message]
                        (let [msg-type (.-type message)
                              msg-data (.-data message)]
@@ -149,7 +149,7 @@
                     j-icon-svg]]]
                  :title "J-icon"
                  :key :j-icon-svg
-                 :sidebar-panel? true})
+                 :sidebar? true})
   :rcf)
 
 ;; Data table example

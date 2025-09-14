@@ -221,9 +221,9 @@ WebView panel and sidebar view creation convenience.
    - `:column` - vscode ViewColumn (default: `js/undefined`)
    - `:reveal?` - Whether to reveal the panel when created or reused (default: true)
    - `:preserve-focus?` - Whether to preserve focus when revealing the panel (default: true)
-   - `:sidebar-panel?` - Display in sidebar vs separate panel (default: false)
+   - `:sidebar?` - Display in sidebar vs separate panel (default: false)
    - `:message-handler` - Function to handle messages from webview. Receives message object.
-   - `:webview-options` - JS object with vscode WebviewPanelOptions & WebviewOptions for the webview (default: `#js {:enableScripts true}`)
+   - `:webview-options` - JS object with vscode WebviewPanelOptions & WebviewOptions for the webview (default: `{:enableScripts true}`)
 - `close!`: Close a specific flare by key.
 - `close-all!`: Close all active flares.
 - `ls`: List all active flare keys.
