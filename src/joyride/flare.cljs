@@ -146,7 +146,7 @@
                    title
                    #js {:viewColumn column
                         :preserveFocus preserve-focus?}
-                   (clj->js webview-options))]
+                   webview-options)]
 
         (.onDidDispose panel
                        #(swap! db/!app-db update :flare-panels dissoc key))
@@ -179,7 +179,7 @@
                                       (keyword "flare" (str "flare-" (gensym))))
                               :title "Flare"
                               :reveal? true
-                              :webview-options {:enableScripts true}
+                              :webview-options #js {:enableScripts true}
                               :column js/undefined
                               :preserve-focus? true
                               :icon :flare/icon-default}
