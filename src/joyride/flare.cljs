@@ -104,7 +104,7 @@
 
 (defn create-webview-panel!
   "Create or reuse a WebView panel based on options"
-  [{:keys [key title column opts reveal icon]
+  [{:keys [key title column opts reveal icon message-handler]
     :or {title "WebView"
          column vscode/ViewColumn.Beside
          opts {:enableScripts true}
@@ -129,6 +129,10 @@
         (when icon
           (set! (.-iconPath panel) (resolve-icon-path icon)))
 
+        ;; Register message handler if provided
+        (when message-handler
+          (.onDidReceiveMessage (.-webview panel) message-handler))
+
         (.onDidDispose panel
                        #(swap! db/!app-db update :flare-panels dissoc panel-key))
 
@@ -151,11 +155,9 @@
    - :title - Panel/view title (default: 'WebView')
    - :key - Identifier for reusing panels
    - :icon - Icon for panel tab. String (path/URL) or map {:light \"...\" :dark \"...\"}
+   - :message-handler - Function to handle messages from webview. Receives message object.
    - :sidebar-panel? - Display in sidebar vs separate panel (default: false)
 
-   Examples:
-   - {:html [:h1 \"Hello\"] :icon \"https://example.com/icon.png\"}
-   - {:icon {:light \"https://light.png\" :dark \"https://dark.png\"}}
 
    Returns: {:panel <webview-panel> :type :panel} or {:view <webview-view> :type :sidebar}"
   [options]
