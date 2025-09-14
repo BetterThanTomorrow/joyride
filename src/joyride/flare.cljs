@@ -130,21 +130,22 @@
 
 (defn create-webview-panel!
   "Create or reuse a WebView panel based on options"
-  [{:keys [key title column webview-options reveal]
+  [{:keys [key title column webview-options reveal? preserve-focus?]
     :as flare-options}]
   (let [existing-panel-data (get (db/flare-panels) key)
         ^js existing-panel (:panel existing-panel-data)]
 
     (if (and existing-panel (not (.-disposed existing-panel)))
       (do
-        (when reveal
-          (.reveal existing-panel column))
+        (when reveal?
+          (.reveal existing-panel column preserve-focus?))
         (update-panel-with-options! existing-panel flare-options)
         existing-panel)
       (let [panel (vscode/window.createWebviewPanel
                    "joyride.flare"
                    title
-                   column
+                   #js {:viewColumn column
+                        :preserveFocus preserve-focus?}
                    (clj->js webview-options))]
 
         (.onDidDispose panel
@@ -165,6 +166,10 @@
    - :title - Panel/view title (default: 'WebView')
    - :key - Identifier for reusing panels
    - :icon - Icon for panel tab. String (path/URL) or map {:light \"...\" :dark \"...\"}
+   - :column - vscode.ViewColumn (default: js/undefined)
+   - :reveal? - Whether to reveal the panel when created or reused (default: true)
+   - :preserve-focus? - Whether to preserve focus when revealing the panel (default: true)
+   - webview-options - Map of vscode WebviewPanelOptions & WebviewOptions for the webview (default: {:enableScripts true})
    - :message-handler - Function to handle messages from webview. Receives message object.
    - :sidebar-panel? - Display in sidebar vs separate panel (default: false)
 
@@ -173,17 +178,18 @@
   (let [flare-options (merge {:key(or key
                                       (keyword "flare" (str "flare-" (gensym))))
                               :title "Flare"
-                              :reveal true
+                              :reveal? true
                               :webview-options {:enableScripts true}
                               :column js/undefined
+                              :preserve-focus? true
                               :icon :flare/icon-default}
                              options)
         {:keys [sidebar-panel?]} flare-options]
     (if sidebar-panel?
       (let [html-content (render-content flare-options)
             title (:title flare-options "Flare")
-            reveal (:reveal flare-options true)
-            result (sidebar/update-sidebar-flare! html-content :title title :reveal reveal)]
+            reveal? (:reveal? flare-options true)
+            result (sidebar/update-sidebar-flare! html-content :title title :reveal? reveal?)]
         (if (= result :pending)
           {:view :pending :type :sidebar}
           {:view result :type :sidebar}))
