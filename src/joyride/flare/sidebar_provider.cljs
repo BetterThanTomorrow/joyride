@@ -3,21 +3,28 @@
    ["vscode" :as vscode]
    [joyride.db :as db]))
 
-(defonce !flare-webview-view (atom nil))
-(defonce !last-content (atom nil))
+(defn get-sidebar-view
+  "Get the current sidebar webview view from app-db"
+  []
+  (get-in @db/!app-db [:flare-sidebar-state :webview-view]))
+
+(defn get-last-content
+  "Get the last content from app-db"
+  []
+  (get-in @db/!app-db [:flare-sidebar-state :last-content]))
 
 (defn create-flare-webview-provider
   "Create WebView provider for sidebar flare views"
   [^js extension-context]
   (letfn [(resolve-webview-view [^js webview-view]
-            (reset! !flare-webview-view webview-view)
+            (swap! db/!app-db assoc-in [:flare-sidebar-state :webview-view] webview-view)
 
             (set! (.-options (.-webview webview-view))
                   (clj->js {:enableScripts true
                             :localResourceRoots [(.-extensionUri extension-context)]}))
 
             ;; Initialize with stored content or default
-            (if-let [content @!last-content]
+            (if-let [content (get-last-content)]
               (do
                 (set! (.-html (.-webview webview-view)) (:html content))
                 (when (:title content)
@@ -40,7 +47,7 @@
 (defn ensure-sidebar-view!
   "Ensure sidebar view is available and reveal if needed"
   [reveal?]
-  (if-let [view @!flare-webview-view]
+  (if-let [view (get-sidebar-view)]
     view
     (do
       (when reveal?

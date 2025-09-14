@@ -139,7 +139,7 @@
   "Create or reuse a WebView panel based on options"
   [{:keys [key title column webview-options reveal? preserve-focus?]
     :as flare-options}]
-  (let [existing-panel-data (get (db/flare-panels) key)
+  (let [existing-panel-data (get (:flare-panels @db/!app-db) key)
         ^js existing-panel (:panel existing-panel-data)]
 
     (if (and existing-panel (not (.-disposed existing-panel)))
@@ -208,7 +208,7 @@
 (defn close!
   "Close/dispose a flare panel by key"
   [flare-key]
-  (if-let [panel-data (get (db/flare-panels) flare-key)]
+  (if-let [panel-data (get (:flare-panels @db/!app-db) flare-key)]
     (let [^js panel (:panel panel-data)]
       (if (.-disposed panel)
         false
@@ -222,7 +222,7 @@
 (defn ls
   "List all currently active flare panels"
   []
-  (->> (db/flare-panels)
+  (->> (:flare-panels @db/!app-db)
        (filter (fn [[_key panel-data]] (not (.-disposed ^js (:panel panel-data)))))
        (into {})))
 
@@ -242,7 +242,7 @@
 (defn get-flare
   "Get a flare by its key"
   [flare-key]
-  (when-let [panel-data (get (db/flare-panels) flare-key)]
+  (when-let [panel-data (get (:flare-panels @db/!app-db) flare-key)]
     (let [^js panel (:panel panel-data)]
       (when (not (.-disposed panel))
         {:panel panel :type :panel}))))
