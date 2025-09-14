@@ -169,14 +169,14 @@
    - :column - vscode.ViewColumn (default: js/undefined)
    - :reveal? - Whether to reveal the panel when created or reused (default: true)
    - :preserve-focus? - Whether to preserve focus when revealing the panel (default: true)
-   - webview-options - Map of vscode WebviewPanelOptions & WebviewOptions for the webview (default: {:enableScripts true})
+   - webview-options - JS object vscode WebviewPanelOptions & WebviewOptions for the webview (default: #js {:enableScripts true})
    - :message-handler - Function to handle messages from webview. Receives message object.
    - :sidebar-panel? - Display in sidebar vs separate panel (default: false)
 
    Returns: {:panel <webview-panel> :type :panel} or {:view <webview-view> :type :sidebar}"
   [options]
-  (let [flare-options (merge {:key(or key
-                                      (keyword "flare" (str "flare-" (gensym))))
+  (let [flare-options (merge {:key (or key
+                                       (keyword "flare" (str "flare-" (gensym))))
                               :title "Flare"
                               :reveal? true
                               :webview-options #js {:enableScripts true}

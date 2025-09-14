@@ -210,14 +210,20 @@ Here's a snippet from the [joyride_api.cljs](../examples/.joyride/scripts/joyrid
 
 #### `joyride.flare`
 
-WebView panel and sidebar view creation using Hiccup.
+WebView panel and sidebar view creation convenience.
 
 - `flare!`: Create or update a flare. Options map with
-  - `:key` (for reuse)
-  - `:title`
-  - `:html` (Hiccup or string)
-  - `:icon` (tab icon)
-  - `:sidebar-panel?` (display in sidebar panel).
+   - `:html` - HTML content string OR Hiccup data structure
+   - `:url` - URL to display in iframe
+   - `:title` - Panel/view title (default: 'Flare')
+   - `:key` - Identifier for reusing panels
+   - `:icon` - Icon for panel tab. String (path/URL) or map {:light \"...\" :dark \"...\"}
+   - `:column` - vscode ViewColumn (default: `js/undefined`)
+   - `:reveal?` - Whether to reveal the panel when created or reused (default: true)
+   - `:preserve-focus?` - Whether to preserve focus when revealing the panel (default: true)
+   - `:sidebar-panel?` - Display in sidebar vs separate panel (default: false)
+   - `:message-handler` - Function to handle messages from webview. Receives message object.
+   - `:webview-options` - JS object with vscode WebviewPanelOptions & WebviewOptions for the webview (default: `#js {:enableScripts true}`)
 - `close!`: Close a specific flare by key.
 - `close-all!`: Close all active flares.
 - `ls`: List all active flare keys.
