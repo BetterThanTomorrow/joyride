@@ -1,6 +1,7 @@
 (ns flares-example
   "Demonstrates Joyride Flares for creating WebView panels and sidebar views"
-  (:require [joyride.flare :as flare]))
+  (:require ["vscode" :as vscode]
+            [joyride.flare :as flare]))
 
 (comment
   ;; Simple greeting panel
@@ -34,6 +35,47 @@
                         [:text {:x 100 :y 190 :text-anchor :middle :fill :purple} "Joyride!"]]
                  :title "SVG Shapes"
                  :key :some-svg})
+
+
+  ;; Message sending example
+  (flare/flare!
+   {:html [:div
+           [:h1 "Message Handler Test"]
+           [:p "Testing message handling:"]
+           [:button {:onclick "sendMessage('button-click', 'Hello from button!')"}
+            "Send Message"]
+           [:div
+            [:input {:type "text" :id "textInput" :placeholder "Type something..."}]
+            [:button {:onclick "sendTextMessage()"}
+             "Send Text"]]
+           [:script {:type "text/javascript"}
+            "
+               // Acquire VS Code API once when the page loads
+               const vscode = acquireVsCodeApi();
+
+               function sendMessage(type, data) {
+                 vscode.postMessage({type: type, data: data, timestamp: Date.now()});
+                 console.log('Sent message:', type, data);
+               }
+
+               function sendTextMessage() {
+                 const input = document.getElementById('textInput');
+                 sendMessage('text-input', input.value);
+                 input.value = '';
+               }
+               "]]
+    :title "Message Test"
+    :key :message-test
+    :preserve-focus? false
+      ;:sidebar-panel? true
+    :message-handler (fn [message]
+                       (let [msg-type (.-type message)
+                             msg-data (.-data message)]
+                         (js/console.log "🔥 Received message from flare, type:" msg-type "data:" msg-data)
+                         (case msg-type
+                           "button-click" (js/console.log "✅ Button was clicked!")
+                           "text-input" (js/console.log "📝 Text input received:" msg-data)
+                           (js/console.log "❓ Unknown message type:" msg-type))))})
 
   :rcf)
 
@@ -377,3 +419,4 @@
   (flare/close-all!)
 
   :rcf)
+

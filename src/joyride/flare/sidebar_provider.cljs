@@ -30,7 +30,7 @@
                 (when (:title content)
                   (set! (.-title webview-view) (:title content))))
               (set! (.-html (.-webview webview-view))
-                    "<h3>Joyride Flare</h3><p>No flare content yet. Create a flare using <code>flare!</code> function.</p>"))
+                    "<h3>Joyride Flare</h3><p>No flare content yet. Create a flare using <code>flare!</code> function. See <a href=\"https://github.com/BetterThanTomorrow/joyride/blob/master/examples/.joyride/src/flares_examples.cljs\">some examples</a>.</p>"))
 
             ;; Initialize database entry for message handler tracking
             (swap! db/!app-db assoc-in [:flare-sidebar :default]
