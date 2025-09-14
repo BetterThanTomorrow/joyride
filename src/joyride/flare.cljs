@@ -33,27 +33,24 @@
 
 (defn render-hiccup
   "Render Hiccup data structure to HTML string using Replicant.
-   Automatically handles script tags safely by using :innerHTML to avoid HTML escaping."
+   Handles :script and :style tags so that they are not escaped, by using :innerHTML."
   [hiccup-data]
   (letfn [(process-hiccup [data]
             (cond
-              ;; Handle script tags specially - convert to use :innerHTML
-              (and (vector? data) 
-                   (= :script (first data))
+              (and (vector? data)
+                   (contains? #{:script :style} (first data))
                    (> (count data) 1))
               (let [[tag attrs & content] data
-                    ;; If attrs is a map, merge innerHTML, otherwise create attrs map
-                    script-attrs (if (map? attrs)
-                                   (assoc attrs :innerHTML (apply str content))
-                                   {:innerHTML (apply str (cons attrs content))})]
-                [tag script-attrs])
-              
-              ;; Process nested hiccup recursively
+                    safe-attrs (if (map? attrs)
+                                 (assoc attrs :innerHTML (apply str content))
+                                 {:innerHTML (apply str (cons attrs content))})]
+                [tag safe-attrs])
+
               (vector? data)
               (mapv process-hiccup data)
-              
-              ;; Return as-is for non-vectors
-              :else data))]
+
+              :else
+              data))]
     (try
       (let [processed-hiccup (process-hiccup hiccup-data)]
         (replicant/render processed-hiccup))
@@ -61,9 +58,7 @@
         (throw (ex-info (str "Failed to render Hiccup data " (.-message e))
                         {:hiccup hiccup-data
                          :processed (process-hiccup hiccup-data)
-                         :error (.-message e)}))))))
-
-(defn generate-iframe-content
+                         :error (.-message e)}))))))(defn generate-iframe-content
   "Create iframe wrapper following Calva's approach"
   [url title]
   (str "<!DOCTYPE html>
