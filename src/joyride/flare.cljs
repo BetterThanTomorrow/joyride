@@ -18,9 +18,9 @@
   (let [panel-data (get (:flare-panels @db/!app-db) flare-key)
         sidebar-data (get (:flare-sidebar @db/!app-db) flare-key)]
     (cond-> {}
-      (and panel-data (not (.-disposed ^js (:panel panel-data))))
+      (and panel-data (not (.-disposed ^js (:view panel-data))))
       (assoc :panel
-             (let [^js webview (.-webview ^js (:panel panel-data))]
+             (let [^js webview (.-webview ^js (:view panel-data))]
                (.postMessage webview (clj->js message))))
 
       (and sidebar-data (:view sidebar-data))
@@ -74,28 +74,28 @@
             (when reveal?
               (vscode/commands.executeCommand "joyride.flare.focus"
                                               preserve-focus?))
-            {:view :pending :type :sidebar})
+            {:sidebar :pending})
           (do
-            (when-let [^js disposable (:message-handler-disposable sidebar-data)]
+            (when-let [^js disposable (:message-handler sidebar-data)]
               (.dispose disposable))
             (swap! db/!app-db assoc-in [:flare-sidebar key]
-                   {:view view :message-handler-disposable nil})
-            (panel/update-panel-with-options! view flare-options)
+                   {:view view})
+            (panel/update-view-with-options! view flare-options)
             (when reveal?
               (.show view preserve-focus?))
-            {:view view :type :sidebar})))
+            {:sidebar view})))
       (let [panel (panel/create-webview-panel! flare-options)]
-        {:panel panel :type :panel}))))
+        {:panel panel}))))
 
 (defn close!
   "Close/dispose a flare panel by key"
   [flare-key]
   (if-let [panel-data (get (:flare-panels @db/!app-db) flare-key)]
-    (let [^js panel (:panel panel-data)]
+    (let [^js panel (:view panel-data)]
       (if (.-disposed panel)
         false
         (do
-          (when-let [^js disposable (:message-handler-disposable panel-data)]
+          (when-let [^js disposable (:message-handler panel-data)]
             (.dispose disposable))
           (.dispose panel)
           true)))
@@ -107,34 +107,38 @@
 (defn ls ; TODO: Include sidebar panels
   "List all currently active flare panels"
   []
-  (->> (merge (:flare-panels @db/!app-db))
-       (filter (fn [[_key panel-data]]
-                 (not (.-disposed ^js (:panel panel-data)))))
-       (into {})))
+  {:panels (->> (:flare-panels @db/!app-db)
+                (filter (fn [[_key panel-data]]
+                          (not (.-disposed ^js (:view panel-data)))))
+                (into {}))
+   :sidebar (->> (:flare-sidebar @db/!app-db)
+                 (filter (fn [[_key sidebar-data]]
+                           (not (.-disposed ^js (:view sidebar-data)))))
+                 (into {}))})
+
+(defn close-all!
+  "Close all active flare panels"
+  []
+  (let [active-panels (:panels (ls))]
+    (doseq [[_key panel-data] active-panels]
+      (let [^js panel (:view panel-data)]
+        (when (not (.-disposed panel))
+          (when-let [^js disposable (:message-handler panel-data)]
+            (.dispose disposable))
+          (.dispose panel))))
+    (swap! db/!app-db assoc :flare-panels {})
+    (count active-panels)))
 
 (defn get-flares
   "Get a flare by its key"
   [flare-key]
   (let [panel-data (get (:flare-panels @db/!app-db) flare-key)
-        ^js panel (:panel panel-data)
+        ^js panel-view (:view panel-data)
         sidebar-data (get (:flare-sidebar @db/!app-db) flare-key)
-        ^js view (:view sidebar-data)]
-    (cond-> []
-      (and panel (not (.-disposed panel)))
-      (conj {:panel panel :type :panel})
+        ^js sidebar-view (:view sidebar-data)]
+    (cond-> {}
+      (and panel-view (not (.-disposed panel-view)))
+      (assoc :panel panel-data)
 
-      (and view (not (.-disposed view)))
-      (conj {:view view :type :sidebar}))))
-
-(defn close-all!
-  "Close all active flare panels"
-  []
-  (let [active-panels (ls)]
-    (doseq [[_key panel-data] active-panels]
-      (let [^js panel (:panel panel-data)]
-        (when (not (.-disposed panel))
-          (when-let [^js disposable (:message-handler-disposable panel-data)]
-            (.dispose disposable))
-          (.dispose panel))))
-    (swap! db/!app-db assoc :flare-panels {})
-    (count active-panels)))
+      (and sidebar-view (not (.-disposed sidebar-view)))
+      (assoc :sidebar sidebar-data))))

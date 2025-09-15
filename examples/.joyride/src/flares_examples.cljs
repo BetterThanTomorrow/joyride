@@ -101,6 +101,8 @@
   (flare/post-message! :message-test {:type "command" :data "foo"})
 
   (flare/get-flares :message-test)
+
+  (flare/ls)
   :rcf)
 
 (def j-icon-svg
@@ -439,6 +441,8 @@
   (flare/close! "greeting")
 
   (flare/ls)
+
+  (flare/close! :message-test)
 
   (flare/close-all!)
 

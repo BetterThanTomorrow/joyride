@@ -101,15 +101,15 @@
     (throw (ex-info "Invalid flare content: must specify either :html or :url"
                     {:content flare-options}))))
 
-(defn update-panel-content!
+(defn update-view-content!
   "Update the HTML content of a WebView panel or sidebar view"
-  [^js webview-container options]
-  (let [^js webview (.-webview webview-container)
+  [^js webview-view options]
+  (let [^js webview (.-webview webview-view)
         html-content (render-content options)]
     (when webview
       (set! (.-html webview) html-content))))
 
-(defn update-panel-with-options!
+(defn update-view-with-options!
   "Update an existing panel or sidebar view with all provided options"
   [^js webview-view flare-options]
   (let [{:keys [key title icon message-handler sidebar? webview-options]} flare-options
@@ -124,27 +124,27 @@
     (let [storage-key (if sidebar? :flare-sidebar :flare-panels)
           storage-path [storage-key key]]
       (when-let [existing-data (get-in @db/!app-db storage-path)]
-        (when-let [^js old-disposable (:message-handler-disposable existing-data)]
+        (when-let [^js old-disposable (:message-handler existing-data)]
           (.dispose old-disposable)))
 
       (when (and message-handler webview)
         (let [new-disposable (.onDidReceiveMessage webview message-handler)]
-          (swap! db/!app-db assoc-in (conj storage-path :message-handler-disposable) new-disposable))))
+          (swap! db/!app-db assoc-in (conj storage-path :message-handler) new-disposable))))
 
-    (update-panel-content! webview-view flare-options)))
+    (update-view-content! webview-view flare-options)))
 
 (defn create-webview-panel!
   "Create or reuse a WebView panel based on options"
   [{:keys [key title column webview-options reveal? preserve-focus?]
     :as flare-options}]
   (let [existing-panel-data (get (:flare-panels @db/!app-db) key)
-        ^js existing-panel (:panel existing-panel-data)]
+        ^js existing-panel (:view existing-panel-data)]
 
     (if (and existing-panel (not (.-disposed existing-panel)))
       (do
         (when reveal?
           (.reveal existing-panel column preserve-focus?))
-        (update-panel-with-options! existing-panel flare-options)
+        (update-view-with-options! existing-panel flare-options)
         existing-panel)
       (let [panel (vscode/window.createWebviewPanel
                    "joyride.flare"
@@ -157,7 +157,7 @@
                        #(swap! db/!app-db update :flare-panels dissoc key))
 
         (swap! db/!app-db assoc-in [:flare-panels key]
-               {:panel panel :message-handler-disposable nil})
+               {:view panel})
 
-        (update-panel-with-options! panel flare-options)
+        (update-view-with-options! panel flare-options)
         panel))))
