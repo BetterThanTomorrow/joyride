@@ -84,7 +84,8 @@
                "]]
     :title "Message Test"
     :key :message-test
-    :preserve-focus? true
+    ;:reveal? true
+    ;:preserve-focus? true
     :webview-options {:enableScripts true
                       :retainContextWhenHidden true}
     ;:sidebar? true
@@ -99,6 +100,7 @@
 
   (flare/post-message! :message-test {:type "command" :data "foo"})
 
+  (flare/get-flares :message-test)
   :rcf)
 
 (def j-icon-svg

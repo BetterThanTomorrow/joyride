@@ -227,7 +227,7 @@ WebView panel and sidebar view creation convenience.
 - `close!`: Close a specific flare by key.
 - `close-all!`: Close all active flares.
 - `ls`: List all active flare keys.
-- `get-flare`: Get flare by key for inspection.
+- `get-flares`: Get flares by key
 
 **Icon Options:**
 - String - Path or URL to icon file

@@ -259,12 +259,30 @@
           true)))
     false))
 
-(defn ls
+;; TODO: Make user facing flares maps consistent between ls and get-flares
+;; Also make the shape of the result make sense
+
+(defn ls ; TODO: Include sidebar panels
   "List all currently active flare panels"
   []
-  (->> (:flare-panels @db/!app-db)
-       (filter (fn [[_key panel-data]] (not (.-disposed ^js (:panel panel-data)))))
+  (->> (merge (:flare-panels @db/!app-db))
+       (filter (fn [[_key panel-data]]
+                 (not (.-disposed ^js (:panel panel-data)))))
        (into {})))
+
+(defn get-flares
+  "Get a flare by its key"
+  [flare-key]
+  (let [panel-data (get (:flare-panels @db/!app-db) flare-key)
+        ^js panel (:panel panel-data)
+        sidebar-data (get (:flare-sidebar @db/!app-db) flare-key)
+        ^js view (:view sidebar-data)]
+    (cond-> []
+      (and panel (not (.-disposed panel)))
+      (conj {:panel panel :type :panel})
+
+      (and view (not (.-disposed view)))
+      (conj {:view view :type :sidebar}))))
 
 (defn close-all!
   "Close all active flare panels"
@@ -278,11 +296,3 @@
           (.dispose panel))))
     (swap! db/!app-db assoc :flare-panels {})
     (count active-panels)))
-
-(defn get-flare
-  "Get a flare by its key"
-  [flare-key]
-  (when-let [panel-data (get (:flare-panels @db/!app-db) flare-key)]
-    (let [^js panel (:panel panel-data)]
-      (when (not (.-disposed panel))
-        {:panel panel :type :panel}))))
