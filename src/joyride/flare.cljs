@@ -232,6 +232,8 @@
             (swap! db/!app-db assoc-in [:flare-sidebar key]
                    {:view view :message-handler-disposable nil})
             (update-panel-with-options! view flare-options)
+            (when reveal?
+              (vscode/commands.executeCommand "joyride.flare.focus"))
             {:view view :type :sidebar})))
       (let [panel (create-webview-panel! flare-options)]
         {:panel panel :type :panel}))))
