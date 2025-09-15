@@ -116,12 +116,9 @@
   [^js webview-container flare-options]
   (let [{:keys [key title icon message-handler sidebar? webview-options]} flare-options
         ^js webview (.-webview webview-container)]
-
-
     (set! (.-options webview) webview-options)
 
-    (when title
-      (set! (.-title webview-container) title))
+    (set! (.-title webview-container) title)
 
     (when (and icon (not sidebar?))
       (set! (.-iconPath webview-container) (resolve-icon-path icon)))
@@ -223,12 +220,19 @@
    Returns: {:panel <webview-panel> :type :panel} or {:view <webview-view> :type :sidebar}"
   [options]
   (let [flare-options (normalize-flare-options options)
-        {:keys [sidebar? key reveal?]} flare-options]
+        {:keys [sidebar? key reveal? preserve-focus?]} flare-options]
     (if sidebar?
       (let [sidebar-data (get (:flare-sidebar @db/!app-db) key)
-            view (sidebar/ensure-sidebar-view! reveal?)]
+            view (sidebar/ensure-sidebar-view!)]
         (if (= view :pending)
-          {:view :pending :type :sidebar}
+          (do
+            ;; Store the flare options for when view becomes available
+            (swap! db/!app-db assoc-in [:flare-sidebar-state :pending-flare]
+                   {:key key :options flare-options})
+            (when reveal?
+              (vscode/commands.executeCommand "joyride.flare.focus"
+                                              preserve-focus?))
+            {:view :pending :type :sidebar})
           (do
             (when-let [^js disposable (:message-handler-disposable sidebar-data)]
               (.dispose disposable))
@@ -236,7 +240,7 @@
                    {:view view :message-handler-disposable nil})
             (update-panel-with-options! view flare-options)
             (when reveal?
-              (vscode/commands.executeCommand "joyride.flare.focus"))
+              (.show view preserve-focus?))
             {:view view :type :sidebar})))
       (let [panel (create-webview-panel! flare-options)]
         {:panel panel :type :panel}))))
