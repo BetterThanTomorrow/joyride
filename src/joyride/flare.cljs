@@ -189,6 +189,21 @@
              (let [^js webview (.-webview ^js (:view sidebar-data))]
                (.postMessage webview (clj->js message)))))))
 
+(defn- normalize-flare-options
+  [options]
+  (merge {:key (or (:key options)
+                   (keyword "flare" (str "flare-" (gensym))))
+          :title "Flare"
+          :reveal? true
+          :column js/undefined
+          :preserve-focus? true
+          :icon :flare/icon-default
+          :sidebar? (or (:sidebar-panel? options) ; Calva uses :sidebar-panel?
+                        false)}                   ; accept it without ceremony
+         options
+         {:webview-options (or (clj->js (:webview-options options))
+                               #js {:enableScripts true})}))
+
 (defn flare!
   "Create a WebView panel or sidebar view with the given options.
 
@@ -207,17 +222,7 @@
 
    Returns: {:panel <webview-panel> :type :panel} or {:view <webview-view> :type :sidebar}"
   [options]
-  (let [flare-options (merge {:key (or (:key options)
-                                       (keyword "flare" (str "flare-" (gensym))))
-                              :title "Flare"
-                              :reveal? true
-                              :column js/undefined
-                              :preserve-focus? true
-                              :icon :flare/icon-default
-                              :sidebar? false}
-                             options
-                             {:webview-options (or (clj->js (:webview-options options))
-                                                   #js {:enableScripts true})})
+  (let [flare-options (normalize-flare-options options)
         {:keys [sidebar? key reveal?]} flare-options]
     (if sidebar?
       (let [view (sidebar/ensure-sidebar-view! reveal?)]
