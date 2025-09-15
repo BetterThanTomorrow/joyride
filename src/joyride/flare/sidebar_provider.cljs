@@ -1,7 +1,8 @@
 (ns joyride.flare.sidebar-provider
   (:require
    ["vscode" :as vscode]
-   [joyride.db :as db]))
+   [joyride.db :as db]
+   [joyride.flare.panel :as panel]))
 
 (defn get-sidebar-view
   "Get the current sidebar webview view from app-db"
@@ -23,8 +24,7 @@
                   (.dispose disposable))
                 (swap! db/!app-db assoc-in [:flare-sidebar key]
                        {:view webview-view :message-handler-disposable nil})
-                (let [update-fn (resolve 'joyride.flare/update-panel-with-options!)]
-                  (update-fn webview-view options)))
+                (panel/update-panel-with-options! webview-view options))
               (set! (.-html (.-webview webview-view))
                     "<h3>Joyride Flare</h3><p>No flare content yet. Create a flare using <code>flare!</code> function. See <a href=\"https://github.com/BetterThanTomorrow/joyride/blob/master/examples/.joyride/src/flares_examples.cljs\">some examples</a>.</p>"))
 
