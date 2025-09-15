@@ -154,7 +154,10 @@
                    webview-options)]
 
         (.onDidDispose panel
-                       #(swap! db/!app-db update :flare-panels dissoc key))
+                       (fn []
+                         (when-let [^js message-handler (:message-handler (get (:flare-panels @db/!app-db) key))]
+                           (.dispose message-handler))
+                         (swap! db/!app-db update :flare-panels dissoc key)))
 
         (swap! db/!app-db assoc-in [:flare-panels key]
                {:view panel})
