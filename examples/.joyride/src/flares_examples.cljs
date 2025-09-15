@@ -88,7 +88,7 @@
     ;:preserve-focus? true
     :webview-options {:enableScripts true
                       :retainContextWhenHidden true}
-    ;:sidebar? true
+    :sidebar? true
     :message-handler (fn [message]
                        (let [msg-type (.-type message)
                              msg-data (.-data message)]
@@ -443,6 +443,7 @@
   (flare/ls)
 
   (flare/close! :message-test)
+  (flare/close! "fancy-svg")
 
   (flare/close-all!)
 

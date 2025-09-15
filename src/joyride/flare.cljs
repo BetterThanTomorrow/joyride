@@ -78,8 +78,8 @@
           (do
             (when-let [^js disposable (:message-handler sidebar-data)]
               (.dispose disposable))
-            (swap! db/!app-db assoc-in [:flare-sidebar key]
-                   {:view view})
+            (swap! db/!app-db assoc :flare-sidebar
+                   {key {:view view}})
             (panel/update-view-with-options! view flare-options)
             (when reveal?
               (.show view preserve-focus?))
@@ -98,35 +98,16 @@
           (when-let [^js disposable (:message-handler panel-data)]
             (.dispose disposable))
           (.dispose panel)
+          (swap! db/!app-db update :flare-panels dissoc flare-key)
           true)))
     false))
-
-;; TODO: Make user facing flares maps consistent between ls and get-flares
-;; Also make the shape of the result make sense
-
-(defn ls ; TODO: Include sidebar panels
-  "List all currently active flare panels"
-  []
-  {:panels (->> (:flare-panels @db/!app-db)
-                (filter (fn [[_key panel-data]]
-                          (not (.-disposed ^js (:view panel-data)))))
-                (into {}))
-   :sidebar (->> (:flare-sidebar @db/!app-db)
-                 (filter (fn [[_key sidebar-data]]
-                           (not (.-disposed ^js (:view sidebar-data)))))
-                 (into {}))})
 
 (defn close-all!
   "Close all active flare panels"
   []
-  (let [active-panels (:panels (ls))]
-    (doseq [[_key panel-data] active-panels]
-      (let [^js panel (:view panel-data)]
-        (when (not (.-disposed panel))
-          (when-let [^js disposable (:message-handler panel-data)]
-            (.dispose disposable))
-          (.dispose panel))))
-    (swap! db/!app-db assoc :flare-panels {})
+  (let [active-panels (:flare-panels @db/!app-db)]
+    (doseq [[key _panel-data] active-panels]
+      (close! key))
     (count active-panels)))
 
 (defn get-flares
@@ -142,3 +123,15 @@
 
       (and sidebar-view (not (.-disposed sidebar-view)))
       (assoc :sidebar sidebar-data))))
+
+(defn ls ; TODO: Include sidebar panels
+  "List all currently active flare panels"
+  []
+  {:panels (->> (:flare-panels @db/!app-db)
+                (filter (fn [[_key panel-data]]
+                          (not (.-disposed ^js (:view panel-data)))))
+                (into {}))
+   :sidebar (->> (:flare-sidebar @db/!app-db)
+                 (filter (fn [[_key sidebar-data]]
+                           (not (.-disposed ^js (:view sidebar-data)))))
+                 (into {}))})

@@ -13,23 +13,23 @@
   "Create WebView provider for sidebar flare views"
   []
   (letfn [(resolve-webview-view
-            [^js webview-view]
-            (swap! db/!app-db assoc-in [:flare-sidebar-state :webview-view] webview-view)
+           [^js webview-view]
+           (swap! db/!app-db assoc-in [:flare-sidebar-state :webview-view] webview-view)
 
-            (if-let [pending-flare (get-in @db/!app-db [:flare-sidebar-state :pending-flare])]
-              (let [{:keys [key options]} pending-flare
-                    sidebar-data (get (:flare-sidebar @db/!app-db) key)]
-                (swap! db/!app-db update :flare-sidebar-state dissoc :pending-flare)
-                (when-let [^js disposable (:message-handler sidebar-data)]
-                  (.dispose disposable))
-                (swap! db/!app-db assoc-in [:flare-sidebar key]
-                       {:view webview-view})
-                (panel/update-view-with-options! webview-view options))
-              (set! (.-html (.-webview webview-view))
-                    "<h3>Joyride Flare</h3><p>No flare content yet. Create a flare using <code>flare!</code> function. See <a href=\"https://github.com/BetterThanTomorrow/joyride/blob/master/examples/.joyride/src/flares_examples.cljs\">some examples</a>.</p>"))
-
-            (swap! db/!app-db assoc-in [:flare-sidebar :default]
-                   {:view webview-view}))]
+           (if-let [pending-flare (get-in @db/!app-db [:flare-sidebar-state :pending-flare])]
+             (let [{:keys [key options]} pending-flare
+                   sidebar-data (get (:flare-sidebar @db/!app-db) key)]
+               (swap! db/!app-db update :flare-sidebar-state dissoc :pending-flare)
+               (when-let [^js disposable (:message-handler sidebar-data)]
+                 (.dispose disposable))
+               (swap! db/!app-db assoc :flare-sidebar
+                      {key {:view webview-view}})
+               (panel/update-view-with-options! webview-view options))
+             (do
+               (set! (.-html (.-webview webview-view))
+                     "<h3>Joyride Flare</h3><p>No flare content yet. Create a flare using <code>flare!</code> function. See <a href=\"https://github.com/BetterThanTomorrow/joyride/blob/master/examples/.joyride/src/flares_examples.cljs\">some examples</a>.</p>")
+               (swap! db/!app-db assoc :flare-sidebar
+                      {:default {:view webview-view}}))))]
     #js {:resolveWebviewView resolve-webview-view}))
 
 (defn register-flare-provider!
