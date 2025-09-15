@@ -225,10 +225,13 @@
   (let [flare-options (normalize-flare-options options)
         {:keys [sidebar? key reveal?]} flare-options]
     (if sidebar?
-      (let [view (sidebar/ensure-sidebar-view! reveal?)]
+      (let [sidebar-data (get (:flare-sidebar @db/!app-db) key)
+            view (sidebar/ensure-sidebar-view! reveal?)]
         (if (= view :pending)
           {:view :pending :type :sidebar}
           (do
+            (when-let [^js disposable (:message-handler-disposable sidebar-data)]
+              (.dispose disposable))
             (swap! db/!app-db assoc-in [:flare-sidebar key]
                    {:view view :message-handler-disposable nil})
             (update-panel-with-options! view flare-options)
