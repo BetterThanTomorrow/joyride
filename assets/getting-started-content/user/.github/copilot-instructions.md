@@ -145,41 +145,6 @@ The evaluation tool has an `awaitResult` parameter for handling async operations
     {:available false :reason "Extension not installed"}))
 ```
 
-### Joyride Flares - WebView Creation
-Joyride Flares provide a powerful way to create visual interfaces and display rich content in VS Code:
-
-```clojure
-(require '[joyride.flare :as flare])
-
-;; Simple HTML flare
-(flare/flare! {:html [:h1 "Hello World!"]
-               :title "My Flare"
-               :key "greeting"})
-
-;; Flare with external URL
-(flare/flare! {:url "https://example.com"
-               :title "External Site"})
-
-;; Sidebar flare
-(flare/flare! {:html [:div [:h2 "Sidebar"] [:p "Content"]]
-               :sidebar? true})
-
-;; Data visualization
-(flare/flare! {:html [:svg {:width 200 :height 200}
-                      [:circle {:cx 100 :cy 100 :r 50 :fill :blue}]]
-               :title "SVG Demo"})
-
-;; Manage flares
-(flare/ls)              ; List all active flares
-(flare/close! "greeting")        ; Close specific flare by key
-(flare/close-all!)               ; Close all flares
-```
-
-**Flare Style Guidelines:**
-- Use maps for `:style` attributes: `{:style {:color :red :border "1px solid #ccc"}}`
-- Prefer keywords for simple CSS values: `:color :red`
-- Use strings for compound CSS property values: `:border "1px solid #ccc"`
-
 ## Common User Patterns
 
 ### Script Execution Guard
