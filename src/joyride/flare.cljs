@@ -1,6 +1,7 @@
 (ns joyride.flare
   "Joyride Flares - WebView panel and sidebar view creation"
   (:require
+   ["path" :as path]
    ["vscode" :as vscode]
    [joyride.db :as db]
    [joyride.flare.panel :as panel]
@@ -28,6 +29,17 @@
              (let [^js webview (.-webview ^js (:view sidebar-data))]
                (.postMessage webview (clj->js message)))))))
 
+(defn- normalize-file-option [file-path-or-uri]
+  (cond
+    (.-scheme file-path-or-uri) file-path-or-uri
+    (.isAbsolute path file-path-or-uri) (vscode/Uri.file file-path-or-uri)
+    :else (if (and vscode/workspace.workspaceFolders
+                   (> (.-length vscode/workspace.workspaceFolders) 0))
+            (let [workspace-uri (.-uri (first vscode/workspace.workspaceFolders))]
+              (vscode/Uri.joinPath workspace-uri file-path-or-uri))
+            (throw (ex-info "Relative file paths require an open workspace"
+                            {:file-path file-path-or-uri})))))
+
 (defn- normalize-flare-options
   [options]
   (merge {:key (or (:key options)
@@ -41,7 +53,9 @@
                         false)}                   ; accept it without ceremony
          options
          {:webview-options (or (clj->js (:webview-options options))
-                               #js {:enableScripts true})}))
+                               #js {:enableScripts true})}
+         (when (:file options)
+           {:file (normalize-file-option (:file options))})))
 
 (defn flare!
   "Create a WebView panel or sidebar view with the given options.

@@ -1,5 +1,6 @@
 (ns joyride.flare.panel
   (:require
+   ["fs" :as fs]
    ["vscode" :as vscode]
    [joyride.db :as db]
    [replicant.string :as replicant]))
@@ -88,6 +89,12 @@
   "Handle different content types and generate appropriate HTML"
   [flare-options]
   (cond
+    (:file flare-options)
+    (let [^js file-uri (:file flare-options)
+          file-path (.-fsPath file-uri)
+          file-content (fs/readFileSync file-path "utf8")]
+      file-content)
+
     (:url flare-options)
     (generate-iframe-content (:url flare-options) (:title flare-options))
 
@@ -98,7 +105,7 @@
         html-content))
 
     :else
-    (throw (ex-info "Invalid flare content: must specify either :html or :url"
+    (throw (ex-info "Invalid flare content: must specify :html, :url, or :file"
                     {:content flare-options}))))
 
 (defn update-view-content!

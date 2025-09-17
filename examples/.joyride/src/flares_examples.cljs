@@ -71,7 +71,7 @@
                  console.log('Received message:', message);
                  const messageLogElement = document.getElementById('messageLog');
                  const logEntry = document.createElement('div');
-                 logEntry.textContent = `[${new Date().toLocaleTimeString()}] Type: ${message.type}, Data: ${message.data}`;
+                 logEntry.textContent = `[${new Date().toLocaleTimeString()}] Type: ${message.type}, Data: ${message.data} ${message.data.foo}`;
                  messageLogElement.appendChild(logEntry);
                }
 
@@ -98,12 +98,24 @@
                            "text-input" (js/console.log "📝 Text input received:" msg-data)
                            (js/console.log "❓ Unknown message type:" msg-type))))})
 
-  (flare/post-message! :message-test {:type "command" :data "foo"})
+  (flare/post-message! :message-test {:type "command" :data {:foo "foo"}})
 
   (flare/get-flares :message-test)
 
   (flare/ls)
+
+  (flare/close-all!)
+
+  (flare/flare! {:file "test-flare.html"
+                 :title "My HTML File"
+                 :key :my-file-test})
+
+  (flare/flare! {:url "https://calva.io/"
+                 :title "My URL Flare"
+                 :key :my-file-test})
   :rcf)
+
+
 
 (def j-icon-svg
   [:svg {:width "256"
@@ -447,5 +459,35 @@
 
   (flare/close-all!)
 
+  :rcf)
+
+(comment
+  ;; Test if explicit localResourceRoots fixes the iframe issue
+
+  (def test-file-path "/Users/pez/Projects/joyride/vscode-test-runner/workspace-1/test-flare.html")
+  (def test-file-uri (vscode/Uri.file test-file-path))
+  (def test-file-dir (vscode/Uri.joinPath test-file-uri ".."))
+
+  ;; Create webview with explicit localResourceRoots
+  (def test-panel (vscode/window.createWebviewPanel
+                   "iframe-roots-test"
+                   "Iframe with Roots Test"
+                   vscode/ViewColumn.One
+                   #js {:enableScripts true}))
+
+  (def test-webview (.-webview test-panel))
+
+  (joyride.core/js-properties test-webview)
+  (-> test-webview .-options .-localResourceRoots)
+
+  (def webview-uri (.asWebviewUri test-webview test-file-uri))
+
+  ;; Set simple iframe HTML
+  (set! (.-html test-webview)
+        (str "<iframe src='" webview-uri "' width='100%' height='400px'></iframe>"))
+
+  ;; Check what we got
+  {:webview-uri (str webview-uri)
+   :file-dir (str test-file-dir)}
   :rcf)
 
