@@ -104,7 +104,7 @@
       (swap! db/!app-db update :disposables conj lm-disposable)
       (.push (.-subscriptions ^js extension-context) lm-disposable))
     ;; Register flare sidebar provider
-    (let [flare-disposable (flare-sidebar/register-flare-provider! extension-context)]
+    (let [flare-disposable (flare-sidebar/register-flare-provider!)]
       (swap! db/!app-db update :disposables conj flare-disposable)
       (.push (.-subscriptions ^js extension-context) flare-disposable))
     (when context (-> (content-utils/maybe-create-user-project+)

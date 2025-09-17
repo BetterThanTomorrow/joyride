@@ -1,6 +1,7 @@
 (ns flares-example
   "Demonstrates Joyride Flares for creating WebView panels and sidebar views"
-  (:require [joyride.flare :as flare]))
+  (:require ["vscode" :as vscode]
+            [joyride.flare :as flare]))
 
 (comment
   ;; Simple greeting panel
@@ -17,9 +18,9 @@
                          [:li "Persistent views"]
                          [:li "Space-efficient"]]
                         [:hr]
-                        [:small "Use " [:code ":sidebar-panel? true"] " option"]]
+                        [:small "Use " [:code ":sidebar? true"] " option"]]
                  :title "Sidebar Demo"
-                 :sidebar-panel? true})
+                 :sidebar? true})
 
   ;; Icon example
   (flare/flare! {:html [:img {:src "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"}]
@@ -35,7 +36,86 @@
                  :title "SVG Shapes"
                  :key :some-svg})
 
+
+  ;; Message sending example
+  (flare/flare!
+   {:html [:div
+           [:h1 "Message Handler Test"]
+           [:p "Testing message handling:"]
+           [:button {:onclick "sendMessage('button-click', 'Hello from button!')"}
+            "Send Message"]
+           [:div
+            [:input {:type "text" :id "textInput" :placeholder "Type something..."}]
+            [:button {:onclick "sendTextMessage()"}
+             "Send Text"]]
+           [:div
+            "log:"
+            [:pre {:id "messageLog"}]]
+           [:script {:type "text/javascript"}
+            "
+               // Acquire VS Code API once when the page loads
+               const vscode = acquireVsCodeApi();
+
+               function sendMessage(type, data) {
+                 vscode.postMessage({type: type, data: data, timestamp: Date.now()});
+                 console.log('Sent message:', type, data);
+               }
+
+               function sendTextMessage() {
+                 const input = document.getElementById('textInput');
+                 sendMessage('text-input', input.value);
+                 input.value = '';
+               }
+
+               function handleMessage(message) {
+                 console.log('Received message:', message);
+                 const messageLogElement = document.getElementById('messageLog');
+                 const logEntry = document.createElement('div');
+                 logEntry.textContent = `[${new Date().toLocaleTimeString()}] Type: ${message.type}, Data: ${message.data} ${message.data.foo}`;
+                 messageLogElement.appendChild(logEntry);
+               }
+
+               window.addEventListener('message', event => {
+                 const message = event.data; // Message from extension
+                 handleMessage(message);
+               });
+
+
+               "]]
+    :title "Message Test"
+    :key :message-test
+    ;:reveal? true
+    ;:preserve-focus? true
+    :webview-options {:enableScripts true
+                      :retainContextWhenHidden true}
+    :sidebar? true
+    :message-handler (fn [message]
+                       (let [msg-type (.-type message)
+                             msg-data (.-data message)]
+                         (js/console.log "🔥 Received message from flare, type:" msg-type "data:" msg-data)
+                         (case msg-type
+                           "button-click" (js/console.log "✅ Button was clicked!")
+                           "text-input" (js/console.log "📝 Text input received:" msg-data)
+                           (js/console.log "❓ Unknown message type:" msg-type))))})
+
+  (flare/post-message! :message-test {:type "command" :data {:foo "foo"}})
+
+  (flare/get-flares :message-test)
+
+  (flare/ls)
+
+  (flare/close-all!)
+
+  (flare/flare! {:file "test-flare.html"
+                 :title "My HTML File"
+                 :key :my-file-test})
+
+  (flare/flare! {:url "https://calva.io/"
+                 :title "My URL Flare"
+                 :key :my-file-test})
   :rcf)
+
+
 
 (def j-icon-svg
   [:svg {:width "256"
@@ -87,7 +167,7 @@
                     j-icon-svg]]]
                  :title "J-icon"
                  :key :j-icon-svg
-                 :sidebar-panel? true})
+                 :sidebar? true})
   :rcf)
 
 ;; Data table example
@@ -374,6 +454,40 @@
 
   (flare/ls)
 
+  (flare/close! :message-test)
+  (flare/close! "fancy-svg")
+
   (flare/close-all!)
 
   :rcf)
+
+(comment
+  ;; Test if explicit localResourceRoots fixes the iframe issue
+
+  (def test-file-path "/Users/pez/Projects/joyride/vscode-test-runner/workspace-1/test-flare.html")
+  (def test-file-uri (vscode/Uri.file test-file-path))
+  (def test-file-dir (vscode/Uri.joinPath test-file-uri ".."))
+
+  ;; Create webview with explicit localResourceRoots
+  (def test-panel (vscode/window.createWebviewPanel
+                   "iframe-roots-test"
+                   "Iframe with Roots Test"
+                   vscode/ViewColumn.One
+                   #js {:enableScripts true}))
+
+  (def test-webview (.-webview test-panel))
+
+  (joyride.core/js-properties test-webview)
+  (-> test-webview .-options .-localResourceRoots)
+
+  (def webview-uri (.asWebviewUri test-webview test-file-uri))
+
+  ;; Set simple iframe HTML
+  (set! (.-html test-webview)
+        (str "<iframe src='" webview-uri "' width='100%' height='400px'></iframe>"))
+
+  ;; Check what we got
+  {:webview-uri (str webview-uri)
+   :file-dir (str test-file-dir)}
+  :rcf)
+

@@ -90,11 +90,6 @@
     },
     "commands": [
       {
-        "command": "joyride.flare.focus",
-        "title": "Focus Flare View",
-        "category": "Joyride"
-      },
-      {
         "command": "joyride.runCode",
         "title": "Run Clojure Code...",
         "category": "Joyride"

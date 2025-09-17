@@ -1,51 +1,50 @@
 (ns joyride.flare.sidebar-provider
   (:require
-   ["vscode" :as vscode]))
+   ["vscode" :as vscode]
+   [joyride.db :as db]
+   [joyride.flare.panel :as panel]))
 
-(defonce !flare-webview-view (atom nil))
-(defonce !last-content (atom nil))
+(defn get-sidebar-view
+  "Get the current sidebar webview view from app-db"
+  []
+  (get-in @db/!app-db [:flare-sidebar-state :webview-view]))
 
 (defn create-flare-webview-provider
   "Create WebView provider for sidebar flare views"
-  [^js extension-context]
-  (letfn [(resolve-webview-view [^js webview-view]
-            (reset! !flare-webview-view webview-view)
+  []
+  (letfn [(resolve-webview-view
+           [^js webview-view]
+           (swap! db/!app-db assoc-in [:flare-sidebar-state :webview-view] webview-view)
 
-            (set! (.-options (.-webview webview-view))
-                  (clj->js {:enableScripts true
-                            :localResourceRoots [(.-extensionUri extension-context)]}))
-
-            (if-let [content @!last-content]
-              (do
-                (set! (.-html (.-webview webview-view)) (:html content))
-                (when (:title content)
-                  (set! (.-title webview-view) (:title content))))
-              (set! (.-html (.-webview webview-view))
-                    "<h3>Joyride Flare</h3><p>No flare content yet. Create a flare using <code>flare!</code> function.</p>")))]
+           (if-let [pending-flare (get-in @db/!app-db [:flare-sidebar-state :pending-flare])]
+             (let [{:keys [key options]} pending-flare
+                   sidebar-data (get (:flare-sidebar @db/!app-db) key)]
+               (swap! db/!app-db update :flare-sidebar-state dissoc :pending-flare)
+               (when-let [^js disposable (:message-handler sidebar-data)]
+                 (.dispose disposable))
+               (swap! db/!app-db assoc :flare-sidebar
+                      {key {:view webview-view}})
+               (panel/update-view-with-options! webview-view options))
+             (do
+               (set! (.-html (.-webview webview-view))
+                     "<h3>Joyride Flare</h3><p>No flare content yet. Create a flare using <code>flare!</code> function. See <a href=\"https://github.com/BetterThanTomorrow/joyride/blob/master/examples/.joyride/src/flares_examples.cljs\">some examples</a>.</p>")
+               (swap! db/!app-db assoc :flare-sidebar
+                      {:default {:view webview-view}}))))]
     #js {:resolveWebviewView resolve-webview-view}))
 
 (defn register-flare-provider!
   "Register the flare webview provider with VS Code"
-  [extension-context]
-  (let [provider (create-flare-webview-provider extension-context)
-        disposable (vscode/window.registerWebviewViewProvider "joyride.flare" provider)]
+  []
+  (let [provider (create-flare-webview-provider)
+        disposable (vscode/window.registerWebviewViewProvider
+                    "joyride.flare"
+                    provider
+                    #js {:webviewOptions #js {:retainContextWhenHidden true}})]
     disposable))
 
-(defn update-sidebar-flare!
-  "Update the content of the sidebar flare view"
-  [html-content & {:keys [title reveal] :or {reveal true}}]
-  (reset! !last-content {:html html-content :title title})
-
-  (if-let [^js view @!flare-webview-view]
-    ;; View is resolved, update immediately
-    (do
-      (set! (.-html (.-webview view)) html-content)
-      (when title
-        (set! (.-title view) title))
-      view)
-    ;; View not resolved yet, reveal it to trigger resolution
-    (do
-      (when reveal
-        (vscode/commands.executeCommand "joyride.flare.focus"))
-      ;; Return a placeholder that indicates content is queued
-      :pending)))
+(defn ensure-sidebar-view!
+  "Ensure sidebar view is available"
+  []
+  (if-let [^js view (get-sidebar-view)]
+    view
+    :pending))

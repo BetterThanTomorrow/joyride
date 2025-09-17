@@ -162,7 +162,7 @@ Joyride Flares provide a powerful way to create visual interfaces and display ri
 
 ;; Sidebar flare
 (flare/flare! {:html [:div [:h2 "Sidebar"] [:p "Content"]]
-               :sidebar-panel? true})
+               :sidebar? true})
 
 ;; Data visualization
 (flare/flare! {:html [:svg {:width 200 :height 200}

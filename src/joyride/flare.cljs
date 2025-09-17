@@ -1,129 +1,61 @@
 (ns joyride.flare
   "Joyride Flares - WebView panel and sidebar view creation"
   (:require
+   ["path" :as path]
    ["vscode" :as vscode]
    [joyride.db :as db]
-   [joyride.flare.sidebar-provider :as sidebar]
-   [replicant.string :as replicant]))
+   [joyride.flare.panel :as panel]
+   [joyride.flare.sidebar-provider :as sidebar]))
 
-(defn resolve-icon-path
-  "Convert icon specification to VS Code Uri or themed icon object"
-  [icon-spec]
-  (let [ext-uri (.-extensionUri ^js (db/extension-context))
-        resolve-path (fn [path]
-                       (if (or (.startsWith path "http://") (.startsWith path "https://"))
-                         (vscode/Uri.parse path)
-                         (vscode/Uri.file path)))]
-    (cond
-      (= icon-spec :flare/icon-default)
-      (vscode/Uri.joinPath ext-uri "assets" "j-icon.svg")
+(defn post-message!
+  "Send a message from extension to flare webview.
 
-      ;; String path - absolute path or URL
-      (string? icon-spec)
-      (resolve-path icon-spec)
+   Args:
+   - flare-key: The key of the flare to send message to
+   - message: The message data to send (will be serialized to JSON)
 
-      ;; Map with :light and :dark - absolute paths or URLs
-      (and (map? icon-spec) (:light icon-spec) (:dark icon-spec))
-      #js {:light (resolve-path (:light icon-spec))
-           :dark (resolve-path (:dark icon-spec))}
+   Returns: a map with the .postMessage promises for the :panel or :sidebar flares matching the key"
+  [flare-key message]
+  (let [panel-data (get (:flare-panels @db/!app-db) flare-key)
+        sidebar-data (get (:flare-sidebar @db/!app-db) flare-key)]
+    (cond-> {}
+      (and panel-data (not (.-disposed ^js (:view panel-data))))
+      (assoc :panel
+             (let [^js webview (.-webview ^js (:view panel-data))]
+               (.postMessage webview (clj->js message))))
 
-      ;; Already a Uri - pass through
-      :else icon-spec)))
+      (and sidebar-data (:view sidebar-data))
+      (assoc :sidebar
+             (let [^js webview (.-webview ^js (:view sidebar-data))]
+               (.postMessage webview (clj->js message)))))))
 
-
-(defn render-hiccup
-  "Render Hiccup data structure to HTML string using Replicant"
-  [hiccup-data]
-  (try
-    (replicant/render hiccup-data)
-    (catch js/Error e
-      (throw (ex-info (str "Failed to render Hiccup data " (.-message e))
-                      {:hiccup hiccup-data
-                       :error (.-message e)})))))
-
-(defn generate-iframe-content
-  "Create iframe wrapper following Calva's approach"
-  [url title]
-  (str "<!DOCTYPE html>
-<html>
-<head>
-    <meta charset=\"UTF-8\">
-    <title>" (or title "Flare") "</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-        }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-    </style>
-</head>
-<body>
-    <iframe src=\"" url "\" sandbox=\"allow-scripts allow-same-origin allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-top-navigation\"></iframe>
-</body>
-</html>"))
-
-(defn render-content
-  "Handle different content types and generate appropriate HTML"
-  [content-data title]
+(defn- normalize-file-option [file-path-or-uri]
   (cond
-    (:url content-data)
-    (generate-iframe-content (:url content-data) title)
+    (.-scheme file-path-or-uri) file-path-or-uri
+    (.isAbsolute path file-path-or-uri) (vscode/Uri.file file-path-or-uri)
+    :else (if (and vscode/workspace.workspaceFolders
+                   (> (.-length vscode/workspace.workspaceFolders) 0))
+            (let [workspace-uri (.-uri (first vscode/workspace.workspaceFolders))]
+              (vscode/Uri.joinPath workspace-uri file-path-or-uri))
+            (throw (ex-info "Relative file paths require an open workspace. Please use an absolute path or open a workspace folder"
+                            {:file-path file-path-or-uri})))))
 
-    (:html content-data)
-    (let [html-content (:html content-data)]
-      (if (vector? html-content)
-        (render-hiccup html-content)
-        html-content))
-
-    :else
-    (throw (ex-info "Invalid flare content: must specify either :html or :url"
-                    {:content content-data}))))
-
-(defn create-webview-panel!
-  "Create or reuse a WebView panel based on options"
-  [{:keys [key title column opts reveal icon]
-    :or {title "WebView"
-         column vscode/ViewColumn.Beside
-         opts {:enableScripts true}
-         reveal true
-         icon :flare/icon-default}}]
-  (let [panel-key (or key (keyword "joyride.flare" (str "flare-" (gensym))))
-        ^js existing-panel (get (db/flare-panels) panel-key)]
-
-    (if (and existing-panel (not (.-disposed existing-panel)))
-      (do
-        (when reveal
-          (.reveal existing-panel column))
-        existing-panel)
-
-      (let [panel (vscode/window.createWebviewPanel
-                   "joyride.flare"
-                   title
-                   column
-                   (clj->js opts))]
-
-        ;; Set icon (default or custom)
-        (when icon
-          (set! (.-iconPath panel) (resolve-icon-path icon)))
-
-        (.onDidDispose panel
-                       #(swap! db/!app-db update :flare-panels dissoc panel-key))
-
-        (swap! db/!app-db assoc-in [:flare-panels panel-key] panel)
-
-        panel))))
-
-(defn update-panel-content!
-  "Update the HTML content of a WebView panel"
-  [^js panel content-data title]
-  (let [html-content (render-content content-data title)]
-    (set! (.-html (.-webview panel)) html-content)))
+(defn- normalize-flare-options
+  [options]
+  (merge {:key (or (:key options)
+                   (keyword "flare" (str "flare-" (gensym))))
+          :title "Flare"
+          :reveal? true
+          :column js/undefined
+          :preserve-focus? true
+          :icon :flare/icon-default
+          :sidebar? (or (:sidebar-panel? options) ; Calva uses :sidebar-panel?
+                        false)}                   ; accept it without ceremony
+         options
+         {:webview-options (or (clj->js (:webview-options options))
+                               #js {:enableScripts true})}
+         (when (:file options)
+           {:file (normalize-file-option (:file options))})))
 
 (defn flare!
   "Create a WebView panel or sidebar view with the given options.
@@ -134,60 +66,86 @@
    - :title - Panel/view title (default: 'WebView')
    - :key - Identifier for reusing panels
    - :icon - Icon for panel tab. String (path/URL) or map {:light \"...\" :dark \"...\"}
-   - :sidebar-panel? - Display in sidebar vs separate panel (default: false)
-
-   Examples:
-   - {:html [:h1 \"Hello\"] :icon \"https://example.com/icon.png\"}
-   - {:icon {:light \"https://light.png\" :dark \"https://dark.png\"}}
+   - :column - vscode.ViewColumn (default: js/undefined)
+   - :reveal? - Whether to reveal the panel when created or reused (default: true)
+   - :preserve-focus? - Whether to preserve focus when revealing the panel (default: true)
+   - webview-options - JS object vscode WebviewPanelOptions & WebviewOptions for the webview (default: {:enableScripts true})
+   - :message-handler - Function to handle messages from webview. Receives message object.
+   - :sidebar? - Display in sidebar vs separate panel (default: false)
 
    Returns: {:panel <webview-panel> :type :panel} or {:view <webview-view> :type :sidebar}"
   [options]
-  (let [{:keys [sidebar-panel?] :as opts} options]
-    (if sidebar-panel?
-      (let [html-content (render-content opts (:title opts "Flare"))
-            title (:title opts "Flare")
-            reveal (:reveal opts true)
-            result (sidebar/update-sidebar-flare! html-content :title title :reveal reveal)]
-        (if (= result :pending)
-          {:view :pending :type :sidebar}
-          {:view result :type :sidebar}))
-      (let [panel (create-webview-panel! opts)]
-        (update-panel-content! panel opts (:title opts "WebView"))
-        {:panel panel :type :panel}))))
-
-;; Programmatic flare control APIs
-
-
+  (let [flare-options (normalize-flare-options options)
+        {:keys [sidebar? key reveal? preserve-focus?]} flare-options]
+    (if sidebar?
+      (let [sidebar-data (get (:flare-sidebar @db/!app-db) key)
+            view (sidebar/ensure-sidebar-view!)]
+        (if (= view :pending)
+          (do
+            ;; Store the flare options for when view becomes available
+            (swap! db/!app-db assoc-in [:flare-sidebar-state :pending-flare]
+                   {:key key :options flare-options})
+            (when reveal?
+              (vscode/commands.executeCommand "joyride.flare.focus"
+                                              preserve-focus?))
+            {:sidebar :pending})
+          (do
+            (when-let [^js disposable (:message-handler sidebar-data)]
+              (.dispose disposable))
+            (swap! db/!app-db assoc :flare-sidebar
+                   {key {:view view}})
+            (panel/update-view-with-options! view flare-options)
+            (when reveal?
+              (.show view preserve-focus?))
+            {:sidebar view})))
+      (let [panel (panel/create-webview-panel! flare-options)]
+        {:panel panel}))))
 
 (defn close!
   "Close/dispose a flare panel by key"
   [flare-key]
-  (if-let [^js panel (get (db/flare-panels) flare-key)]
-    (if (.-disposed panel)
-      false
-      (do (.dispose panel) true))
+  (if-let [panel-data (get (:flare-panels @db/!app-db) flare-key)]
+    (let [^js panel (:view panel-data)]
+      (if (.-disposed panel)
+        false
+        (do
+          (when-let [^js disposable (:message-handler panel-data)]
+            (.dispose disposable))
+          (.dispose panel)
+          (swap! db/!app-db update :flare-panels dissoc flare-key)
+          true)))
     false))
-
-(defn ls
-  "List all currently active flare panels"
-  []
-  (->> (db/flare-panels)
-       (filter (fn [[_key ^js panel]] (not (.-disposed panel))))
-       (into {})))
 
 (defn close-all!
   "Close all active flare panels"
   []
-  (let [active-panels (ls)]
-    (doseq [[_key ^js panel] active-panels]
-      (when (not (.-disposed panel))
-        (.dispose panel)))
-    (swap! db/!app-db assoc :flare-panels {})
+  (let [active-panels (:flare-panels @db/!app-db)]
+    (doseq [[key _panel-data] active-panels]
+      (close! key))
     (count active-panels)))
 
-(defn get-flare
+(defn get-flares
   "Get a flare by its key"
   [flare-key]
-  (when-let [^js panel (get (db/flare-panels) flare-key)]
-    (when (not (.-disposed panel))
-      {:panel panel :type :panel})))
+  (let [panel-data (get (:flare-panels @db/!app-db) flare-key)
+        ^js panel-view (:view panel-data)
+        sidebar-data (get (:flare-sidebar @db/!app-db) flare-key)
+        ^js sidebar-view (:view sidebar-data)]
+    (cond-> {}
+      (and panel-view (not (.-disposed panel-view)))
+      (assoc :panel panel-data)
+
+      (and sidebar-view (not (.-disposed sidebar-view)))
+      (assoc :sidebar sidebar-data))))
+
+(defn ls
+  "List all currently active flare panels and sidebar panels"
+  []
+  {:panels (->> (:flare-panels @db/!app-db)
+                (filter (fn [[_key panel-data]]
+                          (not (.-disposed ^js (:view panel-data)))))
+                (into {}))
+   :sidebar (->> (:flare-sidebar @db/!app-db)
+                 (filter (fn [[_key sidebar-data]]
+                           (not (.-disposed ^js (:view sidebar-data)))))
+                 (into {}))})

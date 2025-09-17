@@ -8,7 +8,7 @@
   (p/let [panel (vscode/window.createWebviewPanel
                  "My webview!" "Scittle"
                  vscode/ViewColumn.One
-                 #js {:enableScripts true})
+                 {:enableScripts true})
           uri (vscode/Uri.file (path/join vscode/workspace.rootPath
                                           ".joyride" "scripts" "webview"
                                           "page.html"))

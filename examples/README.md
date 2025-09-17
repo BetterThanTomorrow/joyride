@@ -95,7 +95,7 @@ Createing Webviews is such a common thing, that Joyride has a way to quickly cre
                       [:h2 "Sidebar View"]
                       [:p "This appears in the Joyride sidebar"]]
                :title "Side Panel"
-               :sidebar-panel? true})
+               :sidebar? true})
 ```
 
 The `:key` parameter allows reusing the same panel for updates.

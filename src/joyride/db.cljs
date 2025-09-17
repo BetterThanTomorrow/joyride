@@ -5,7 +5,10 @@
               :invoked-script nil
               :disposables []
               :workspace-root-path nil
-              :flare-panels {}})
+              :flare-panels {}
+              :flare-sidebar {}
+              :flare-sidebar-state {:webview-view nil
+                                    :last-content nil}})
 
 (defonce !app-db (atom init-db))
 
@@ -26,8 +29,3 @@
    See: https://code.visualstudio.com/api/references/vscode-api#OutputChannel"
   []
   (:output-channel @!app-db))
-
-(defn flare-panels
-  "Returns the map of active flare panels"
-  []
-  (:flare-panels @!app-db))

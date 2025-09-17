@@ -27,7 +27,8 @@
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
 (sci/alter-var-root sci/print-err-fn (constantly *print-err-fn*))
 
-(def joyride-ns (sci/create-ns 'joyride.core nil))
+(def core-ns (sci/create-ns 'joyride.core nil))
+(def flare-ns (sci/create-ns 'joyride.flare nil))
 
 (defn- ns->path [namespace ext]
   (-> (str namespace)
@@ -129,22 +130,23 @@
         (sci/with-bindings {sci/file absolute-path}
           (:val (sci/eval-string+ (store/get-ctx) source)))))))
 
-(def joyride-code
+(def joyride-core
   {'*file* sci/file
-   'extension-context (sci/copy-var db/extension-context joyride-ns)
-   'invoked-script (sci/copy-var db/invoked-script joyride-ns)
-   'output-channel (sci/copy-var db/output-channel joyride-ns)
+   'extension-context (sci/copy-var db/extension-context core-ns)
+   'invoked-script (sci/copy-var db/invoked-script core-ns)
+   'output-channel (sci/copy-var db/output-channel core-ns)
    'js-properties repl-utils/instance-properties
    'user-joyride-dir (conf/user-abs-joyride-path)
    'slurp (sci/copy-var slurp+ core-namespace)
    'load-file (sci/copy-var load-file+ core-namespace)})
 
-(def joyride-flare-ns
-  {'flare! (sci/copy-var flare/flare! joyride-ns)
-   'close! (sci/copy-var flare/close! joyride-ns)
-   'close-all! (sci/copy-var flare/close-all! joyride-ns)
-   'ls (sci/copy-var flare/ls joyride-ns)
-   'get-flare (sci/copy-var flare/get-flare joyride-ns)})
+(def joyride-flare
+  {'flare! (sci/copy-var flare/flare! flare-ns)
+   'close! (sci/copy-var flare/close! flare-ns)
+   'close-all! (sci/copy-var flare/close-all! flare-ns)
+   'ls (sci/copy-var flare/ls flare-ns)
+   'get-flares (sci/copy-var flare/get-flares flare-ns)
+   'post-message! (sci/copy-var flare/post-message! flare-ns)})
 
 (store/reset-ctx!
  (sci/init {:classes {'js (doto goog/global
@@ -161,8 +163,8 @@
                          'cljs.test cljs-test-config/cljs-test-namespace
                          'cljs.pprint cljs-pprint-config/cljs-pprint-namespace
                          'promesa.core promesa-config/promesa-namespace
-                         'joyride.core joyride-code
-                         'joyride.flare joyride-flare-ns
+                         'joyride.core joyride-core
+                         'joyride.flare joyride-flare
                          'rewrite-clj.zip rewrite-clj-zip-ns
                          'rewrite-clj.parser rewrite-clj-parser-ns
                          'rewrite-clj.node rewrite-clj-node-ns
