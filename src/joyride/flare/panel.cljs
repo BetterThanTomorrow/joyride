@@ -53,7 +53,9 @@
       (let [processed-hiccup (process-hiccup hiccup-data)]
         (replicant/render processed-hiccup))
       (catch js/Error e
-        (throw (ex-info (str "Failed to render Hiccup data " (.-message e))
+        (throw (ex-info (str "An error occurred while rendering Hiccup data to HTML. "
+                             "Please check your Hiccup structure. "
+                             "Original error: " (.-message e))
                         {:hiccup hiccup-data
                          :processed (process-hiccup hiccup-data)
                          :error (.-message e)}))))))
@@ -81,7 +83,7 @@
     </style>
 </head>
 <body>
-    <iframe src=\"" url "\" sandbox=\"allow-scripts allow-same-origin allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-top-navigation\"></iframe>
+    <iframe src=\"" url "\" sandbox=\"allow-scripts allow-same-origin allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-top-navigation-by-user-activation\"></iframe>
 </body>
 </html>"))
 
@@ -105,8 +107,8 @@
         html-content))
 
     :else
-    (throw (ex-info "Invalid flare content: must specify :html, :url, or :file"
-                    {:content flare-options}))))
+    (throw (ex-info "Missing flare content"
+                    {:missing ":html, :url, or :file"}))))
 
 (defn update-view-content!
   "Update the HTML content of a WebView panel or sidebar view"

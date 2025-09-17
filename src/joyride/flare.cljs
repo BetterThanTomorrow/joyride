@@ -37,7 +37,7 @@
                    (> (.-length vscode/workspace.workspaceFolders) 0))
             (let [workspace-uri (.-uri (first vscode/workspace.workspaceFolders))]
               (vscode/Uri.joinPath workspace-uri file-path-or-uri))
-            (throw (ex-info "Relative file paths require an open workspace"
+            (throw (ex-info "Relative file paths require an open workspace. Please use an absolute path or open a workspace folder"
                             {:file-path file-path-or-uri})))))
 
 (defn- normalize-flare-options
@@ -138,8 +138,8 @@
       (and sidebar-view (not (.-disposed sidebar-view)))
       (assoc :sidebar sidebar-data))))
 
-(defn ls ; TODO: Include sidebar panels
-  "List all currently active flare panels"
+(defn ls
+  "List all currently active flare panels and sidebar panels"
   []
   {:panels (->> (:flare-panels @db/!app-db)
                 (filter (fn [[_key panel-data]]
