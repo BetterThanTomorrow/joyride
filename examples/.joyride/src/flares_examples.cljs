@@ -106,7 +106,7 @@
 
   (flare/close-all!)
 
-  (flare/flare! {:file "test-flare.html"
+  (flare/flare! {:file "assets/test-flare.html"
                  :title "My HTML File"
                  :key :my-file-test})
 
