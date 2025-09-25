@@ -1,4 +1,4 @@
-(ns flares-example
+(ns flares-examples
   "Demonstrates Joyride Flares for creating WebView panels and sidebar views"
   (:require ["vscode" :as vscode]
             [joyride.flare :as flare]))
@@ -512,6 +512,23 @@
 
   (flare/close-all!)
 
+  :rcf)
+
+(comment
+  ;; Using a local resource file is a bit cumbersome
+  (let [;; Step 1: Create flare to get webview
+        {:keys [panel]} (flare/flare! {:html [:div "Loading..."]
+                                       :key :my-flare
+                                       :preserve-focus? true})
+        ;; Step 2: Get webview and convert paths
+        webview (.-webview panel)
+        workspace-uri (.-uri (first vscode/workspace.workspaceFolders))
+        local-uri (vscode/Uri.joinPath workspace-uri "assets" "joyride-logo.png")
+        webview-uri (.asWebviewUri webview local-uri)]
+    ;; Step 3: Update flare with converted URI
+    (flare/flare! {:html [:img {:src (str webview-uri)}] ; Reuse existing flare
+                   :key :my-flare}))
+  ;; Future Joyride versions will probably make this easier!
   :rcf)
 
 (comment
