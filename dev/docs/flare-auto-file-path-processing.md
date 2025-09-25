@@ -8,7 +8,6 @@ Implement automatic file path processing in Joyride Flares to convert file-like 
 
 Users must manually handle file paths for local resources:
 - No automatic conversion to webview URIs
-- Local files fail to load due to security restrictions
 - Users need to understand VS Code's webview security model
 
 ## Proposed Enhancement
