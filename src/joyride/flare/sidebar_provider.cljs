@@ -27,7 +27,7 @@
              (when (= slot 1) ; Only show default content in slot 1
                (set! (.-html (.-webview webview-view))
                      "<h3>Joyride Flare</h3><p>No flare content yet. Create a flare using <code>flare!</code> with <code>:key :sidebar-1</code>. See <a href=\"https://github.com/BetterThanTomorrow/joyride/blob/master/examples/.joyride/src/flares_examples.cljs\">some examples</a>.</p>")
-               (swap! db/!app-db assoc-in [:flare-sidebars :default] {:view webview-view}))))]
+               (swap! db/!app-db assoc-in [:flare-sidebars :sidebar-1] {:view webview-view}))))]
     #js {:resolveWebviewView resolve-webview-view}))
 
 (defn register-flare-providers!

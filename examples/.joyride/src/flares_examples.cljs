@@ -98,17 +98,19 @@
                            "text-input" (js/console.log "📝 Text input received:" msg-data)
                            (js/console.log "❓ Unknown message type:" msg-type))))})
 
-  (flare/post-message! :message-test {:type "command" :data {:foo "foo"}})
+  (flare/post-message! :sidebar-2 {:type "command" :data {:foo "foo"}})
 
-  (flare/get-flares :message-test)
+  (flare/get-flares :sidebar-2)
 
   (flare/ls)
+
+  (flare/close! :sidebar-1)
 
   (flare/close-all!)
 
   (flare/flare! {:file "assets/test-flare.html"
                  :title "My HTML File"
-                 :key :my-file-test})
+                 #_#_:key :my-file-test})
 
   (flare/flare!
    {:file "assets/test-flare.html"

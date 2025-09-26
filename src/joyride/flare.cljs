@@ -140,7 +140,7 @@
 (defn close-all!
   "Close all active flare panels"
   []
-  (let [active-panels (:flare-panels @db/!app-db)]
+  (let [active-panels (into (:flare-panels @db/!app-db) (:flare-sidebars @db/!app-db))]
     (doseq [[key _panel-data] active-panels]
       (close! key))
     (count active-panels)))
