@@ -10,6 +10,12 @@
                  :title "Greeting"
                  :key "greeting"})
 
+  (flare/flare! {:html [:h1 "An anonymous Joyride Flare"]
+                 :title "I get a default key"})
+
+  (flare/flare! {:html [:h1 "An updated anonymous Joyride Flare"]
+                 :title "Because the same default key"})
+
   ;; Sidebar example
   (flare/flare! {:html [:div {:style {:padding "10px"}}
                         [:h3 "Joyride Sidebar"]
@@ -110,7 +116,7 @@
 
   (flare/flare! {:file "assets/test-flare.html"
                  :title "My HTML File"
-                 #_#_:key :my-file-test})
+                 :key :my-file-test})
 
   (flare/flare!
    {:file "assets/test-flare.html"

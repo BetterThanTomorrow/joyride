@@ -215,9 +215,10 @@ WebView panel and sidebar view creation convenience.
 - `flare!`: Create or update a flare. Options map with
    - `:html` - HTML content string OR Hiccup data structure
    - `:url` - URL to display in iframe
+   - `:file` - A path to a html file in the workspace
    - `:title` - Panel/view title (default: 'Flare')
    - `:key` - Identifier for reusing panels
-     - Special keys are `:sidebar-1` - `:sidebar-5`, displays the flare in sidebar vs separate panel
+     - Special keys are `:sidebar-1` -> `:sidebar-5`, displays the flare in sidebar vs separate panel
    - `:icon` - Icon for panel tab. String (path/URL) or map {:light \"...\" :dark \"...\"}
    - `:column` - vscode ViewColumn (default: `js/undefined`)
    - `:reveal?` - Whether to reveal the panel when created or reused (default: true)
