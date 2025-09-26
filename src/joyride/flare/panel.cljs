@@ -121,16 +121,16 @@
 (defn update-view-with-options!
   "Update an existing panel or sidebar view with all provided options"
   [^js webview-view flare-options]
-  (let [{:keys [key title icon message-handler sidebar? webview-options]} flare-options
+  (let [{:keys [key title icon message-handler sidebar-slot webview-options]} flare-options
         ^js webview (.-webview webview-view)]
     (set! (.-options webview) webview-options)
 
     (set! (.-title webview-view) title)
 
-    (when (and icon (not sidebar?))
+    (when (and icon (not sidebar-slot))
       (set! (.-iconPath webview-view) (resolve-icon-path icon)))
 
-    (let [storage-key (if sidebar? :flare-sidebar :flare-panels)
+    (let [storage-key (if sidebar-slot :flare-sidebars :flare-panels)
           storage-path [storage-key key]]
       (when-let [existing-data (get-in @db/!app-db storage-path)]
         (when-let [^js old-disposable (:message-handler existing-data)]

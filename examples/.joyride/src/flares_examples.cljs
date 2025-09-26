@@ -1,6 +1,7 @@
 (ns flares-examples
   "Demonstrates Joyride Flares for creating WebView panels and sidebar views"
   (:require ["vscode" :as vscode]
+            [joyride.core]
             [joyride.flare :as flare]))
 
 (comment
@@ -18,9 +19,9 @@
                          [:li "Persistent views"]
                          [:li "Space-efficient"]]
                         [:hr]
-                        [:small "Use " [:code ":sidebar? true"] " option"]]
+                        [:small "Use " [:code ":key :sidebar-1"] " through " [:code ":key :sidebar-5"] " for sidebar slots"]]
                  :title "Sidebar Demo"
-                 :sidebar? true})
+                 :key :sidebar-1})
 
   ;; Icon example
   (flare/flare! {:html [:img {:src "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"}]
@@ -83,12 +84,11 @@
 
                "]]
     :title "Message Test"
-    :key :message-test
+    :key :sidebar-2
     ;:reveal? true
     ;:preserve-focus? true
     :webview-options {:enableScripts true
                       :retainContextWhenHidden true}
-    :sidebar? true
     :message-handler (fn [message]
                        (let [msg-type (.-type message)
                              msg-data (.-data message)]
@@ -113,7 +113,6 @@
   (flare/flare!
    {:file "assets/test-flare.html"
     :title "HTML File with Bi-directional Messaging"
-    ;:sidebar? true
     :key "html-file-messaging"
     :message-handler
     (fn [message]
@@ -219,8 +218,7 @@
                    [:div {:class "icon-bounce" :style {:position :relative :z-index 2}}
                     j-icon-svg]]]
                  :title "J-icon"
-                 :key :j-icon-svg
-                 :sidebar? true})
+                 :key :sidebar-3})
   :rcf)
 
 ;; Data table example
@@ -251,6 +249,39 @@
                         (data-table sample-data)]
                  :title "Data Table"
                  :key "data-table"})
+  :rcf)
+
+;; Multiple Sidebar Slots Demo
+(comment
+  ;; Show multiple sidebar flares at once using different slots
+  (flare/flare! {:html [:div {:style {:padding "10px"}}
+                        [:h3 "🔥 Sidebar Slot 1"]
+                        [:p "This appears in the first sidebar slot"]
+                        [:p "Always visible when content is present"]]
+                 :title "Slot 1"
+                 :key :sidebar-1})
+
+  (flare/flare! {:html [:div {:style {:padding "10px"}}
+                        [:h3 "⚡ Sidebar Slot 2"]
+                        [:p "This appears in the second sidebar slot"]
+                        [:p "Only visible when content is added"]]
+                 :title "Slot 2"
+                 :key :sidebar-2})
+
+  (flare/flare! {:html [:div {:style {:padding "10px"}}
+                        [:h3 "🎯 Sidebar Slot 3"]
+                        [:p "This appears in the third sidebar slot"]
+                        [:p "Independent of other slots"]]
+                 :title "Slot 3"
+                 :key :sidebar-3})
+
+  ;; Close individual slots
+  (flare/close! :sidebar-2)
+  (flare/close! :sidebar-3)
+
+  ;; Or close all
+  (flare/close-all!)
+
   :rcf)
 
 ;; Fancy animated flare (vibe coded)

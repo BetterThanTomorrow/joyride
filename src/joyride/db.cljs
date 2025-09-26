@@ -6,9 +6,8 @@
               :disposables []
               :workspace-root-path nil
               :flare-panels {}
-              :flare-sidebar {}
-              :flare-sidebar-state {:webview-view nil
-                                    :last-content nil}})
+              :flare-sidebars {}
+              :flare-sidebar-views {}})
 
 (defonce !app-db (atom init-db))
 

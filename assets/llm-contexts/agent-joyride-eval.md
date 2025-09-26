@@ -117,7 +117,7 @@ Joyride Flares provide a powerful way to create WebView panels and sidebar views
 
 ;; Create sidebar flare
 (flare/flare! {:html [:div [:h2 "Sidebar"] [:p "Content"]]
-               :sidebar? true})
+               :key :sidebar-1}) ; uses slot 1, there are slots 1 - 5
 ```
 
 ### Style Guidelines for Hiccup

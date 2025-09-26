@@ -13,4 +13,5 @@
     "titleBar.inactiveBackground": "#F00C18cc",
     "titleBar.inactiveForeground": "#eeeeeecc"
   },
+  "debug.allowBreakpointsEverywhere": true
 }

@@ -100,13 +100,15 @@
     (register-command! extension-context "joyride.startNReplServer" #'start-nrepl-server+)
     (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server+)    (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
     (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)    (when-contexts/set-context! ::when-contexts/joyride.isActive true)
+    (when-contexts/initialize-flare-contexts!)
     (doseq [lm-disposable (lm/register-tools! extension-context)]
       (swap! db/!app-db update :disposables conj lm-disposable)
       (.push (.-subscriptions ^js extension-context) lm-disposable))
-    ;; Register flare sidebar provider
-    (let [flare-disposable (flare-sidebar/register-flare-provider!)]
-      (swap! db/!app-db update :disposables conj flare-disposable)
-      (.push (.-subscriptions ^js extension-context) flare-disposable))
+    ;; Register flare sidebar providers
+    (let [flare-disposables (flare-sidebar/register-flare-providers!)]
+      (doseq [flare-disposable flare-disposables]
+        (swap! db/!app-db update :disposables conj flare-disposable)
+        (.push (.-subscriptions ^js extension-context) flare-disposable)))
     (when context (-> (content-utils/maybe-create-user-project+)
                       (p/catch
                        (fn [e]
