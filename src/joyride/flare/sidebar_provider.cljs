@@ -26,17 +26,23 @@
                (swap! db/!app-db assoc-in [:flare-sidebars :sidebar-1] {:view webview-view}))))]
     #js {:resolveWebviewView resolve-webview-view}))
 
-(defn register-flare-providers!
-  "Register all 5 flare webview providers with VS Code"
-  []
-  (for [slot (range 1 6)]
-    (let [provider (create-flare-webview-provider! slot)
-          provider-id (str "joyride.flare-" slot)
-          disposable (vscode/window.registerWebviewViewProvider
-                      provider-id
-                      provider
-                      #js {:webviewOptions #js {:retainContextWhenHidden true}})]
-      disposable)))
+#_(let [flare-disposables (flare-sidebar/register-flare-providers!)]
+  (doseq [flare-disposable flare-disposables]
+    (swap! db/!app-db update :disposables conj flare-disposable)
+    (.push (.-subscriptions ^js extension-context) flare-disposable)))
+
+(defn- register-flare-provider!
+  "Register a flare webview provider with VS Code"
+  [slot]
+  (let [provider (create-flare-webview-provider! slot)
+        provider-id (str "joyride.flare-" slot)
+        disposable (vscode/window.registerWebviewViewProvider
+                    provider-id
+                    provider
+                    #js {:webviewOptions #js {:retainContextWhenHidden true}})]
+    (swap! db/!app-db update :disposables conj disposable)
+    (.push (.-subscriptions ^js (:extension-context @db/!app-db)) disposable)
+    disposable))
 
 (defn create-sidebar-view!
   "Create or reuse a sidebar panel"
@@ -46,6 +52,7 @@
         view (get-in @db/!app-db [:flare-sidebar-views sidebar-slot :webview-view] :pending)]
     (if (= view :pending)
       (do
+        (register-flare-provider! sidebar-slot)
         ;; Store the flare options for when view becomes available
         (swap! db/!app-db assoc-in [:flare-sidebar-views sidebar-slot :pending-flare]
                {:key key :options flare-options})
