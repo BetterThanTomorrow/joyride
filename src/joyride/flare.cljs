@@ -13,7 +13,7 @@
   (-> (:flares @db/!app-db)
       (update-vals #(select-keys % [:view :message-handler]))))
 
-(defn post-message!
+(defn post-message!+
   "Send a message from extension to flare webview.
 
    Args:

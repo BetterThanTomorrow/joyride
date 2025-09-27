@@ -106,7 +106,7 @@
                            "text-input" (js/console.log "📝 Text input received:" msg-data)
                            (js/console.log "❓ Unknown message type:" msg-type))))})
 
-  (p/let [result (flare/post-message! :sidebar-2 {:type "command" :data {:foo "foo"}})]
+  (p/let [result (flare/post-message!+ :sidebar-2 {:type "command" :data {:foo "foo"}})]
     (def result result))
 
   (flare/get-flare :sidebar-2)
@@ -135,25 +135,25 @@
           (do
             (println "🚨 Alert button was clicked!" (pr-str msg-data))
             (apply vscode/window.showInformationMessage msg-data)
-            (flare/post-message! "html-file-messaging"
+            (flare/post-message!+ "html-file-messaging"
                                  {:type "response"
                                   :data "Alert acknowledged from Clojure! 🎉"}))
           "color-changed"
           (do
             (println "🎨 Color changed to:" msg-data)
-            (flare/post-message! "html-file-messaging"
+            (flare/post-message!+ "html-file-messaging"
                                  {:type "color-feedback"
                                   :data (str "Beautiful " msg-data " choice! 🌈")}))
           "input-processed"
           (do
             (println "📝 Input processed:" msg-data)
-            (flare/post-message! "html-file-messaging"
+            (flare/post-message!+ "html-file-messaging"
                                  {:type "input-response"
                                   :data (str "Clojure processed: '" msg-data "' ✨")}))
           "progress-animated"
           (do
             (println "📊 Progress animated to:" msg-data)
-            (flare/post-message! "html-file-messaging"
+            (flare/post-message!+ "html-file-messaging"
                                  {:type "progress-feedback"
                                   :data (str "Progress at " msg-data "% - "
                                              (cond
@@ -165,13 +165,13 @@
           "timer-completed"
           (do
             (println "⏰ Timer completed:" msg-data)
-            (flare/post-message! "html-file-messaging"
+            (flare/post-message!+ "html-file-messaging"
                                  {:type "response"
                                   :data "Timer event received in Clojure! ⏰"}))
 
           (println "❓ Unknown message type:" msg-type))))})
 
-  (flare/post-message! "html-file-messaging" {:type "animate-process" :data {}})
+  (flare/post-message!+ "html-file-messaging" {:type "animate-process" :data {}})
 
   (flare/flare! {:url "https://calva.io/"
                  :title "My URL Flare"

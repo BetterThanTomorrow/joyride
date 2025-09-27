@@ -227,9 +227,10 @@ WebView panel and sidebar view creation convenience.
    - `:preserve-focus?` - Whether to preserve focus when revealing the panel (default: true)
    - `:message-handler` - Function to handle messages from webview. Receives message object.
    - `:webview-options` - A map with vscode WebviewPanelOptions & WebviewOptions for the webview (default: `{:enableScripts true}`)
-- `close!`: Close a specific flare by key.
+- `close!`: Close a flare by key.
+- `post-massage!+`: Post a message to a flare by key.
 - `close-all!`: Close all active flares.
-- `ls`: List all active flare keys.
+- `ls`: List all active flares as a map `key -> flare`
 - `get-flare`: Get a flare by its key
 
 **Icon Options:**

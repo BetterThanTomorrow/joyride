@@ -146,7 +146,7 @@
    'close-all! (sci/copy-var flare/close-all! flare-ns)
    'ls (sci/copy-var flare/ls flare-ns)
    'get-flare (sci/copy-var flare/get-flare flare-ns)
-   'post-message! (sci/copy-var flare/post-message! flare-ns)})
+   'post-message!+ (sci/copy-var flare/post-message!+ flare-ns)})
 
 (store/reset-ctx!
  (sci/init {:classes {'js (doto goog/global
