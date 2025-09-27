@@ -141,7 +141,7 @@
 
     (update-view-content! webview-view flare-options)))
 
-(defn create-view!
+(defn create-view!+
   "Create or reuse a WebView panel"
   [{:keys [key title column webview-options reveal? preserve-focus?]
     :as flare-options}]
@@ -171,7 +171,7 @@
                {:view panel})
 
         (update-view-with-options! panel flare-options)
-        panel))))
+        (js/Promise.resolve panel)))))
 
 (defn close! [flare-key]
   (let [flare-data (get (:flares @db/!app-db) flare-key)

@@ -40,9 +40,9 @@ Always test new Joyride features in the dev extension host to verify they work w
 
 ;; Evaluate Joyride code in the dev extension host
 (jsci/eval-string "(require '[joyride.flare :as flare])
-                   (flare/flare! {:html [:h1 \"🔥 Test from Dev Host\"]
-                                  :title \"Feature Test\"
-                                  :key :test-feature})")
+                   (flare/flare!+ {:html [:h1 \"🔥 Test from Dev Host\"]
+                                   :title \"Feature Test\"
+                                   :key :test-feature})")
 ```
 
 ### Why This Works
@@ -86,8 +86,8 @@ When implementing new Joyride APIs (like the sidebar-N keys):
 ```clojure
 ;; Test in dev extension host first
 (jsci/eval-string "(require '[joyride.flare :as flare])
-                   (flare/flare! {:html [:div \"Testing new API\"]
-                                  :key :sidebar-1})")
+                   (flare/flare!+ {:html [:div \"Testing new API\"]
+                                   :key :sidebar-1})")
 ```
 
 ### Testing Protocol for UI Features

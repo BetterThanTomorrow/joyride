@@ -9,13 +9,13 @@ Redesigned the flare sidebar API from a single `:sidebar?` boolean flag to suppo
 ### API Design Evolution
 **Old API:**
 ```clojure
-(flare/flare! {:html [:h1 "Hello"] :sidebar? true})
+(flare/flare!+ {:html [:h1 "Hello"] :sidebar? true})
 ```
 
 **New API:**
 ```clojure
-(flare/flare! {:html [:h1 "Hello"] :key :sidebar-1})
-(flare/flare! {:html [:h2 "Another"] :key :sidebar-2})
+(flare/flare!+ {:html [:h1 "Hello"] :key :sidebar-1})
+(flare/flare!+ {:html [:h2 "Another"] :key :sidebar-2})
 ```
 
 ### Key Benefits
@@ -122,11 +122,11 @@ Redesigned the flare sidebar API from a single `:sidebar?` boolean flag to suppo
 ### Test Cases to Validate
 ```clojure
 ;; Test 1: Single sidebar slot
-(jsci/eval-string "(flare/flare! {:html [:h1 \"Test 1\"] :key :sidebar-1})")
+(jsci/eval-string "(flare/flare!+ {:html [:h1 \"Test 1\"] :key :sidebar-1})")
 
 ;; Test 2: Multiple concurrent sidebar slots
-(jsci/eval-string "(flare/flare! {:html [:h1 \"Slot 2\"] :key :sidebar-2})")
-(jsci/eval-string "(flare/flare! {:html [:h1 \"Slot 3\"] :key :sidebar-3})")
+(jsci/eval-string "(flare/flare!+ {:html [:h1 \"Slot 2\"] :key :sidebar-2})")
+(jsci/eval-string "(flare/flare!+ {:html [:h1 \"Slot 3\"] :key :sidebar-3})")
 
 ;; Test 3: Slot visibility (should show/hide based on content)
 ;; Test 4: Closing specific sidebar slots

@@ -32,12 +32,36 @@
       (swap! db/!app-db assoc-in [:flare-sidebar-views slot :webview-view] webview-view)
       (swap! db/!app-db assoc-in [:flare-sidebar-views slot :dispose-listener] new-dispose-listener))))
 
+(defn- resolve-pending-promises!
+  "Resolve all pending promises for a sidebar slot when view is created"
+  [sidebar-slot webview-view]
+  (let [resolvers (get-in @db/!app-db [:flare-sidebar-views sidebar-slot :promise-resolvers])]
+    (doseq [{:keys [resolve-fn]} resolvers]
+      (when resolve-fn
+        (resolve-fn webview-view)))
+    ;; Clear the resolvers
+    (swap! db/!app-db assoc-in [:flare-sidebar-views sidebar-slot :promise-resolvers] [])))
+
+(defn- create-view-promise!
+  "Create a promise that resolves when a view is created for the given slot and key"
+  [sidebar-slot key]
+  (let [promise-resolver (atom nil)
+        promise (js/Promise. (fn [resolve _reject]
+                               (reset! promise-resolver resolve)))]
+    ;; Store the resolver for later use
+    (swap! db/!app-db update-in [:flare-sidebar-views sidebar-slot :promise-resolvers]
+           (fnil conj []) {:key key :resolve-fn @promise-resolver})
+    promise))
+
 (defn- create-flare-webview-provider!
   "Create WebView provider for sidebar flare views"
   [slot]
   (letfn [(resolve-webview-view
             [^js webview-view]
             (store-sidebar-view! slot webview-view)
+
+            ;; Resolve any pending promises for this slot
+            (resolve-pending-promises! slot webview-view)
 
             (if-let [pending-flare (get-in @db/!app-db [:flare-sidebar-views slot :pending-flare])]
               (let [{:keys [key options]} pending-flare
@@ -75,35 +99,39 @@
       (swap! db/!app-db assoc-in [:flare-sidebar-views slot :provider-disposable] disposable)
       disposable)))
 
-(defn create-view!
-  "Create or reuse a sidebar panel"
+(defn create-view!+
+  "Create or reuse a sidebar panel, returns a promise that resolves to the view"
   [{:keys [sidebar-slot key reveal? preserve-focus?] :as flare-options}]
   (when-contexts/set-flare-content-context! sidebar-slot true)
   (register-flare-provider! sidebar-slot)
   (let [sidebar-data (get (:flares @db/!app-db) key)
         view (get-in @db/!app-db [:flare-sidebar-views sidebar-slot :webview-view] :pending)]
     (if (= view :pending)
-      (do
+      ;; View doesn't exist yet, return a promise
+      (let [promise (create-view-promise! sidebar-slot key)]
         (swap! db/!app-db assoc-in [:flare-sidebar-views sidebar-slot :pending-flare]
                {:key key :options flare-options})
         (when reveal?
           (vscode/commands.executeCommand (str "joyride.flare-" sidebar-slot ".focus")
                                           preserve-focus?))
-        :pending)
+        promise)
+      ;; View exists or we're in the else branch
       (let [existing-handler (:message-handler sidebar-data)]
         (when existing-handler
           (.dispose ^js existing-handler))
         (swap! db/!app-db assoc-in [:flares key] {:view view})
         (if view
+          ;; View exists, return resolved promise
           (do
             (panel/update-view-with-options! view flare-options)
             (when reveal?
               (.show view preserve-focus?))
-            view)
+            (js/Promise.resolve view))
+          ;; View is nil, recursive call
           (do
             (swap! db/!app-db update-in [:flare-sidebar-views sidebar-slot] dissoc :webview-view)
             (swap! db/!app-db update :flares dissoc key)
-            (create-view! flare-options)))))))
+            (create-view!+ flare-options)))))))
 
 (defn close! [flare-key]
   (let [flare-data (get (:flares @db/!app-db) flare-key)

@@ -107,18 +107,20 @@ Joyride Flares provide a powerful way to create WebView panels and sidebar views
 (require '[joyride.flare :as flare])
 
 ;; Create a simple HTML flare
-(flare/flare! {:html [:h1 "Hello World!"]
-               :title "My Flare"
-               :key "example"})
+(flare/flare!+ {:html [:h1 "Hello World!"]
+                :title "My Flare"
+                :key "example"})
 
 ;; Create a flare with external URL
-(flare/flare! {:url "https://example.com"
-               :title "External Site"})
+(flare/flare!+ {:url "https://example.com"
+                :title "External Site"})
 
 ;; Create sidebar flare
-(flare/flare! {:html [:div [:h2 "Sidebar"] [:p "Content"]]
-               :key :sidebar-1}) ; uses slot 1, there are slots 1 - 5
+(flare/flare!+ {:html [:div [:h2 "Sidebar"] [:p "Content"]]
+                :key :sidebar-1}) ; uses slot 1, there are slots 1 - 5
 ```
+
+(The `+` in `flare!+` means it returns a promise, use `awaitResult: true`.)
 
 ### Style Guidelines for Hiccup
 - **Use maps for `:style` attributes** (not strings)
@@ -150,16 +152,16 @@ Joyride Flares provide a powerful way to create WebView panels and sidebar views
 ### Common Flare Examples
 ```clojure
 ;; Data table
-(flare/flare! {:html [:table {:style {:border-collapse :collapse}}
+(flare/flare!+ {:html [:table {:style {:border-collapse :collapse}}
                        [:tr [:th "Name"] [:th "Value"]]
                        [:tr [:td "Item 1"] [:td "42"]]]
-               :title "Data View"})
+                :title "Data View"})
 
 ;; SVG graphics
-(flare/flare! {:html [:svg {:width 200 :height 200
-                           :style {:border "1px solid #ddd"}}
-                      [:circle {:cx 100 :cy 100 :r 50 :fill :blue}]]
-               :title "SVG Demo"})
+(flare/flare!+ {:html [:svg {:width 200 :height 200
+                            :style {:border "1px solid #ddd"}}
+                       [:circle {:cx 100 :cy 100 :r 50 :fill :blue}]]
+                :title "SVG Demo"})
 ```
 
 ## Common Evaluation Patterns

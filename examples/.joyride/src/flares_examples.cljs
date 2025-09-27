@@ -8,46 +8,53 @@
 
 (comment
   ;; Simple greeting panel
-  (flare/flare! {:html [:h1 "Hello, Joyride Flares!"]
-                 :title "Greeting"
-                 :key "greeting"})
+  (flare/flare!+ {:html [:h1 "Hello, Joyride Flares!"]
+                  :title "Greeting"
+                  :key "greeting"})
 
-  (flare/flare! {:html [:h1 "An anonymous Joyride Flare"]
-                 :title "I get a default key"})
+  (flare/flare!+ {:html [:h1 "An anonymous Joyride Flare"]
+                  :title "I get a default key"})
 
-  (flare/flare! {:html [:h1 "An updated anonymous Joyride Flare"]
-                 :title "Because the same default key"})
+  (flare/flare!+ {:html [:h1 "An updated anonymous Joyride Flare"]
+                  :title "Because the same default key"})
+
+  ; Inspect the result in the repl
+  (p/let [editor-flare (flare/flare!+ {:html [:h1 "A Flare"]
+                                       :title "a flare"})]
+    (def flare editor-flare))
 
   ;; Sidebar example
-  (flare/flare! {:html [:div {:style {:padding "10px"}}
-                        [:h3 "Joyride Sidebar"]
-                        [:p "This flare appears in the sidebar instead of a separate panel."]
-                        [:ul
-                         [:li "Useful for quick info"]
-                         [:li "Persistent views"]
-                         [:li "Space-efficient"]]
-                        [:hr]
-                        [:small "Use " [:code ":key :sidebar-1"] " through " [:code ":key :sidebar-5"] " for sidebar slots"]]
-                 :title "Sidebar Demo"
-                 :key :sidebar-1})
+  (p/let [sidebar-flare
+          (flare/flare!+ {:html [:div {:style {:padding "10px"}}
+                                 [:h3 "Joyride Sidebar"]
+                                 [:p "This flare appears in the sidebar instead of a separate panel."]
+                                 [:ul
+                                  [:li "Useful for quick info"]
+                                  [:li "Persistent views"]
+                                  [:li "Space-efficient"]]
+                                 [:hr]
+                                 [:small "Use " [:code ":key :sidebar-1"] " through " [:code ":key :sidebar-5"] " for sidebar slots"]]
+                          :title "Sidebar Demo"
+                          :key :sidebar-1})]
+    (def sidebar-flare sidebar-flare))
 
   ;; Icon example
-  (flare/flare! {:html [:img {:src "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"}]
-                 :title "Awesome"
-                 :icon "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"})
+  (flare/flare!+ {:html [:img {:src "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"}]
+                  :title "Awesome"
+                  :icon "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"})
 
 
-  (flare/flare! {:html [:svg {:height 200 :width 200 :style {:border "1px solid #ccc"}}
-                        [:circle {:r 30 :cx 50 :cy 50 :fill "red" :opacity 0.7}]
-                        [:rect {:x 70 :y 70 :width 60 :height 40 :fill :blue :opacity 0.7}]
-                        [:line {:x1 10 :y1 180 :x2 190 :y2 20 :stroke :green :stroke-width 3}]
-                        [:text {:x 100 :y 190 :text-anchor :middle :fill :purple} "Joyride!"]]
-                 :title "SVG Shapes"
-                 :key :some-svg})
+  (flare/flare!+ {:html [:svg {:height 200 :width 200 :style {:border "1px solid #ccc"}}
+                         [:circle {:r 30 :cx 50 :cy 50 :fill "red" :opacity 0.7}]
+                         [:rect {:x 70 :y 70 :width 60 :height 40 :fill :blue :opacity 0.7}]
+                         [:line {:x1 10 :y1 180 :x2 190 :y2 20 :stroke :green :stroke-width 3}]
+                         [:text {:x 100 :y 190 :text-anchor :middle :fill :purple} "Joyride!"]]
+                  :title "SVG Shapes"
+                  :key :some-svg})
 
 
   ;; Message sending example
-  (flare/flare!
+  (flare/flare!+
    {:html [:div
            [:h1 "Message Handler Test"]
            [:p "Testing message handling:"]
@@ -94,7 +101,7 @@
     :title "Message Test"
     :key :sidebar-2
     ;:reveal? true
-    ;:preserve-focus? true
+    :preserve-focus? true
     :webview-options {:enableScripts true
                       :retainContextWhenHidden true}
     :message-handler (fn [message]
@@ -117,11 +124,11 @@
 
   (flare/close-all!)
 
-  (flare/flare! {:file "assets/test-flare.html"
-                 :title "My HTML File"
-                 :key :my-file-test})
+  (flare/flare!+ {:file "assets/test-flare.html"
+                  :title "My HTML File"
+                  :key :my-file-test})
 
-  (flare/flare!
+  (flare/flare!+
    {:file "assets/test-flare.html"
     :title "HTML File with Bi-directional Messaging"
     :key "html-file-messaging"
@@ -136,46 +143,46 @@
             (println "🚨 Alert button was clicked!" (pr-str msg-data))
             (apply vscode/window.showInformationMessage msg-data)
             (flare/post-message!+ "html-file-messaging"
-                                 {:type "response"
-                                  :data "Alert acknowledged from Clojure! 🎉"}))
+                                  {:type "response"
+                                   :data "Alert acknowledged from Clojure! 🎉"}))
           "color-changed"
           (do
             (println "🎨 Color changed to:" msg-data)
             (flare/post-message!+ "html-file-messaging"
-                                 {:type "color-feedback"
-                                  :data (str "Beautiful " msg-data " choice! 🌈")}))
+                                  {:type "color-feedback"
+                                   :data (str "Beautiful " msg-data " choice! 🌈")}))
           "input-processed"
           (do
             (println "📝 Input processed:" msg-data)
             (flare/post-message!+ "html-file-messaging"
-                                 {:type "input-response"
-                                  :data (str "Clojure processed: '" msg-data "' ✨")}))
+                                  {:type "input-response"
+                                   :data (str "Clojure processed: '" msg-data "' ✨")}))
           "progress-animated"
           (do
             (println "📊 Progress animated to:" msg-data)
             (flare/post-message!+ "html-file-messaging"
-                                 {:type "progress-feedback"
-                                  :data (str "Progress at " msg-data "% - "
-                                             (cond
-                                               (< msg-data 25) "Just getting started! 🌱"
-                                               (< msg-data 50) "Making good progress! 🚀"
-                                               (< msg-data 75) "More than halfway there! 💪"
-                                               (< msg-data 90) "Almost finished! 🔥"
-                                               :else "Excellent work! 🎯"))}))
+                                  {:type "progress-feedback"
+                                   :data (str "Progress at " msg-data "% - "
+                                              (cond
+                                                (< msg-data 25) "Just getting started! 🌱"
+                                                (< msg-data 50) "Making good progress! 🚀"
+                                                (< msg-data 75) "More than halfway there! 💪"
+                                                (< msg-data 90) "Almost finished! 🔥"
+                                                :else "Excellent work! 🎯"))}))
           "timer-completed"
           (do
             (println "⏰ Timer completed:" msg-data)
             (flare/post-message!+ "html-file-messaging"
-                                 {:type "response"
-                                  :data "Timer event received in Clojure! ⏰"}))
+                                  {:type "response"
+                                   :data "Timer event received in Clojure! ⏰"}))
 
           (println "❓ Unknown message type:" msg-type))))})
 
   (flare/post-message!+ "html-file-messaging" {:type "animate-process" :data {}})
 
-  (flare/flare! {:url "https://calva.io/"
-                 :title "My URL Flare"
-                 :key :my-file-test})
+  (flare/flare!+ {:url "https://calva.io/"
+                  :title "My URL Flare"
+                  :key :my-file-test})
   :rcf)
 
 
@@ -196,12 +203,12 @@
            :fill "#F00C18"}]])
 
 (comment
-  (flare/flare! {:html
-                 [:div {:style {:text-align :center
-                                :padding-top "100px"
-                                :overflow :hidden
-                                :height "500px"}}
-                  [:style "@keyframes pulse-glow {
+  (flare/flare!+ {:html
+                  [:div {:style {:text-align :center
+                                 :padding-top "100px"
+                                 :overflow :hidden
+                                 :height "500px"}}
+                   [:style "@keyframes pulse-glow {
                               0%, 100% { fill-opacity: 0.1;}
                               50% { fill-opacity: 0.4;}
                             }
@@ -217,19 +224,19 @@
                             .icon-bounce { animation: bounce 4s ease-in-out infinite; }
                             .bg-rotate { animation: rotate-slow 20s linear infinite; }
                           "]
-                  [:div {:style {:position :relative :display :inline-block}}
-                   [:div {:class "bg-rotate"
-                          :style {:position :absolute
-                                  :top "-40px" :left "-40px"
-                                  :width "336px" :height "336px"
-                                  :border "7px solid #FEE719"
-                                  :background "#F00C18"
-                                  :border-radius "20%"
-                                  :z-index 1}}]
-                   [:div {:class "icon-bounce" :style {:position :relative :z-index 2}}
-                    j-icon-svg]]]
-                 :title "J-icon"
-                 :key :sidebar-3})
+                   [:div {:style {:position :relative :display :inline-block}}
+                    [:div {:class "bg-rotate"
+                           :style {:position :absolute
+                                   :top "-40px" :left "-40px"
+                                   :width "336px" :height "336px"
+                                   :border "7px solid #FEE719"
+                                   :background "#F00C18"
+                                   :border-radius "20%"
+                                   :z-index 1}}]
+                    [:div {:class "icon-bounce" :style {:position :relative :z-index 2}}
+                     j-icon-svg]]]
+                  :title "J-icon"
+                  :key :sidebar-3})
   :rcf)
 
 ;; Data table example
@@ -255,36 +262,36 @@
    {:name "Carol" :age 35 :city "Chicago"}])
 
 (comment
-  (flare/flare! {:html [:div
-                        [:h2 "Sample Data"]
-                        (data-table sample-data)]
-                 :title "Data Table"
-                 :key "data-table"})
+  (flare/flare!+ {:html [:div
+                         [:h2 "Sample Data"]
+                         (data-table sample-data)]
+                  :title "Data Table"
+                  :key "data-table"})
   :rcf)
 
 ;; Multiple Sidebar Slots Demo
 (comment
   ;; Show multiple sidebar flares at once using different slots
-  (flare/flare! {:html [:div {:style {:padding "10px"}}
-                        [:h3 "🔥 Sidebar Slot 1"]
-                        [:p "This appears in the first sidebar slot"]
-                        [:p "Always visible when content is present"]]
-                 :title "Slot 1"
-                 :key :sidebar-1})
+  (flare/flare!+ {:html [:div {:style {:padding "10px"}}
+                         [:h3 "🔥 Sidebar Slot 1"]
+                         [:p "This appears in the first sidebar slot"]
+                         [:p "Always visible when content is present"]]
+                  :title "Slot 1"
+                  :key :sidebar-1})
 
-  (flare/flare! {:html [:div {:style {:padding "10px"}}
-                        [:h3 "⚡ Sidebar Slot 2"]
-                        [:p "This appears in the second sidebar slot"]
-                        [:p "Only visible when content is added"]]
-                 :title "Slot 2"
-                 :key :sidebar-2})
+  (flare/flare!+ {:html [:div {:style {:padding "10px"}}
+                         [:h3 "⚡ Sidebar Slot 2"]
+                         [:p "This appears in the second sidebar slot"]
+                         [:p "Only visible when content is added"]]
+                  :title "Slot 2"
+                  :key :sidebar-2})
 
-  (flare/flare! {:html [:div {:style {:padding "10px"}}
-                        [:h3 "🎯 Sidebar Slot 3"]
-                        [:p "This appears in the third sidebar slot"]
-                        [:p "Independent of other slots"]]
-                 :title "Slot 3"
-                 :key :sidebar-3})
+  (flare/flare!+ {:html [:div {:style {:padding "10px"}}
+                         [:h3 "🎯 Sidebar Slot 3"]
+                         [:p "This appears in the third sidebar slot"]
+                         [:p "Independent of other slots"]]
+                  :title "Slot 3"
+                  :key :sidebar-3})
 
   ;; Close individual slots
   (flare/close! :sidebar-2)
@@ -414,9 +421,9 @@
 
 (comment
   ;; Fancy animated flare with modern design and CSS animations
-  (flare/flare! {:html fancy-html
-                 :title "Fancy Joyride Flare"
-                 :key "fancy-flare"})
+  (flare/flare!+ {:html fancy-html
+                  :title "Fancy Joyride Flare"
+                  :key "fancy-flare"})
 
   :rcf)
 
@@ -537,9 +544,9 @@
 
 (comment
   ;; Fancy SVG flare with animations
-  (flare/flare! {:html fancy-svg
-                 :title "Fancy SVG Showcase"
-                 :key "fancy-svg"})
+  (flare/flare!+ {:html fancy-svg
+                  :title "Fancy SVG Showcase"
+                  :key "fancy-svg"})
   :rcf)
 
 (comment
@@ -559,17 +566,17 @@
 (comment
   ;; Using a local resource file is a bit cumbersome
   (let [;; Step 1: Create flare to get webview
-        {:keys [panel]} (flare/flare! {:html [:div "Loading..."]
-                                       :key :my-flare
-                                       :preserve-focus? true})
+        {:keys [panel]} (flare/flare!+ {:html [:div "Loading..."]
+                                        :key :my-flare
+                                        :preserve-focus? true})
         ;; Step 2: Get webview and convert paths
         webview (.-webview panel)
         workspace-uri (.-uri (first vscode/workspace.workspaceFolders))
         local-uri (vscode/Uri.joinPath workspace-uri "assets" "joyride-logo.png")
         webview-uri (.asWebviewUri webview local-uri)]
     ;; Step 3: Update flare with converted URI
-    (flare/flare! {:html [:img {:src (str webview-uri)}] ; Reuse existing flare
-                   :key :my-flare}))
+    (flare/flare!+ {:html [:img {:src (str webview-uri)}] ; Reuse existing flare
+                    :key :my-flare}))
   ;; Future Joyride versions will probably make this easier!
   :rcf)
 

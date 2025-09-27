@@ -5,7 +5,8 @@
    ["vscode" :as vscode]
    [joyride.db :as db]
    [joyride.flare.panel :as panel]
-   [joyride.flare.sidebar :as sidebar]))
+   [joyride.flare.sidebar :as sidebar]
+   [promesa.core :as p]))
 
 (defn- current-api-flares
   "Return the current active flares in API shape"
@@ -53,7 +54,7 @@
            (when (:file options)
              {:file (normalize-file-option (:file options))}))))
 
-(defn flare!
+(defn flare!+
   "Create a WebView panel or sidebar view with the given options.
 
    Options:
@@ -70,11 +71,12 @@
 
    Returns: {:panel <webview-panel>} or {:sidebar <webview-view>}"
   [options]
-  (let [flare-options (normalize-flare-options options)
-        {:keys [sidebar-slot]} flare-options]
-    {(:key flare-options) (if sidebar-slot
-                            (sidebar/create-view! flare-options)
-                            (panel/create-view! flare-options))}))
+  (p/let [flare-options (normalize-flare-options options)
+          {:keys [sidebar-slot]} flare-options
+          view (if sidebar-slot
+                 (sidebar/create-view!+ flare-options)
+                 (panel/create-view!+ flare-options))]
+    {(:key flare-options) view}))
 
 (defn close!
   "Close/dispose a flare panel by key"
