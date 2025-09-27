@@ -1,14 +1,15 @@
 (ns joyride.html.to-hiccup
-  (:require ["posthtml-parser" :as posthtml-parser]
-            [camel-snake-kebab.core :as csk]
+  (:require [camel-snake-kebab.core :as csk]
             [clojure.string :as string]
             [joyride.utils :refer [jsify cljify]]
             [zprint.core :as zprint]))
 
+(defonce posthtml-parser (js/require "posthtml-parser"))
+
 (def default-opts {:add-classes-to-tag-keyword? true})
 
 (defn- html->ast [html]
-  (->> (.parser posthtml-parser html #js {:recognizeNoValueAttribute true})
+  (->> ((.-parser posthtml-parser) html #js {:recognizeNoValueAttribute true})
        cljify
        (remove string/blank?)
        (map #(if (string? %) (string/trim %) %))))
