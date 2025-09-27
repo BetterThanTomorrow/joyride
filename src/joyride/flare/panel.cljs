@@ -130,8 +130,7 @@
     (when (and icon (not sidebar-slot))
       (set! (.-iconPath webview-view) (resolve-icon-path icon)))
 
-    (let [storage-key (if sidebar-slot :flare-sidebars :flare-panels)
-          storage-path [storage-key key]]
+    (let [storage-path [:flares key]]
       (when-let [existing-data (get-in @db/!app-db storage-path)]
         (when-let [^js old-disposable (:message-handler existing-data)]
           (.dispose old-disposable)))
@@ -146,7 +145,7 @@
   "Create or reuse a WebView panel"
   [{:keys [key title column webview-options reveal? preserve-focus?]
     :as flare-options}]
-  (let [existing-panel-data (get (:flare-panels @db/!app-db) key)
+  (let [existing-panel-data (get (:flares @db/!app-db) key)
         ^js existing-panel (:view existing-panel-data)]
 
     (if (and existing-panel (not (.-disposed existing-panel)))
@@ -164,11 +163,11 @@
 
         (.onDidDispose panel
                        (fn []
-                         (when-let [^js message-handler (:message-handler (get (:flare-panels @db/!app-db) key))]
+                         (when-let [^js message-handler (:message-handler (get (:flares @db/!app-db) key))]
                            (.dispose message-handler))
-                         (swap! db/!app-db update :flare-panels dissoc key)))
+                         (swap! db/!app-db update :flares dissoc key)))
 
-        (swap! db/!app-db assoc-in [:flare-panels key]
+        (swap! db/!app-db assoc-in [:flares key]
                {:view panel})
 
         (update-view-with-options! panel flare-options)

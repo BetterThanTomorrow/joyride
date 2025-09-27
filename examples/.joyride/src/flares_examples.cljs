@@ -1,8 +1,10 @@
 (ns flares-examples
   "Demonstrates Joyride Flares for creating WebView panels and sidebar views"
-  (:require ["vscode" :as vscode]
-            [joyride.core]
-            [joyride.flare :as flare]))
+  (:require
+   ["vscode" :as vscode]
+   [joyride.core]
+   [joyride.flare :as flare]
+   [promesa.core :as p]))
 
 (comment
   ;; Simple greeting panel
@@ -104,7 +106,8 @@
                            "text-input" (js/console.log "📝 Text input received:" msg-data)
                            (js/console.log "❓ Unknown message type:" msg-type))))})
 
-  (flare/post-message! :sidebar-2 {:type "command" :data {:foo "foo"}})
+  (p/let [result (flare/post-message! :sidebar-2 {:type "command" :data {:foo "foo"}})]
+    (def result result))
 
   (flare/get-flare :sidebar-2)
 

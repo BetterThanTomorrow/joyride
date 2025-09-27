@@ -5,8 +5,7 @@
               :invoked-script nil
               :disposables []
               :workspace-root-path nil
-              :flare-panels {}
-              :flare-sidebars {}
+              :flares {}
               :flare-sidebar-views {}})
 
 (defonce !app-db (atom init-db))

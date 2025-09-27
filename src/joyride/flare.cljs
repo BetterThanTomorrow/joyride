@@ -8,6 +8,12 @@
    [joyride.flare.sidebar-provider :as sidebar]
    [joyride.when-contexts :as when-contexts]))
 
+(defn- current-api-flares
+  "Return the current active flares in API shape"
+  []
+  (-> (:flares @db/!app-db)
+      (update-vals #(select-keys % [:view :message-handler]))))
+
 (defn post-message!
   "Send a message from extension to flare webview.
 
@@ -15,20 +21,11 @@
    - flare-key: The key of the flare to send message to
    - message: The message data to send (will be serialized to JSON)
 
-   Returns: a map with the .postMessage promises for the :panel or :sidebar flares matching the key"
+   Returns: the `postMessage` promise"
   [flare-key message]
-  (let [panel-data (get (:flare-panels @db/!app-db) flare-key)
-        sidebar-data (get (:flare-sidebars @db/!app-db) flare-key)]
-    (cond-> {}
-      (and panel-data (not (.-disposed ^js (:view panel-data))))
-      (assoc :panel
-             (let [^js webview (.-webview ^js (:view panel-data))]
-               (.postMessage webview (clj->js message))))
-
-      (and sidebar-data (:view sidebar-data))
-      (assoc :sidebar
-             (let [^js webview (.-webview ^js (:view sidebar-data))]
-               (.postMessage webview (clj->js message)))))))
+  (let [flare-data (get (:flares @db/!app-db) flare-key)
+        ^js view (:view flare-data)]
+    (.postMessage (.-webview view) (clj->js message))))
 
 (defn- normalize-file-option [file-path-or-uri]
   (cond
@@ -87,59 +84,46 @@
 (defn close!
   "Close/dispose a flare panel by key"
   [flare-key]
-  (if-let [panel-data (get (:flare-panels @db/!app-db) flare-key)]
-    (let [^js panel (:view panel-data)]
-      (if (.-disposed panel)
-        false
-        (do
-          (when-let [^js disposable (:message-handler panel-data)]
-            (.dispose disposable))
-          (.dispose panel)
-          (swap! db/!app-db update :flare-panels dissoc flare-key)
-          true)))
-    ;; Check if it's a sidebar flare
-    (if-let [sidebar-data (get (:flare-sidebars @db/!app-db) flare-key)]
-      (let [^js view (:view sidebar-data)
-            slot (when (sidebar/sidebar-keys flare-key) (sidebar/key->sidebar-slot flare-key))]
-        (when-let [^js disposable (:message-handler sidebar-data)]
-          (.dispose disposable))
-        (swap! db/!app-db update :flare-sidebars dissoc flare-key)
-        (when slot
-          (when-contexts/set-flare-content-context! slot false))
-        #_(if view true false)
+  (if-let [flare-data (get (:flares @db/!app-db) flare-key)]
+    (let [^js view (:view flare-data)
+          ^js message-handler (:message-handler flare-data)
+          sidebar? (contains? sidebar/sidebar-keys flare-key)]
+      (if sidebar?
+        (let [slot (sidebar/key->sidebar-slot flare-key)]
+          (when message-handler
+            (.dispose message-handler))
+          (swap! db/!app-db update :flares dissoc flare-key)
+          (when slot
+            (when-contexts/set-flare-content-context! slot false))
+          (if (and view (not (.-disposed view)))
+            (do
+              (.dispose view)
+              true)
+            false))
         (if (and view (not (.-disposed view)))
           (do
+            (when message-handler
+              (.dispose message-handler))
             (.dispose view)
+            (swap! db/!app-db update :flares dissoc flare-key)
             true)
-          false))
-      false)))
+          false)))
+    false))
 
 (defn close-all!
   "Close all active flare panels"
   []
-  (let [active-panels (into (:flare-panels @db/!app-db) (:flare-sidebars @db/!app-db))]
-    (doseq [[key _panel-data] active-panels]
-      (close! key))
-    (count active-panels)))
+  (let [flare-keys (keys (:flares @db/!app-db))]
+    (doseq [flare-key flare-keys]
+      (close! flare-key))
+    (count flare-keys)))
 
 (defn get-flare
-  "Get a flare by its key"
+  "Get a flare by its key, returning only the view and optional message handler when active."
   [flare-key]
-  (let [flare (into (get (:flare-panels @db/!app-db) flare-key {})
-                    (get (:flare-sidebars @db/!app-db) flare-key))
-        ^js view (:view flare)]
-    (if (and view (not (.-disposed view)))
-      flare
-      {})))
+  (get (current-api-flares) flare-key))
 
 (defn ls
-  "List all currently active flare panels and sidebar panels"
+  "List all currently active flares keyed by flare key."
   []
-  {:panels (->> (:flare-panels @db/!app-db)
-                (filter (fn [[_key panel-data]]
-                          (not (.-disposed ^js (:view panel-data)))))
-                (into {}))
-   :sidebars (->> (:flare-sidebars @db/!app-db)
-                  (filter (fn [[_key sidebar-data]]
-                            (not (.-disposed ^js (:view sidebar-data)))))
-                  (into {}))})
+  (current-api-flares))
