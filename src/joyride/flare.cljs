@@ -38,8 +38,6 @@
             (throw (ex-info "Relative file paths require an open workspace. Please use an absolute path or open a workspace folder"
                             {:file-path file-path-or-uri})))))
 
-
-
 (defn- normalize-flare-options
   [options]
   (let [k (:key options ::anonymous)]

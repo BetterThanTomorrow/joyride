@@ -54,9 +54,9 @@
     #js {:resolveWebviewView resolve-webview-view}))
 
 #_(let [flare-disposables (flare-sidebar/register-flare-providers!)]
-  (doseq [flare-disposable flare-disposables]
-    (swap! db/!app-db update :disposables conj flare-disposable)
-    (.push (.-subscriptions ^js extension-context) flare-disposable)))
+    (doseq [flare-disposable flare-disposables]
+      (swap! db/!app-db update :disposables conj flare-disposable)
+      (.push (.-subscriptions ^js extension-context) flare-disposable)))
 
 (defn- register-flare-provider!
   "Register a flare webview provider with VS Code"
