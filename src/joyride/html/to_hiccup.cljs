@@ -37,10 +37,22 @@
     (re-find #"^[a-zA-Z]+$" v) (keyword v)
     :else (str v)))
 
+(defn- parse-style-entry [entry]
+  (let [trimmed (string/trim entry)]
+    (when (seq trimmed)
+      (if-let [[_ k v] (re-matches #"(\S+?)\s*:\s*(.+)" trimmed)]
+        [(-> k string/lower-case keyword)
+         (normalize-css-value (string/trim v))]
+        (when-let [[_ k v] (re-matches #"(\S+?)\s+(.+)" trimmed)]
+          [(-> k string/lower-case keyword)
+           (normalize-css-value (string/trim v))])))))
+
 (defn- mapify-style [style-str]
   (try
-    (into {} (for [[_ k v] (re-seq #"(\S+?)\s*:\s*([^;]+);?" style-str)]
-               [(-> k string/lower-case keyword) (normalize-css-value v)]))
+    (->> (string/split style-str #";")
+         (map parse-style-entry)
+         (remove nil?)
+         (into {}))
     (catch :default e
       (js/console.warn "Failed to mapify style: '" style-str "'." (.-message e))
       style-str)))
