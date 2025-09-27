@@ -126,8 +126,8 @@
     value))
 
 (defn- transform-srcset
-  [value options]
-  (if (string? value)
+  [value {:keys [transform-file-path] :as options}]
+  (if (and transform-file-path (string? value))
     (->> (string/split value #",")
          (map string/trim)
          (remove string/blank?)
@@ -141,8 +141,8 @@
     value))
 
 (defn- transform-style-string
-  [value options]
-  (if (and (:transform-file-path options) (string? value))
+  [value {:keys [transform-file-path] :as options}]
+  (if (and transform-file-path (string? value))
     (.replace value (js/RegExp. "url\\((['\"]?)([^'\")]+)\\1\\)" "gi")
               (fn [match quote path]
                 (let [quote (or quote "")
@@ -154,19 +154,20 @@
     value))
 
 (defn- transform-style
-  [style options]
+  [style {:keys [transform-file-path] :as options}]
   (cond
+    (not transform-file-path) style
     (string? style) (transform-style-string style options)
     (map? style) (into {} (map (fn [[k v]]
                                  [k (if (string? v)
                                       (transform-style-string v options)
                                       v)]))
-                          style)
+                       style)
     :else style))
 
 (defn- transform-file-attrs
-  [attrs options]
-  (if (and attrs (:transform-file-path options))
+  [attrs {:keys [transform-file-path] :as options}]
+  (if (and attrs transform-file-path)
     (reduce-kv (fn [acc k v]
                  (assoc acc k
                         (cond
@@ -187,10 +188,9 @@
       (js/console.warn "Failed to mapify style: '" style-str "'." (.-message e))
       style-str)))
 
-(defn- normalize-attrs [attrs options]
+(defn- normalize-attrs [attrs {:keys [mapify-style?] :as options}]
   (let [normalized (normalize-attr-keys attrs options)
-        normalized (if (and (:style normalized)
-                             (:mapify-style? options))
+        normalized (if (and (:style normalized) mapify-style?)
                      (update normalized :style mapify-style)
                      normalized)]
     (transform-file-attrs normalized options)))
@@ -212,7 +212,9 @@
        (when (seq kw-classes)
          (str "." (some->> kw-classes (string/join "."))))))
 
-(defn- element->hiccup [{:keys [tag attrs content] :as element} options]
+(defn- element->hiccup
+  [{:keys [tag attrs content] :as element}
+   {:keys [add-classes-to-tag-keyword?] :as options}]
   (if tag
     (let [normalized-attrs (normalize-attrs attrs options)
           {:keys [id class]} normalized-attrs
@@ -220,7 +222,7 @@
           tag+id (tag+id lowercased-tag id)
           classes (when class
                     (string/split class #"\s+"))
-          [kw-classes remaining-classes] (if-not (:add-classes-to-tag-keyword? options)
+          [kw-classes remaining-classes] (if-not add-classes-to-tag-keyword?
                                            [() classes]
                                            (bisect-all-by valid-as-hiccup-kw? classes))
           tag-w-id+classes (build-tag-with-classes tag+id kw-classes)
