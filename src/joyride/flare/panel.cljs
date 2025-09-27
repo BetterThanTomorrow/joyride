@@ -172,3 +172,16 @@
 
         (update-view-with-options! panel flare-options)
         panel))))
+
+(defn close! [flare-key]
+  (let [flare-data (get (:flares @db/!app-db) flare-key)
+        ^js view (:view flare-data)
+        ^js message-handler (:message-handler flare-data)]
+    (if (and view (not (.-disposed view)))
+      (do
+        (when message-handler
+          (.dispose message-handler))
+        (.dispose view)
+        (swap! db/!app-db update :flares dissoc flare-key)
+        true)
+      false)))

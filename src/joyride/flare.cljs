@@ -84,20 +84,11 @@
 (defn close!
   "Close/dispose a flare panel by key"
   [flare-key]
-  (if-let [flare-data (get (:flares @db/!app-db) flare-key)]
-    (let [^js view (:view flare-data)
-          ^js message-handler (:message-handler flare-data)
-          sidebar? (contains? sidebar/sidebar-keys flare-key)]
+  (if (get (:flares @db/!app-db) flare-key)
+    (let [sidebar? (contains? sidebar/sidebar-keys flare-key)]
       (if sidebar?
         (sidebar/close! flare-key)
-        (if (and view (not (.-disposed view)))
-          (do
-            (when message-handler
-              (.dispose message-handler))
-            (.dispose view)
-            (swap! db/!app-db update :flares dissoc flare-key)
-            true)
-          false)))
+        (panel/close! flare-key)))
     false))
 
 (defn close-all!
