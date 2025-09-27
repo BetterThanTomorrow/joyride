@@ -30,12 +30,60 @@
                                                      (string/lower-case s))))]
                     [transformed-k v])) m)))
 
-;; TODO: We can go really fancy here, but for now, just some best effort
 (defn- normalize-css-value [v]
   (cond
     (= (str (js/parseFloat v)) v) (js/parseFloat v)
     (re-find #"^[a-zA-Z]+$" v) (keyword v)
     :else (str v)))
+
+(def ^:private opener->closer
+  {\( \)
+   \[ \]
+   \{ \}})
+
+(defn- split-style-entries [style-str]
+  (loop [chars (seq (or style-str ""))
+         current []
+         entries []
+         stack []
+         quote-char nil
+         escaped? false]
+    (if-let [ch (first chars)]
+      (let [rest (next chars)]
+        (cond
+          escaped?
+          (recur rest (conj current ch) entries stack quote-char false)
+
+          (and quote-char (= ch \\))
+          (recur rest (conj current ch) entries stack quote-char true)
+
+          (and quote-char (= ch quote-char))
+          (recur rest (conj current ch) entries stack nil false)
+
+          quote-char
+          (recur rest (conj current ch) entries stack quote-char false)
+
+          (or (= ch \") (= ch \'))
+          (recur rest (conj current ch) entries stack ch false)
+
+          (opener->closer ch)
+          (recur rest (conj current ch) entries (conj stack (opener->closer ch)) quote-char false)
+
+          (and (seq stack) (= ch (peek stack)))
+          (recur rest (conj current ch) entries (pop stack) quote-char false)
+
+          (and (empty? stack) (= ch \;))
+          (let [segment (string/trim (apply str current))
+                entries (if (string/blank? segment)
+                          entries
+                          (conj entries segment))]
+            (recur rest [] entries stack quote-char false))
+
+          :else
+          (recur rest (conj current ch) entries stack quote-char false)))
+      (let [segment (string/trim (apply str current))]
+        (cond-> entries
+          (not (string/blank? segment)) (conj segment))))))
 
 (defn- parse-style-entry [entry]
   (let [trimmed (string/trim entry)]
@@ -47,15 +95,15 @@
           [(-> k string/lower-case keyword)
            (normalize-css-value (string/trim v))])))))
 
-(defn- mapify-style [style-str]
-  (try
-    (->> (string/split style-str #";")
-         (map parse-style-entry)
-         (remove nil?)
-         (into {}))
-    (catch :default e
-      (js/console.warn "Failed to mapify style: '" style-str "'." (.-message e))
-      style-str)))
+  (defn- mapify-style [style-str]
+    (try
+      (->> (split-style-entries style-str)
+           (map parse-style-entry)
+           (remove nil?)
+           (into {}))
+      (catch :default e
+        (js/console.warn "Failed to mapify style: '" style-str "'." (.-message e))
+        style-str)))
 
 (defn- normalize-attrs [attrs options]
   (if (and (:style attrs)

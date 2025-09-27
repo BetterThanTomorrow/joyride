@@ -124,7 +124,13 @@
            (sut/html->hiccup "<foo style='padding: 0 0'></foo>" {:mapify-style? true}))))
   (testing "style attribute non-bare-word, non bare-numeric is stringified"
     (is (= [:foo {:style {:padding "var(--some-padding, 0 0)"}}]
-           (sut/html->hiccup "<foo style='padding: var(--some-padding, 0 0);'></foo>" {:mapify-style? true})))))
+           (sut/html->hiccup "<foo style='padding: var(--some-padding, 0 0);'></foo>" {:mapify-style? true}))))
+  (testing "style attribute handles data URIs containing semicolons"
+    (is (= [:foo {:style {:background "url('data:image/svg+xml;utf8,<svg></svg>')" :color :red}}]
+           (sut/html->hiccup "<foo style=\"background: url('data:image/svg+xml;utf8,<svg></svg>'); color: red\"></foo>" {:mapify-style? true}))))
+  (testing "style attribute keeps semicolons inside quoted values"
+    (is (= [:foo {:style {:content "';'" :padding "4px"}}]
+           (sut/html->hiccup "<foo style=\"content:';'; padding: 4px\"></foo>" {:mapify-style? true})))))
 
 (deftest html->hiccup-wo-add-classes-to-tag-keyword?
   (testing "When the :add-classes-to-tag-keyword? option is false they all remain in class attr"
