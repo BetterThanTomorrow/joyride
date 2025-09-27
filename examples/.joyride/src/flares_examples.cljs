@@ -27,7 +27,6 @@
                         [:hr]
                         [:small "Use " [:code ":key :sidebar-1"] " through " [:code ":key :sidebar-5"] " for sidebar slots"]]
                  :title "Sidebar Demo"
-                 :reveal? false
                  :key :sidebar-1})
 
   ;; Icon example
@@ -107,7 +106,7 @@
 
   (flare/post-message! :sidebar-2 {:type "command" :data {:foo "foo"}})
 
-  (flare/get-flares :sidebar-2)
+  (flare/get-flare :sidebar-2)
 
   (flare/ls)
 

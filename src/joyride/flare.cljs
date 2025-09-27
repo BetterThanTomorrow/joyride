@@ -122,19 +122,15 @@
       (close! key))
     (count active-panels)))
 
-(defn get-flares
+(defn get-flare
   "Get a flare by its key"
   [flare-key]
-  (let [panel-data (get (:flare-panels @db/!app-db) flare-key)
-        ^js panel-view (:view panel-data)
-        sidebar-data (get (:flare-sidebars @db/!app-db) flare-key)
-        ^js sidebar-view (:view sidebar-data)]
-    (cond-> {}
-      (and panel-view (not (.-disposed panel-view)))
-      (assoc :panel panel-data)
-
-      (and sidebar-view (not (.-disposed sidebar-view)))
-      (assoc :sidebar sidebar-data))))
+  (let [flare (into (get (:flare-panels @db/!app-db) flare-key {})
+                    (get (:flare-sidebars @db/!app-db) flare-key))
+        ^js view (:view flare)]
+    (if (and view (not (.-disposed view)))
+      flare
+      {})))
 
 (defn ls
   "List all currently active flare panels and sidebar panels"
