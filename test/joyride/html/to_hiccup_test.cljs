@@ -147,6 +147,28 @@
     (is (= [:foo {:style {:margin "0 !important" :color :blue}}]
            (sut/html->hiccup "<foo style=\"margin: 0 !important; color: blue\"></foo>" {:mapify-style? true})))))
 
+(deftest html->hiccup-transform-file-path
+  (let [opts {:transform-file-path (fn [path] (str "/static/" path))}]
+    (testing "transforms src attributes that point to files"
+      (is (= [:img {:src "/static/images/foo.png"}]
+             (sut/html->hiccup "<img src='images/foo.png'>" opts))))
+    (testing "does not alter network hrefs"
+      (is (= [:a {:href "https://example.com"}]
+             (sut/html->hiccup "<a href='https://example.com'></a>" opts))))
+    (testing "does not alter fragment hrefs"
+      (is (= [:a {:href "#section"}]
+             (sut/html->hiccup "<a href='#section'></a>" opts))))
+    (testing "transforms style url values when mapified"
+      (is (= [:div {:style {:background "url(\"/static/images/bg.png\")" :color :red}}]
+             (sut/html->hiccup "<div style='background: url(\"images/bg.png\"); color: red'></div>" opts))))
+    (testing "transforms style url values when kept as string"
+      (is (= [:div {:style "background: url(\"/static/images/bg.png\"); color: red"}]
+             (sut/html->hiccup "<div style='background: url(\"images/bg.png\"); color: red'></div>"
+                               (assoc opts :mapify-style? false)))))
+    (testing "transforms srcset entries individually"
+      (is (= [:img {:srcset "/static/img-1x.png 1x, https://cdn/img-2x.png 2x, /static/img-3x.png 3x"}]
+             (sut/html->hiccup "<img srcset='img-1x.png 1x, https://cdn/img-2x.png 2x, img-3x.png 3x'>" opts))))))
+
 (deftest html->hiccup-wo-add-classes-to-tag-keyword?
   (testing "When the :add-classes-to-tag-keyword? option is false they all remain in class attr"
     (is (= [:foo {:class ["clz1" "clz2"]}]

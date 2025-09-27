@@ -7,7 +7,8 @@
 (defonce posthtml-parser (js/require "posthtml-parser"))
 
 (def default-opts {:add-classes-to-tag-keyword? true
-                   :mapify-style? true})
+                   :mapify-style? true
+                   :transform-file-path nil})
 
 (defn- html->ast [html]
   (->> ((.-parser posthtml-parser) html #js {:recognizeNoValueAttribute true})
@@ -95,21 +96,104 @@
           [(-> k string/lower-case keyword)
            (normalize-css-value (string/trim v))])))))
 
-  (defn- mapify-style [style-str]
-    (try
-      (->> (split-style-entries style-str)
-           (map parse-style-entry)
-           (remove nil?)
-           (into {}))
-      (catch :default e
-        (js/console.warn "Failed to mapify style: '" style-str "'." (.-message e))
-        style-str)))
+(def ^:private file-path-attr-keys
+  #{:action
+    :background
+    :data
+    :formaction
+    :href
+    :poster
+    :src
+    :xlink:href})
+
+(defn- looks-like-file-path?
+  [s]
+  (let [candidate (some-> s string/trim)]
+    (boolean (and candidate
+                  (not (string/blank? candidate))
+                  (not (string/starts-with? candidate "#"))
+                  (not (string/starts-with? candidate "?"))
+                  (not (re-find #"^[a-zA-Z][a-zA-Z0-9+.-]*:" candidate))
+                  (not (string/starts-with? candidate "//"))))))
+
+(defn- transform-path-if-needed
+  [value {:keys [transform-file-path]}]
+  (if (and transform-file-path (string? value))
+    (let [trimmed (string/trim value)]
+      (if (looks-like-file-path? trimmed)
+        (transform-file-path trimmed)
+        value))
+    value))
+
+(defn- transform-srcset
+  [value options]
+  (if (string? value)
+    (->> (string/split value #",")
+         (map string/trim)
+         (remove string/blank?)
+         (map (fn [entry]
+                (let [[path descriptor] (string/split entry #"\s+" 2)
+                      updated (transform-path-if-needed path options)]
+                  (if descriptor
+                    (str updated " " descriptor)
+                    updated))))
+         (string/join ", "))
+    value))
+
+(defn- transform-style-string
+  [value options]
+  (if (and (:transform-file-path options) (string? value))
+    (.replace value (js/RegExp. "url\\((['\"]?)([^'\")]+)\\1\\)" "gi")
+              (fn [match quote path]
+                (let [quote (or quote "")
+                      trimmed (string/trim path)
+                      updated (transform-path-if-needed trimmed options)]
+                  (if (= updated trimmed)
+                    match
+                    (str "url(" quote updated quote ")")))))
+    value))
+
+(defn- transform-style
+  [style options]
+  (cond
+    (string? style) (transform-style-string style options)
+    (map? style) (into {} (map (fn [[k v]]
+                                 [k (if (string? v)
+                                      (transform-style-string v options)
+                                      v)]))
+                          style)
+    :else style))
+
+(defn- transform-file-attrs
+  [attrs options]
+  (if (and attrs (:transform-file-path options))
+    (reduce-kv (fn [acc k v]
+                 (assoc acc k
+                        (cond
+                          (= k :style) (transform-style v options)
+                          (= k :srcset) (transform-srcset v options)
+                          (file-path-attr-keys k) (transform-path-if-needed v options)
+                          :else v)))
+               {} attrs)
+    attrs))
+
+(defn- mapify-style [style-str]
+  (try
+    (->> (split-style-entries style-str)
+         (map parse-style-entry)
+         (remove nil?)
+         (into {}))
+    (catch :default e
+      (js/console.warn "Failed to mapify style: '" style-str "'." (.-message e))
+      style-str)))
 
 (defn- normalize-attrs [attrs options]
-  (if (and (:style attrs)
-           (:mapify-style? options))
-    (-> (normalize-attr-keys attrs options) (update :style mapify-style))
-    (normalize-attr-keys attrs options)))
+  (let [normalized (normalize-attr-keys attrs options)
+        normalized (if (and (:style normalized)
+                             (:mapify-style? options))
+                     (update normalized :style mapify-style)
+                     normalized)]
+    (transform-file-attrs normalized options)))
 
 (defn- valid-as-hiccup-kw? [s]
   (and s
@@ -167,7 +251,8 @@
    `options` is a map:
    * `:mapify-style?`: tuck the style attributes into a map (Reagent style)
    * `:kebab-attrs?`: kebab-case any camelCase or snake_case attribute names
-   * `:add-classes-to-tag-keyword?`: use CSS-like class name shortcuts"
+   * `:add-classes-to-tag-keyword?`: use CSS-like class name shortcuts
+   * `:transform-file-path`: fn that receives a local file path and returns the value to embed"
   ([html]
    (html->hiccup html default-opts))
   ([html options]
