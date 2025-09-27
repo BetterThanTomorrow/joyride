@@ -60,6 +60,7 @@
    Options:
    - :html - HTML content string OR Hiccup data structure
    - :url - URL to display in iframe
+   - :file - A string path to a HTML file in the workspace
    - :title - Panel/view title (default: 'WebView')
    - :key - Identifier for reusing panels. Use :sidebar-1 through :sidebar-5 for sidebar views
    - :icon - Icon for panel tab. String (path/URL) or map {:light \"...\" :dark \"...\"}
