@@ -9,7 +9,12 @@
                                          ::joyride.userActivateScriptExists false
                                          ::joyride.userHelloScriptExists false
                                          ::joyride.workspaceActivateScriptExists false
-                                         ::joyride.workspaceHelloScriptExists false}}))
+                                         ::joyride.workspaceHelloScriptExists false
+                                         ::joyride.sidebar-1.flare.hasContent false
+                                         ::joyride.sidebar-2.flare.hasContent false
+                                         ::joyride.sidebar-3.flare.hasContent false
+                                         ::joyride.sidebar-4.flare.hasContent false
+                                         ::joyride.sidebar-5.flare.hasContent false}}))
 
 (defn set-context! [k v]
   (swap! !db assoc-in [:contexts k] v)
@@ -38,6 +43,24 @@
     (set-context! ::joyride.userHelloScriptExists user-hello-exists?)
     (set-context! ::joyride.workspaceActivateScriptExists (boolean ws-activate-exists?))
     (set-context! ::joyride.workspaceHelloScriptExists (boolean ws-hello-exists?))))
+
+(defn set-flare-content-context!
+  "Set the hasContent context for a flare slot"
+  [slot has-content?]
+  (case slot
+    1 (set-context! ::joyride.sidebar-1.flare.hasContent has-content?)
+    2 (set-context! ::joyride.sidebar-2.flare.hasContent has-content?)
+    3 (set-context! ::joyride.sidebar-3.flare.hasContent has-content?)
+    4 (set-context! ::joyride.sidebar-4.flare.hasContent has-content?)
+    5 (set-context! ::joyride.sidebar-5.flare.hasContent has-content?)
+    (throw (ex-info "Invalid flare slot" {:slot slot}))))
+
+(defn initialize-flare-contexts!
+  "Initialize all flare content contexts, except slot 1, to false"
+  []
+  (set-flare-content-context! 1 true)
+  (doseq [slot (range 2 6)]
+    (set-flare-content-context! slot false)))
 
 (comment
   ;; Interactive testing and development

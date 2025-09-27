@@ -73,29 +73,34 @@ Createing Webviews is such a common thing, that Joyride has a way to quickly cre
 (require '[joyride.flare :as flare])
 
 ;; Display HTML in a Webview
-(flare/flare! {:html [:h1 "Hello, Joyride Flares!"]
-               :title "Greeting"
-               :key "example"})
+(flare/flare!+ {:html [:h1 "Hello, Joyride Flares!"]
+                :title "Greeting"
+                :key "example"})
 
 ;; Close the flare
 (flare/close! "example")
 
 ;; SVG visualization
-(flare/flare! {:html [:svg {:height 100 :width 100}
-                      [:circle {:r 40 :cx 50 :cy 50 :fill "blue"}]]
-               :title "Blue Circle"})
+(flare/flare!+ {:html [:svg {:height 100 :width 100}
+                       [:circle {:r 40 :cx 50 :cy 50 :fill "blue"}]]
+                :title "Blue Circle"})
 
 ;; Custom tab icon
-(flare/flare! {:html [:img {:src "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"}]
-               :title "Awesome"
-               :icon "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"})
+(flare/flare!+ {:html [:img {:src "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"}]
+                :title "Awesome"
+                :icon "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"})
 
-;; Display in sidebar instead of panel
-(flare/flare! {:html [:div
-                      [:h2 "Sidebar View"]
-                      [:p "This appears in the Joyride sidebar"]]
-               :title "Side Panel"
-               :sidebar? true})
+;; Display in sidebar slots (1-5 available)
+(flare/flare!+ {:html [:div
+                       [:h2 "Sidebar View"]
+                       [:p "This appears in Joyride sidebar slot 1"]]
+                :title "Sidebar View"
+                :key :sidebar-1})
+
+;; Use different slots for multiple sidebars
+(flare/flare!+ {:file "assets/something.html"
+                :title "Sidebar 2"
+                :key :sidebar-2})
 ```
 
 The `:key` parameter allows reusing the same panel for updates.

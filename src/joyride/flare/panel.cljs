@@ -121,17 +121,16 @@
 (defn update-view-with-options!
   "Update an existing panel or sidebar view with all provided options"
   [^js webview-view flare-options]
-  (let [{:keys [key title icon message-handler sidebar? webview-options]} flare-options
+  (let [{:keys [key title icon message-handler sidebar-slot webview-options]} flare-options
         ^js webview (.-webview webview-view)]
     (set! (.-options webview) webview-options)
 
     (set! (.-title webview-view) title)
 
-    (when (and icon (not sidebar?))
+    (when (and icon (not sidebar-slot))
       (set! (.-iconPath webview-view) (resolve-icon-path icon)))
 
-    (let [storage-key (if sidebar? :flare-sidebar :flare-panels)
-          storage-path [storage-key key]]
+    (let [storage-path [:flares key]]
       (when-let [existing-data (get-in @db/!app-db storage-path)]
         (when-let [^js old-disposable (:message-handler existing-data)]
           (.dispose old-disposable)))
@@ -142,11 +141,11 @@
 
     (update-view-content! webview-view flare-options)))
 
-(defn create-webview-panel!
-  "Create or reuse a WebView panel based on options"
+(defn create-view!+
+  "Create or reuse a WebView panel"
   [{:keys [key title column webview-options reveal? preserve-focus?]
     :as flare-options}]
-  (let [existing-panel-data (get (:flare-panels @db/!app-db) key)
+  (let [existing-panel-data (get (:flares @db/!app-db) key)
         ^js existing-panel (:view existing-panel-data)]
 
     (if (and existing-panel (not (.-disposed existing-panel)))
@@ -154,7 +153,7 @@
         (when reveal?
           (.reveal existing-panel column preserve-focus?))
         (update-view-with-options! existing-panel flare-options)
-        existing-panel)
+        (js/Promise.resolve existing-panel))
       (let [panel (vscode/window.createWebviewPanel
                    "joyride.flare"
                    title
@@ -164,12 +163,25 @@
 
         (.onDidDispose panel
                        (fn []
-                         (when-let [^js message-handler (:message-handler (get (:flare-panels @db/!app-db) key))]
+                         (when-let [^js message-handler (:message-handler (get (:flares @db/!app-db) key))]
                            (.dispose message-handler))
-                         (swap! db/!app-db update :flare-panels dissoc key)))
+                         (swap! db/!app-db update :flares dissoc key)))
 
-        (swap! db/!app-db assoc-in [:flare-panels key]
+        (swap! db/!app-db assoc-in [:flares key]
                {:view panel})
 
         (update-view-with-options! panel flare-options)
-        panel))))
+        (js/Promise.resolve panel)))))
+
+(defn close! [flare-key]
+  (let [flare-data (get (:flares @db/!app-db) flare-key)
+        ^js view (:view flare-data)
+        ^js message-handler (:message-handler flare-data)]
+    (if (and view (not (.-disposed view)))
+      (do
+        (when message-handler
+          (.dispose message-handler))
+        (.dispose view)
+        (swap! db/!app-db update :flares dissoc flare-key)
+        true)
+      false)))

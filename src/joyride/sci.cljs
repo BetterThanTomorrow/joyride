@@ -141,12 +141,12 @@
    'load-file (sci/copy-var load-file+ core-namespace)})
 
 (def joyride-flare
-  {'flare! (sci/copy-var flare/flare! flare-ns)
+  {'flare!+ (sci/copy-var flare/flare!+ flare-ns)
    'close! (sci/copy-var flare/close! flare-ns)
    'close-all! (sci/copy-var flare/close-all! flare-ns)
    'ls (sci/copy-var flare/ls flare-ns)
-   'get-flares (sci/copy-var flare/get-flares flare-ns)
-   'post-message! (sci/copy-var flare/post-message! flare-ns)})
+   'get-flare (sci/copy-var flare/get-flare flare-ns)
+   'post-message!+ (sci/copy-var flare/post-message!+ flare-ns)})
 
 (store/reset-ctx!
  (sci/init {:classes {'js (doto goog/global

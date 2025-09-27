@@ -215,19 +215,23 @@ WebView panel and sidebar view creation convenience.
 - `flare!`: Create or update a flare. Options map with
    - `:html` - HTML content string OR Hiccup data structure
    - `:url` - URL to display in iframe
+   - `:file` - A path to a html file in the workspace
    - `:title` - Panel/view title (default: 'Flare')
    - `:key` - Identifier for reusing panels
+     - Special keys are `:sidebar-1` -> `:sidebar-5`, displays the flare in sidebar vs separate panel
    - `:icon` - Icon for panel tab. String (path/URL) or map {:light \"...\" :dark \"...\"}
    - `:column` - vscode ViewColumn (default: `js/undefined`)
-   - `:reveal?` - Whether to reveal the panel when created or reused (default: true)
+   - `:reveal?` - Whether to reveal the panel (default: `true`). `false` works differently between regular editor area flares and sidebar flares:
+      - editor area: Will reveal newly created flares, will respect the `false` setting when updating flares
+      - sidebar: Will always respect `false`
    - `:preserve-focus?` - Whether to preserve focus when revealing the panel (default: true)
-   - `:sidebar?` - Display in sidebar vs separate panel (default: false)
    - `:message-handler` - Function to handle messages from webview. Receives message object.
    - `:webview-options` - A map with vscode WebviewPanelOptions & WebviewOptions for the webview (default: `{:enableScripts true}`)
-- `close!`: Close a specific flare by key.
+- `close!`: Close a flare by key.
+- `post-massage!+`: Post a message to a flare by key.
 - `close-all!`: Close all active flares.
-- `ls`: List all active flare keys.
-- `get-flares`: Get flares by key
+- `ls`: List all active flares as a map `key -> flare`
+- `get-flare`: Get a flare by its key
 
 **Icon Options:**
 - String - Path or URL to icon file

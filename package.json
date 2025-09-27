@@ -82,9 +82,38 @@
       "joyride": [
         {
           "type": "webview",
-          "id": "joyride.flare",
-          "name": "Flare",
-          "icon": "assets/j-icon-white.svg"
+          "id": "joyride.flare-1",
+          "name": "Flare 1",
+          "icon": "assets/j-icon-white.svg",
+          "when": "joyride.sidebar-1.flare.hasContent"
+        },
+        {
+          "type": "webview",
+          "id": "joyride.flare-2",
+          "name": "Flare 2",
+          "icon": "assets/j-icon-white.svg",
+          "when": "joyride.sidebar-2.flare.hasContent"
+        },
+        {
+          "type": "webview",
+          "id": "joyride.flare-3",
+          "name": "Flare 3",
+          "icon": "assets/j-icon-white.svg",
+          "when": "joyride.sidebar-3.flare.hasContent"
+        },
+        {
+          "type": "webview",
+          "id": "joyride.flare-4",
+          "name": "Flare 4",
+          "icon": "assets/j-icon-white.svg",
+          "when": "joyride.sidebar-4.flare.hasContent"
+        },
+        {
+          "type": "webview",
+          "id": "joyride.flare-5",
+          "name": "Flare 5",
+          "icon": "assets/j-icon-white.svg",
+          "when": "joyride.sidebar-5.flare.hasContent"
         }
       ]
     },

@@ -29,11 +29,13 @@
                 "--extensionDevelopmentPath=${workspaceRoot}",
                 "--folder-uri=${workspaceRoot}/vscode-test-runner/workspace-1"
              ],
-            "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"
-            ]
+            ],
+            "sourceMapPathOverrides": {
+                "joyride/*": "${workspaceFolder}/src/joyride/*"
+            }
         },
         {
             "name": "Launch Extension w/o folder",
@@ -44,11 +46,13 @@
                 "--extensionDevelopmentPath=${workspaceRoot}",
                 "--folder-uri=null"
             ],
-            "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"
-            ]
+            ],
+            "sourceMapPathOverrides": {
+                "joyride/*": "${workspaceFolder}/src/joyride/*"
+            }
         },
         {
             "name": "Launch Extension w/o extensions",
@@ -59,12 +63,14 @@
                 "--extensionDevelopmentPath=${workspaceRoot}",
                 "--disable-extensions"
             ],
-            "stopOnEntry": false,
             "sourceMaps": true,
             "env": {},
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"
-            ]
+            ],
+            "sourceMapPathOverrides": {
+                "joyride/*": "${workspaceFolder}/src/joyride/*"
+            }
         },
         {
             "name": "Launch in playground/hello-joyride folder",
@@ -75,12 +81,14 @@
                 "--extensionDevelopmentPath=${workspaceRoot}",
                 "${workspaceFolder}/playground/hello-joyride"
             ],
-            "stopOnEntry": false,
             "sourceMaps": true,
             "env": {},
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
-            ]
+            ],
+            "sourceMapPathOverrides": {
+                "joyride/*": "${workspaceFolder}/src/joyride/*"
+            }
         },
         {
             "name": "Launch in examples folder",
@@ -91,12 +99,14 @@
                 "--extensionDevelopmentPath=${workspaceRoot}",
                 "${workspaceFolder}/examples"
             ],
-            "stopOnEntry": false,
             "sourceMaps": true,
             "env": {},
             "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ]
+                "${workspaceFolder}/out/**/*.js"
+            ],
+            "sourceMapPathOverrides": {
+                "joyride/*": "${workspaceFolder}/src/joyride/*"
+            }
         }
     ]
 }
