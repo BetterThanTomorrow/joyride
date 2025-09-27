@@ -143,7 +143,7 @@
     (update-view-content! webview-view flare-options)))
 
 (defn create-webview-panel!
-  "Create or reuse a WebView panel based on options"
+  "Create or reuse a WebView panel"
   [{:keys [key title column webview-options reveal? preserve-focus?]
     :as flare-options}]
   (let [existing-panel-data (get (:flare-panels @db/!app-db) key)
