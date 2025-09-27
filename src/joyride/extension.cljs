@@ -11,7 +11,8 @@
    [joyride.scripts-handler :as scripts-handler]
    [joyride.utils :as utils :refer [info jsify]]
    [joyride.when-contexts :as when-contexts]
-   [promesa.core :as p]))
+   [promesa.core :as p]
+   [joyride.flare.sidebar :as flare-sidebar]))
 
 (defn- register-command! [^js context command-id var]
   (let [disposable (vscode/commands.registerCommand command-id var)]
@@ -100,6 +101,7 @@
     (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server+)    (register-command! extension-context "joyride.enableNReplMessageLogging" #'nrepl/enable-message-logging!)
     (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)    (when-contexts/set-context! ::when-contexts/joyride.isActive true)
     (when-contexts/initialize-flare-contexts!)
+    (flare-sidebar/register-flare-provider! 1)
     (doseq [lm-disposable (lm/register-tools! extension-context)]
       (swap! db/!app-db update :disposables conj lm-disposable)
       (.push (.-subscriptions ^js extension-context) lm-disposable))

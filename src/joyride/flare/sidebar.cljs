@@ -58,7 +58,7 @@
       (swap! db/!app-db update :disposables conj flare-disposable)
       (.push (.-subscriptions ^js extension-context) flare-disposable)))
 
-(defn- register-flare-provider!
+(defn register-flare-provider!
   "Register a flare webview provider with VS Code"
   [slot]
   (if (get-in @db/!app-db [:flare-sidebar-views slot :provider-registered?])
