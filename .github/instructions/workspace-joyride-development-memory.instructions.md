@@ -156,7 +156,7 @@ When debugging timing issues between VS Code API callbacks and extension logic, 
 ### Debugging Strategy
 **Use REPL to investigate state**:
 ```clojure
-;; Check current app state
+;; Check current app state (Adapt to your current task)
 (select-keys @db/!app-db [:flare-sidebar-views :flare-sidebars])
 
 ;; Verify when context state

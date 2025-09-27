@@ -2,12 +2,8 @@
   (:require
    ["vscode" :as vscode]
    [joyride.db :as db]
-   [joyride.flare.panel :as panel]))
-
-(defn get-sidebar-view
-  "Get the sidebar webview view for a specific slot from app-db"
-  [slot]
-  (get-in @db/!app-db [:flare-sidebar-views slot :webview-view]))
+   [joyride.flare.panel :as panel]
+   [joyride.when-contexts :as when-contexts]))
 
 (defn create-flare-webview-provider
   "Create WebView provider for sidebar flare views"
@@ -45,6 +41,31 @@
 (defn ensure-sidebar-view!
   "Ensure sidebar view is available for the given slot"
   [slot]
-  (if-let [^js view (get-sidebar-view slot)]
+  (if-let [^js view (get-in @db/!app-db [:flare-sidebar-views slot :webview-view])]
     view
     :pending))
+
+(defn create-sidebar-view!
+  ""
+  [{:keys [sidebar-slot key reveal? preserve-focus?] :as flare-options}]
+  (when-contexts/set-flare-content-context! sidebar-slot true)
+  (let [sidebar-data (get (:flare-sidebars @db/!app-db) key)
+        view (ensure-sidebar-view! sidebar-slot)]
+    (println view)
+    (if (= view :pending)
+      (do
+              ;; Store the flare options for when view becomes available
+        (swap! db/!app-db assoc-in [:flare-sidebar-views sidebar-slot :pending-flare]
+               {:key key :options flare-options})
+        (when reveal?
+          (vscode/commands.executeCommand (str "joyride.flare-" sidebar-slot ".focus")
+                                          preserve-focus?))
+        :pending)
+      (do
+        (when-let [^js disposable (:message-handler sidebar-data)]
+          (.dispose disposable))
+        (swap! db/!app-db assoc-in [:flare-sidebars key] {:view view})
+        (panel/update-view-with-options! view flare-options)
+        (when reveal?
+          (.show view preserve-focus?))
+        view))))

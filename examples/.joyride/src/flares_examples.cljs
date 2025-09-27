@@ -27,6 +27,7 @@
                         [:hr]
                         [:small "Use " [:code ":key :sidebar-1"] " through " [:code ":key :sidebar-5"] " for sidebar slots"]]
                  :title "Sidebar Demo"
+                 :reveal? false
                  :key :sidebar-1})
 
   ;; Icon example

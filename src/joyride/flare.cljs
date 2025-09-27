@@ -50,15 +50,15 @@
 (defn- normalize-flare-options
   [options]
   (let [k (:key options ::anonymous)]
-    (merge options
-           {:key k
-            :title "Flare"
+    (merge {:title "Flare"
             :reveal? true
             :column js/undefined
             :preserve-focus? true
-            :icon :flare/icon-default
-            :sidebar-slot (when (sidebar-keys k) (key->sidebar-slot k))}
-           {:webview-options (or (clj->js (:webview-options options))
+            :icon :flare/icon-default}
+           options
+           {:key k
+            :sidebar-slot (when (sidebar-keys k) (key->sidebar-slot k))
+            :webview-options (or (clj->js (:webview-options options))
                                  #js {:enableScripts true})}
            (when (:file options)
              {:file (normalize-file-option (:file options))}))))
@@ -81,29 +81,10 @@
    Returns: {:panel <webview-panel>} or {:sidebar <webview-view>}"
   [options]
   (let [flare-options (normalize-flare-options options)
-        {:keys [sidebar-slot key reveal? preserve-focus?]} flare-options]
+        {:keys [sidebar-slot]} flare-options]
     (if sidebar-slot
-      (do
-        (when-contexts/set-flare-content-context! sidebar-slot true)
-        (let [sidebar-data (get (:flare-sidebars @db/!app-db) key)
-              view (sidebar/ensure-sidebar-view! sidebar-slot)]
-          (if (= view :pending)
-            (do
-            ;; Store the flare options for when view becomes available
-              (swap! db/!app-db assoc-in [:flare-sidebar-views sidebar-slot :pending-flare]
-                     {:key key :options flare-options})
-              (when reveal?
-                (vscode/commands.executeCommand (str "joyride.flare-" sidebar-slot ".focus")
-                                                preserve-focus?))
-              {:sidebar :pending})
-            (do
-              (when-let [^js disposable (:message-handler sidebar-data)]
-                (.dispose disposable))
-              (swap! db/!app-db assoc-in [:flare-sidebars key] {:view view})
-              (panel/update-view-with-options! view flare-options)
-              (when reveal?
-                (.show view preserve-focus?))
-              {:sidebar view}))))
+      (let [view (sidebar/create-sidebar-view! flare-options)]
+        {:sidebar view})
       (let [panel (panel/create-webview-panel! flare-options)]
         {:panel panel}))))
 

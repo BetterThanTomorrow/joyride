@@ -98,9 +98,7 @@ Createing Webviews is such a common thing, that Joyride has a way to quickly cre
                :key :sidebar-1})
 
 ;; Use different slots for multiple sidebars
-(flare/flare! {:html [:div
-                      [:h2 "Another Sidebar"]
-                      [:p "This appears in sidebar slot 2"]]
+(flare/flare! {:file "assets/something.html"
                :title "Sidebar 2"
                :key :sidebar-2})
 ```
