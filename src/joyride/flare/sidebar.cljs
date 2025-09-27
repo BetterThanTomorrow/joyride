@@ -104,3 +104,19 @@
             (swap! db/!app-db update-in [:flare-sidebar-views sidebar-slot] dissoc :webview-view)
             (swap! db/!app-db update :flares dissoc key)
             (create-sidebar-view! flare-options)))))))
+
+(defn close! [flare-key]
+  (let [flare-data (get (:flares @db/!app-db) flare-key)
+        ^js view (:view flare-data)
+        ^js message-handler (:message-handler flare-data)
+        slot (key->sidebar-slot flare-key)]
+    (when message-handler
+      (.dispose message-handler))
+    (swap! db/!app-db update :flares dissoc flare-key)
+    (when slot
+      (when-contexts/set-flare-content-context! slot false))
+    (if (and view (not (.-disposed view)))
+      (do
+        (.dispose view)
+        true)
+      false)))

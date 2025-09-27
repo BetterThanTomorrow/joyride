@@ -89,17 +89,7 @@
           ^js message-handler (:message-handler flare-data)
           sidebar? (contains? sidebar/sidebar-keys flare-key)]
       (if sidebar?
-        (let [slot (sidebar/key->sidebar-slot flare-key)]
-          (when message-handler
-            (.dispose message-handler))
-          (swap! db/!app-db update :flares dissoc flare-key)
-          (when slot
-            (when-contexts/set-flare-content-context! slot false))
-          (if (and view (not (.-disposed view)))
-            (do
-              (.dispose view)
-              true)
-            false))
+        (sidebar/close! flare-key)
         (if (and view (not (.-disposed view)))
           (do
             (when message-handler
