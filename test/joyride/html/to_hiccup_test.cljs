@@ -130,7 +130,22 @@
            (sut/html->hiccup "<foo style=\"background: url('data:image/svg+xml;utf8,<svg></svg>'); color: red\"></foo>" {:mapify-style? true}))))
   (testing "style attribute keeps semicolons inside quoted values"
     (is (= [:foo {:style {:content "';'" :padding "4px"}}]
-           (sut/html->hiccup "<foo style=\"content:';'; padding: 4px\"></foo>" {:mapify-style? true})))))
+           (sut/html->hiccup "<foo style=\"content:';'; padding: 4px\"></foo>" {:mapify-style? true}))))
+  (testing "style attribute handles custom properties with spaces"
+    (is (= [:foo {:style {:--tw-shadow "0 0 #0000" :padding "4px"}}]
+           (sut/html->hiccup "<foo style=\"--tw-shadow: 0 0 #0000; padding: 4px\"></foo>" {:mapify-style? true}))))
+  (testing "style attribute keeps double-quoted content values"
+    (is (= [:foo {:style {:content "\";\"" :padding "4px"}}]
+           (sut/html->hiccup "<foo style='content:\";\"; padding: 4px'></foo>" {:mapify-style? true}))))
+  (testing "style attribute preserves font-family stacks"
+    (is (= [:foo {:style {:font-family "-apple-system,BlinkMacSystemFont,\"Segoe UI\",Helvetica,sans-serif" :color :red}}]
+           (sut/html->hiccup "<foo style='font-family: -apple-system,BlinkMacSystemFont,\"Segoe UI\",Helvetica,sans-serif; color: red'></foo>" {:mapify-style? true}))))
+  (testing "style attribute preserves gradient values"
+    (is (= [:foo {:style {:background "linear-gradient(90deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.2) 50%)" :color :white}}]
+           (sut/html->hiccup "<foo style=\"background: linear-gradient(90deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.2) 50%); color: white\"></foo>" {:mapify-style? true}))))
+  (testing "style attribute preserves !important declarations"
+    (is (= [:foo {:style {:margin "0 !important" :color :blue}}]
+           (sut/html->hiccup "<foo style=\"margin: 0 !important; color: blue\"></foo>" {:mapify-style? true})))))
 
 (deftest html->hiccup-wo-add-classes-to-tag-keyword?
   (testing "When the :add-classes-to-tag-keyword? option is false they all remain in class attr"
