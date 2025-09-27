@@ -5,8 +5,7 @@
    ["vscode" :as vscode]
    [joyride.db :as db]
    [joyride.flare.panel :as panel]
-   [joyride.flare.sidebar :as sidebar]
-   [joyride.when-contexts :as when-contexts]))
+   [joyride.flare.sidebar :as sidebar]))
 
 (defn- current-api-flares
   "Return the current active flares in API shape"
@@ -73,11 +72,9 @@
   [options]
   (let [flare-options (normalize-flare-options options)
         {:keys [sidebar-slot]} flare-options]
-    (if sidebar-slot
-      (let [view (sidebar/create-sidebar-view! flare-options)]
-        {:sidebar view})
-      (let [panel (panel/create-webview-panel! flare-options)]
-        {:panel panel}))))
+    {(:key flare-options) (if sidebar-slot
+                            (sidebar/create-view! flare-options)
+                            (panel/create-view! flare-options))}))
 
 (defn close!
   "Close/dispose a flare panel by key"

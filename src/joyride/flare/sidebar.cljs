@@ -75,7 +75,7 @@
       (swap! db/!app-db assoc-in [:flare-sidebar-views slot :provider-disposable] disposable)
       disposable)))
 
-(defn create-sidebar-view!
+(defn create-view!
   "Create or reuse a sidebar panel"
   [{:keys [sidebar-slot key reveal? preserve-focus?] :as flare-options}]
   (when-contexts/set-flare-content-context! sidebar-slot true)
@@ -103,7 +103,7 @@
           (do
             (swap! db/!app-db update-in [:flare-sidebar-views sidebar-slot] dissoc :webview-view)
             (swap! db/!app-db update :flares dissoc key)
-            (create-sidebar-view! flare-options)))))))
+            (create-view! flare-options)))))))
 
 (defn close! [flare-key]
   (let [flare-data (get (:flares @db/!app-db) flare-key)

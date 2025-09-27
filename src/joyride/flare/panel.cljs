@@ -141,7 +141,7 @@
 
     (update-view-content! webview-view flare-options)))
 
-(defn create-webview-panel!
+(defn create-view!
   "Create or reuse a WebView panel"
   [{:keys [key title column webview-options reveal? preserve-focus?]
     :as flare-options}]
