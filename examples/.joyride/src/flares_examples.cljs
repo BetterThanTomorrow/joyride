@@ -12,6 +12,11 @@
                   :title "Greeting"
                   :key "greeting"})
 
+  ;; Simple greeting panel using HTML string instead of Hiccup
+  (flare/flare!+ {:html "<h1>Hello, Joyride Flares!</h1>"
+                  :title "Greeting HTML"
+                  :key "greeting-html"})
+
   (flare/flare!+ {:html [:h1 "An anonymous Joyride Flare"]
                   :title "I get a default key"})
 

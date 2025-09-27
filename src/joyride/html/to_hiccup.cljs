@@ -6,7 +6,8 @@
 
 (defonce posthtml-parser (js/require "posthtml-parser"))
 
-(def default-opts {:add-classes-to-tag-keyword? true})
+(def default-opts {:add-classes-to-tag-keyword? true
+                   :mapify-style? true})
 
 (defn- html->ast [html]
   (->> ((.-parser posthtml-parser) html #js {:recognizeNoValueAttribute true})
@@ -110,7 +111,11 @@
   ([html]
    (html->hiccup html default-opts))
   ([html options]
-   (-> html html->ast (ast->hiccup (merge default-opts options)))))
+   (as-> html $
+     (html->ast $)
+     (ast->hiccup $ (merge default-opts options))
+     (filter vector? $)
+     (first $))))
 
 (defn- pretty-print [f]
   (zprint/zprint-str f {:style :hiccup

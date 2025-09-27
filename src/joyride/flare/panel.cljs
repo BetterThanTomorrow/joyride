@@ -3,6 +3,7 @@
    ["fs" :as fs]
    ["vscode" :as vscode]
    [joyride.db :as db]
+   [joyride.html.to-hiccup :as hth]
    [replicant.string :as replicant]))
 
 (defn resolve-icon-path
@@ -95,7 +96,9 @@
     (let [^js file-uri (:file flare-options)
           file-path (.-fsPath file-uri)
           file-content (fs/readFileSync file-path "utf8")]
-      file-content)
+      (-> file-content
+          hth/html->hiccup
+          render-hiccup))
 
     (:url flare-options)
     (generate-iframe-content (:url flare-options) (:title flare-options))
@@ -104,7 +107,9 @@
     (let [html-content (:html flare-options)]
       (if (vector? html-content)
         (render-hiccup html-content)
-        html-content))
+        (-> html-content
+            hth/html->hiccup
+            render-hiccup)))
 
     :else
     (throw (ex-info "Missing flare content"
