@@ -5,7 +5,7 @@
    ["vscode" :as vscode]
    [joyride.db :as db]
    [joyride.flare.panel :as panel]
-   [joyride.flare.sidebar-provider :as sidebar]
+   [joyride.flare.sidebar :as sidebar]
    [joyride.when-contexts :as when-contexts]))
 
 (defn- current-api-flares

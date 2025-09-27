@@ -1,4 +1,4 @@
-(ns joyride.flare.sidebar-provider
+(ns joyride.flare.sidebar
   (:require
    ["vscode" :as vscode]
    [joyride.db :as db]
