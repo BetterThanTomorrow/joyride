@@ -153,7 +153,7 @@
         (when reveal?
           (.reveal existing-panel column preserve-focus?))
         (update-view-with-options! existing-panel flare-options)
-        existing-panel)
+        (js/Promise.resolve existing-panel))
       (let [panel (vscode/window.createWebviewPanel
                    "joyride.flare"
                    title

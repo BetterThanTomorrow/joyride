@@ -56,7 +56,7 @@
     (throw (ex-info "Invalid flare slot" {:slot slot}))))
 
 (defn initialize-flare-contexts!
-  "Initialize all flare content contexts to false"
+  "Initialize all flare content contexts, except slot 1, to false"
   []
   (set-flare-content-context! 1 true)
   (doseq [slot (range 2 6)]

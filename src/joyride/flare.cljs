@@ -40,7 +40,7 @@
 
 (defn- normalize-flare-options
   [options]
-  (let [k (:key options ::anonymous)]
+  (let [k (:key options :anonymous)]
     (merge {:title "Flare"
             :reveal? true
             :column js/undefined
@@ -70,7 +70,7 @@
    - webview-options - JS object vscode WebviewPanelOptions & WebviewOptions for the webview (default: {:enableScripts true})
    - :message-handler - Function to handle messages from webview. Receives message object.
 
-   Returns: {:panel <webview-panel>} or {:sidebar <webview-view>}"
+   Returns: {key view} where key is the flare key and view is the created panel or sidebar view."
   [options]
   (p/let [flare-options (normalize-flare-options options)
           {:keys [sidebar-slot]} flare-options
