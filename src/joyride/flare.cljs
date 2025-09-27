@@ -41,11 +41,7 @@
             (throw (ex-info "Relative file paths require an open workspace. Please use an absolute path or open a workspace folder"
                             {:file-path file-path-or-uri})))))
 
-(def ^:private sidebar-keys #{:sidebar-1 :sidebar-2 :sidebar-3 :sidebar-4 :sidebar-5})
 
-(defn- key->sidebar-slot [k]
-  (let [key-str (name k)]
-    (js/parseInt (subs key-str 8))))
 
 (defn- normalize-flare-options
   [options]
@@ -57,7 +53,7 @@
             :icon :flare/icon-default}
            options
            {:key k
-            :sidebar-slot (when (sidebar-keys k) (key->sidebar-slot k))
+            :sidebar-slot (when (sidebar/sidebar-keys k) (sidebar/key->sidebar-slot k))
             :webview-options (or (clj->js (:webview-options options))
                                  #js {:enableScripts true})}
            (when (:file options)
@@ -103,19 +99,19 @@
           true)))
     ;; Check if it's a sidebar flare
     (if-let [sidebar-data (get (:flare-sidebars @db/!app-db) flare-key)]
-      (let [^js view (:view sidebar-data)]
-        (if (.-disposed view)
-          false
+      (let [^js view (:view sidebar-data)
+            slot (when (sidebar/sidebar-keys flare-key) (sidebar/key->sidebar-slot flare-key))]
+        (when-let [^js disposable (:message-handler sidebar-data)]
+          (.dispose disposable))
+        (swap! db/!app-db update :flare-sidebars dissoc flare-key)
+        (when slot
+          (when-contexts/set-flare-content-context! slot false))
+        #_(if view true false)
+        (if (and view (not (.-disposed view)))
           (do
-            (when-let [^js disposable (:message-handler sidebar-data)]
-              (.dispose disposable))
-            ;; For sidebar views, clear content instead of disposing
-            (set! (.-html (.-webview view)) "")
-            (swap! db/!app-db update :flare-sidebars dissoc flare-key)
-            ;; Update when context if this was a sidebar slot
-            (when (sidebar-keys flare-key)
-              (when-contexts/set-flare-content-context! (key->sidebar-slot flare-key) false))
-            true)))
+            (.dispose view)
+            true)
+          false))
       false)))
 
 (defn close-all!
