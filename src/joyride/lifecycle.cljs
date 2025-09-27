@@ -1,7 +1,7 @@
 (ns joyride.lifecycle
   (:require ["path" :as path]
             [joyride.config :as conf]
-            [joyride.utils :as utils]
+            [joyride.vscode-utils :as vscode-utils]
             [promesa.core :as p]))
 
 (def user-init-script "user_activate.cljs")
@@ -28,11 +28,11 @@
                :script-abs-path (workspace-init-script-abs-path)}})
 
 (defn maybe-run-init-script+ [run-fn {:keys [label script script-path script-abs-path]}]
-  (utils/say (str label " script: " script-path))
-  (-> (utils/path-or-uri-exists?+ script-abs-path)
+  (vscode-utils/say (str label " script: " script-path))
+  (-> (vscode-utils/path-or-uri-exists?+ script-abs-path)
       (p/then (fn [exists?]
                 (if exists?
                   (do
-                    (utils/sayln (str ".  Running..."))
+                    (vscode-utils/sayln (str ".  Running..."))
                     (run-fn script))
-                  (utils/sayln (str ".  No " label " script present")))))))
+                  (vscode-utils/sayln (str ".  No " label " script present")))))))

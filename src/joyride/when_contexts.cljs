@@ -1,7 +1,7 @@
 (ns joyride.when-contexts
   (:require ["vscode" :as vscode]
             [joyride.config :as conf]
-            [joyride.utils :as utils]
+            [joyride.vscode-utils :as vscode-utils]
             [promesa.core :as p]))
 
 (defonce ^:private !db (atom {:contexts {::joyride.isActive false
@@ -26,18 +26,18 @@
                             k)]))
 
 (defn update-script-contexts! []
-  (p/let [user-activate-exists? (utils/path-or-uri-exists?+
-                                 (utils/path->uri (conf/user-abs-scripts-path) ["user_activate.cljs"]))
-          user-hello-exists? (utils/path-or-uri-exists?+
-                              (utils/path->uri (conf/user-abs-scripts-path) ["hello_joyride_user_script.cljs"]))
+  (p/let [user-activate-exists? (vscode-utils/path-or-uri-exists?+
+                                 (vscode-utils/path->uri (conf/user-abs-scripts-path) ["user_activate.cljs"]))
+          user-hello-exists? (vscode-utils/path-or-uri-exists?+
+                              (vscode-utils/path->uri (conf/user-abs-scripts-path) ["hello_joyride_user_script.cljs"]))
           ;; Workspace contexts - only check if workspace exists
           ws-scripts-path (conf/workspace-abs-scripts-path)
           ws-activate-exists? (when ws-scripts-path
-                                (utils/path-or-uri-exists?+
-                                 (utils/path->uri ws-scripts-path ["workspace_activate.cljs"])))
+                                (vscode-utils/path-or-uri-exists?+
+                                 (vscode-utils/path->uri ws-scripts-path ["workspace_activate.cljs"])))
           ws-hello-exists? (when ws-scripts-path
-                             (utils/path-or-uri-exists?+
-                              (utils/path->uri ws-scripts-path ["hello_joyride_workspace_script.cljs"])))]
+                             (vscode-utils/path-or-uri-exists?+
+                              (vscode-utils/path->uri ws-scripts-path ["hello_joyride_workspace_script.cljs"])))]
     ;; Update all contexts
     (set-context! ::joyride.userActivateScriptExists user-activate-exists?)
     (set-context! ::joyride.userHelloScriptExists user-hello-exists?)
@@ -88,11 +88,11 @@
    (conf/workspace-abs-scripts-path)]
 
   ;; Test path->uri helper
-  (utils/path->uri (conf/user-abs-scripts-path) ["user_activate.cljs"])
+  (vscode-utils/path->uri (conf/user-abs-scripts-path) ["user_activate.cljs"])
 
   ;; Test file existence manually
-  (p/let [it-exists? (utils/path-or-uri-exists?+
-                      (utils/path->uri (conf/user-abs-scripts-path) ["user_activate.cljs"]))]
+  (p/let [it-exists? (vscode-utils/path-or-uri-exists?+
+                      (vscode-utils/path->uri (conf/user-abs-scripts-path) ["user_activate.cljs"]))]
     (def it-exists? it-exists?))
 
 ;; Reset all script contexts to false

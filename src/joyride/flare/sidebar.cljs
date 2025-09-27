@@ -77,7 +77,6 @@
                 (swap! db/!app-db assoc-in [:flares :sidebar-1] {:view webview-view}))))]
     #js {:resolveWebviewView resolve-webview-view}))
 
-
 (defn register-flare-provider!
   "Register a flare webview provider with VS Code"
   [slot]
