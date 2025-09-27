@@ -4,6 +4,7 @@
    ["path" :as path]
    ["vscode" :as vscode]
    [joyride.db :as db]
+   [joyride.html.to-hiccup :refer [html->hiccup-convert]]
    [joyride.flare.panel :as panel]
    [joyride.flare.sidebar :as sidebar]
    [promesa.core :as p]))

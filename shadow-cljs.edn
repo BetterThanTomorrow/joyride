@@ -12,7 +12,7 @@
               :devtools {:before-load-async joyride.extension/before
                          :after-load joyride.extension/after}
               :dev {:compiler-options {:optimizations :none
-                                      :source-map true}}}
+                                       :source-map true}}}
   :test-watch
   {:target    :node-test
    :output-to "out/extension-tests.js"
