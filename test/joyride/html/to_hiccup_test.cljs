@@ -148,7 +148,41 @@
     (is (= [:foo {:style {:margin "0 !important" :color :blue}}]
            (sut/html->hiccup "<foo style=\"margin: 0 !important; color: blue\"></foo>" {:mapify-style? true})))))
 
-(deftest html->hiccup-transform-file-path
+(deftest html->hiccup-transform-file-paths-option
+  (let [transform (fn [path] (str "/static/" path))]
+    (testing "transforms src attributes that point to files"
+      (is (= [:img {:src "/static/images/foo.png"}]
+             (sut/html->hiccup "<img src='images/foo.png'>"
+                               {:transform-file-paths transform}))))
+    (testing "does not alter network hrefs"
+      (is (= [:a {:href "https://example.com"}]
+             (sut/html->hiccup "<a href='https://example.com'></a>"
+                               {:transform-file-paths transform}))))
+    (testing "does not alter fragment hrefs"
+      (is (= [:a {:href "#section"}]
+             (sut/html->hiccup "<a href='#section'></a>"
+                               {:transform-file-paths transform}))))
+    (testing "transforms style url values when mapified"
+      (is (= [:div {:style {:background "url(\"/static/images/bg.png\")" :color :red}}]
+             (sut/html->hiccup "<div style='background: url(\"images/bg.png\"); color: red'></div>"
+                               {:transform-file-paths transform}))))
+    (testing "transforms style url values when kept as string"
+      (is (= [:div {:style "background: url(\"/static/images/bg.png\"); color: red"}]
+             (sut/html->hiccup "<div style='background: url(\"images/bg.png\"); color: red'></div>"
+                               {:mapify-style? false
+                                :transform-file-paths transform}))))
+    (testing "transforms srcset entries individually"
+      (is (= [:img {:srcset "/static/img-1x.png 1x, https://cdn/img-2x.png 2x, /static/img-3x.png 3x"}]
+             (sut/html->hiccup "<img srcset='img-1x.png 1x, https://cdn/img-2x.png 2x, img-3x.png 3x'>"
+                               {:transform-file-paths transform}))))
+    (testing "transforms nested nodes"
+      (is (= [:div {:style {:background "url(\"/static/images/bg.png\")"}}
+              [:img {:src "/static/images/foo.png"}]
+              [:source {:srcset "/static/images/foo.png 1x"}]]
+             (sut/html->hiccup "<div style='background: url(\"images/bg.png\")'><img src='images/foo.png'><source srcset='images/foo.png 1x'></div>"
+                               {:transform-file-paths transform}))))))
+
+(deftest transform-file-paths-in-hiccup
   (let [transform (fn [path] (str "/static/" path))]
     (testing "transforms src attributes that point to files"
       (is (= [:img {:src "/static/images/foo.png"}]
