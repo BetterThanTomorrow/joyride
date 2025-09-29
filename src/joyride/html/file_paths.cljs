@@ -71,7 +71,7 @@
                        style)
     :else style))
 
-(defn- transform-file-attrs
+(defn transform-file-attrs
   [transform attrs]
   (if (and attrs transform)
     (reduce-kv (fn [acc k v]
@@ -84,7 +84,7 @@
                {} attrs)
     attrs))
 
-(defn transform-file-paths-in-hccup
+(defn transform-file-paths-in-hiccup
   "Apply `transform` to file path strings within the provided hiccup form."
   [transform hiccup]
   (letfn [(walk [node]

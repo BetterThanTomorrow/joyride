@@ -152,35 +152,35 @@
   (let [transform (fn [path] (str "/static/" path))]
     (testing "transforms src attributes that point to files"
       (is (= [:img {:src "/static/images/foo.png"}]
-             (file-paths/transform-file-paths-in-hccup transform
-                                                       (sut/html->hiccup "<img src='images/foo.png'>")))))
+             (file-paths/transform-file-paths-in-hiccup transform
+                                                        (sut/html->hiccup "<img src='images/foo.png'>")))))
     (testing "does not alter network hrefs"
       (is (= [:a {:href "https://example.com"}]
-             (file-paths/transform-file-paths-in-hccup transform
-                                                       (sut/html->hiccup "<a href='https://example.com'></a>")))))
+             (file-paths/transform-file-paths-in-hiccup transform
+                                                        (sut/html->hiccup "<a href='https://example.com'></a>")))))
     (testing "does not alter fragment hrefs"
       (is (= [:a {:href "#section"}]
-             (file-paths/transform-file-paths-in-hccup transform
-                                                       (sut/html->hiccup "<a href='#section'></a>")))))
+             (file-paths/transform-file-paths-in-hiccup transform
+                                                        (sut/html->hiccup "<a href='#section'></a>")))))
     (testing "transforms style url values when mapified"
       (is (= [:div {:style {:background "url(\"/static/images/bg.png\")" :color :red}}]
-             (file-paths/transform-file-paths-in-hccup transform
-                                                       (sut/html->hiccup "<div style='background: url(\"images/bg.png\"); color: red'></div>")))))
+             (file-paths/transform-file-paths-in-hiccup transform
+                                                        (sut/html->hiccup "<div style='background: url(\"images/bg.png\"); color: red'></div>")))))
     (testing "transforms style url values when kept as string"
       (is (= [:div {:style "background: url(\"/static/images/bg.png\"); color: red"}]
-             (file-paths/transform-file-paths-in-hccup transform
-                                                       (sut/html->hiccup "<div style='background: url(\"images/bg.png\"); color: red'></div>"
-                                                                         {:mapify-style? false})))))
+             (file-paths/transform-file-paths-in-hiccup transform
+                                                        (sut/html->hiccup "<div style='background: url(\"images/bg.png\"); color: red'></div>"
+                                                                          {:mapify-style? false})))))
     (testing "transforms srcset entries individually"
       (is (= [:img {:srcset "/static/img-1x.png 1x, https://cdn/img-2x.png 2x, /static/img-3x.png 3x"}]
-             (file-paths/transform-file-paths-in-hccup transform
-                                                       (sut/html->hiccup "<img srcset='img-1x.png 1x, https://cdn/img-2x.png 2x, img-3x.png 3x'>")))))
+             (file-paths/transform-file-paths-in-hiccup transform
+                                                        (sut/html->hiccup "<img srcset='img-1x.png 1x, https://cdn/img-2x.png 2x, img-3x.png 3x'>")))))
     (testing "transforms nested nodes"
       (is (= [:div {:style {:background "url(\"/static/images/bg.png\")"}}
               [:img {:src "/static/images/foo.png"}]
               [:source {:srcset "/static/images/foo.png 1x"}]]
-             (file-paths/transform-file-paths-in-hccup transform
-                                                       (sut/html->hiccup "<div style='background: url(\"images/bg.png\")'><img src='images/foo.png'><source srcset='images/foo.png 1x'></div>")))))))
+             (file-paths/transform-file-paths-in-hiccup transform
+                                                        (sut/html->hiccup "<div style='background: url(\"images/bg.png\")'><img src='images/foo.png'><source srcset='images/foo.png 1x'></div>")))))))
 
 (deftest html->hiccup-wo-add-classes-to-tag-keyword?
   (testing "When the :add-classes-to-tag-keyword? option is false they all remain in class attr"

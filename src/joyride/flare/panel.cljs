@@ -102,33 +102,29 @@
 (defn- render-content
   "Handle different content types and generate appropriate HTML"
   [^js webview flare-options]
-  (cond
-    (:file flare-options)
-    (let [^js file-uri (:file flare-options)
-          file-path (.-fsPath file-uri)
-          file-content (fs/readFileSync file-path "utf8")
-          transform (partial ->webview-uri-str webview)]
-      (->> file-content
-           h2h/html->hiccup
-           (file-paths/transform-file-paths-in-hccup transform)
-           render-hiccup))
+  (let [file-paths-transformer (partial ->webview-uri-str webview)]
+    (cond
+      (:file flare-options)
+      (let [^js file-uri (:file flare-options)
+            file-path (.-fsPath file-uri)
+            file-content (fs/readFileSync file-path "utf8")]
+        (-> (h2h/html->hiccup file-content {:transform-file-paths file-paths-transformer})
+            render-hiccup))
 
-    (:url flare-options)
-    (generate-iframe-content (:url flare-options) (:title flare-options))
+      (:url flare-options)
+      (generate-iframe-content (:url flare-options) (:title flare-options))
 
-    (:html flare-options)
-    (let [html-content (:html flare-options)]
-      (if (vector? html-content)
-        (render-hiccup html-content)
-        (let [transform (partial ->webview-uri-str webview)]
-          (->> html-content
-              h2h/html->hiccup
-              (file-paths/transform-file-paths-in-hccup transform)
-              render-hiccup))))
+      (:html flare-options)
+      (let [html-content (:html flare-options)]
+        (if (vector? html-content)
+          (-> (file-paths/transform-file-paths-in-hiccup file-paths-transformer html-content)
+              render-hiccup)
+          ((-> (h2h/html->hiccup html-content {:transform-file-paths file-paths-transformer})
+               render-hiccup))))
 
-    :else
-    (throw (ex-info "Missing flare content"
-                    {:missing ":html, :url, or :file"}))))
+      :else
+      (throw (ex-info "Missing flare content"
+                      {:missing ":html, :url, or :file"})))))
 
 (defn update-view-content!
   "Update the HTML content of a WebView panel or sidebar view"

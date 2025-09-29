@@ -569,7 +569,11 @@
   :rcf)
 
 (comment
-  ;; Using a local resource file is a bit cumbersome
+  ; TODO revisit!
+  (flare/flare!+ {:html [:img {:src "assets/joyride-logo.png"}]
+                  :key :my-flare})
+
+  ;; Using a local resource file as a fallback
   (p/let [;; Step 1: Create flare to get webview
           {view :my-flare} (flare/flare!+ {:html [:div "Loading..."]
                                            :key :my-flare

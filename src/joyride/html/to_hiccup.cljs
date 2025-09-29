@@ -2,6 +2,7 @@
   (:require [camel-snake-kebab.core :as csk]
             [clojure.string :as string]
             [joyride.utils :refer [jsify cljify]]
+            [joyride.html.file-paths :as file-paths]
             [zprint.core :as zprint]))
 
 (defonce posthtml-parser (js/require "posthtml-parser"))
@@ -95,20 +96,6 @@
           [(-> k string/lower-case keyword)
            (normalize-css-value (string/trim v))])))))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 (defn- mapify-style [style-str]
   (try
     (->> (split-style-entries style-str)
@@ -119,15 +106,20 @@
       (js/console.warn "Failed to mapify style: '" style-str "'." (.-message e))
       style-str)))
 
-(defn- normalize-attrs [attrs {:keys [mapify-style?] :as options}]
-  (let [normalized (normalize-attr-keys attrs options)]
-    (if (and (:style normalized) mapify-style?)
-      (update normalized :style mapify-style)
+#_(defn- normalize-attrs [attrs {:keys [mapify-style?] :as options}]
+    (let [normalized (normalize-attr-keys attrs options)]
+      (if (and (:style normalized) mapify-style?)
+        (update normalized :style mapify-style)
+        normalized)))
+
+(defn- normalize-attrs [attrs {:keys [mapify-style? transform-file-paths] :as options}]
+  (let [normalized (normalize-attr-keys attrs options)
+        normalized (if (and (:style normalized) mapify-style?)
+                     (update normalized :style mapify-style)
+                     normalized)]
+    (if transform-file-paths
+      (file-paths/transform-file-attrs transform-file-paths normalized)
       normalized)))
-
-
-
-
 
 (defn- valid-as-hiccup-kw? [s]
   (and s
@@ -187,7 +179,8 @@
    `options` is a map:
    * `:mapify-style?`: tuck the style attributes into a map (Reagent style)
    * `:kebab-attrs?`: kebab-case any camelCase or snake_case attribute names
-   * `:add-classes-to-tag-keyword?`: use CSS-like class name shortcuts"
+   * `:add-classes-to-tag-keyword?`: use CSS-like class name shortcuts
+   * `:transform-file-paths`: function to be applied to anything that looks like file paths"
   ([html]
    (html->hiccup html default-opts))
   ([html options]
