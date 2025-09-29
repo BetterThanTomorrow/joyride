@@ -189,11 +189,37 @@
       style-str)))
 
 (defn- normalize-attrs [attrs {:keys [mapify-style?] :as options}]
-  (let [normalized (normalize-attr-keys attrs options)
-        normalized (if (and (:style normalized) mapify-style?)
-                     (update normalized :style mapify-style)
-                     normalized)]
-    (transform-file-attrs normalized options)))
+  (let [normalized (normalize-attr-keys attrs options)]
+    (if (and (:style normalized) mapify-style?)
+      (update normalized :style mapify-style)
+      normalized)))
+
+(defn- transform-hiccup
+  [form {:keys [transform-file-path] :as options}]
+  (letfn [(walk [node]
+            (cond
+              (vector? node)
+              (let [[tag & body] node
+                    [attrs body] (if (map? (first body))
+                                   [(first body) (rest body)]
+                                   [nil body])
+                    transformed-attrs (when attrs (transform-file-attrs attrs options))
+                    transformed-children (map walk body)]
+                (into [tag]
+                      (concat (when transformed-attrs [transformed-attrs])
+                              transformed-children)))
+
+              (seq? node)
+              (if (= 'comment (first node))
+                node
+                (map walk node))
+
+              :else node))]
+    (if (and form transform-file-path)
+      (walk form)
+      form)))
+
+
 
 (defn- valid-as-hiccup-kw? [s]
   (and s
@@ -258,11 +284,13 @@
   ([html]
    (html->hiccup html default-opts))
   ([html options]
-   (as-> html $
-     (html->ast $)
-     (ast->hiccup $ (merge default-opts options))
-     (filter vector? $)
-     (first $))))
+   (let [opts (merge default-opts options)]
+     (as-> html $
+       (html->ast $)
+       (ast->hiccup $ opts)
+       (filter vector? $)
+       (first $)
+       (transform-hiccup $ opts)))))
 
 (defn- pretty-print [f]
   (zprint/zprint-str f {:style :hiccup

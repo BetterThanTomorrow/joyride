@@ -167,7 +167,12 @@
                                (assoc opts :mapify-style? false)))))
     (testing "transforms srcset entries individually"
       (is (= [:img {:srcset "/static/img-1x.png 1x, https://cdn/img-2x.png 2x, /static/img-3x.png 3x"}]
-             (sut/html->hiccup "<img srcset='img-1x.png 1x, https://cdn/img-2x.png 2x, img-3x.png 3x'>" opts))))))
+             (sut/html->hiccup "<img srcset='img-1x.png 1x, https://cdn/img-2x.png 2x, img-3x.png 3x'>" opts))))
+    (testing "transforms nested nodes"
+      (is (= [:div {:style {:background "url(\"/static/images/bg.png\")"}}
+              [:img {:src "/static/images/foo.png"}]
+              [:source {:srcset "/static/images/foo.png 1x"}]]
+             (sut/html->hiccup "<div style='background: url(\"images/bg.png\")'><img src='images/foo.png'><source srcset='images/foo.png 1x'></div>" opts))))))
 
 (deftest html->hiccup-wo-add-classes-to-tag-keyword?
   (testing "When the :add-classes-to-tag-keyword? option is false they all remain in class attr"
