@@ -3,7 +3,8 @@
    ["fs" :as fs]
    ["vscode" :as vscode]
    [joyride.db :as db]
-   [joyride.html.to-hiccup :as hth]
+   [joyride.html.to-hiccup :as h2h]
+   [joyride.vscode-utils :as vscode-utils]
    [replicant.string :as replicant]))
 
 (defn resolve-icon-path
@@ -88,16 +89,25 @@
 </body>
 </html>"))
 
-(defn render-content
+(defn- ->webview-uri-str
+  "Transforms a path or a uri to a webview local resource uri string"
+  [^js webview path]
+  (->> path
+       vscode-utils/as-workspace-abs-path
+       vscode/Uri.file
+       (.asWebviewUri webview)
+       str))
+
+(defn- render-content
   "Handle different content types and generate appropriate HTML"
-  [flare-options]
+  [^js webview flare-options]
   (cond
     (:file flare-options)
     (let [^js file-uri (:file flare-options)
           file-path (.-fsPath file-uri)
           file-content (fs/readFileSync file-path "utf8")]
       (-> file-content
-          hth/html->hiccup
+          (h2h/html->hiccup {:transform-file-path (partial ->webview-uri-str webview)})
           render-hiccup))
 
     (:url flare-options)
@@ -108,7 +118,7 @@
       (if (vector? html-content)
         (render-hiccup html-content)
         (-> html-content
-            hth/html->hiccup
+            (h2h/html->hiccup {:transform-file-path (partial ->webview-uri-str webview)})
             render-hiccup)))
 
     :else
@@ -119,7 +129,7 @@
   "Update the HTML content of a WebView panel or sidebar view"
   [^js webview-view options]
   (let [^js webview (.-webview webview-view)
-        html-content (render-content options)]
+        html-content (render-content webview options)]
     (when webview
       (set! (.-html webview) html-content))))
 
