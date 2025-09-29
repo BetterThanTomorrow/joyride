@@ -3,6 +3,7 @@
    ["fs" :as fs]
    ["vscode" :as vscode]
    [joyride.db :as db]
+   [joyride.html.file-paths :as file-paths]
    [joyride.html.to-hiccup :as h2h]
    [joyride.vscode-utils :as vscode-utils]
    [replicant.string :as replicant]))
@@ -105,10 +106,12 @@
     (:file flare-options)
     (let [^js file-uri (:file flare-options)
           file-path (.-fsPath file-uri)
-          file-content (fs/readFileSync file-path "utf8")]
-      (-> file-content
-          (h2h/html->hiccup {:transform-file-path (partial ->webview-uri-str webview)})
-          render-hiccup))
+          file-content (fs/readFileSync file-path "utf8")
+          transform (partial ->webview-uri-str webview)]
+      (->> file-content
+           h2h/html->hiccup
+           (file-paths/transform-file-paths-in-hccup transform)
+           render-hiccup))
 
     (:url flare-options)
     (generate-iframe-content (:url flare-options) (:title flare-options))
@@ -117,9 +120,11 @@
     (let [html-content (:html flare-options)]
       (if (vector? html-content)
         (render-hiccup html-content)
-        (-> html-content
-            (h2h/html->hiccup {:transform-file-path (partial ->webview-uri-str webview)})
-            render-hiccup)))
+        (let [transform (partial ->webview-uri-str webview)]
+          (->> html-content
+              h2h/html->hiccup
+              (file-paths/transform-file-paths-in-hccup transform)
+              render-hiccup))))
 
     :else
     (throw (ex-info "Missing flare content"

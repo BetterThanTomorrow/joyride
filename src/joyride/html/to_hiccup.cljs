@@ -7,8 +7,7 @@
 (defonce posthtml-parser (js/require "posthtml-parser"))
 
 (def default-opts {:add-classes-to-tag-keyword? true
-                   :mapify-style? true
-                   :transform-file-path nil})
+                   :mapify-style? true})
 
 (defn- html->ast [html]
   (->> ((.-parser posthtml-parser) html #js {:recognizeNoValueAttribute true})
@@ -96,87 +95,19 @@
           [(-> k string/lower-case keyword)
            (normalize-css-value (string/trim v))])))))
 
-(def ^:private file-path-attr-keys
-  #{:action
-    :background
-    :data
-    :formaction
-    :href
-    :poster
-    :src
-    :xlink:href})
 
-(defn- looks-like-file-path?
-  [s]
-  (let [candidate (some-> s string/trim)]
-    (boolean (and candidate
-                  (not (string/blank? candidate))
-                  (not (string/starts-with? candidate "#"))
-                  (not (string/starts-with? candidate "?"))
-                  (not (re-find #"^[a-zA-Z][a-zA-Z0-9+.-]*:" candidate))
-                  (not (string/starts-with? candidate "//"))))))
 
-(defn- transform-path-if-needed
-  [value {:keys [transform-file-path]}]
-  (if (and transform-file-path (string? value))
-    (let [trimmed (string/trim value)]
-      (if (looks-like-file-path? trimmed)
-        (transform-file-path trimmed)
-        value))
-    value))
 
-(defn- transform-srcset
-  [value {:keys [transform-file-path] :as options}]
-  (if (and transform-file-path (string? value))
-    (->> (string/split value #",")
-         (map string/trim)
-         (remove string/blank?)
-         (map (fn [entry]
-                (let [[path descriptor] (string/split entry #"\s+" 2)
-                      updated (transform-path-if-needed path options)]
-                  (if descriptor
-                    (str updated " " descriptor)
-                    updated))))
-         (string/join ", "))
-    value))
 
-(defn- transform-style-string
-  [value {:keys [transform-file-path] :as options}]
-  (if (and transform-file-path (string? value))
-    (.replace value (js/RegExp. "url\\((['\"]?)([^'\")]+)\\1\\)" "gi")
-              (fn [match quote path]
-                (let [quote (or quote "")
-                      trimmed (string/trim path)
-                      updated (transform-path-if-needed trimmed options)]
-                  (if (= updated trimmed)
-                    match
-                    (str "url(" quote updated quote ")")))))
-    value))
 
-(defn- transform-style
-  [style {:keys [transform-file-path] :as options}]
-  (cond
-    (not transform-file-path) style
-    (string? style) (transform-style-string style options)
-    (map? style) (into {} (map (fn [[k v]]
-                                 [k (if (string? v)
-                                      (transform-style-string v options)
-                                      v)]))
-                       style)
-    :else style))
 
-(defn- transform-file-attrs
-  [attrs {:keys [transform-file-path] :as options}]
-  (if (and attrs transform-file-path)
-    (reduce-kv (fn [acc k v]
-                 (assoc acc k
-                        (cond
-                          (= k :style) (transform-style v options)
-                          (= k :srcset) (transform-srcset v options)
-                          (file-path-attr-keys k) (transform-path-if-needed v options)
-                          :else v)))
-               {} attrs)
-    attrs))
+
+
+
+
+
+
+
 
 (defn- mapify-style [style-str]
   (try
@@ -194,30 +125,7 @@
       (update normalized :style mapify-style)
       normalized)))
 
-(defn- transform-hiccup
-  [form {:keys [transform-file-path] :as options}]
-  (letfn [(walk [node]
-            (cond
-              (vector? node)
-              (let [[tag & body] node
-                    [attrs body] (if (map? (first body))
-                                   [(first body) (rest body)]
-                                   [nil body])
-                    transformed-attrs (when attrs (transform-file-attrs attrs options))
-                    transformed-children (map walk body)]
-                (into [tag]
-                      (concat (when transformed-attrs [transformed-attrs])
-                              transformed-children)))
 
-              (seq? node)
-              (if (= 'comment (first node))
-                node
-                (map walk node))
-
-              :else node))]
-    (if (and form transform-file-path)
-      (walk form)
-      form)))
 
 
 
@@ -279,8 +187,7 @@
    `options` is a map:
    * `:mapify-style?`: tuck the style attributes into a map (Reagent style)
    * `:kebab-attrs?`: kebab-case any camelCase or snake_case attribute names
-   * `:add-classes-to-tag-keyword?`: use CSS-like class name shortcuts
-   * `:transform-file-path`: fn that receives a local file path and returns the value to embed"
+   * `:add-classes-to-tag-keyword?`: use CSS-like class name shortcuts"
   ([html]
    (html->hiccup html default-opts))
   ([html options]
@@ -289,8 +196,7 @@
        (html->ast $)
        (ast->hiccup $ opts)
        (filter vector? $)
-       (first $)
-       (transform-hiccup $ opts)))))
+       (first $)))))
 
 (defn- pretty-print [f]
   (zprint/zprint-str f {:style :hiccup
