@@ -125,8 +125,8 @@
         (if (vector? html-content)
           (-> (file-paths/transform-file-paths-in-hiccup file-paths-transformer html-content)
               render-hiccup)
-          ((-> (h2h/html->hiccup html-content {:transform-file-paths file-paths-transformer})
-               render-hiccup))))
+          (-> (h2h/html->hiccup html-content {:transform-file-paths file-paths-transformer})
+              render-hiccup)))
 
       :else
       (throw (ex-info "Missing flare content"
