@@ -83,7 +83,7 @@
   (if (get-in @db/!app-db [:flare-sidebar-views slot :provider-registered?])
     (get-in @db/!app-db [:flare-sidebar-views slot :provider-disposable])
     (let [provider (create-flare-webview-provider! slot)
-          provider-id (str "joyride.flare-" slot)
+          provider-id (str "joyride.flare.sidebar-" slot)
           disposable (vscode/window.registerWebviewViewProvider
                       provider-id
                       provider

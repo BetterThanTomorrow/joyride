@@ -42,24 +42,24 @@ Redesigned the flare sidebar API from a single `:sidebar?` boolean flag to suppo
 ```json
 "views": {
   "joyride": [
-    {"id": "joyride.flare-1", "name": "Flare 1", "when": "joyride.sidebar-1.flare.hasContent"},
-    {"id": "joyride.flare-2", "name": "Flare 2", "when": "joyride.sidebar-2.flare.hasContent"},
-    {"id": "joyride.flare-3", "name": "Flare 3", "when": "joyride.sidebar-3.flare.hasContent"},
-    {"id": "joyride.flare-4", "name": "Flare 4", "when": "joyride.sidebar-4.flare.hasContent"},
-    {"id": "joyride.flare-5", "name": "Flare 5", "when": "joyride.sidebar-5.flare.hasContent"}
+    {"id": "joyride.flare-1", "name": "Flare 1", "when": "joyride.flare.sidebar-1.isActive"},
+    {"id": "joyride.flare-2", "name": "Flare 2", "when": "joyride.flare.sidebar-2.isActive"},
+    {"id": "joyride.flare-3", "name": "Flare 3", "when": "joyride.flare.sidebar-3.isActive"},
+    {"id": "joyride.flare-4", "name": "Flare 4", "when": "joyride.flare.sidebar-4.isActive"},
+    {"id": "joyride.flare-5", "name": "Flare 5", "when": "joyride.flare.sidebar-5.isActive"}
   ]
 }
 ```
 
 #### 4. When Contexts (`when-contexts.cljs`)
-- Added flare content contexts: `joyride.sidebar-N.flare.hasContent` (N=1-5)
+- Added flare content contexts: `joyride.flare.sidebar-N.isActive` (N=1-5)
 - **All sidebar slots** use when contexts - only appear when they have content
 - Slot 1 gets default content at startup (preserves original UX but allows closing)
 - Context management functions: `set-flare-content-context!`, `initialize-flare-contexts!`
 
 #### 5. Startup Initialization (NEW)
 - Create default "getting started" flare content for slot 1 at Joyride activation
-- Set `joyride.sidebar-1.flare.hasContent` context to make slot 1 visible by default
+- Set `joyride.flare.sidebar-1.isActive` context to make slot 1 visible by default
 - Preserves original user experience while enabling consistent slot behavior
 
 ## Current Status
@@ -138,7 +138,7 @@ Redesigned the flare sidebar API from a single `:sidebar?` boolean flag to suppo
 ### Immediate Priority
 1. **Implement consistent when-context behavior** - Make all slots (including slot 1) use when contexts
 2. **Debug regression** - Fix first-try content update issue (confirmed consistent pattern)
-3. **Verify when context wiring** - Ensure flare creation properly sets `joyride.sidebar-N.flare.hasContent` contexts
+3. **Verify when context wiring** - Ensure flare creation properly sets `joyride.flare.sidebar-N.isActive` contexts
 
 ### Remaining Testing
 3. **Complete slot testing** - Test slots 4 and 5 (expect same regression pattern)

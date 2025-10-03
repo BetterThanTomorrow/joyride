@@ -10,11 +10,11 @@
                                          ::joyride.userHelloScriptExists false
                                          ::joyride.workspaceActivateScriptExists false
                                          ::joyride.workspaceHelloScriptExists false
-                                         ::joyride.sidebar-1.flare.hasContent false
-                                         ::joyride.sidebar-2.flare.hasContent false
-                                         ::joyride.sidebar-3.flare.hasContent false
-                                         ::joyride.sidebar-4.flare.hasContent false
-                                         ::joyride.sidebar-5.flare.hasContent false}}))
+                                         ::joyride.flare.sidebar-1.isActive false
+                                         ::joyride.flare.sidebar-2.isActive false
+                                         ::joyride.flare.sidebar-3.isActive false
+                                         ::joyride.flare.sidebar-4.isActive false
+                                         ::joyride.flare.sidebar-5.isActive false}}))
 
 (defn set-context! [k v]
   (swap! !db assoc-in [:contexts k] v)
@@ -45,14 +45,14 @@
     (set-context! ::joyride.workspaceHelloScriptExists (boolean ws-hello-exists?))))
 
 (defn set-flare-content-context!
-  "Set the hasContent context for a flare slot"
+  "Set the isActive context for a flare slot"
   [slot has-content?]
   (case slot
-    1 (set-context! ::joyride.sidebar-1.flare.hasContent has-content?)
-    2 (set-context! ::joyride.sidebar-2.flare.hasContent has-content?)
-    3 (set-context! ::joyride.sidebar-3.flare.hasContent has-content?)
-    4 (set-context! ::joyride.sidebar-4.flare.hasContent has-content?)
-    5 (set-context! ::joyride.sidebar-5.flare.hasContent has-content?)
+    1 (set-context! ::joyride.flare.sidebar-1.isActive has-content?)
+    2 (set-context! ::joyride.flare.sidebar-2.isActive has-content?)
+    3 (set-context! ::joyride.flare.sidebar-3.isActive has-content?)
+    4 (set-context! ::joyride.flare.sidebar-4.isActive has-content?)
+    5 (set-context! ::joyride.flare.sidebar-5.isActive has-content?)
     (throw (ex-info "Invalid flare slot" {:slot slot}))))
 
 (defn initialize-flare-contexts!

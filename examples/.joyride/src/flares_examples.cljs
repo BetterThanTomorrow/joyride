@@ -62,6 +62,7 @@
   (flare/flare!+
    {:html [:div
            [:h1 "Message Handler Test"]
+           [:img {:src "assets/joyride-logo.png"}]
            [:p "Testing message handling:"]
            [:button {:onclick "sendMessage('button-click', 'Hello from button!')"}
             "Send Message"]
@@ -112,11 +113,11 @@
     :message-handler (fn [message]
                        (let [msg-type (.-type message)
                              msg-data (.-data message)]
-                         (js/console.log "🔥 Received message from flare, type:" msg-type "data:" msg-data)
+                         (println "🔥 Received message from flare, type:" msg-type "data:" msg-data)
                          (case msg-type
-                           "button-click" (js/console.log "✅ Button was clicked!")
-                           "text-input" (js/console.log "📝 Text input received:" msg-data)
-                           (js/console.log "❓ Unknown message type:" msg-type))))})
+                           "button-click" (println "✅ Button was clicked!")
+                           "text-input" (println "📝 Text input received:" msg-data)
+                           (println "❓ Unknown message type:" msg-type))))})
 
   (p/let [result (flare/post-message!+ :sidebar-2 {:type "command" :data {:foo "foo"}})]
     (def result result))
