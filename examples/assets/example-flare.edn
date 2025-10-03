@@ -1,0 +1,44 @@
+[:div
+ [:h1 "Message Handler Test"]
+ [:img {:src "assets/joyride-logo.png"}]
+ [:p "Testing message handling:"]
+ [:button {:onclick "sendMessage('button-click', 'Hello from button!')"}
+  "Send Message"]
+ [:div
+  [:input {:type "text" :id "textInput" :placeholder "Type something..."}]
+  [:button {:onclick "sendTextMessage()"}
+   "Send Text"]]
+ [:div
+  "log:"
+  [:pre {:id "messageLog"}]]
+ [:script {:type "text/javascript"}
+  "
+               // Acquire VS Code API once when the page loads
+               const vscode = acquireVsCodeApi();
+
+               function sendMessage(type, data) {
+                 vscode.postMessage({type: type, data: data, timestamp: Date.now()});
+                 console.log('Sent message:', type, data);
+               }
+
+               function sendTextMessage() {
+                 const input = document.getElementById('textInput');
+                 sendMessage('text-input', input.value);
+                 input.value = '';
+               }
+
+               function handleMessage(message) {
+                 console.log('Received message:', message);
+                 const messageLogElement = document.getElementById('messageLog');
+                 const logEntry = document.createElement('div');
+                 logEntry.textContent = `[${new Date().toLocaleTimeString()}] Type: ${message.type}, Data: ${message.data} ${message.data.foo}`;
+                 messageLogElement.appendChild(logEntry);
+               }
+
+               window.addEventListener('message', event => {
+                 const message = event.data; // Message from extension
+                 handleMessage(message);
+               });
+
+
+               "]]

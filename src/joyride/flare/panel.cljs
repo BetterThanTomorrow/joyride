@@ -2,6 +2,7 @@
   (:require
    ["fs" :as fs]
    ["vscode" :as vscode]
+   [clojure.edn :as edn]
    [joyride.db :as db]
    [joyride.html.file-paths :as file-paths]
    [joyride.html.to-hiccup :as h2h]
@@ -107,9 +108,14 @@
       (:file flare-options)
       (let [^js file-uri (:file flare-options)
             file-path (.-fsPath file-uri)
-            file-content (fs/readFileSync file-path "utf8")]
-        (-> (h2h/html->hiccup file-content {:transform-file-paths file-paths-transformer})
-            render-hiccup))
+            file-content (fs/readFileSync file-path "utf8")
+            hiccup-content (try (edn/read-string file-content)
+                                (catch :default _e))]
+        (if (vector? hiccup-content)
+          (-> (file-paths/transform-file-paths-in-hiccup file-paths-transformer hiccup-content)
+              render-hiccup)
+          (-> (h2h/html->hiccup file-content {:transform-file-paths file-paths-transformer})
+              render-hiccup)))
 
       (:url flare-options)
       (generate-iframe-content (:url flare-options) (:title flare-options))

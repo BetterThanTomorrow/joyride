@@ -130,12 +130,31 @@
 
   (flare/close-all!)
 
-  (flare/flare!+ {:file "assets/test-flare.html"
+  (flare/flare!+ {:file "assets/example-flare.html"
                   :title "My HTML File"
-                  :key :my-file-test})
+                  :key :my-html-file-test})
+
+  (flare/flare!+ {:file "assets/test-flare.edn"
+                  :title "My Hiccup File"
+                  :key :sidebar-4
+                      ;:reveal? true
+                  :preserve-focus? true
+                  :webview-options {:enableScripts true
+                                    :retainContextWhenHidden true}
+                  :message-handler (fn [message]
+                                     (let [msg-type (.-type message)
+                                           msg-data (.-data message)]
+                                       (println "🔥 Received message from flare, type:" msg-type "data:" msg-data)
+                                       (case msg-type
+                                         "button-click" (println "✅ Button was clicked!")
+                                         "text-input" (println "📝 Text input received:" msg-data)
+                                         (println "❓ Unknown message type:" msg-type))))})
+
+  (p/let [result (flare/post-message!+ :sidebar-4 {:type "command" :data #js {:foo "foo"}})]
+    (def result result))
 
   (flare/flare!+
-   {:file "assets/test-flare.html"
+   {:file "assets/example-flare.html"
     :title "HTML File with Bi-directional Messaging"
     :key "html-file-messaging"
     :message-handler
@@ -590,35 +609,5 @@
     (flare/flare!+ {:html [:img {:src (str webview-uri)}] ; Reuse existing flare
                     :key :my-flare}))
   ;; Future Joyride versions will probably make this easier!
-  :rcf)
-
-(comment
-  ;; Test if explicit localResourceRoots fixes the iframe issue
-
-  (def test-file-path "/Users/pez/Projects/joyride/vscode-test-runner/workspace-1/test-flare.html")
-  (def test-file-uri (vscode/Uri.file test-file-path))
-  (def test-file-dir (vscode/Uri.joinPath test-file-uri ".."))
-
-  ;; Create webview with explicit localResourceRoots
-  (def test-panel (vscode/window.createWebviewPanel
-                   "iframe-roots-test"
-                   "Iframe with Roots Test"
-                   vscode/ViewColumn.One
-                   #js {:enableScripts true}))
-
-  (def test-webview (.-webview test-panel))
-
-  (joyride.core/js-properties test-webview)
-  (-> test-webview .-options .-localResourceRoots)
-
-  (def webview-uri (.asWebviewUri test-webview test-file-uri))
-
-  ;; Set simple iframe HTML
-  (set! (.-html test-webview)
-        (str "<iframe src='" webview-uri "' width='100%' height='400px'></iframe>"))
-
-  ;; Check what we got
-  {:webview-uri (str webview-uri)
-   :file-dir (str test-file-dir)}
   :rcf)
 
