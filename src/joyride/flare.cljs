@@ -64,11 +64,11 @@
    - :file - A string path to a HTML file in the workspace
    - :title - Panel/view title (default: 'WebView')
    - :key - Identifier for reusing panels. Use :sidebar-1 through :sidebar-5 for sidebar views
-   - :icon - Icon for panel tab. String (path/URL) or map {:light \"...\" :dark \"...\"}
+   - :icon - Icon for panel tab. String (path/URL) or map `{:light "..." :dark "..."}`
    - :column - vscode.ViewColumn (default: js/undefined)
    - :reveal? - Whether to reveal the panel when created or reused (default: true)
    - :preserve-focus? - Whether to preserve focus when revealing the panel (default: true)
-   - webview-options - JS object vscode WebviewPanelOptions & WebviewOptions for the webview (default: {:enableScripts true})
+   - :webview-options - JS object vscode WebviewPanelOptions & WebviewOptions for the webview (default: {:enableScripts true})
    - :message-handler - Function to handle messages from webview. Receives message object.
 
    Returns: {key view} where key is the flare key and view is the created panel or sidebar view."
