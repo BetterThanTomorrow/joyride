@@ -74,7 +74,7 @@
         {
           "id": "joyride",
           "title": "Joyride",
-          "icon": "assets/j-icon-white.svg"
+          "icon": "assets/j-icon-dark.svg"
         }
       ]
     },
@@ -84,35 +84,35 @@
           "type": "webview",
           "id": "joyride.flare.sidebar-1",
           "name": "Flare 1",
-          "icon": "assets/j-icon-white.svg",
+          "icon": "assets/j-icon-dark.svg",
           "when": "joyride.flare.sidebar-1.isActive"
         },
         {
           "type": "webview",
           "id": "joyride.flare.sidebar-2",
           "name": "Flare 2",
-          "icon": "assets/j-icon-white.svg",
+          "icon": "assets/j-icon-dark.svg",
           "when": "joyride.flare.sidebar-2.isActive"
         },
         {
           "type": "webview",
           "id": "joyride.flare.sidebar-3",
           "name": "Flare 3",
-          "icon": "assets/j-icon-white.svg",
+          "icon": "assets/j-icon-dark.svg",
           "when": "joyride.flare.sidebar-3.isActive"
         },
         {
           "type": "webview",
           "id": "joyride.flare.sidebar-4",
           "name": "Flare 4",
-          "icon": "assets/j-icon-white.svg",
+          "icon": "assets/j-icon-dark.svg",
           "when": "joyride.flare.sidebar-4.isActive"
         },
         {
           "type": "webview",
           "id": "joyride.flare.sidebar-5",
           "name": "Flare 5",
-          "icon": "assets/j-icon-white.svg",
+          "icon": "assets/j-icon-dark.svg",
           "when": "joyride.flare.sidebar-5.isActive"
         }
       ]

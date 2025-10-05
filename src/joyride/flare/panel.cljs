@@ -13,13 +13,15 @@
   "Convert icon specification to VS Code Uri or themed icon object"
   [icon-spec]
   (let [ext-uri (.-extensionUri ^js (db/extension-context))
+        assets-uri (vscode/Uri.joinPath ext-uri "assets")
         resolve-path (fn [path]
                        (if (or (.startsWith path "http://") (.startsWith path "https://"))
                          (vscode/Uri.parse path)
-                         (vscode/Uri.file path)))]
+                         (vscode/Uri.file (vscode-utils/as-workspace-abs-path path))))]
     (cond
       (= icon-spec :flare/icon-default)
-      (vscode/Uri.joinPath ext-uri "assets" "j-icon.svg")
+      #js {:light (vscode/Uri.joinPath assets-uri "j-icon-light.svg")
+           :dark (vscode/Uri.joinPath assets-uri "j-icon-dark.svg")}
 
       ;; String path - absolute path or URL
       (string? icon-spec)
