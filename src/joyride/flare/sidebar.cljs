@@ -107,7 +107,7 @@
         (swap! db/!app-db assoc-in [:flare-sidebar-views sidebar-slot :pending-flare]
                {:key key :options flare-options})
         (when reveal?
-          (vscode/commands.executeCommand (str "joyride.flare-" sidebar-slot ".focus")
+          (vscode/commands.executeCommand (str "joyride.flare.sidebar-" sidebar-slot ".focus")
                                           preserve-focus?))
         promise)
       ;; View exists or we're in the else branch
