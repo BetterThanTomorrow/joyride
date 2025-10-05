@@ -219,7 +219,7 @@ WebView panel and sidebar view creation convenience.
    - `:title` - Panel/view title (default: 'Flare')
    - `:key` - Identifier for reusing panels
      - Special keys are `:sidebar-1` -> `:sidebar-5`, displays the flare in sidebar vs separate panel
-   - `:icon` - Icon for panel tab. String (path/URL) or map {:light \"...\" :dark \"...\"}
+   - `:icon` - Icon for panel tab. String (path/URL) or map `{:light "..." :dark "..."}`
    - `:column` - vscode ViewColumn (default: `js/undefined`)
    - `:reveal?` - Whether to reveal the panel (default: `true`). `false` works differently between regular editor area flares and sidebar flares:
       - editor area: Will reveal newly created flares, will respect the `false` setting when updating flares

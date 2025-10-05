@@ -7,16 +7,25 @@
    [promesa.core :as p]))
 
 (comment
-  ;; Simple greeting panel
+  ;; Simple greeting panel, with themed icon
   (flare/flare!+ {:html [:h1 "Hello, Joyride Flares!"]
+                  :icon {:dark "assets/circle-dark-theme.svg"
+                         :light "assets/circle-light-theme.svg"}
                   :title "Greeting"
                   :key "greeting"})
 
-  ;; Simple greeting panel using HTML string instead of Hiccup
+  ;; Icon from url
+  (flare/flare!+ {:html [:img {:src "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"}]
+                  :title "Awesome"
+                  :icon "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"
+                  :key :awesome})
+
+  ;; Simple greeting panel using HTML string instead of Hiccup, default icon
   (flare/flare!+ {:html "<h1>Hello, Joyride Flares!</h1>"
                   :title "Greeting HTML"
-                  :key "greeting-html"})
+                  :key :greeting})
 
+  ;; Default flare-key is `:anonymous`
   (flare/flare!+ {:html [:h1 "An anonymous Joyride Flare"]
                   :title "I get a default key"})
 
@@ -25,29 +34,36 @@
 
   ; Inspect the result in the repl
   (p/let [editor-flare (flare/flare!+ {:html [:h1 "A Flare"]
-                                       :title "a flare"})]
-    (def flare editor-flare))
+                                       :title "a flare"
+                                       :key 42})]
+    (def flare editor-flare)
+    ; flare => {42 <view-object>}
+    )
 
   ;; Sidebar example
-  (p/let [sidebar-flare
-          (flare/flare!+ {:html [:div {:style {:padding "10px"}}
-                                 [:h3 "Joyride Sidebar"]
-                                 [:p "This flare appears in the sidebar instead of a separate panel."]
-                                 [:ul
-                                  [:li "Useful for quick info"]
-                                  [:li "Persistent views"]
-                                  [:li "Space-efficient"]]
-                                 [:hr]
-                                 [:small "Use " [:code ":key :sidebar-1"] " through " [:code ":key :sidebar-5"] " for sidebar slots"]]
-                          :title "Sidebar Demo"
-                          :key :sidebar-1})]
-    (def sidebar-flare sidebar-flare))
+  (flare/flare!+ {:html [:div {:style {:padding "10px"}}
+                         [:h3 "Joyride Sidebar"]
+                         [:p "This flare appears in the sidebar instead of a separate panel."]
+                         [:ul
+                          [:li "Useful for quick info"]
+                          [:li "Persistent views"]
+                          [:li "Space-efficient"]]
+                         [:hr]
+                         [:small "Use " [:code ":key :sidebar-1"] " through " [:code ":key :sidebar-5"] " for sidebar slots"]]
+                  :title "Sidebar Demo"
+                  :reveal? true
+                  :key :sidebar-1})
 
-  ;; Icon example
-  (flare/flare!+ {:html [:img {:src "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"}]
-                  :title "Awesome"
-                  :icon "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"})
+  ; List all currently open flares
+  (flare/ls)
 
+  (flare/get-flare :sidebar-1)
+
+  (flare/close! :sidebar-1)
+
+  (flare/close-all!)
+
+  (flare/ls)
 
   (flare/flare!+ {:html [:svg {:height 200 :width 200 :style {:border "1px solid #ccc"}}
                          [:circle {:r 30 :cx 50 :cy 50 :fill "red" :opacity 0.7}]
@@ -58,7 +74,7 @@
                   :key :some-svg})
 
 
-  ;; Message sending example
+  ;; Bidirectional message example
   (flare/flare!+
    {:html [:div
            [:h1 "Message Handler Test"]
@@ -106,7 +122,7 @@
                "]]
     :title "Message Test"
     :key :sidebar-2
-    ;:reveal? true
+    :reveal? false
     :preserve-focus? true
     :webview-options {:enableScripts true
                       :retainContextWhenHidden true}
@@ -119,8 +135,7 @@
                            "text-input" (println "📝 Text input received:" msg-data)
                            (println "❓ Unknown message type:" msg-type))))})
 
-  (p/let [result (flare/post-message!+ :sidebar-2 {:type "command" :data {:foo "foo"}})]
-    (def result result))
+  (flare/post-message!+ :sidebar-2 {:type "command" :data {:foo "foo"}})
 
   (flare/get-flare :sidebar-2)
 
