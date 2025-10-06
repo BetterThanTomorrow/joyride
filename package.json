@@ -74,7 +74,7 @@
         {
           "id": "joyride",
           "title": "Joyride",
-          "icon": "assets/j-icon-white.svg"
+          "icon": "assets/j-icon-dark.svg"
         }
       ]
     },
@@ -82,38 +82,38 @@
       "joyride": [
         {
           "type": "webview",
-          "id": "joyride.flare-1",
+          "id": "joyride.flare.sidebar-1",
           "name": "Flare 1",
-          "icon": "assets/j-icon-white.svg",
-          "when": "joyride.sidebar-1.flare.hasContent"
+          "icon": "assets/j-icon-dark.svg",
+          "when": "joyride.flare.sidebar-1.isActive"
         },
         {
           "type": "webview",
-          "id": "joyride.flare-2",
+          "id": "joyride.flare.sidebar-2",
           "name": "Flare 2",
-          "icon": "assets/j-icon-white.svg",
-          "when": "joyride.sidebar-2.flare.hasContent"
+          "icon": "assets/j-icon-dark.svg",
+          "when": "joyride.flare.sidebar-2.isActive"
         },
         {
           "type": "webview",
-          "id": "joyride.flare-3",
+          "id": "joyride.flare.sidebar-3",
           "name": "Flare 3",
-          "icon": "assets/j-icon-white.svg",
-          "when": "joyride.sidebar-3.flare.hasContent"
+          "icon": "assets/j-icon-dark.svg",
+          "when": "joyride.flare.sidebar-3.isActive"
         },
         {
           "type": "webview",
-          "id": "joyride.flare-4",
+          "id": "joyride.flare.sidebar-4",
           "name": "Flare 4",
-          "icon": "assets/j-icon-white.svg",
-          "when": "joyride.sidebar-4.flare.hasContent"
+          "icon": "assets/j-icon-dark.svg",
+          "when": "joyride.flare.sidebar-4.isActive"
         },
         {
           "type": "webview",
-          "id": "joyride.flare-5",
+          "id": "joyride.flare.sidebar-5",
           "name": "Flare 5",
-          "icon": "assets/j-icon-white.svg",
-          "when": "joyride.sidebar-5.flare.hasContent"
+          "icon": "assets/j-icon-dark.svg",
+          "when": "joyride.flare.sidebar-5.isActive"
         }
       ]
     },
@@ -328,14 +328,15 @@
     "@vscode/codicons": "^0.0.30",
     "fdir": "^5.2.0",
     "parinfer": "^3.13.1",
-    "picomatch": "^2.3.1"
+    "picomatch": "^2.3.1",
+    "posthtml-parser": "^0.12.1"
   },
   "devDependencies": {
     "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.6.0",
     "axios": "^1.1.2",
     "moment": "^2.29.4",
     "rimraf": "^3.0.2",
-    "shadow-cljs": "^2.18.0",
-    "@vscode/vsce": "^3.6.0"
+    "shadow-cljs": "^2.18.0"
   }
 }

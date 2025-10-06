@@ -11,7 +11,7 @@
    [joyride.db :as db]
    [joyride.flare :as flare]
    [joyride.repl-utils :as repl-utils]
-   [joyride.utils :as util]
+   [joyride.vscode-utils :as vscode-utils]
    [sci.configs.cljs.test :as cljs-test-config]
    [sci.configs.cljs.pprint :as cljs-pprint-config]
    [sci.configs.funcool.promesa :as promesa-config]
@@ -116,15 +116,15 @@
    Relative paths are resolved relative to the workspace root.
    Returns a promise."
   [file-path]
-  (let [absolute-path (util/as-workspace-abs-path file-path)]
-    (util/vscode-read-uri+ absolute-path)))
+  (let [absolute-path (vscode-utils/as-workspace-abs-path file-path)]
+    (vscode-utils/vscode-read-uri+ absolute-path)))
 
 (defn- load-file+
   "Asynchronously evaluate the content of the file at `file-path`.
    Relative paths are resolved relative to the workspace root.
    Returns a promise."
   [file-path]
-  (let [absolute-path (util/as-workspace-abs-path file-path)]
+  (let [absolute-path (vscode-utils/as-workspace-abs-path file-path)]
     (p/let [source (slurp+ absolute-path)]
       (sci/binding [sci/ns @!last-ns]
         (sci/with-bindings {sci/file absolute-path}

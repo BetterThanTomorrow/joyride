@@ -77,14 +77,13 @@
                 (swap! db/!app-db assoc-in [:flares :sidebar-1] {:view webview-view}))))]
     #js {:resolveWebviewView resolve-webview-view}))
 
-
 (defn register-flare-provider!
   "Register a flare webview provider with VS Code"
   [slot]
   (if (get-in @db/!app-db [:flare-sidebar-views slot :provider-registered?])
     (get-in @db/!app-db [:flare-sidebar-views slot :provider-disposable])
     (let [provider (create-flare-webview-provider! slot)
-          provider-id (str "joyride.flare-" slot)
+          provider-id (str "joyride.flare.sidebar-" slot)
           disposable (vscode/window.registerWebviewViewProvider
                       provider-id
                       provider
@@ -108,7 +107,7 @@
         (swap! db/!app-db assoc-in [:flare-sidebar-views sidebar-slot :pending-flare]
                {:key key :options flare-options})
         (when reveal?
-          (vscode/commands.executeCommand (str "joyride.flare-" sidebar-slot ".focus")
+          (vscode/commands.executeCommand (str "joyride.flare.sidebar-" sidebar-slot ".focus")
                                           preserve-focus?))
         promise)
       ;; View exists or we're in the else branch

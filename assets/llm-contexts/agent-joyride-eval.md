@@ -100,69 +100,41 @@ joyride/load-file                 ; Similar to Clojure `load-file`, but is async
 
 ## Joyride Flares - WebView Creation
 
-Joyride Flares provide a powerful way to create WebView panels and sidebar views with HTML content or external URLs.
+Joyride Flares provide a convenient way to create WebView panels and sidebar views.
 
-### Basic Flare Usage
+### Basic Usage
 ```clojure
 (require '[joyride.flare :as flare])
 
-;; Create a simple HTML flare
+;; Create a flare with Hiccup
 (flare/flare!+ {:html [:h1 "Hello World!"]
                 :title "My Flare"
                 :key "example"})
 
-;; Create a flare with external URL
+;; Create sidebar flare (slots 1-5 available)
+(flare/flare!+ {:html [:div [:h2 "Sidebar"] [:p "Content"]]
+                :key :sidebar-1})
+
+;; Load from file (HTML or EDN with Hiccup)
+(flare/flare!+ {:file "assets/my-view.html"
+                :key "my-view"})
+
+;; Display external URL
 (flare/flare!+ {:url "https://example.com"
                 :title "External Site"})
-
-;; Create sidebar flare
-(flare/flare!+ {:html [:div [:h2 "Sidebar"] [:p "Content"]]
-                :key :sidebar-1}) ; uses slot 1, there are slots 1 - 5
 ```
 
-(The `+` in `flare!+` means it returns a promise, use `awaitResult: true`.)
+**Note**: `flare!+` returns a promise, use `awaitResult: true`.
 
-### Style Guidelines for Hiccup
-- **Use maps for `:style` attributes** (not strings)
-- **Prefer keywords for CSS values** when possible
-- **Use proper CSS strings for compound properties**
+### Key Points
+- **Hiccup styles**: Use maps for `:style` attributes: `{:color :red :margin "10px"}`
+- **File paths**: Absolute, relative (requires workspace), or Uri objects
+- **Management**: `(flare/close! key)`, `(flare/ls)`, `(flare/close-all!)`
+- **Bidirectional messaging**: Use `:message-handler` and `post-message!+`
 
-```clojure
-;; Proper style patterns:
-[:div {:style {:color :red
-               :background-color :blue
-               :border "1px solid #ccc"
-               :margin "10px 20px"
-               :font-family "'SF Pro', sans-serif"
-               :border-radius "8px"}}]
-```
+**Full documentation**: [API docs](https://github.com/BetterThanTomorrow/joyride/blob/master/doc/api.md#joyrideflare)
 
-### Flare Management
-```clojure
-;; Close specific flare
-(flare/close! "my-key")
-
-;; List active flares
-(flare/ls)
-
-;; Close all flares
-(flare/close-all!)
-```
-
-### Common Flare Examples
-```clojure
-;; Data table
-(flare/flare!+ {:html [:table {:style {:border-collapse :collapse}}
-                       [:tr [:th "Name"] [:th "Value"]]
-                       [:tr [:td "Item 1"] [:td "42"]]]
-                :title "Data View"})
-
-;; SVG graphics
-(flare/flare!+ {:html [:svg {:width 200 :height 200
-                            :style {:border "1px solid #ddd"}}
-                       [:circle {:cx 100 :cy 100 :r 50 :fill :blue}]]
-                :title "SVG Demo"})
-```
+**Comprehensive examples**: [flares_examples.cljs](https://github.com/BetterThanTomorrow/joyride/blob/master/examples/.joyride/src/flares_examples.cljs)
 
 ## Common Evaluation Patterns
 

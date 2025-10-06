@@ -2,7 +2,7 @@ version: 2
 jobs:
   checkout:
     docker:
-      - image: cimg/openjdk:17.0.1-node
+      - image: cimg/clojure:1.12.0-openjdk-21.0-node
     working_directory: ~/joyride
     steps:
       - attach_workspace:
@@ -33,7 +33,7 @@ jobs:
             - build
   build:
     docker:
-      - image: cimg/openjdk:17.0.1-node
+      - image: cimg/clojure:1.12.0-openjdk-21.0-node
     working_directory: ~/joyride
     steps:
       - attach_workspace:

@@ -21,7 +21,7 @@ A User [user_activate.cljs](../assets/getting-started-content/user/scripts/user_
 * A re-runnable recipe for registering VS Code disposables as with the Workspace `activate.cljs` example.
 * A way to safely require VS Code extensions from `activate.cljs` scripts, where the extensions might yet not be activated.
 
-**NB**: This script will be automatically insstalled for you if you do not have a User `activate.cljs` script already.
+**NB**: This script will be automatically installed for you if you do not have a User `activate.cljs` script already.
 
 ### `workspace_activate.cljs`
 
@@ -65,9 +65,11 @@ Create a Webview. Uses [scittle](https://babashka.org/scittle/) + [reagent](http
 
 Live demo here: https://twitter.com/borkdude/status/1519607386218053632
 
-## Quick and Simple Webviews with Flares
+## Quick and Easy Webviews with Flares
 
-Createing Webviews is such a common thing, that Joyride has a way to quickly create simple webviews. They can also be created in as a sidebar panel view. And they support using [Replicant Hiccup](https://replicant.fun/hiccup/).
+Creating Webviews is such a common thing that Joyride has convenience API to quickly create them: Flares. Flares can be created as views in the editor area, as well as sidebar panel views. Flares support using [Replicant Hiccup](https://replicant.fun/hiccup/).
+
+See more fancy example in [.joyride/src/flares_examples.cljs](.joyride/src/flares_examples.cljs)
 
 ```clojure
 (require '[joyride.flare :as flare])
@@ -83,7 +85,7 @@ Createing Webviews is such a common thing, that Joyride has a way to quickly cre
 ;; SVG visualization
 (flare/flare!+ {:html [:svg {:height 100 :width 100}
                        [:circle {:r 40 :cx 50 :cy 50 :fill "blue"}]]
-                :title "Blue Circle"})
+                :title :blue})
 
 ;; Custom tab icon
 (flare/flare!+ {:html [:img {:src "https://raw.githubusercontent.com/sindresorhus/awesome/refs/heads/main/media/logo.png"}]
@@ -208,7 +210,7 @@ Joyride API used:
 * `vscode/workspace.openTextDocument`
 * `vscode/window.showTextDocument`
 
-## Build your own Joyride library
+## Build Your Own Joyride Library
 
 Adding commands to your workflow can be implemented in several ways, including:
 

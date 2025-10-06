@@ -2,20 +2,26 @@
   (:require
    ["fs" :as fs]
    ["vscode" :as vscode]
+   [clojure.edn :as edn]
    [joyride.db :as db]
+   [joyride.html.file-paths :as file-paths]
+   [joyride.html.to-hiccup :as h2h]
+   [joyride.vscode-utils :as vscode-utils]
    [replicant.string :as replicant]))
 
 (defn resolve-icon-path
   "Convert icon specification to VS Code Uri or themed icon object"
   [icon-spec]
   (let [ext-uri (.-extensionUri ^js (db/extension-context))
+        assets-uri (vscode/Uri.joinPath ext-uri "assets")
         resolve-path (fn [path]
                        (if (or (.startsWith path "http://") (.startsWith path "https://"))
                          (vscode/Uri.parse path)
-                         (vscode/Uri.file path)))]
+                         (vscode/Uri.file (vscode-utils/as-workspace-abs-path path))))]
     (cond
       (= icon-spec :flare/icon-default)
-      (vscode/Uri.joinPath ext-uri "assets" "j-icon.svg")
+      #js {:light (vscode/Uri.joinPath assets-uri "j-icon-light.svg")
+           :dark (vscode/Uri.joinPath assets-uri "j-icon-dark.svg")}
 
       ;; String path - absolute path or URL
       (string? icon-spec)
@@ -87,34 +93,52 @@
 </body>
 </html>"))
 
-(defn render-content
+(defn- ->webview-uri-str
+  "Transforms a path or a uri to a webview local resource uri string"
+  [^js webview path]
+  (->> path
+       vscode-utils/as-workspace-abs-path
+       vscode/Uri.file
+       (.asWebviewUri webview)
+       str))
+
+(defn- render-content
   "Handle different content types and generate appropriate HTML"
-  [flare-options]
-  (cond
-    (:file flare-options)
-    (let [^js file-uri (:file flare-options)
-          file-path (.-fsPath file-uri)
-          file-content (fs/readFileSync file-path "utf8")]
-      file-content)
+  [^js webview flare-options]
+  (let [file-paths-transformer (partial ->webview-uri-str webview)]
+    (cond
+      (:file flare-options)
+      (let [^js file-uri (:file flare-options)
+            file-path (.-fsPath file-uri)
+            file-content (fs/readFileSync file-path "utf8")
+            hiccup-content (try (edn/read-string file-content)
+                                (catch :default _e))]
+        (if (vector? hiccup-content)
+          (-> (file-paths/transform-file-paths-in-hiccup file-paths-transformer hiccup-content)
+              render-hiccup)
+          (-> (h2h/html->hiccup file-content {:transform-file-paths file-paths-transformer})
+              render-hiccup)))
 
-    (:url flare-options)
-    (generate-iframe-content (:url flare-options) (:title flare-options))
+      (:url flare-options)
+      (generate-iframe-content (:url flare-options) (:title flare-options))
 
-    (:html flare-options)
-    (let [html-content (:html flare-options)]
-      (if (vector? html-content)
-        (render-hiccup html-content)
-        html-content))
+      (:html flare-options)
+      (let [html-content (:html flare-options)]
+        (if (vector? html-content)
+          (-> (file-paths/transform-file-paths-in-hiccup file-paths-transformer html-content)
+              render-hiccup)
+          (-> (h2h/html->hiccup html-content {:transform-file-paths file-paths-transformer})
+              render-hiccup)))
 
-    :else
-    (throw (ex-info "Missing flare content"
-                    {:missing ":html, :url, or :file"}))))
+      :else
+      (throw (ex-info "Missing flare content"
+                      {:missing ":html, :url, or :file"})))))
 
 (defn update-view-content!
   "Update the HTML content of a WebView panel or sidebar view"
   [^js webview-view options]
   (let [^js webview (.-webview webview-view)
-        html-content (render-content options)]
+        html-content (render-content webview options)]
     (when webview
       (set! (.-html webview) html-content))))
 

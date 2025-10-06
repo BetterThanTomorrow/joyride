@@ -212,26 +212,28 @@ Here's a snippet from the [joyride_api.cljs](../examples/.joyride/scripts/joyrid
 
 WebView panel and sidebar view creation convenience.
 
-- `flare!`: Create or update a flare. Options map with
+- `flare!+`: Create or update a flare. The argument is an options map with:
    - `:html` - HTML content string OR Hiccup data structure
    - `:url` - URL to display in iframe
-   - `:file` - A path to a html file in the workspace
+   - `:file` - Path to an HTML or EDN file containing Hiccup. Can be:
+     - Absolute path string
+     - Relative path string, resolves to a path in the workspace root (the first folder, if it's a multi-folder workspace)
    - `:title` - Panel/view title (default: 'Flare')
    - `:key` - Identifier for reusing panels
-     - Special keys are `:sidebar-1` -> `:sidebar-5`, displays the flare in sidebar vs separate panel
-   - `:icon` - Icon for panel tab. String (path/URL) or map {:light \"...\" :dark \"...\"}
+     - Special keys are `:sidebar-1` → `:sidebar-5`, displays the flare in sidebar vs separate panel
+   - `:icon` - Icon for panel tab. String (path/URL) or map `{:light "..." :dark "..."}`
    - `:column` - vscode ViewColumn (default: `js/undefined`)
    - `:reveal?` - Whether to reveal the panel (default: `true`). `false` works differently between regular editor area flares and sidebar flares:
       - editor area: Will reveal newly created flares, will respect the `false` setting when updating flares
       - sidebar: Will always respect `false`
-   - `:preserve-focus?` - Whether to preserve focus when revealing the panel (default: true)
+   - `:preserve-focus?` - Whether to preserve focus when revealing the panel (default: `true`)
    - `:message-handler` - Function to handle messages from webview. Receives message object.
    - `:webview-options` - A map with vscode WebviewPanelOptions & WebviewOptions for the webview (default: `{:enableScripts true}`)
-- `close!`: Close a flare by key.
-- `post-massage!+`: Post a message to a flare by key.
-- `close-all!`: Close all active flares.
-- `ls`: List all active flares as a map `key -> flare`
-- `get-flare`: Get a flare by its key
+- `close!`: Close a flare by key. Returns `true` if a flare was closed, `false` if the key was not found.
+- `post-message!+`: Post a message to a flare by key. Returns the `postMessage` promise.
+- `close-all!`: Close all active flares. Returns the count of flares that were closed.
+- `ls`: List all active flares as a map `key → flare`.
+- `get-flare`: Get a flare by its key, returning only the view and optional message handler when active.
 
 **Icon Options:**
 - String - Path or URL to icon file

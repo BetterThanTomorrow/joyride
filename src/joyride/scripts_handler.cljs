@@ -6,7 +6,8 @@
             [joyride.db :as db]
             [joyride.getting-started :as getting-started]
             [joyride.sci :as jsci]
-            [joyride.utils :as utils :refer [cljify jsify]]
+            [joyride.utils :refer [cljify jsify]]
+            [joyride.vscode-utils :as utils]
             [promesa.core :as p]
             [sci.core :as sci]
             [clojure.string :as string]))

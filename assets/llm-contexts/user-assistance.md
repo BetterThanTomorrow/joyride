@@ -439,27 +439,41 @@ For inline code execution:
 (ns flare-examples
   (:require [joyride.flare :as flare]))
 
+;; Create WebView with Hiccup
+(flare/flare!+ {:html [:div {:style {:padding "20px"}}
+                       [:h2 "My View"]
+                       [:p "Content here"]]
+                :title "Data View"
+                :key "my-view"})
+
+;; Sidebar view
+(flare/flare!+ {:html [:div "Sidebar content"]
+                :key :sidebar-1})
+
+;; Load from file
+(flare/flare!+ {:file "assets/my-flare.html"
+                :key "file-flare"})
+
 ;; Use maps for :style attributes, prefer keywords for values
-(defn create-data-view []
-  (flare/flare!+ {:html [:div {:style {:padding "20px"}}
-                         [:h2 "Data Dashboard"]
-                         [:table {:style {:border-collapse :collapse}}
-                          [:tr [:th "Metric"] [:th "Value"]]
-                          [:tr [:td "Files"] [:td "42"]]
-                          [:tr [:td "Lines"] [:td "1,337"]]]]
-                  :title "Project Stats"
-                  :key "dashboard"}))
 
-(defn create-svg-chart []
-  (flare/flare!+ {:html [:svg {:width 300 :height 200
-                               :style {:border "1px solid #ccc"}}
-                         [:rect {:x 50 :y 50 :width 100 :height 80 :fill :blue}]
-                         [:text {:x 100 :y 100 :text-anchor :middle :fill :white} "Chart"]]
-                  :title "SVG Visualization"}))
+(flare/flare!+ {:html [:div {:style {:padding "20px"}}
+                       [:h2 "Data Dashboard"]
+                       [:table {:style {:border-collapse :collapse}}
+                        [:tr [:th "Metric"] [:th "Value"]]
+                        [:tr [:td "Files"] [:td "42"]]
+                        [:tr [:td "Lines"] [:td "1,337"]]]]
+                :title "Project Stats"
+                :key "dashboard"})
 
-(when (= (joyride/invoked-script) joyride/*file*)
-  (create-data-view))
+(flare/flare!+ {:html [:svg {:width 300 :height 200
+                             :style {:border "1px solid #ccc"}}
+                       [:rect {:x 50 :y 50 :width 100 :height 80 :fill :blue}]
+                       [:text {:x 100 :y 100 :text-anchor :middle :fill :white} "Chart"]]
+                :title "SVG Visualization"})
+
 ```
+
+**Learn more**: See [Flare API docs](https://github.com/BetterThanTomorrow/joyride/blob/master/doc/api.md#joyrideflare) and [comprehensive examples](https://github.com/BetterThanTomorrow/joyride/blob/master/examples/.joyride/src/flares_examples.cljs)
 
 ## NPM Dependencies for Users
 

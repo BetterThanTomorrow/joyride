@@ -9,7 +9,8 @@
    [joyride.nrepl :as nrepl]
    [joyride.sci :as jsci]
    [joyride.scripts-handler :as scripts-handler]
-   [joyride.utils :as utils :refer [info jsify]]
+   [joyride.utils :refer [jsify]]
+   [joyride.vscode-utils :as utils :refer [info]]
    [joyride.when-contexts :as when-contexts]
    [promesa.core :as p]
    [joyride.flare.sidebar :as flare-sidebar]))
