@@ -3,9 +3,8 @@
             [clojure.string :as string]
             [joyride.utils :refer [jsify cljify]]
             [joyride.html.file-paths :as file-paths]
-            [zprint.core :as zprint]))
-
-(defonce posthtml-parser (js/require "posthtml-parser"))
+            [zprint.core :as zprint]
+            ["posthtml-parser" :as posthtml-parser]))
 
 (def default-opts {:add-classes-to-tag-keyword? true
                    :mapify-style? true})
