@@ -161,13 +161,19 @@ jobs:
           name: Restore dependencies (VS Code install, Joyride workspace node_modules)
           key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
       - run:
+          name: Install Babashka
+          command: |
+            curl -sLO https://raw.githubusercontent.com/babashka/babashka/master/install
+            chmod +x install
+            sudo ./install
+      - run:
           name: Apt install missing dependencies
           command: |
             sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E88979FB9B30ACF2 # workaround for some deprecated signing method, or something
             sudo apt update && sudo apt install -y libnss3
       - run:
-          name: Run Extension Tests
-          command: npm run integration-test -- --joyride-vsix=/tmp/artifacts/joyride-$(node -p 'require("./package.json").version').vsix
+          name: Run Extension Tests (VSIX with isolated workspace)
+          command: npm run integration-test:vsix -- --joyride-vsix=/tmp/artifacts/joyride-$(node -p 'require("./package.json").version').vsix
       - save_cache:
           name: Save dependencies (VS Code install, Joyride workspace node_modules)
           key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
