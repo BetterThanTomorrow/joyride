@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.64] - 2025-10-07
+
 - [Flares: Add quick way to create webview content using hiccup](https://github.com/BetterThanTomorrow/joyride/pull/237)
 
 ## [0.0.63] - 2025-09-08
