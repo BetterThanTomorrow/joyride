@@ -15,33 +15,27 @@
   (println "  Source runner:" (str vscode-test-runner-dir))
   (println "  Target base:" (str temp-base))
 
-  ;; Clean existing temp environment
   (when (fs/exists? temp-base)
     (println "  Cleaning existing environment...")
     (fs/delete-tree temp-base))
 
-  ;; Copy workspace to temp
   (println "  Copying workspace...")
   (fs/copy-tree source-workspace temp-workspace)
 
-  ;; Copy test runner files to temp
   (println "  Copying test runner...")
   (fs/create-dirs temp-runner)
   (doseq [file ["launch.js" "runTests.js"]]
     (fs/copy (fs/path vscode-test-runner-dir file)
              (fs/path temp-runner file)))
 
-  ;; Create minimal package.json for test runner
   (spit (str (fs/path temp-runner "package.json"))
         "{\"dependencies\": {\"@vscode/test-electron\": \"^2.4.1\", \"minimist\": \"^1.2.8\"}}")
 
-  ;; Install workspace dependencies
   (println "  Installing workspace dependencies...")
   (shell {:dir (str temp-workspace)
           :out "/dev/null"}
          "npm install")
 
-  ;; Install test runner dependencies
   (println "  Installing test runner dependencies...")
   (shell {:dir (str temp-runner)
           :out "/dev/null"}
