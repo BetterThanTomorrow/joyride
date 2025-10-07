@@ -33,7 +33,7 @@
 
   ;; Create minimal package.json for test runner
   (spit (str (fs/path temp-runner "package.json"))
-        (str "{\"dependencies\": {\"@vscode/test-electron\": \"^2.4.1\", \"minimist\": \"^1.2.8\"}}"))
+        "{\"dependencies\": {\"@vscode/test-electron\": \"^2.4.1\", \"minimist\": \"^1.2.8\"}}")
 
   ;; Install workspace dependencies
   (println "  Installing workspace dependencies...")

@@ -161,6 +161,12 @@ jobs:
           name: Restore dependencies (VS Code install, Joyride workspace node_modules)
           key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
       - run:
+          name: Install Babashka
+          command: |
+            curl -sLO https://raw.githubusercontent.com/babashka/babashka/master/install
+            chmod +x install
+            sudo ./install
+      - run:
           name: Apt install missing dependencies
           command: |
             sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E88979FB9B30ACF2 # workaround for some deprecated signing method, or something

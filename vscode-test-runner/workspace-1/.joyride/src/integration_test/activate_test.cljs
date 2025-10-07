@@ -45,7 +45,7 @@
            (workspace-activate/fn-1))))
 
   (testing "Workspace activation script finds workspace root"
-    (is (= "workspace"
+    (is (contains? #{"workspace" "workspace-1"}
            #_{:clj-kondo/ignore [:unresolved-namespace]}
            (-> (workspace-activate/ws-root)
                .-uri
