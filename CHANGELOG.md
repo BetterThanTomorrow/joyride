@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: [Joyride 0.0.64 fails to activate](https://github.com/BetterThanTomorrow/joyride/pull/242)
+
 ## [0.0.64] - 2025-10-07
 
 - [Flares: Add quick way to create webview content using hiccup](https://github.com/BetterThanTomorrow/joyride/pull/237)
