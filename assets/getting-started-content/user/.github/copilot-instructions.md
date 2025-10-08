@@ -145,6 +145,44 @@ The evaluation tool has an `awaitResult` parameter for handling async operations
     {:available false :reason "Extension not installed"}))
 ```
 
+## Joyride Flares - WebView Creation
+
+Joyride Flares provide a convenient way to create WebView panels and sidebar views.
+
+### Basic Usage
+```clojure
+(require '[joyride.flare :as flare])
+
+;; Create a flare with Hiccup
+(flare/flare!+ {:html [:h1 "Hello World!"]
+                :title "My Flare"
+                :key "example"})
+
+;; Create sidebar flare (slots 1-5 available)
+(flare/flare!+ {:html [:div [:h2 "Sidebar"] [:p "Content"]]
+                :key :sidebar-1})
+
+;; Load from file (HTML or EDN with Hiccup)
+(flare/flare!+ {:file "assets/my-view.html"
+                :key "my-view"})
+
+;; Display external URL
+(flare/flare!+ {:url "https://example.com"
+                :title "External Site"})
+```
+
+**Note**: `flare!+` returns a promise, use `awaitResult: true`.
+
+### Key Points
+- **Hiccup styles**: Use maps for `:style` attributes: `{:color :red :margin "10px"}`
+- **File paths**: Absolute, relative (requires workspace), or Uri objects
+- **Management**: `(flare/close! key)`, `(flare/ls)`, `(flare/close-all!)`
+- **Bidirectional messaging**: Use `:message-handler` and `post-message!+`
+
+**Full documentation**: [API docs](https://github.com/BetterThanTomorrow/joyride/blob/master/doc/api.md#joyrideflare)
+
+**Comprehensive examples**: [flares_examples.cljs](https://github.com/BetterThanTomorrow/joyride/blob/master/examples/.joyride/src/flares_examples.cljs)
+
 ## Common User Patterns
 
 ### Script Execution Guard
