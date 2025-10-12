@@ -1,8 +1,3 @@
----
-applyTo: "**/.joyride/**"
-description: "Joyride agent guide - provides AI agents with documentation about using Joyride evaluation effectively"
----
-
 # Joyride Evaluation Tool - Agent Guide
 
 Critically important contexts for agents to effectively use Joyride's evaluation capabilities for testing, exploring, and automating VS Code.

@@ -76,13 +76,13 @@
             (let [temp-path (str target-path ".tmp")]
               (fs/writeFileSync temp-path (:content result) "utf8")
               (fs/renameSync temp-path target-path))
-            (js/console.log "✅ Background guide sync SUCCESS:" file-path "from" (:source result))
+            (js/console.log "Background guide sync SUCCESS:" file-path "from" (:source result))
             {:status :success :source (:source result)})
           (do
-            (js/console.warn "❌ Background guide sync FAILED:" file-path (:message result))
+            (js/console.warn "Background guide sync FAILED:" file-path (:message result))
             {:status :failed :error (:message result)})))
       (p/catch (fn [error]
-                 (js/console.error "❌ Background guide sync ERROR:" file-path (.-message error))
+                 (js/console.error "Background guide sync ERROR:" file-path (.-message error))
                  {:status :failed :error (.-message error)}))))
 
 (defn sync-all-guides-background!

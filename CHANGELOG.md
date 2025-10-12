@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Provide instructions using the new VS Code API](https://github.com/BetterThanTomorrow/joyride/pull/245)
+
 ## [0.0.65] - 2025-10-07
 
 - Fix: [Joyride 0.0.64 fails to activate](https://github.com/BetterThanTomorrow/joyride/pull/242)
