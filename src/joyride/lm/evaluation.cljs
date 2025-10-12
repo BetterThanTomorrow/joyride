@@ -1,8 +1,8 @@
 (ns joyride.lm.evaluation
   (:require
    ["vscode" :as vscode]
-   [joyride.balance :as balance]
    [joyride.lm.eval.core :as core]
+   [joyride.lm.eval.validation :as validation]
    [joyride.repl-utils :as repl-utils]
    [joyride.sci :as joyride-sci]
    [promesa.core :as p]
@@ -15,80 +15,82 @@
    Uses Joyride's full SCI context with VS Code API access and extensions.
    When wait-for-promise? is false, returns result synchronously (no promise)."
   [{:keys [code ns wait-for-promise?]}]
-  (let [inferred (balance/infer-parens code)
-        balanced-code (if (:success inferred)
-                        (:text inferred)
-                        code)
-        balancing-occurred? (not= code balanced-code)
-        stdout-buffer (atom "")
-        stderr-buffer (atom "")
-        original-print-fn @sci/print-fn
-        original-print-err-fn @sci/print-err-fn
-        setup-capture! (fn []
-                         (sci/alter-var-root sci/print-fn (constantly (fn [s] (swap! stdout-buffer str s))))
-                         (sci/alter-var-root sci/print-err-fn (constantly (fn [s] (swap! stderr-buffer str s)))))
-        restore-fns! (fn []
-                       (sci/alter-var-root sci/print-fn (constantly original-print-fn))
-                       (sci/alter-var-root sci/print-err-fn (constantly original-print-err-fn)))
-        make-result (fn [result error wait-for-promise?]
-                      (cond-> {:result (if (and (not wait-for-promise?)
-                                                (not error)
-                                                (instance? js/Promise result))
-                                         {:type "promise"
-                                          :message "Promise returned but not awaited (fire-and-forget mode)"
-                                          :toString (str result)}
-                                         result)
-                               :error error
-                               :ns (str @sci/ns)
-                               :stdout @stdout-buffer
-                               :stderr @stderr-buffer}
-                        balancing-occurred?
-                        (merge
-                         {:balancing-note "The code provided for evaluation had unbalanced brackets and was automatically balanced before evaluation. Please update your code records with the corrected version from `balanced-code` in this response."
-                          :balanced-code balanced-code})))]
-    (when balancing-occurred?
-      (js/console.log "[Evaluation] Code was unbalanced:" code "balanced-code:" balanced-code))
-    (if wait-for-promise?
-      ;; Async path with p/let (existing behavior)
-      (try
-        (setup-capture!)
-        (p/-> (p/let [target-ns (symbol ns)
-                      resolved-ns (try
-                                    (repl-utils/the-sci-ns (store/get-ctx) target-ns)
-                                    (catch js/Error _
-                                      (try
-                                        (sci/eval-form (store/get-ctx)
-                                                       (list 'clojure.core/create-ns (list 'quote target-ns)))
+  (let [bracket-validation (validation/validate-brackets code)]
+    (if-not (:valid? bracket-validation)
+      ;; Error: code has unbalanced brackets - don't execute
+      (cond-> {:result nil
+               :error (:error bracket-validation)
+               :ns ns
+               :stdout ""
+               :stderr ""}
+        (:balanced-code bracket-validation)
+        (assoc :balanced-code (:balanced-code bracket-validation))
+        (:parinfer-error bracket-validation)
+        (assoc :parinfer-error (:parinfer-error bracket-validation)))
+      ;; Happy path: code is balanced - continue with execution
+      (let [stdout-buffer (atom "")
+            stderr-buffer (atom "")
+            original-print-fn @sci/print-fn
+            original-print-err-fn @sci/print-err-fn
+            setup-capture! (fn []
+                             (sci/alter-var-root sci/print-fn (constantly (fn [s] (swap! stdout-buffer str s))))
+                             (sci/alter-var-root sci/print-err-fn (constantly (fn [s] (swap! stderr-buffer str s)))))
+            restore-fns! (fn []
+                           (sci/alter-var-root sci/print-fn (constantly original-print-fn))
+                           (sci/alter-var-root sci/print-err-fn (constantly original-print-err-fn)))
+            make-result (fn [result error wait-for-promise?]
+                          {:result (if (and (not wait-for-promise?)
+                                            (not error)
+                                            (instance? js/Promise result))
+                                     {:type "promise"
+                                      :message "Promise returned but not awaited (fire-and-forget mode)"
+                                      :toString (str result)}
+                                     result)
+                           :error error
+                           :ns (str @sci/ns)
+                           :stdout @stdout-buffer
+                           :stderr @stderr-buffer})]
+        (if wait-for-promise?
+          ;; Async path with p/let (existing behavior)
+          (try
+            (setup-capture!)
+            (p/-> (p/let [target-ns (symbol ns)
+                          resolved-ns (try
+                                        (repl-utils/the-sci-ns (store/get-ctx) target-ns)
                                         (catch js/Error _
-                                          @joyride-sci/!last-ns))))
-                      result (sci/binding [sci/ns resolved-ns]
-                               (joyride-sci/eval-string balanced-code))]
-                (make-result result nil wait-for-promise?))
-              (p/catch (fn [e] ;; Todo, this doesn't catch evalutation errors
-                         (make-result nil (.-message e) wait-for-promise?)))
-              (p/finally
-                (restore-fns!)))
-        (catch js/Error e
-          (make-result nil (.-message e) wait-for-promise?)))
-      ;; Sync path without promises
-      (try
-        (setup-capture!)
-        (let [target-ns (symbol ns)
-              resolved-ns (try
-                            (repl-utils/the-sci-ns (store/get-ctx) target-ns)
-                            (catch js/Error _
-                              (try
-                                (sci/eval-form (store/get-ctx)
-                                               (list 'clojure.core/create-ns (list 'quote target-ns)))
+                                          (try
+                                            (sci/eval-form (store/get-ctx)
+                                                           (list 'clojure.core/create-ns (list 'quote target-ns)))
+                                            (catch js/Error _
+                                              @joyride-sci/!last-ns))))
+                          result (sci/binding [sci/ns resolved-ns]
+                                   (joyride-sci/eval-string code))]
+                    (make-result result nil wait-for-promise?))
+                  (p/catch (fn [e] ;; Todo, this doesn't catch evalutation errors
+                             (make-result nil (.-message e) wait-for-promise?)))
+                  (p/finally
+                    (restore-fns!)))
+            (catch js/Error e
+              (make-result nil (.-message e) wait-for-promise?)))
+          ;; Sync path without promises
+          (try
+            (setup-capture!)
+            (let [target-ns (symbol ns)
+                  resolved-ns (try
+                                (repl-utils/the-sci-ns (store/get-ctx) target-ns)
                                 (catch js/Error _
-                                  @joyride-sci/!last-ns))))
-              result (sci/binding [sci/ns resolved-ns]
-                       (joyride-sci/eval-string balanced-code))]
-          (make-result result nil wait-for-promise?))
-        (catch js/Error e
-          (make-result nil (.-message e) wait-for-promise?))
-        (finally
-          (restore-fns!))))))
+                                  (try
+                                    (sci/eval-form (store/get-ctx)
+                                                   (list 'clojure.core/create-ns (list 'quote target-ns)))
+                                    (catch js/Error _
+                                      @joyride-sci/!last-ns))))
+                  result (sci/binding [sci/ns resolved-ns]
+                           (joyride-sci/eval-string code))]
+              (make-result result nil wait-for-promise?))
+            (catch js/Error e
+              (make-result nil (.-message e) wait-for-promise?))
+            (finally
+              (restore-fns!))))))))
 
 (defn prepare-invocation
   "Prepare confirmation message with rich code preview"
