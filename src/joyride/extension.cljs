@@ -6,6 +6,7 @@
    [joyride.getting-started :as getting-started]
    [joyride.lifecycle :as life-cycle]
    [joyride.lm :as lm]
+   [joyride.lm.docs :as lm-docs]
    [joyride.nrepl :as nrepl]
    [joyride.sci :as jsci]
    [joyride.scripts-handler :as scripts-handler]
@@ -103,9 +104,10 @@
     (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)    (when-contexts/set-context! ::when-contexts/joyride.isActive true)
     (when-contexts/initialize-flare-contexts!)
     (flare-sidebar/register-flare-provider! 1)
-    (doseq [lm-disposable (lm/register-tools! extension-context)]
+    (doseq [lm-disposable (lm/register-tools!)]
       (swap! db/!app-db update :disposables conj lm-disposable)
       (.push (.-subscriptions ^js extension-context) lm-disposable))
+    (lm-docs/sync-all-guides-background! extension-context)
     (when context (-> (content-utils/maybe-create-user-project+)
                       (p/catch
                        (fn [e]

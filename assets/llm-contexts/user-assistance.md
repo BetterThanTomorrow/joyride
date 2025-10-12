@@ -1,4 +1,9 @@
-# Joyride User Assistance Guide
+---
+applyTo: "**"
+description: "Joyride user guide - provides AI agents with documentation about helping users learn Joyride"
+---
+
+# Assisting the Joyride User
 
 Critically important contexts for agents to effectively help users learn and use Joyride for VS Code automation and customization.
 

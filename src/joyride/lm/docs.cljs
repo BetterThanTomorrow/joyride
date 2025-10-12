@@ -3,6 +3,7 @@
   (:require
    ["vscode" :as vscode]
    ["path" :as path]
+   ["fs" :as fs]
    [joyride.lm.core :as core]
    [promesa.core :as p]
    [clojure.string :as string]))
@@ -64,3 +65,32 @@
     (catch js/Error e
       (js/console.error "Failed to register" tool-name "LM Tool:" (.-message e))
       nil)))
+
+(defn sync-guide-background!
+  "Non-blocking sync of guide from GitHub. Writes to target-path if successful.
+   Returns promise resolving to {:status :success/:failed :source ...}"
+  [extension-context file-path target-path]
+  (-> (p/let [result (fetch-agent-guide extension-context file-path)]
+        (if (= (:type result) "success")
+          (do
+            (let [temp-path (str target-path ".tmp")]
+              (fs/writeFileSync temp-path (:content result) "utf8")
+              (fs/renameSync temp-path target-path))
+            (js/console.log "✅ Background guide sync SUCCESS:" file-path "from" (:source result))
+            {:status :success :source (:source result)})
+          (do
+            (js/console.warn "❌ Background guide sync FAILED:" file-path (:message result))
+            {:status :failed :error (:message result)})))
+      (p/catch (fn [error]
+                 (js/console.error "❌ Background guide sync ERROR:" file-path (.-message error))
+                 {:status :failed :error (.-message error)}))))
+
+(defn sync-all-guides-background!
+  "Sync all guides in background after activation completes."
+  [^js extension-context]
+  (let [guides [{:file-path agent-guide-path
+                 :target (path/join (.-extensionPath extension-context) agent-guide-path)}
+                {:file-path user-assistance-guide-path
+                 :target (path/join (.-extensionPath extension-context) user-assistance-guide-path)}]]
+    (doseq [{:keys [file-path target]} guides]
+      (sync-guide-background! extension-context file-path target))))

@@ -228,6 +228,18 @@
         "key": "ctrl+alt+j w"
       }
     ],
+    "chatInstructions": [
+      {
+        "name": "JoyRideBasicsForAgents",
+        "description": "Joyride agent guide: how to use Joyride's evaluation capabilities effectively",
+        "path": "./assets/llm-contexts/agent-joyride-eval.md"
+      },
+      {
+        "name": "JoyRideAssistingUsersGuide",
+        "description": "Joyride user guide: helping users learn and use Joyride effectively",
+        "path": "./assets/llm-contexts/user-assistance.md"
+      }
+    ],
     "languageModelTools": [
       {
         "name": "joyride_evaluate_code",
@@ -257,34 +269,6 @@
           "required": [
             "code"
           ]
-        }
-      },
-      {
-        "name": "joyride_basics_for_agents",
-        "displayName": "Joyride Agent Guide",
-        "modelDescription": "**Joyride agent guide**: Retrieve the latest Joyride guide for LLM agents, providing context on how to use Joyride's evaluation capabilities effectively. Always read the Joyride agent guide before using Joyride.",
-        "userDescription": "Joyride agent guide - provides the AI agent with documentation about using Joyride effectively",
-        "canBeReferencedInPrompt": true,
-        "toolReferenceName": "joyride-agent-guide",
-        "icon": "$(book)",
-        "inputSchema": {
-          "type": "object",
-          "properties": {},
-          "required": []
-        }
-      },
-      {
-        "name": "joyride_assisting_users_guide",
-        "displayName": "Joyride User Guide",
-        "modelDescription": "**Joyride user guide**: Retrieve the latest **Assist the Joyride User** guide for LLM agents, providing context on things the LLM agent needs to know to help the user learn the basics of Joyride and using Joyride effectively. Read the Joyride user guide if you have indications that the user needs help understanding anything about Joyride.",
-        "userDescription": "Joyride user guide - provides the AI agent with documentation about helping users learn Joyride",
-        "canBeReferencedInPrompt": true,
-        "toolReferenceName": "joyride-user-guide",
-        "icon": "$(book)",
-        "inputSchema": {
-          "type": "object",
-          "properties": {},
-          "required": []
         }
       },
       {
