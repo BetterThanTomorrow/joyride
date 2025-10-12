@@ -230,12 +230,12 @@
     ],
     "chatInstructions": [
       {
-        "name": "JoyRideBasicsForAgents",
+        "name": "JoyrideBasicsForAgents",
         "description": "Joyride agent guide: how to use Joyride's evaluation capabilities effectively",
         "path": "./assets/llm-contexts/agent-joyride-eval.md"
       },
       {
-        "name": "JoyRideAssistingUsersGuide",
+        "name": "JoyrideAssistingUsersGuide",
         "description": "Joyride user guide: helping users learn and use Joyride effectively",
         "path": "./assets/llm-contexts/user-assistance.md"
       }

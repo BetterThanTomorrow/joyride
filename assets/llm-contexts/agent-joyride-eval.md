@@ -1,5 +1,5 @@
 ---
-applyTo: "**"
+applyTo: "**/.joyride/**"
 description: "Joyride agent guide - provides AI agents with documentation about using Joyride evaluation effectively"
 ---
 
