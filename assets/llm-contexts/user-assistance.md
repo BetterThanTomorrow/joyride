@@ -1,4 +1,9 @@
-# Joyride User Assistance Guide
+---
+applyTo: "**/.joyride/**"
+description: "Joyride user guide - provides AI agents with documentation about helping users learn Joyride"
+---
+
+# Assisting the Joyride User
 
 Critically important contexts for agents to effectively help users learn and use Joyride for VS Code automation and customization.
 
@@ -578,20 +583,6 @@ npm install lodash
 4. **Namespace conflicts**: Same namespace names overwrite each other
 5. **Promise handling**: Forgetting to use `promesa.core` for async operations
 6. **File paths**: Need absolute paths for VS Code APIs
-7. **Docstring placement**: Putting docstrings in wrong place (common Clojure beginner mistake)
-
-```clojure
-;; WRONG - docstring after parameter vector
-(defn my-function [param]
-  "This function does something"  ; ❌ Wrong position
-  (do-something param))
-
-;; RIGHT - docstring before parameter vector
-(defn my-function
-  "This function does something"  ; ✅ Correct position
-  [param]
-  (do-something param))
-```
 
 ## Approaches to Helping Users
 
@@ -626,10 +617,10 @@ npm install lodash
 - **Workspace vs User**: Based on whether functionality is project-specific or global
 
 ### Common User Journey Patterns
-- **Automation seekers**: Want to eliminate repetitive tasks → Show practical examples
-- **Customization enthusiasts**: Want to modify VS Code behavior → Focus on configuration and UI APIs
-- **Integration builders**: Want to connect tools → Emphasize extension APIs and external processes
-- **Library creators**: Want to build reusable functionality → Guide toward `/src` organization and clean APIs
+- **Automation seekers**: Want to eliminate repetitive tasks � Show practical examples
+- **Customization enthusiasts**: Want to modify VS Code behavior � Focus on configuration and UI APIs
+- **Integration builders**: Want to connect tools � Emphasize extension APIs and external processes
+- **Library creators**: Want to build reusable functionality � Guide toward `/src` organization and clean APIs
 
 ## Troubleshooting Help
 

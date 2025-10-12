@@ -64,3 +64,35 @@
     (catch js/Error e
       (js/console.error "Failed to register" tool-name "LM Tool:" (.-message e))
       nil)))
+
+(defn sync-guide-background!
+  "Non-blocking sync of guide from GitHub. Writes to target-path if successful.
+   Returns promise resolving to {:status :success/:failed :source ...}"
+  [extension-context file-path target-path]
+  (-> (p/let [result (fetch-agent-guide extension-context file-path)]
+        (if (= (:type result) "success")
+          (p/let [target-uri (vscode/Uri.file target-path)
+                  _ (vscode/workspace.fs.writeFile target-uri (.encode (js/TextEncoder.) (:content result)))]
+            (js/console.log "Background guide sync SUCCESS:" file-path "from" (:source result))
+            {:status :success :source (:source result)})
+          (do
+            (js/console.warn "Background guide sync FAILED:" file-path (:message result))
+            {:status :failed :error (:message result)})))
+      (p/catch (fn [error]
+                 (js/console.error "Background guide sync ERROR:" file-path (.-message error))
+                 {:status :failed :error (.-message error)}))))
+
+(defn sync-all-guides-background!
+  "Sync all guides in background after activation completes.
+   Skips sync in development mode to avoid overwriting local edits."
+  [^js extension-context]
+  (let [extension-mode (.-extensionMode extension-context)
+        development-mode? (= extension-mode 2)]
+    (if development-mode?
+      (js/console.log "Development mode detected - skipping background guide sync")
+      (let [guides [{:file-path agent-guide-path
+                     :target (path/join (.-extensionPath extension-context) agent-guide-path)}
+                    {:file-path user-assistance-guide-path
+                     :target (path/join (.-extensionPath extension-context) user-assistance-guide-path)}]]
+        (doseq [{:keys [file-path target]} guides]
+          (sync-guide-background! extension-context file-path target))))))
