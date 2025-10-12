@@ -3,7 +3,6 @@
   (:require
    ["vscode" :as vscode]
    ["path" :as path]
-   ["fs" :as fs]
    [joyride.lm.core :as core]
    [promesa.core :as p]
    [clojure.string :as string]))
@@ -72,10 +71,10 @@
   [extension-context file-path target-path]
   (-> (p/let [result (fetch-agent-guide extension-context file-path)]
         (if (= (:type result) "success")
-          (do
-            (let [temp-path (str target-path ".tmp")]
-              (fs/writeFileSync temp-path (:content result) "utf8")
-              (fs/renameSync temp-path target-path))
+          (p/let [target-uri (vscode/Uri.file target-path)
+                  content-bytes (js/Uint8Array.from (.split (:content result) "")
+                                                    (fn [c] (.charCodeAt c 0)))
+                  _ (vscode/workspace.fs.writeFile target-uri content-bytes)]
             (js/console.log "Background guide sync SUCCESS:" file-path "from" (:source result))
             {:status :success :source (:source result)})
           (do
