@@ -103,8 +103,6 @@
     (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server+)
     (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)
     (when-contexts/set-context! ::when-contexts/joyride.isActive true)
-    (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)
-    (when-contexts/set-context! ::when-contexts/joyride.isActive true)
     (when-contexts/initialize-flare-contexts!)
     (flare-sidebar/register-flare-provider! 1)
     (doseq [lm-disposable (lm/register-tools!)]
