@@ -72,9 +72,7 @@
   (-> (p/let [result (fetch-agent-guide extension-context file-path)]
         (if (= (:type result) "success")
           (p/let [target-uri (vscode/Uri.file target-path)
-                  content-bytes (js/Uint8Array.from (.split (:content result) "")
-                                                    (fn [c] (.charCodeAt c 0)))
-                  _ (vscode/workspace.fs.writeFile target-uri content-bytes)]
+                  _ (vscode/workspace.fs.writeFile target-uri (.encode (js/TextEncoder.) (:content result)))]
             (js/console.log "Background guide sync SUCCESS:" file-path "from" (:source result))
             {:status :success :source (:source result)})
           (do
