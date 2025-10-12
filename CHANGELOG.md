@@ -4,7 +4,9 @@ Changes to Joyride
 
 ## [Unreleased]
 
-- [Provide instructions using the new VS Code API](https://github.com/BetterThanTomorrow/joyride/pull/245)
+## [0.0.66] - 2025-10-12
+
+- [Provide Copilot instructions using the new VS Code API](https://github.com/BetterThanTomorrow/joyride/pull/245)
 - Fix: [The autobalancing of AI evaluations sometimes silently breaks the code](https://github.com/BetterThanTomorrow/joyride/issues/247)
 
 ## [0.0.65] - 2025-10-07
