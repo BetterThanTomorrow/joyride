@@ -83,11 +83,16 @@
                  {:status :failed :error (.-message error)}))))
 
 (defn sync-all-guides-background!
-  "Sync all guides in background after activation completes."
+  "Sync all guides in background after activation completes.
+   Skips sync in development mode to avoid overwriting local edits."
   [^js extension-context]
-  (let [guides [{:file-path agent-guide-path
-                 :target (path/join (.-extensionPath extension-context) agent-guide-path)}
-                {:file-path user-assistance-guide-path
-                 :target (path/join (.-extensionPath extension-context) user-assistance-guide-path)}]]
-    (doseq [{:keys [file-path target]} guides]
-      (sync-guide-background! extension-context file-path target))))
+  (let [extension-mode (.-extensionMode extension-context)
+        development-mode? (= extension-mode 2)]
+    (if development-mode?
+      (js/console.log "Development mode detected - skipping background guide sync")
+      (let [guides [{:file-path agent-guide-path
+                     :target (path/join (.-extensionPath extension-context) agent-guide-path)}
+                    {:file-path user-assistance-guide-path
+                     :target (path/join (.-extensionPath extension-context) user-assistance-guide-path)}]]
+        (doseq [{:keys [file-path target]} guides]
+          (sync-guide-background! extension-context file-path target))))))

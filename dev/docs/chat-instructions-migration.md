@@ -45,26 +45,32 @@ Create `sync-guides-background!` in `joyride.lm.docs`:
   [extension-context file-path target-path]
   (-> (p/let [result (fetch-agent-guide extension-context file-path)]
         (when (= (:type result) "success")
-          (let [temp-path (str target-path ".tmp")]
-            (fs/writeFileSync temp-path (:content result) "utf8")
-            (fs/renameSync temp-path target-path)
-            (js/console.log "Background guide sync:" file-path "from" (:source result))))
+          (p/let [target-uri (vscode/Uri.file target-path)
+                  _ (vscode/workspace.fs.writeFile target-uri (.encode (js/TextEncoder.) (:content result)))]
+            (js/console.log "Background guide sync SUCCESS:" file-path "from" (:source result))))
         {:status (if (= (:type result) "success") :success :failed)
          :source (:source result)})
       (p/catch (fn [error]
-                 (js/console.warn "Background guide sync failed:" file-path (.-message error))
+                 (js/console.warn "Background guide sync ERROR:" file-path (.-message error))
                  {:status :failed :error (.-message error)}))))
 
 (defn sync-all-guides-background!
-  "Sync all guides in background after activation completes."
+  "Sync all guides in background after activation completes.
+   Skips sync in development mode to avoid overwriting local edits."
   [extension-context]
-  (let [guides [{:file-path agent-guide-path
-                 :target (path/join (.-extensionPath extension-context) agent-guide-path)}
-                {:file-path user-assistance-guide-path
-                 :target (path/join (.-extensionPath extension-context) user-assistance-guide-path)}]]
-    (doseq [{:keys [file-path target]} guides]
-      (sync-guide-background! extension-context file-path target))))
+  (let [extension-mode (.-extensionMode extension-context)
+        development-mode? (= extension-mode 2)]
+    (if development-mode?
+      (js/console.log "Development mode detected - skipping background guide sync")
+      (let [guides [{:file-path agent-guide-path
+                     :target (path/join (.-extensionPath extension-context) agent-guide-path)}
+                    {:file-path user-assistance-guide-path
+                     :target (path/join (.-extensionPath extension-context) user-assistance-guide-path)}]]
+        (doseq [{:keys [file-path target]} guides]
+          (sync-guide-background! extension-context file-path target))))))
 ```
+
+**Development Mode Protection**: Background sync is skipped when `extensionMode = 2` (Development) to prevent overwriting local guide edits during Shadow-CLJS hot-reload cycles. In production (`extensionMode = 1`), guides are updated from GitHub as intended.
 
 ### 3. Update Extension Activation
 In `joyride.extension/activate`:
@@ -136,7 +142,7 @@ Keep in `joyride.lm.docs`:
 - [x] Update `package.json` to add `chatInstructions` contribution
 - [x] Update `package.json` to remove guide entries from `languageModelTools`
 - [x] Fix all Shadow-CLJS compilation warnings (type hints, arity)
-- [ ] Remove obsolete functions from `joyride.lm.docs` (`invoke-tool!`, `register-tool!` if guides-only)
-- [ ] Test in Extension Development Host together with human developer
-- [ ] Verify background sync works and updates files
-- [ ] Verify chat instructions appear in Copilot
+- [x] Remove obsolete functions from `joyride.lm.docs` (`invoke-tool!`, `register-tool!` if guides-only)
+- [x] Test in Extension Development Host together with human developer
+- [x] Verify background sync works and updates files
+- [x] Verify chat instructions appear in Copilot
