@@ -97,22 +97,6 @@
   [message]
   (append (str message "\n")))
 
-(defn format-ns-comment
-  "Format the namespace header comment for evaluated code."
-  [{:keys [ns repl-session-type]}]
-  (when ns
-    (let [session (or repl-session-type "cljs")]
-      (str "; " session ":" ns))))
-
-(defn append-clojure-eval
-  "Echo evaluated code to the terminal with namespace context."
-  ([code]
-   (append-clojure-eval code {}))
-  ([code options]
-   (when-let [ns-comment (format-ns-comment options)]
-     (append-line ns-comment))
-   (append-line code)))
-
 (defn append-eval-out
   "Append stdout generated during evaluation."
   [message]
@@ -157,3 +141,13 @@
   "Append non-evaluation stderr and ensure newline."
   [message]
   (append-line message))
+
+(defn append-clojure-eval
+  "Echo evaluated code to the terminal with namespace context."
+  ([code]
+   (append-clojure-eval code {}))
+  ([code {:keys [ns]}]
+   (when (not= ns (:output/last-printed-ns @db/!app-db))
+     (swap! db/!app-db assoc :output/last-printed-ns ns)
+     (append-line-other-out (str "; " ns)))
+   (append-line code)))
