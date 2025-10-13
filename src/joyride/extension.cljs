@@ -8,6 +8,7 @@
    [joyride.lm :as lm]
    [joyride.lm.docs :as lm-docs]
    [joyride.nrepl :as nrepl]
+   [joyride.output :as output]
    [joyride.sci :as jsci]
    [joyride.scripts-handler :as scripts-handler]
    [joyride.utils :refer [jsify]]
@@ -38,11 +39,15 @@
        (run-code+ input))))
   ([code]
    (-> (p/let [result (jsci/eval-string code)]
-         ;; Maybe we should skip printing here?
-         (utils/say-result result)
          result)
        (p/catch (fn [e]
-                  (utils/say-error (str (ex-message e) "\n  " (ex-data e)))
+                  (let [message (or (ex-message e) (.-message e) (str e))
+                        data (ex-data e)
+                        details (cond-> message
+                                  data (str "\n  " (pr-str data)))
+                        headline (str "Run Code failed: " message)]
+                    (output/append-line-other-err (str "Run Code failed: " details))
+                    (utils/error headline))
                   (throw e))))))
 
 (defn evaluate-selection+

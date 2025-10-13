@@ -5,6 +5,7 @@
             [joyride.constants :as const]
             [joyride.db :as db]
             [joyride.getting-started :as getting-started]
+            [joyride.output :as output]
             [joyride.sci :as jsci]
             [joyride.utils :refer [cljify jsify]]
             [joyride.vscode-utils :as utils]
@@ -111,10 +112,13 @@
        (p/handle (fn [result error]
                    (swap! db/!app-db assoc :invoked-script nil)
                    (if error
-                     (binding [utils/*show-when-said?* true]
-                       (utils/say-error (str title " Failed: " script-path " " (.-message error))))
-                     (do (utils/say-result (str script-path " evaluated.") result)
-                         result)))))))
+                     (let [message (or (ex-message error) (.-message error) (str error))
+                           headline (str title " Failed: " script-path " " message)]
+                       (output/append-line-other-err headline)
+                       (utils/error headline))
+                     (do
+                       (output/append-line-other-out (str script-path " evaluated."))
+                       result)))))))
 
 (defn open-script+
   ([menu-conf+ base-path scripts-path]
@@ -126,8 +130,10 @@
                (vscode/window.showTextDocument
                 #js {:preview false, :preserveFocus false})))
        (p/catch (fn [error]
-                  (binding [utils/*show-when-said?* true]
-                    (utils/say-error (str title " Failed: " script-path " " (.-message error)))))))))
+                  (let [message (or (ex-message error) (.-message error) (str error))
+                        headline (str title " Failed: " script-path " " message)]
+                    (output/append-line-other-err headline)
+                    (utils/error headline)))))))
 
 (defn run-or-open-workspace-script-args [menu-conf-or-title+]
   [menu-conf-or-title+

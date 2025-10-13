@@ -10,6 +10,7 @@
    [joyride.config :as conf]
    [joyride.db :as db]
    [joyride.flare :as flare]
+   [joyride.output :as output]
    [joyride.repl-utils :as repl-utils]
    [joyride.vscode-utils :as vscode-utils]
    [sci.configs.cljs.test :as cljs-test-config]
@@ -207,11 +208,43 @@
 
 (defn eval-string [s]
   (sci/binding [sci/ns @!last-ns]
-    (let [rdr (sci/reader s)]
-      (loop [res nil]
-        (let [form (sci/parse-next (store/get-ctx) rdr)]
-          (if (= :sci.core/eof form)
-            (do
-              (vreset! !last-ns @sci/ns)
-              res)
-            (recur (sci/eval-form (store/get-ctx) form))))))))
+    (let [code (str s)
+          trimmed (str/trim code)
+          original-print @sci/print-fn
+          original-err @sci/print-err-fn
+          tapped-print (fn [message]
+                         (when (some? message)
+                           (output/append-eval-out message))
+                         (when original-print
+                           (original-print message)))
+          tapped-err (fn [message]
+                       (when (some? message)
+                         (output/append-eval-err message))
+                       (when original-err
+                         (original-err message)))]
+      (sci/alter-var-root sci/print-fn (constantly tapped-print))
+      (sci/alter-var-root sci/print-err-fn (constantly tapped-err))
+      (try
+        (let [reader (sci/reader code)
+              session-type "cljs"]
+          (when-not (str/blank? trimmed)
+            (output/append-clojure-eval code {:ns (str @sci/ns)
+                                              :repl-session-type session-type}))
+          (loop [res nil]
+            (let [form (sci/parse-next (store/get-ctx) reader)]
+              (if (= :sci.core/eof form)
+                (do
+                  (vreset! !last-ns @sci/ns)
+                  res)
+                (let [result (try
+                               (sci/eval-form (store/get-ctx) form)
+                               (catch js/Error e
+                                 (let [message (or (.-message e) (str e))]
+                                   (output/append-line-eval-err message)
+                                   (throw e))))
+                      formatted-result (pr-str result)]
+                  (output/append-eval-result (str "=> " formatted-result))
+                  (recur result))))))
+        (finally
+          (sci/alter-var-root sci/print-fn (constantly original-print))
+          (sci/alter-var-root sci/print-err-fn (constantly original-err)))))))
