@@ -110,12 +110,6 @@
 
 (def pst-nyip (fn [_] (throw (js/Error. "pst not yet implemented"))))
 
-(defonce !print-hook-state
-  (atom {:wrapped-out nil
-         :delegate-out nil
-         :wrapped-err nil
-         :delegate-err nil}))
-
 (def ^:dynamic *echo-eval-code?* true)
 
 (defn- wrap-print-fn [delegate append-fn]
@@ -130,17 +124,17 @@
   []
   (let [current-out @sci/print-fn
         current-err @sci/print-err-fn
-        {:keys [wrapped-out wrapped-err]} @!print-hook-state]
+        {:keys [wrapped-out wrapped-err]} (:sci/print-hook-state @db/!app-db {})]
     (when (or (not (identical? current-out wrapped-out))
               (not (identical? current-err wrapped-err)))
       (let [wrapped-out-fn (wrap-print-fn current-out output/append-eval-out)
             wrapped-err-fn (wrap-print-fn current-err output/append-eval-err)]
         (sci/alter-var-root sci/print-fn (constantly wrapped-out-fn))
         (sci/alter-var-root sci/print-err-fn (constantly wrapped-err-fn))
-        (reset! !print-hook-state {:wrapped-out wrapped-out-fn
-                                   :delegate-out current-out
-                                   :wrapped-err wrapped-err-fn
-                                   :delegate-err current-err})))))
+        (swap! db/!app-db assoc :sci/print-hook-state {:wrapped-out wrapped-out-fn
+                                                       :delegate-out current-out
+                                                       :wrapped-err wrapped-err-fn
+                                                       :delegate-err current-err})))))
 
 (def !last-ns (volatile! @sci/ns))
 
