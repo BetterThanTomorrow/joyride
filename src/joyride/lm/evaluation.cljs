@@ -37,8 +37,7 @@
                              (sci/alter-var-root sci/print-err-fn (constantly (fn [s] (swap! stderr-buffer str s)))))
             restore-fns! (fn []
                            (sci/alter-var-root sci/print-fn (constantly original-print-fn))
-                           (sci/alter-var-root sci/print-err-fn (constantly original-print-err-fn))
-                           #_(joyride-sci/install-terminal-print-hooks!))
+                           (sci/alter-var-root sci/print-err-fn (constantly original-print-err-fn)))
             make-result (fn [result error wait-for-promise?]
                           {:result (if (and (not wait-for-promise?)
                                             (not error)

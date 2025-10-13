@@ -116,6 +116,8 @@
          :wrapped-err nil
          :delegate-err nil}))
 
+(def ^:dynamic *echo-eval-code?* true)
+
 (defn- wrap-print-fn [delegate append-fn]
   (fn [message]
     (when (some? message)
@@ -236,32 +238,28 @@
                                                   ns-sym))
                              {:handled true}))))}))
 
-(defn eval-string
-  ([s]
-   (eval-string s {}))
-  ([s {:keys [append-results?]
-       :or {append-results? true}}]
-   (install-terminal-print-hooks!)
-   (sci/binding [sci/ns @!last-ns]
-     (let [code (str s)
-           trimmed (str/trim code)
-           reader (sci/reader code)
-           session-type "cljs"]
-       (when-not (str/blank? trimmed)
-         (output/append-clojure-eval code {:ns (str @sci/ns)
-                                           :repl-session-type session-type}))
-       (loop [res nil]
-         (let [form (sci/parse-next (store/get-ctx) reader)]
-           (if (= :sci.core/eof form)
-             (do
-               (vreset! !last-ns @sci/ns)
-               res)
-             (let [result (try
-                            (sci/eval-form (store/get-ctx) form)
-                            (catch js/Error e
-                              (let [message (or (.-message e) (str e))]
-                                (output/append-line-eval-err message)
-                                (throw e))))]
-               (when append-results?
-                 (output/append-eval-result (str "=> " (pr-str result))))
-               (recur result)))))))))
+(defn eval-string [s]
+  (install-terminal-print-hooks!)
+  (sci/binding [sci/ns @!last-ns]
+    (let [code (str s)
+          trimmed (str/trim code)
+          reader (sci/reader code)
+          session-type "cljs"]
+      (when (and *echo-eval-code?*
+                 (not (str/blank? trimmed)))
+        (output/append-clojure-eval code {:ns (str @sci/ns)
+                                          :repl-session-type session-type}))
+      (loop [res nil]
+        (let [form (sci/parse-next (store/get-ctx) reader)]
+          (if (= :sci.core/eof form)
+            (do
+              (vreset! !last-ns @sci/ns)
+              (output/append-eval-result (str "=> " (pr-str res)))
+              res)
+            (let [result (try
+                           (sci/eval-form (store/get-ctx) form)
+                           (catch js/Error e
+                             (let [message (or (.-message e) (str e))]
+                               (output/append-line-eval-err message)
+                               (throw e))))]
+              (recur result))))))))

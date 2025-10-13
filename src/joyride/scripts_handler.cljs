@@ -105,10 +105,20 @@
                script-uri (vscode/Uri.file abs-path)
                code (if (.endsWith script-path ".js")
                       (cljs-snippet-requiring-js abs-path)
-                      (utils/vscode-read-uri+ script-uri))]
+                      (utils/vscode-read-uri+ script-uri))
+               workspace-root (:workspace-root-path @db/!app-db)
+               script-kind (cond
+                             (= base-path conf/user-config-path) "user"
+                             (and workspace-root (= base-path workspace-root)) "workspace"
+                             :else nil)
+               message (if script-kind
+                         (str "Evaluating " script-kind " script: " script-path)
+                         (str "Evaluating script: " script-path))]
+         (output/append-line-other-out message)
          (swap! db/!app-db assoc :invoked-script abs-path)
          (sci/with-bindings {sci/file abs-path}
-           (jsci/eval-string code {:append-results? false})))
+           (binding [jsci/*echo-eval-code?* false]
+             (jsci/eval-string code))))
        (p/handle (fn [result error]
                    (swap! db/!app-db assoc :invoked-script nil)
                    (if error
@@ -116,9 +126,7 @@
                            headline (str title " Failed: " script-path " " message)]
                        (output/append-line-other-err headline)
                        (utils/error headline))
-                     (do
-                       (output/append-line-other-out (str script-path " evaluated."))
-                       result)))))))
+                     result))))))
 
 (defn open-script+
   ([menu-conf+ base-path scripts-path]
