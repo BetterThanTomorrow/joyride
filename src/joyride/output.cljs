@@ -47,7 +47,9 @@
    :color/bright-red     "\u001b[91m"
 
    ;; Colored background
-   :color/bg-white "\u001b[47m"
+   :color/bg-white        "\u001b[47m"
+   :color/bg-magenta      "\u001b[45m"
+   :color/bg-bright-blue  "\u001b[104m"
 
    ;; Aliases matching Chalk
    :color/gray :color/bright-black})
@@ -87,19 +89,21 @@
   []
   (cond
     (high-contrast-theme?)
-    {:output/eval-out :color/bright-black
+    {:output/eval-ns :color/bg-magenta
+     :output/eval-out :color/bright-black
      :output/eval-err :color/bright-red
      :output/other-out :color/green
      :output/other-err :color/bright-red}
 
     (light-theme?)
-    {:output/eval-out :color/gray
+    {:output/eval-ns :color/bg-magenta
+     :output/eval-out :color/gray
      :output/eval-err :color/red
      :output/other-out :color/green
      :output/other-err :color/red}
 
     :else  ;; Dark theme
-    {:output/eval-ns :color/bg-white
+    {:output/eval-ns :color/bg-magenta
      :output/eval-out :color/gray
      :output/eval-err :color/bright-red
      :output/other-out :white
