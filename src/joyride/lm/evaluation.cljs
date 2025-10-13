@@ -63,13 +63,14 @@
                                                            (list 'clojure.core/create-ns (list 'quote target-ns)))
                                             (catch js/Error _
                                               @joyride-sci/!last-ns))))
-                          result (sci/binding [sci/ns resolved-ns]
-                                   (joyride-sci/eval-string code))]
-                    (make-result result nil wait-for-promise?))
+                          eval-result (sci/binding [sci/ns resolved-ns]
+                                        (joyride-sci/eval-string code))
+                          _ (restore-fns!)
+                          result (make-result eval-result nil wait-for-promise?)]
+                    result)
                   (p/catch (fn [e] ;; Todo, this doesn't catch evalutation errors
-                             (make-result nil (.-message e) wait-for-promise?)))
-                  (p/finally
-                    (restore-fns!)))
+                             (make-result nil (.-message e) wait-for-promise?)
+                             (restore-fns!))))
             (catch js/Error e
               (make-result nil (.-message e) wait-for-promise?)))
           ;; Sync path without promises
