@@ -110,6 +110,36 @@
 
 (def pst-nyip (fn [_] (throw (js/Error. "pst not yet implemented"))))
 
+(defonce !print-hook-state
+  (atom {:wrapped-out nil
+         :delegate-out nil
+         :wrapped-err nil
+         :delegate-err nil}))
+
+(defn- wrap-print-fn [delegate append-fn]
+  (fn [message]
+    (when (some? message)
+      (append-fn message))
+    (when delegate
+      (delegate message))))
+
+(defn install-terminal-print-hooks!
+  "Ensure SCI print functions mirror evaluation output to the Joyride terminal."
+  []
+  (let [current-out @sci/print-fn
+        current-err @sci/print-err-fn
+        {:keys [wrapped-out wrapped-err]} @!print-hook-state]
+    (when (or (not (identical? current-out wrapped-out))
+              (not (identical? current-err wrapped-err)))
+      (let [wrapped-out-fn (wrap-print-fn current-out output/append-eval-out)
+            wrapped-err-fn (wrap-print-fn current-err output/append-eval-err)]
+        (sci/alter-var-root sci/print-fn (constantly wrapped-out-fn))
+        (sci/alter-var-root sci/print-err-fn (constantly wrapped-err-fn))
+        (reset! !print-hook-state {:wrapped-out wrapped-out-fn
+                                   :delegate-out current-out
+                                   :wrapped-err wrapped-err-fn
+                                   :delegate-err current-err})))))
+
 (def !last-ns (volatile! @sci/ns))
 
 (defn slurp+
@@ -206,45 +236,32 @@
                                                   ns-sym))
                              {:handled true}))))}))
 
-(defn eval-string [s]
-  (sci/binding [sci/ns @!last-ns]
-    (let [code (str s)
-          trimmed (str/trim code)
-          original-print @sci/print-fn
-          original-err @sci/print-err-fn
-          tapped-print (fn [message]
-                         (when (some? message)
-                           (output/append-eval-out message))
-                         (when original-print
-                           (original-print message)))
-          tapped-err (fn [message]
-                       (when (some? message)
-                         (output/append-eval-err message))
-                       (when original-err
-                         (original-err message)))]
-      (sci/alter-var-root sci/print-fn (constantly tapped-print))
-      (sci/alter-var-root sci/print-err-fn (constantly tapped-err))
-      (try
-        (let [reader (sci/reader code)
-              session-type "cljs"]
-          (when-not (str/blank? trimmed)
-            (output/append-clojure-eval code {:ns (str @sci/ns)
-                                              :repl-session-type session-type}))
-          (loop [res nil]
-            (let [form (sci/parse-next (store/get-ctx) reader)]
-              (if (= :sci.core/eof form)
-                (do
-                  (vreset! !last-ns @sci/ns)
-                  res)
-                (let [result (try
-                               (sci/eval-form (store/get-ctx) form)
-                               (catch js/Error e
-                                 (let [message (or (.-message e) (str e))]
-                                   (output/append-line-eval-err message)
-                                   (throw e))))
-                      formatted-result (pr-str result)]
-                  (output/append-eval-result (str "=> " formatted-result))
-                  (recur result))))))
-        (finally
-          (sci/alter-var-root sci/print-fn (constantly original-print))
-          (sci/alter-var-root sci/print-err-fn (constantly original-err)))))))
+(defn eval-string
+  ([s]
+   (eval-string s {}))
+  ([s {:keys [append-results?]
+       :or {append-results? true}}]
+   (install-terminal-print-hooks!)
+   (sci/binding [sci/ns @!last-ns]
+     (let [code (str s)
+           trimmed (str/trim code)
+           reader (sci/reader code)
+           session-type "cljs"]
+       (when-not (str/blank? trimmed)
+         (output/append-clojure-eval code {:ns (str @sci/ns)
+                                           :repl-session-type session-type}))
+       (loop [res nil]
+         (let [form (sci/parse-next (store/get-ctx) reader)]
+           (if (= :sci.core/eof form)
+             (do
+               (vreset! !last-ns @sci/ns)
+               res)
+             (let [result (try
+                            (sci/eval-form (store/get-ctx) form)
+                            (catch js/Error e
+                              (let [message (or (.-message e) (str e))]
+                                (output/append-line-eval-err message)
+                                (throw e))))]
+               (when append-results?
+                 (output/append-eval-result (str "=> " (pr-str result))))
+               (recur result)))))))))

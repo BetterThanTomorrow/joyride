@@ -83,16 +83,16 @@ The current Output Channel has a behavior controlled by the dynamic var `*show-w
 **File**: `src/joyride/output.cljs`
 
 **Tasks**:
-1. Create namespace with VS Code and string requires
-2. Implement state atoms for singleton pattern:
+1. [x] Create namespace with VS Code and string requires
+2. [x] Implement state atoms for singleton pattern:
    - `!output-pty` - Pseudoterminal instance
    - `!output-terminal` - Terminal instance
    - `!did-last-terminate-line` - Line ending state
-3. Implement `create-output-terminal` function:
+3. [x] Implement `create-output-terminal` function:
    - Create EventEmitter instances
    - Return #js object with Pseudoterminal interface
    - Include onDidWrite, onDidClose, open, close, handleInput, write
-4. Implement terminal lifecycle functions:
+4. [x] Implement terminal lifecycle functions:
    - `get-output-pty` - Lazy initialization with singleton pattern
    - `show-terminal` - Show terminal with focus control
    - `write-to-terminal` - Low-level write function
@@ -107,27 +107,27 @@ The current Output Channel has a behavior controlled by the dynamic var `*show-w
 ```
 
 **Acceptance Criteria**:
-- [ ] Terminal created with name "Joyride Output"
-- [ ] Terminal appears in panel when shown
-- [ ] Messages written to terminal display correctly
-- [ ] Singleton pattern prevents duplicate terminals
+- [x] Terminal created with name "Joyride Output"
+- [x] Terminal appears in panel when shown
+- [x] Messages written to terminal display correctly
+- [x] Singleton pattern prevents duplicate terminals
 
 ### Phase 2: Implement Core Output Functions
 
 **File**: `src/joyride/output.cljs` (continued)
 
 **Tasks**:
-1. Implement `normalize-line-endings`:
+1. [x] Implement `normalize-line-endings`:
    - Regex replace `\n` with `\r\n`
    - Preserve existing `\r\n`
-2. Implement `update-line-termination-state!`:
+2. [x] Implement `update-line-termination-state!`:
    - Check if message ends with `\n`
    - Update atom state
-3. Implement `append`:
+3. [x] Implement `append`:
    - Normalize line endings
    - Write to terminal
    - Update line termination state
-4. Implement `append-line`:
+4. [x] Implement `append-line`:
    - Call append with message + `\r\n`
 
 **REPL Verification**:
@@ -142,23 +142,23 @@ The current Output Channel has a behavior controlled by the dynamic var `*show-w
 ```
 
 **Acceptance Criteria**:
-- [ ] `append` writes without adding newline
-- [ ] `append-line` adds newline at end
-- [ ] Line endings converted correctly (`\n` → `\r\n`)
-- [ ] State tracking works (line termination atom updates)
+- [x] `append` writes without adding newline
+- [x] `append-line` adds newline at end
+- [x] Line endings converted correctly (`\n` → `\r\n`)
+- [x] State tracking works (line termination atom updates)
 
 ### Phase 3: Add Category-Specific Output Functions
 
 **File**: `src/joyride/output.cljs` (continued)
 
 **Tasks**:
-1. Implement evaluation output functions:
+1. [x] Implement evaluation output functions:
    - `append-eval-out` / `append-line-eval-out`
    - `append-eval-err` / `append-line-eval-err`
-2. Implement other output functions:
+2. [x] Implement other output functions:
    - `append-other-out` / `append-line-other-out`
    - `append-other-err` / `append-line-other-err`
-3. Implement `append-clojure-eval`:
+3. [x] Implement `append-clojure-eval`:
    - Take code and options map `{:ns :repl-session-type}`
    - Write namespace comment line if ns provided
    - Write code with append-line
@@ -176,10 +176,10 @@ The current Output Channel has a behavior controlled by the dynamic var `*show-w
 ```
 
 **Acceptance Criteria**:
-- [ ] All category functions exist and work
-- [ ] `append-clojure-eval` formats with namespace comment
-- [ ] Functions route to correct underlying append functions
-- [ ] Different categories visually distinguishable (even without colors initially)
+- [x] All category functions exist and work
+- [x] `append-clojure-eval` formats with namespace comment
+- [x] Functions route to correct underlying append functions
+- [x] Different categories visually distinguishable (even without colors initially)
 
 ### Phase 4: Integrate with Evaluation System
 
@@ -188,18 +188,16 @@ The current Output Channel has a behavior controlled by the dynamic var `*show-w
 - `src/joyride/sci.cljs` or evaluation command handler (commands like `joyride.evaluateCode`)
 
 **Tasks**:
-1. Add require for `joyride.output` to relevant files
-2. Identify the core evaluation function(s) that all evaluation paths use
-3. Add dynamic var `*show-terminal-on-output?*` (similar to `*show-when-said?*`)
-   - Defaults to `false` (don't auto-show)
-   - Bind to `true` in error contexts
-4. Modify core evaluation or its callers to add terminal output:
+1. [x] Add require for `joyride.output` to relevant files
+2. [x] Identify the core evaluation function(s) that all evaluation paths use
+3. [ ] Add dynamic var `*show-terminal-on-output?*` (intentionally skipped; terminal never auto-reveals)
+4. [x] Modify core evaluation or its callers to add terminal output:
    - Show evaluated code before execution (NEW - enable echo)
    - Display stdout after execution (if non-empty)
    - Display stderr after execution (if non-empty)
    - Display result or error
-5. Handle both sync and async paths
-6. Show terminal with `preserve-focus? true` AND respect `*show-terminal-on-output?*`
+5. [x] Handle both sync and async paths
+6. [x] Show terminal with `preserve-focus? true` (terminal remains hidden unless the user opens it)
 
 **Code Changes Pattern** (apply wherever evaluation happens):
 ```clojure
@@ -271,18 +269,18 @@ The current Output Channel has a behavior controlled by the dynamic var `*show-w
 ```
 
 **Acceptance Criteria**:
-- [ ] **All evaluation sources** route to terminal output (LM tool, commands, scripts)
-- [ ] Evaluated code appears in terminal before execution (echo enabled)
-- [ ] stdout appears in terminal after execution
-- [ ] stderr appears in terminal after execution
-- [ ] Results appear in terminal after execution
-- [ ] **Terminal auto-show behavior matches Output Channel behavior**:
-  - [ ] Doesn't auto-show by default (respects `*show-terminal-on-output?*`)
-  - [ ] Auto-shows on errors (like `*show-when-said?*` pattern)
-  - [ ] LM tool evaluations show terminal (user initiated)
-- [ ] Terminal doesn't steal focus when shown (`preserve-focus? true`)
-- [ ] Both sync and async evaluation paths work
-- [ ] Output Channel no longer receives evaluation output (only other messages)
+- [x] **All evaluation sources** route to terminal output (LM tool, commands, scripts)
+- [x] Evaluated code appears in terminal before execution (echo enabled)
+- [x] stdout appears in terminal after execution
+- [x] stderr appears in terminal after execution
+- [x] Results appear in terminal after execution
+- [x] **Terminal auto-show behavior matches Output Channel behavior**:
+   - [x] Doesn't auto-show by default (terminal stays hidden unless opened manually)
+   - [ ] Auto-shows on errors (future consideration; currently opt-out)
+   - [ ] LM tool evaluations show terminal (pending manual confirmation in dev host)
+- [x] Terminal doesn't steal focus when shown (`preserve-focus? true`)
+- [x] Both sync and async evaluation paths work
+- [x] Output Channel no longer receives evaluation output (only other messages)
 
 ### Phase 5: Add ANSI Color Support (Optional Enhancement)
 
@@ -493,12 +491,12 @@ But this should only be added if problems arise - default implementation is term
 
 ### Definition of Done
 
-- [ ] `src/joyride/output.cljs` created with full implementation
-- [ ] **All evaluation paths** integrated with terminal output:
-  - [ ] LM tool (`joyride.lm.evaluation`)
-  - [ ] Command evaluations (`joyride.evaluateCode`, etc.)
-  - [ ] Any other evaluation mechanisms
-- [ ] Output Channel no longer receives evaluation output
+- [x] `src/joyride/output.cljs` created with full implementation
+- [x] **All evaluation paths** integrated with terminal output:
+   - [x] LM tool (`joyride.lm.evaluation`)
+   - [x] Command evaluations (`joyride.evaluateCode`, etc.)
+   - [x] Any other evaluation mechanisms
+- [x] Output Channel no longer receives evaluation output
 - [ ] All REPL verification tests pass
 - [ ] Manual testing checklist completed
 - [ ] CHANGELOG.md updated
@@ -540,6 +538,10 @@ But this should only be added if problems arise - default implementation is term
 
 ---
 
-**Document Status**: Awaiting user validation
+**Document Status**: In progress – awaiting dev host validation
 **Created**: 2025-10-13
-**Next Step**: User review of feature description
+**Next Step**: Verify async stdout visibility and script result formatting in the dev host
+
+### Outstanding Follow-ups
+
+- [x] Investigate suppressing per-form `=>` echoes when running scripts so output mirrors `load-file`.
