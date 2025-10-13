@@ -29,6 +29,109 @@
 (defn- set-did-last-terminate-line! [value]
   (swap! db/!app-db assoc :output/did-last-terminate-line value))
 
+;; ============================================================================
+;; ANSI Color Support
+;; ============================================================================
+
+(def ansi-codes
+  "ANSI escape sequence codes matching Calva's terminal output colors"
+  {:reset "\u001b[0m"
+
+   ;; Basic colors
+   :red     "\u001b[31m"
+   :green   "\u001b[32m"
+
+   ;; Bright colors
+   :bright-black   "\u001b[90m"
+   :bright-red     "\u001b[91m"
+
+   ;; Aliases matching Chalk
+   :gray :bright-black
+   :grey :bright-black})
+
+(defn- get-ansi-code
+  "Get ANSI code for a color key, resolving aliases"
+  [color-key]
+  (let [code-or-alias (get ansi-codes color-key)]
+    (if (keyword? code-or-alias)
+      (get ansi-codes code-or-alias)
+      code-or-alias)))
+
+(defn- current-theme-kind
+  "Get current VS Code theme kind"
+  []
+  (.-kind vscode/window.activeColorTheme))
+
+(defn- light-theme?
+  "Check if current theme is light"
+  []
+  (= (current-theme-kind) vscode/ColorThemeKind.Light))
+
+(defn- dark-theme?
+  "Check if current theme is dark"
+  []
+  (= (current-theme-kind) vscode/ColorThemeKind.Dark))
+
+(defn- high-contrast-theme?
+  "Check if current theme is high contrast"
+  []
+  (or (= (current-theme-kind) vscode/ColorThemeKind.HighContrast)
+      (= (current-theme-kind) vscode/ColorThemeKind.HighContrastLight)))
+
+(defn- get-output-colors
+  "Get color scheme based on current VS Code theme.
+   Matches Calva's terminal output colors."
+  []
+  (cond
+    (high-contrast-theme?)
+    {:eval-out :bright-black
+     :eval-err :bright-red
+     :other-out :green
+     :other-err :bright-red}
+
+    (light-theme?)
+    {:eval-out :gray
+     :eval-err :red
+     :other-out :green
+     :other-err :red}
+
+    :else  ;; Dark theme
+    {:eval-out :gray
+     :eval-err :bright-red
+     :other-out :grey
+     :other-err :bright-red}))
+
+(defn- ansi-escape-seq?
+  "Check if message contains ANSI escape sequences"
+  [message]
+  (boolean (re-find #"\u001b\[" message)))
+
+(defn- colorize
+  "Add ANSI color codes to message"
+  [color-key message]
+  (let [color-code (get-ansi-code color-key)
+        reset-code (get-ansi-code :reset)]
+    (str color-code message reset-code)))
+
+(defn- maybe-colorize
+  "Colorize message only if it doesn't already contain ANSI codes.
+   This preserves user-provided or library-generated colors."
+  [color-key message]
+  (if (ansi-escape-seq? message)
+    message
+    (colorize color-key message)))
+
+(defn- colorize-by-category
+  "Apply category-appropriate color to message based on current theme"
+  [category message]
+  (let [colors (get-output-colors)
+        color-key (get colors category)]
+    (maybe-colorize color-key message)))
+
+;; ============================================================================
+;; Terminal Management
+;; ============================================================================
+
 (defn normalize-line-endings
   "Convert Unix line endings to terminal friendly CRLF sequences."
   [message]
@@ -100,22 +203,26 @@
 (defn append-eval-out
   "Append stdout generated during evaluation."
   [message]
-  (append message))
+  (let [colored (colorize-by-category :eval-out message)]
+    (append colored)))
 
 (defn append-line-eval-out
   "Append stdout and ensure a newline."
   [message]
-  (append-line message))
+  (let [colored (colorize-by-category :eval-out message)]
+    (append-line colored)))
 
 (defn append-eval-err
   "Append stderr generated during evaluation."
   [message]
-  (append message))
+  (let [colored (colorize-by-category :eval-err message)]
+    (append colored)))
 
 (defn append-line-eval-err
   "Append stderr and ensure a newline."
   [message]
-  (append-line message))
+  (let [colored (colorize-by-category :eval-err message)]
+    (append-line colored)))
 
 (defn append-eval-result
   "Append the value returned from an evaluation."
@@ -125,22 +232,26 @@
 (defn append-other-out
   "Append non-evaluation stdout messages."
   [message]
-  (append message))
+  (let [colored (colorize-by-category :other-out message)]
+    (append colored)))
 
 (defn append-line-other-out
   "Append non-evaluation stdout and ensure newline."
   [message]
-  (append-line message))
+  (let [colored (colorize-by-category :other-out message)]
+    (append-line colored)))
 
 (defn append-other-err
   "Append non-evaluation stderr messages."
   [message]
-  (append message))
+  (let [colored (colorize-by-category :other-err message)]
+    (append colored)))
 
 (defn append-line-other-err
   "Append non-evaluation stderr and ensure newline."
   [message]
-  (append-line message))
+  (let [colored (colorize-by-category :other-err message)]
+    (append-line colored)))
 
 (defn append-clojure-eval
   "Echo evaluated code to the terminal with namespace context."

@@ -287,16 +287,18 @@ The current Output Channel has a behavior controlled by the dynamic var `*show-w
 **File**: `src/joyride/output.cljs`
 
 **Tasks**:
-1. Implement `get-theme-colors`:
+1. Implement zprint syntax highlighting of code and results
+   - like Calva, with same default colors
+2. Implement `get-theme-colors`:
    - Detect light vs dark theme
    - Return color map with ANSI codes
-2. Implement `message-contains-ansi?`:
+3. Implement `message-contains-ansi?`:
    - Check for existing ANSI escape sequences
-3. Implement `colorize-message`:
+4. Implement `colorize-message`:
    - Add color code + message + reset code
-4. Implement `maybe-colorize`:
+5. Implement `maybe-colorize`:
    - Only colorize if no existing ANSI codes
-5. Update category functions to use colorization:
+6. Update category functions to use colorization:
    - `append-eval-out` → gray
    - `append-eval-err` → red/bright red
    - `append-other-out` → green/gray
@@ -312,6 +314,7 @@ The current Output Channel has a behavior controlled by the dynamic var `*show-w
 ```
 
 **Acceptance Criteria**:
+- [ ] We use the same syntax highlighting colors as Calva defaults
 - [ ] Colors work in both light and dark themes
 - [ ] Existing ANSI codes preserved (not double-wrapped)
 - [ ] Color reset codes applied correctly
