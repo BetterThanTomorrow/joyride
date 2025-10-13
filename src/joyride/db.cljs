@@ -8,6 +8,7 @@
               :flares {}
               :flare-sidebar-views {}})
 
+; dissoc :extension-context when dereffing `!app-db` in the repl.
 (defonce !app-db (atom init-db))
 
 (defn extension-context

@@ -2,7 +2,8 @@
   "Terminal output utilities for Joyride evaluations."
   (:require
    ["vscode" :as vscode]
-   [clojure.string :as string]))
+   [clojure.string :as string]
+   [joyride.db :as db]))
 
 (def terminal-name "Joyride Output")
 
@@ -10,9 +11,23 @@
   (str "Joyride Evaluation Output\r\n"
        "This terminal displays evaluation results, output, and code.\r\n\r\n"))
 
-(defonce !output-pty (atom nil))
-(defonce !output-terminal (atom nil))
-(defonce !did-last-terminate-line (atom true))
+(defn- get-output-pty []
+  (:output/pty @db/!app-db))
+
+(defn- set-output-pty! [pty]
+  (swap! db/!app-db assoc :output/pty pty))
+
+(defn- get-output-terminal []
+  (:output/terminal @db/!app-db))
+
+(defn- set-output-terminal! [terminal]
+  (swap! db/!app-db assoc :output/terminal terminal))
+
+(defn- get-did-last-terminate-line []
+  (get @db/!app-db :output/did-last-terminate-line true))
+
+(defn- set-did-last-terminate-line! [value]
+  (swap! db/!app-db assoc :output/did-last-terminate-line value))
 
 (defn normalize-line-endings
   "Convert Unix line endings to terminal friendly CRLF sequences."
@@ -30,8 +45,8 @@
                  (.fire write-emitter terminal-banner))
          :close (fn []
                   (.fire close-emitter)
-                  (reset! !output-terminal nil)
-                  (reset! !output-pty nil))
+                  (set-output-terminal! nil)
+                  (set-output-pty! nil))
          :handleInput (fn [data]
                         (when (= data "\r")
                           (.fire write-emitter "\r\n")))
@@ -42,20 +57,20 @@
 (defn ensure-terminal!
   "Ensure the output terminal exists and return the backing pseudoterminal."
   []
-  (when-not @!output-pty
+  (when-not (get-output-pty)
     (let [pty (create-output-terminal)
           terminal (vscode/window.createTerminal #js {:name terminal-name
                                                       :pty pty})]
-      (reset! !output-pty pty)
-      (reset! !output-terminal terminal)
-      (reset! !did-last-terminate-line true)))
-  @!output-pty)
+      (set-output-pty! pty)
+      (set-output-terminal! terminal)
+      (set-did-last-terminate-line! true)))
+  (get-output-pty))
 
 (defn show-terminal
   "Reveal the Joyride output terminal if it exists or can be created."
   [preserve-focus?]
   (ensure-terminal!)
-  (when-let [terminal @!output-terminal]
+  (when-let [terminal (get-output-terminal)]
     (.show terminal preserve-focus?)))
 
 (defn write-to-terminal
@@ -67,7 +82,7 @@
 (defn update-line-state!
   "Track whether the last appended message terminated the line."
   [normalized-message]
-  (reset! !did-last-terminate-line (string/ends-with? normalized-message "\r\n")))
+  (set-did-last-terminate-line! (string/ends-with? normalized-message "\r\n")))
 
 (defn append
   "Append message without forcing a trailing newline."
