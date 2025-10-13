@@ -241,14 +241,13 @@
           session-type "cljs"]
       (when (and *echo-eval-code?*
                  (not (str/blank? trimmed)))
-        (output/append-clojure-eval code {:ns (str @sci/ns)
-                                          :repl-session-type session-type}))
+        (output/append-clojure-eval code {:ns (str @sci/ns)}))
       (loop [res nil]
         (let [form (sci/parse-next (store/get-ctx) reader)]
           (if (= :sci.core/eof form)
             (do
               (vreset! !last-ns @sci/ns)
-              (output/append-eval-result (str "=> " (pr-str res)))
+              (output/append-eval-result (pr-str res) {:ns (str @sci/ns)})
               res)
             (let [result (try
                            (sci/eval-form (store/get-ctx) form)

@@ -3,7 +3,8 @@
   (:require
    ["vscode" :as vscode]
    [clojure.string :as string]
-   [joyride.db :as db]))
+   [joyride.db :as db]
+   [zprint.core :as zp]))
 
 (def terminal-name "Joyride Output")
 
@@ -35,19 +36,21 @@
 
 (def ansi-codes
   "ANSI escape sequence codes matching Calva's terminal output colors"
-  {:reset "\u001b[0m"
+  {:color/reset "\u001b[0m"
 
    ;; Basic colors
-   :red     "\u001b[31m"
-   :green   "\u001b[32m"
+   :color/red     "\u001b[31m"
+   :color/green   "\u001b[32m"
 
    ;; Bright colors
-   :bright-black   "\u001b[90m"
-   :bright-red     "\u001b[91m"
+   :color/bright-black   "\u001b[90m"
+   :color/bright-red     "\u001b[91m"
+
+   ;; Colored background
+   :color/bg-white "\u001b[47m"
 
    ;; Aliases matching Chalk
-   :gray :bright-black
-   :grey :bright-black})
+   :color/gray :color/bright-black})
 
 (defn- get-ansi-code
   "Get ANSI code for a color key, resolving aliases"
@@ -84,22 +87,23 @@
   []
   (cond
     (high-contrast-theme?)
-    {:eval-out :bright-black
-     :eval-err :bright-red
-     :other-out :green
-     :other-err :bright-red}
+    {:output/eval-out :color/bright-black
+     :output/eval-err :color/bright-red
+     :output/other-out :color/green
+     :output/other-err :color/bright-red}
 
     (light-theme?)
-    {:eval-out :gray
-     :eval-err :red
-     :other-out :green
-     :other-err :red}
+    {:output/eval-out :color/gray
+     :output/eval-err :color/red
+     :output/other-out :color/green
+     :output/other-err :color/red}
 
     :else  ;; Dark theme
-    {:eval-out :gray
-     :eval-err :bright-red
-     :other-out :grey
-     :other-err :bright-red}))
+    {:output/eval-ns :color/bg-white
+     :output/eval-out :color/gray
+     :output/eval-err :color/bright-red
+     :output/other-out :white
+     :output/other-err :color/bright-red}))
 
 (defn- ansi-escape-seq?
   "Check if message contains ANSI escape sequences"
@@ -110,7 +114,7 @@
   "Add ANSI color codes to message"
   [color-key message]
   (let [color-code (get-ansi-code color-key)
-        reset-code (get-ansi-code :reset)]
+        reset-code (get-ansi-code :color/reset)]
     (str color-code message reset-code)))
 
 (defn- maybe-colorize
@@ -127,6 +131,45 @@
   (let [colors (get-output-colors)
         color-key (get colors category)]
     (maybe-colorize color-key message)))
+
+;; ============================================================================
+;; Clojure Syntax Highlighting (Calva-compatible)
+;; ============================================================================
+
+(defn- syntax-highlight-clojure
+  "Apply syntax highlighting to Clojure code using zprint with Calva colors"
+  [code]
+  (try
+    (zp/zprint-str code {:color? true
+                         :color-map {:brace :white,
+                                     :bracket :white,
+                                     :char :none,
+                                     :comma :none,
+                                     :comment :italic,
+                                     :deref :blue,
+                                     :false :blue,
+                                     :fn :yellow,
+                                     :hash-brace :white,
+                                     :hash-paren :white,
+                                     :keyword :magenta,
+                                     :left :none,
+                                     :nil :blue,
+                                     :none :blue,
+                                     :number :blue,
+                                     :paren :white,
+                                     :quote :white,
+                                     :regex :green,
+                                     :right :none,
+                                     :string :green,
+                                     :symbol :black,
+                                     :syntax-quote-paren :none
+                                     :true :blue,
+                                     :uneval :none,
+                                     :user-fn :yellow}
+                         :parse-string? true})
+    (catch js/Error _e
+      ;; If zprint fails, return code as-is
+      code)))
 
 ;; ============================================================================
 ;; Terminal Management
@@ -203,62 +246,57 @@
 (defn append-eval-out
   "Append stdout generated during evaluation."
   [message]
-  (let [colored (colorize-by-category :eval-out message)]
-    (append colored)))
+  (append (colorize-by-category :output/eval-out message)))
 
 (defn append-line-eval-out
   "Append stdout and ensure a newline."
   [message]
-  (let [colored (colorize-by-category :eval-out message)]
-    (append-line colored)))
+  (append-line (colorize-by-category :output/eval-out message)))
 
 (defn append-eval-err
   "Append stderr generated during evaluation."
   [message]
-  (let [colored (colorize-by-category :eval-err message)]
-    (append colored)))
+  (append (colorize-by-category :output/eval-err message)))
 
 (defn append-line-eval-err
   "Append stderr and ensure a newline."
   [message]
-  (let [colored (colorize-by-category :eval-err message)]
-    (append-line colored)))
-
-(defn append-eval-result
-  "Append the value returned from an evaluation."
-  [message]
-  (append-line message))
+  (append-line (colorize-by-category :output/eval-err message)))
 
 (defn append-other-out
   "Append non-evaluation stdout messages."
   [message]
-  (let [colored (colorize-by-category :other-out message)]
-    (append colored)))
+  (append (colorize-by-category :output/other-out message)))
 
 (defn append-line-other-out
   "Append non-evaluation stdout and ensure newline."
   [message]
-  (let [colored (colorize-by-category :other-out message)]
-    (append-line colored)))
+  (append-line (colorize-by-category :output/other-out message)))
 
 (defn append-other-err
   "Append non-evaluation stderr messages."
   [message]
-  (let [colored (colorize-by-category :other-err message)]
-    (append colored)))
+  (append (colorize-by-category :output/other-err message)))
 
 (defn append-line-other-err
   "Append non-evaluation stderr and ensure newline."
   [message]
-  (let [colored (colorize-by-category :other-err message)]
-    (append-line colored)))
+  (append-line (colorize-by-category :output/other-err message)))
+
+(defn- maybe-append-and-set-ns! [ns]
+  (when (not= ns (:output/last-printed-ns @db/!app-db))
+    (swap! db/!app-db assoc :output/last-printed-ns ns)
+    (append-line-other-out (colorize-by-category :output/eval-ns (str "; " ns)))))
+
+(defn append-eval-result
+  "Append the value returned from an evaluation."
+  [data {:keys [ns]}]
+  (maybe-append-and-set-ns! ns)
+  (append-line (syntax-highlight-clojure data)))
 
 (defn append-clojure-eval
   "Echo evaluated code to the terminal with namespace context."
-  ([code]
-   (append-clojure-eval code {}))
-  ([code {:keys [ns]}]
-   (when (not= ns (:output/last-printed-ns @db/!app-db))
-     (swap! db/!app-db assoc :output/last-printed-ns ns)
-     (append-line-other-out (str "; " ns)))
-   (append-line code)))
+  [code {:keys [ns]}]
+  (maybe-append-and-set-ns! ns)
+  (let [highlighted (syntax-highlight-clojure code)]
+    (append-line highlighted)))

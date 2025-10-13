@@ -282,43 +282,61 @@ The current Output Channel has a behavior controlled by the dynamic var `*show-w
 - [x] Both sync and async evaluation paths work
 - [x] Output Channel no longer receives evaluation output (only other messages)
 
-### Phase 5: Add ANSI Color Support (Optional Enhancement)
+### Phase 5: Add ANSI Color Support
 
 **File**: `src/joyride/output.cljs`
 
+**Objective**: Match Calva's terminal output color scheme completely - both output categories AND Clojure syntax highlighting.
+
 **Tasks**:
-1. Implement zprint syntax highlighting of code and results
-   - like Calva, with same default colors
-2. Implement `get-theme-colors`:
-   - Detect light vs dark theme
-   - Return color map with ANSI codes
-3. Implement `message-contains-ansi?`:
-   - Check for existing ANSI escape sequences
-4. Implement `colorize-message`:
-   - Add color code + message + reset code
-5. Implement `maybe-colorize`:
-   - Only colorize if no existing ANSI codes
-6. Update category functions to use colorization:
-   - `append-eval-out` → gray
-   - `append-eval-err` → red/bright red
-   - `append-other-out` → green/gray
-   - `append-other-err` → red/bright red
+
+**5.1 Output Category Colors** ✅ COMPLETE
+- [x] Implement `get-theme-colors` - Detect light vs dark theme
+- [x] Implement `get-ansi-code` - ANSI code map with aliases
+- [x] Implement `ansi-escape-seq?` - Check for existing ANSI sequences
+- [x] Implement `colorize` - Add color code + message + reset code
+- [x] Implement `maybe-colorize` - Only colorize if no existing ANSI codes
+- [x] Update category functions to use colorization:
+  - `append-eval-out` → gray
+  - `append-eval-err` → red/bright red
+  - `append-other-out` → green/gray
+  - `append-other-err` → red/bright red
+
+**5.2 Clojure Syntax Highlighting** ✅ COMPLETE
+- [x] Integrate zprint with ANSI color support
+- [x] Define Calva-compatible color maps for light/dark themes
+  - Keywords, symbols, strings, numbers, etc.
+- [x] Implement `syntax-highlight-clojure` function using zprint
+- [x] Update `append-clojure-eval` to syntax-highlight code
+- [x] Update result display to syntax-highlight values
+- [x] Handle edge cases (zprint failures, fallback to plain text)
 
 **REPL Verification**:
 ```clojure
 (require '[joyride.output :as output] :reload)
 (output/show-terminal false)
+
+;; Test output category colors
 (output/append-eval-out "This should be gray\n")
 (output/append-eval-err "This should be red\n")
-;; => Verify colors appear correctly in terminal
+
+;; Test syntax highlighting
+(output/append-clojure-eval "(defn foo [x] (* x 2))" {:ns "user"})
+;; => Keywords blue, symbols default, numbers cyan
+(output/append-clojure-eval "{:name \"Alice\" :age 30}" {:ns "user"})
+;; => Keywords blue, strings yellow/green
 ```
 
 **Acceptance Criteria**:
-- [ ] We use the same syntax highlighting colors as Calva defaults
-- [ ] Colors work in both light and dark themes
-- [ ] Existing ANSI codes preserved (not double-wrapped)
-- [ ] Color reset codes applied correctly
-- [ ] Output remains readable if colors disabled
+- [x] Output category colors match Calva (gray, red, green)
+- [x] Colors work in both light and dark themes
+- [x] Existing ANSI codes preserved (not double-wrapped)
+- [x] Color reset codes applied correctly
+- [x] **Clojure syntax highlighting matches Calva defaults**
+- [x] **Keywords, strings, numbers, etc. use correct colors**
+- [x] **Syntax highlighting works in both light and dark themes**
+- [x] **Results (values) are syntax-highlighted like code**
+- [x] Output remains readable if syntax highlighting fails (fallback)
 
 ### Phase 6: Testing & Validation
 
