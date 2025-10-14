@@ -34,8 +34,8 @@
     (:output-channel @!app-db)
     (do
       (swap! !app-db assoc :output-channel (vscode/window.createOutputChannel "Joyride"))
-      (.appendLine (:output-channel @!app-db) "This is the old Joyride output destination.\nYou probably should be using `println` instead, to write the the Joyride output terminal.")
-      (.appendLine (:output-channel @!app-db) "")
+      (.appendLine ^js (:output-channel @!app-db) "This is the old Joyride output destination.\nYou probably should be using plain `println` instead, to write the the Joyride output terminal.")
+      (.appendLine ^js (:output-channel @!app-db) "")
       (:output-channel @!app-db))))
 
 (defn output-terminal

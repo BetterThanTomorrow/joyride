@@ -93,21 +93,24 @@
      :output/eval-out :color/bright-black
      :output/eval-err :color/bright-red
      :output/other-out :color/green
-     :output/other-err :color/bright-red}
+     :output/other-err :color/bright-red
+     :output/info :color/bg-white}
 
     (light-theme?)
     {:output/eval-ns :color/bg-magenta
      :output/eval-out :color/gray
      :output/eval-err :color/red
      :output/other-out :color/green
-     :output/other-err :color/red}
+     :output/other-err :color/red
+     :output/info :color/bg-white}
 
     :else  ;; Dark theme
     {:output/eval-ns :color/bg-magenta
      :output/eval-out :color/gray
      :output/eval-err :color/bright-red
      :output/other-out :color/white
-     :output/other-err :color/bright-red}))
+     :output/other-err :color/bright-red
+     :output/info :color/bg-white}))
 
 (defn- ansi-escape-seq?
   "Check if message contains ANSI escape sequences"
@@ -144,7 +147,10 @@
   "Apply syntax highlighting to Clojure code using zprint with Calva colors"
   [code]
   (try
-    (zp/zprint-str code {:color? true
+    (zp/zprint-file-str code
+                        "Joyride"
+                        {:color? true
+                         :map {:comma? false}
                          :color-map {:brace :white,
                                      :bracket :white,
                                      :char :none,
@@ -291,7 +297,8 @@
 (defn- maybe-append-and-set-ns! [ns]
   (when (not= ns (:output/last-printed-ns @db/!app-db))
     (swap! db/!app-db assoc :output/last-printed-ns ns)
-    (append-line-other-out (colorize-by-category :output/eval-ns (str "; " ns)))))
+    (append-line-other-out (str (colorize-by-category :output/info "; ")
+                                (colorize-by-category :output/eval-ns ns)))))
 
 (defn append-eval-result
   "Append the value returned from an evaluation."
@@ -301,7 +308,6 @@
 
 (defn append-clojure-eval
   "Echo evaluated code to the terminal with namespace context."
-  [code {:keys [ns]}]
-  (maybe-append-and-set-ns! ns)
+  [code]
   (let [highlighted (syntax-highlight-clojure code)]
     (append-line highlighted)))

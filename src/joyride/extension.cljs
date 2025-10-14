@@ -3,6 +3,7 @@
    ["vscode" :as vscode]
    [joyride.content-utils :as content-utils]
    [joyride.db :as db]
+   [joyride.flare.sidebar :as flare-sidebar]
    [joyride.getting-started :as getting-started]
    [joyride.lifecycle :as life-cycle]
    [joyride.lm :as lm]
@@ -15,7 +16,7 @@
    [joyride.vscode-utils :as utils :refer [info]]
    [joyride.when-contexts :as when-contexts]
    [promesa.core :as p]
-   [joyride.flare.sidebar :as flare-sidebar]))
+   [sci.core :as sci]))
 
 (defn- register-command! [^js context command-id var]
   (let [disposable (vscode/commands.registerCommand command-id var)]
@@ -38,6 +39,7 @@
      (when input
        (run-code+ input))))
   ([code]
+   (output/append-clojure-eval code)
    (-> (p/let [result (jsci/eval-string code)]
          result)
        (p/catch (fn [e]

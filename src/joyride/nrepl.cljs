@@ -85,7 +85,7 @@
         (pr-str value)))
     (pr-str value)))
 
-(defn do-handle-eval [{:keys [ns code _sci-ctx _load-file? file] :as request} send-fn]
+(defn do-handle-eval [{:keys [ns code _sci-ctx load-file? file] :as request} send-fn]
   (sci/with-bindings
     {sci/ns ns
      sci/print-length @sci/print-length
@@ -96,6 +96,9 @@
     (sci/alter-var-root sci/print-fn (constantly
                                       (fn [s]
                                         (send-fn request {"out" s}))))
+    (if load-file?
+      (output/append-line-other-out (str "Loading file: " file))
+      (output/append-clojure-eval code))
     (try (let [v (jsci/eval-string code)]
            (sci/alter-var-root sci/*3 (constantly @sci/*2))
            (sci/alter-var-root sci/*2 (constantly @sci/*1))

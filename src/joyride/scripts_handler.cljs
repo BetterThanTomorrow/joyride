@@ -117,8 +117,7 @@
          (output/append-line-other-out message)
          (swap! db/!app-db assoc :invoked-script abs-path)
          (sci/with-bindings {sci/file abs-path}
-           (binding [jsci/*echo-eval-code?* false]
-             (jsci/eval-string code))))
+           (jsci/eval-string code)))
        (p/handle (fn [result error]
                    (swap! db/!app-db assoc :invoked-script nil)
                    (if error

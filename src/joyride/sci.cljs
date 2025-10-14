@@ -110,8 +110,6 @@
 
 (def pst-nyip (fn [_] (throw (js/Error. "pst not yet implemented"))))
 
-(def ^:dynamic *echo-eval-code?* true)
-
 (defn- wrap-print-fn [delegate append-fn]
   (fn [message]
     (when (some? message)
@@ -237,11 +235,7 @@
   (install-terminal-print-hooks!)
   (sci/binding [sci/ns @!last-ns]
     (let [code (str s)
-          trimmed (str/trim code)
           reader (sci/reader code)]
-      (when (and *echo-eval-code?*
-                 (not (str/blank? trimmed)))
-        (output/append-clojure-eval code {:ns (str @sci/ns)}))
       (loop [res nil]
         (let [form (sci/parse-next (store/get-ctx) reader)]
           (if (= :sci.core/eof form)

@@ -3,6 +3,7 @@
    ["vscode" :as vscode]
    [joyride.lm.eval.core :as core]
    [joyride.lm.eval.validation :as validation]
+   [joyride.output :as output]
    [joyride.repl-utils :as repl-utils]
    [joyride.sci :as joyride-sci]
    [promesa.core :as p]
@@ -50,6 +51,7 @@
                            :ns (str @sci/ns)
                            :stdout @stdout-buffer
                            :stderr @stderr-buffer})]
+        (output/append-clojure-eval code)
         (if wait-for-promise?
           ;; Async path with p/let (existing behavior)
           (try
