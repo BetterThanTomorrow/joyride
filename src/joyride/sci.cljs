@@ -237,8 +237,7 @@
   (sci/binding [sci/ns @!last-ns]
     (let [code (str s)
           trimmed (str/trim code)
-          reader (sci/reader code)
-          session-type "cljs"]
+          reader (sci/reader code)]
       (when (and *echo-eval-code?*
                  (not (str/blank? trimmed)))
         (output/append-clojure-eval code {:ns (str @sci/ns)}))

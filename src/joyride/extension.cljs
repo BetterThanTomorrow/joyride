@@ -32,23 +32,17 @@
 (defn run-code+
   ([]
    (p/let [input (vscode/window.showInputBox #js {:title "Run Code"
-                                                  ;; "(require '[\"vscode\" :as vscode]) (vscode/window.showInformationMessage \"Hello World!\" [\"Hi there\"])"
                                                   :placeHolder "(inc 41)"
-                                                  :prompt "Enter some code to be evaluated"})]
+                                                  :prompt "Enter some code to be evaluated"
+                                                  :ignoreFocusOut true})]
      (when input
        (run-code+ input))))
   ([code]
    (-> (p/let [result (jsci/eval-string code)]
          result)
        (p/catch (fn [e]
-                  (let [message (or (ex-message e) (.-message e) (str e))
-                        data (ex-data e)
-                        details (cond-> message
-                                  data (str "\n  " (pr-str data)))
-                        headline (str "Run Code failed: " message)]
-                    (output/append-line-other-err (str "Run Code failed: " details))
-                    (utils/error headline))
-                  (throw e))))))
+                  (output/append-line-other-err (some-> e ex-data pr-str))
+                  (throw (js/Error. e)))))))
 
 (defn evaluate-selection+
   "Evaluates the selection by first copying it to the clipboard and reading it from there.

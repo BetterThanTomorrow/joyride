@@ -106,7 +106,7 @@
     {:output/eval-ns :color/bg-magenta
      :output/eval-out :color/gray
      :output/eval-err :color/bright-red
-     :output/other-out :white
+     :output/other-out :color/white
      :output/other-err :color/bright-red}))
 
 (defn- ansi-escape-seq?
