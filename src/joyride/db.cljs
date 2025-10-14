@@ -1,6 +1,9 @@
-(ns joyride.db)
+(ns joyride.db
+  (:require
+   ["vscode" :as vscode]))
 
 (def init-db {:output-channel nil
+              :output/terminal nil
               :extension-context nil
               :invoked-script nil
               :disposables []
@@ -23,8 +26,19 @@
   []
   (:invoked-script @!app-db))
 
-(defn output-channel
-  "Returns the Joyride OutputChannel instance.
-   See: https://code.visualstudio.com/api/references/vscode-api#OutputChannel"
+(defn ^{:deprecated "0.0.67"} output-channel
+  "DEPRECATED: Returns the Joyride OutputChannel instance.
+   We still need to support it because it is used by a lot of scripts out there."
   []
-  (:output-channel @!app-db))
+  (if (:output-channel @!app-db)
+    (:output-channel @!app-db)
+    (do
+      (swap! !app-db assoc :output-channel (vscode/window.createOutputChannel "Joyride"))
+      (.appendLine (:output-channel @!app-db) "This is the old Joyride output destination.\nYou probably should be using `println` instead, to write the the Joyride output terminal.")
+      (.appendLine (:output-channel @!app-db) "")
+      (:output-channel @!app-db))))
+
+(defn output-terminal
+  "Returns the Joyride Output terminal instance."
+  []
+  (:output/terminal @!app-db))

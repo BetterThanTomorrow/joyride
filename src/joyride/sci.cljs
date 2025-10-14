@@ -162,6 +162,7 @@
    'extension-context (sci/copy-var db/extension-context core-ns)
    'invoked-script (sci/copy-var db/invoked-script core-ns)
    'output-channel (sci/copy-var db/output-channel core-ns)
+   'output-terminal (sci/copy-var db/output-terminal core-ns)
    'js-properties repl-utils/instance-properties
    'user-joyride-dir (conf/user-abs-joyride-path)
    'slurp (sci/copy-var slurp+ core-namespace)

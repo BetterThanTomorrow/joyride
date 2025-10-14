@@ -42,6 +42,7 @@
          result)
        (p/catch (fn [e]
                   (output/append-line-other-err (some-> e ex-data pr-str))
+                  (output/show-terminal)
                   (throw (js/Error. e)))))))
 
 (defn evaluate-selection+
@@ -81,7 +82,6 @@
 
   (when context
     (swap! db/!app-db assoc
-           :output-channel (vscode/window.createOutputChannel "Joyride")
            :extension-context context
            :workspace-root-path vscode/workspace.rootPath))
   (let [{:keys [extension-context]} @db/!app-db]
@@ -119,7 +119,7 @@
                                 (when vscode/workspace.rootPath
                                   (life-cycle/maybe-run-init-script+ scripts-handler/run-workspace-script+
                                                                      (:workspace (life-cycle/init-scripts))))
-                                (utils/sayln "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
+                                (output/append-line-other-out "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
     (js/console.timeLog "activation" "Joyride activate END")
     (js/console.timeEnd "activation")
     api))

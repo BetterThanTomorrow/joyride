@@ -10,7 +10,7 @@
 
 (def terminal-banner
   (str "Joyride Evaluation Output\r\n"
-       "This terminal displays evaluation results, output, and code.\r\n\r\n"))
+       "This (pseudo) terminal displays Joyride messages, evaluated code, results, and output."))
 
 (defn- get-output-pty []
   (:output/pty @db/!app-db))
@@ -218,10 +218,11 @@
 
 (defn show-terminal
   "Reveal the Joyride output terminal if it exists or can be created."
-  [preserve-focus?]
-  (ensure-terminal!)
-  (when-let [terminal (get-output-terminal)]
-    (.show terminal preserve-focus?)))
+  ([] (show-terminal true))
+  ([preserve-focus?]
+   (ensure-terminal!)
+    (when-let [terminal (get-output-terminal)]
+      (.show terminal preserve-focus?))))
 
 (defn write-to-terminal
   "Write a raw message to the Joyride terminal."

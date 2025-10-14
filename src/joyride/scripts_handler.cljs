@@ -125,7 +125,8 @@
                      (let [message (or (ex-message error) (.-message error) (str error))
                            headline (str title " Failed: " script-path " " message)]
                        (output/append-line-other-err headline)
-                       (utils/error headline))
+                       (.then (vscode/window.showErrorMessage (str title " error") "Reveal output terminal")
+                              (output/show-terminal)))
                      result))))))
 
 (defn open-script+
@@ -141,7 +142,8 @@
                   (let [message (or (ex-message error) (.-message error) (str error))
                         headline (str title " Failed: " script-path " " message)]
                     (output/append-line-other-err headline)
-                    (utils/error headline)))))))
+                    (.then (vscode/window.showErrorMessage (str title " error") "Reveal output terminal")
+                           (output/show-terminal))))))))
 
 (defn run-or-open-workspace-script-args [menu-conf-or-title+]
   [menu-conf-or-title+
@@ -446,8 +448,9 @@
               joyride-uri (vscode/Uri.file joyride-path)]
         (vscode/commands.executeCommand "vscode.openFolder" joyride-uri true))
       (p/catch (fn [error]
-                 (binding [utils/*show-when-said?* true]
-                   (utils/say-error (str "Failed to open User Joyride directory: " (.-message error))))))))
+                 (output/append-line-other-err (str "Failed to open User Joyride directory: " (.-message error)))
+                 (.then (vscode/window.showErrorMessage "Failed to open User Joyride directory: " "Reveal output")
+                        (output/show-terminal))))))
 
 (def open-user-joyride-directory-menu-item
   {:label (menu-label-with-icon "Open User Joyride Directory in New Window" "folder")

@@ -180,7 +180,7 @@ In addition to these there is also `joyride.core`:
     (main))
   ```
 - `extension-context`: function returning the Joyride [ExtensionContext](https://code.visualstudio.com/api/references/vscode-api#ExtensionContext) instance
-- `output-channel`: function returning the Joyride [OutputChannel](https://code.visualstudio.com/api/references/vscode-api#OutputChannel) instance
+- `output-terminal`: function returning the Joyride Output terminal instance
 - `js-properties`: a function returning a sequence of the full JS API of the provided JS object/instance. For use instead of `cljs.core/js-keys` when it doesn't return the full API.
 - `user-joyride-dir`: a string path with the user/global joyride directory.
 - `slurp`: similar to Clojure `slurp`, but is asynchronous and returns a promise. Resolves relative paths using the workspace root.
@@ -193,17 +193,15 @@ Here's a snippet from the [joyride_api.cljs](../examples/.joyride/scripts/joyrid
   (:require [joyride.core :as joyride]
             ...))
 
-(doto (joyride/output-channel)
-  (.show true)
-  (.append "Writing to the ")
-  (.appendLine "Joyride output channel.")
-  (.appendLine (str "Joyride extension path: "
-                    (-> (joyride/extension-context)
-                        .-extension
-                        .-extensionPath)))
-  (.appendLine (str "joyride/*file*: " joyride/*file*))
-  (.appendLine (str "Invoked script: " (joyride/invoked-script)))
-  (.appendLine "🎉"))
+(.show (joyride/output-terminal))
+(print "Writing to the ")
+(println "Joyride output channel.")
+(println "Joyride extension path: " (-> (joyride/extension-context)
+                                        .-extension
+                                        .-extensionPath))
+(println "joyride/*file*: " joyride/*file*)
+(println "Invoked script: " (joyride/invoked-script))
+(println "🎉")
 ```
 
 **NB**: Currently, using bare `*file*` works. But it will probably stop working soon. Always use it from `joyride.core`.
