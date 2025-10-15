@@ -8,7 +8,8 @@
    [joyride.config :as config]
    [joyride.db :as db]
    [joyride.utils :as utils]
-   [promesa.core :as p]))
+   [promesa.core :as p]
+   [joyride.output :as output]))
 
 (defn path-or-uri-exists?+ [path-or-uri]
   (-> (p/let [uri (if (= (type "") (type path-or-uri))
@@ -34,44 +35,20 @@
 (defn workspace-root []
   vscode/workspace.rootPath)
 
-(defn info [& xs]
-  (vscode/window.showInformationMessage (str/join " " (mapv str xs))))
+(defn info [title & xs]
+  (output/append-line-other-err! (str title "\n" (str/join " " (mapv str xs))))
+  (.then (vscode/window.showInformationMessage title "Reveal output terminal")
+         (output/show-terminal!)))
 
-(defn warn [& xs]
-  (vscode/window.showWarningMessage (str/join " " (mapv str xs))))
+(defn warn [title & xs]
+  (output/append-line-other-err! (str title "\n" (str/join " " (mapv str xs))))
+  (.then (vscode/window.showWarningMessage title "Reveal output terminal")
+         (output/show-terminal!)))
 
-(defn error [& xs]
-  (vscode/window.showErrorMessage (str/join " " (mapv str xs))))
-
-(def ^{:dynamic true
-       :doc "Should the Joyride output channel be revealed after `say`?
-             Default: `true`"}
-  *show-when-said?* false)
-
-(defn sayln [message]
-  (let [channel ^js (:output-channel @db/!app-db)]
-    (.appendLine channel message)
-    (when *show-when-said?*
-      (.show channel true))))
-
-(defn say [message]
-  (let [channel ^js (:output-channel @db/!app-db)]
-    (.append channel message)
-    (when *show-when-said?*
-      (.show channel true))))
-
-(defn say-error [message]
-  (sayln (str "ERROR: " message)))
-
-(defn say-result
-  ([result]
-   (say-result nil result))
-  ([message result]
-   (let [prefix (if (empty? message)
-                  "=> "
-                  (str message "\n=> "))]
-     (.append ^js (:output-channel @db/!app-db) prefix)
-     (sayln (with-out-str (pprint/pprint result))))))
+(defn error [title & xs]
+  (output/append-line-other-err! (str title "\n" (str/join " " (mapv str xs))))
+  (.then (vscode/window.showErrorMessage (str/join " " (mapv str xs)) "Reveal output terminal")
+         (output/show-terminal!)))
 
 (defn extension-path []
   (-> ^js (:extension-context @db/!app-db)

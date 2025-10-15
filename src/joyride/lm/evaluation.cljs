@@ -3,6 +3,7 @@
    ["vscode" :as vscode]
    [joyride.lm.eval.core :as core]
    [joyride.lm.eval.validation :as validation]
+   [joyride.output :as output]
    [joyride.repl-utils :as repl-utils]
    [joyride.sci :as joyride-sci]
    [promesa.core :as p]
@@ -50,6 +51,7 @@
                            :ns (str @sci/ns)
                            :stdout @stdout-buffer
                            :stderr @stderr-buffer})]
+        (output/append-clojure-eval! code)
         (if wait-for-promise?
           ;; Async path with p/let (existing behavior)
           (try
@@ -63,13 +65,14 @@
                                                            (list 'clojure.core/create-ns (list 'quote target-ns)))
                                             (catch js/Error _
                                               @joyride-sci/!last-ns))))
-                          result (sci/binding [sci/ns resolved-ns]
-                                   (joyride-sci/eval-string code))]
-                    (make-result result nil wait-for-promise?))
+                          eval-result (sci/binding [sci/ns resolved-ns]
+                                        (joyride-sci/eval-string code))
+                          _ (restore-fns!)
+                          result (make-result eval-result nil wait-for-promise?)]
+                    result)
                   (p/catch (fn [e] ;; Todo, this doesn't catch evalutation errors
-                             (make-result nil (.-message e) wait-for-promise?)))
-                  (p/finally
-                    (restore-fns!)))
+                             (make-result nil (.-message e) wait-for-promise?)
+                             (restore-fns!))))
             (catch js/Error e
               (make-result nil (.-message e) wait-for-promise?)))
           ;; Sync path without promises

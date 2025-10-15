@@ -5,14 +5,12 @@
             [promesa.core :as p]
             [util.editor :as editor-utils]))
 
-(def oc (joyride.core/output-channel))
-
 (defn evaluate-in-session+ [session-key code]
   (p/let [result (calva/repl.evaluateCode
                   session-key
                   code
-                  #js {:stdout #(.append oc %)
-                       :stderr #(.append oc (str "Error: " %))})]
+                  #js {:stdout println
+                       :stderr #(println (str "Error: " %))})]
     (.-result result)))
 
 (defn clj-evaluate+ [code]

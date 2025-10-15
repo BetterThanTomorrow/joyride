@@ -84,7 +84,6 @@ When using the **Joyride evaluation** tool, always specify the correct namespace
 joyride/*file*                    ; Current file path
 (joyride/invoked-script)          ; Script being run (nil in REPL)
 (joyride/extension-context)       ; VS Code extension context
-(joyride/output-channel)          ; Joyride's output channel
 joyride/user-joyride-dir          ; User joyride directory path
 joyride/slurp                     ; Similar to Clojure `slurp`, but is async. Accepts absolute or relative (to the workspace) path. Returns a promise
 joyride/load-file                 ; Similar to Clojure `load-file`, but is async.  Accepts absolute or relative (to the workspace) path. Returns a promise

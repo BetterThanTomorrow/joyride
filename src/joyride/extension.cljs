@@ -3,18 +3,20 @@
    ["vscode" :as vscode]
    [joyride.content-utils :as content-utils]
    [joyride.db :as db]
+   [joyride.flare.sidebar :as flare-sidebar]
    [joyride.getting-started :as getting-started]
    [joyride.lifecycle :as life-cycle]
    [joyride.lm :as lm]
    [joyride.lm.docs :as lm-docs]
    [joyride.nrepl :as nrepl]
+   [joyride.output :as output]
    [joyride.sci :as jsci]
    [joyride.scripts-handler :as scripts-handler]
    [joyride.utils :refer [jsify]]
    [joyride.vscode-utils :as utils :refer [info]]
    [joyride.when-contexts :as when-contexts]
    [promesa.core :as p]
-   [joyride.flare.sidebar :as flare-sidebar]))
+   [sci.core :as sci]))
 
 (defn- register-command! [^js context command-id var]
   (let [disposable (vscode/commands.registerCommand command-id var)]
@@ -31,19 +33,19 @@
 (defn run-code+
   ([]
    (p/let [input (vscode/window.showInputBox #js {:title "Run Code"
-                                                  ;; "(require '[\"vscode\" :as vscode]) (vscode/window.showInformationMessage \"Hello World!\" [\"Hi there\"])"
                                                   :placeHolder "(inc 41)"
-                                                  :prompt "Enter some code to be evaluated"})]
+                                                  :prompt "Enter some code to be evaluated"
+                                                  :ignoreFocusOut true})]
      (when input
        (run-code+ input))))
   ([code]
+   (output/append-clojure-eval! code)
    (-> (p/let [result (jsci/eval-string code)]
-         ;; Maybe we should skip printing here?
-         (utils/say-result result)
          result)
        (p/catch (fn [e]
-                  (utils/say-error (str (ex-message e) "\n  " (ex-data e)))
-                  (throw e))))))
+                  (output/append-line-other-err! (some-> e ex-data pr-str))
+                  (output/show-terminal!)
+                  (throw (js/Error. e)))))))
 
 (defn evaluate-selection+
   "Evaluates the selection by first copying it to the clipboard and reading it from there.
@@ -64,6 +66,11 @@
       (when (not-empty selected-text)
         (run-code+ selected-text)))))
 
+(defn reveal-output-terminal
+  "Reveal the Joyride output terminal without taking focus."
+  []
+  (output/show-terminal! true))
+
 (defn choose-file [default-uri]
   (vscode/window.showOpenDialog #js {:canSelectMany false
                                      :defaultUri default-uri
@@ -82,12 +89,14 @@
 
   (when context
     (swap! db/!app-db assoc
-           :output-channel (vscode/window.createOutputChannel "Joyride")
            :extension-context context
-           :workspace-root-path vscode/workspace.rootPath))
+           :workspace-root-path vscode/workspace.rootPath)
+    (output/ensure-terminal!))
+
   (let [{:keys [extension-context]} @db/!app-db]
     (register-command! extension-context "joyride.runCode" #'run-code+)
     (register-command! extension-context "joyride.evaluateSelection" #'evaluate-selection+)
+    (register-command! extension-context "joyride.revealOutputTerminal" #'reveal-output-terminal)
     (register-command! extension-context "joyride.runWorkspaceScript" #'scripts-handler/run-workspace-script+)
     (register-command! extension-context "joyride.runUserScript" #'scripts-handler/run-user-script+)
     (register-command! extension-context "joyride.openWorkspaceScript" #'scripts-handler/open-workspace-script+)
@@ -112,7 +121,7 @@
     (when context (-> (content-utils/maybe-create-user-project+)
                       (p/catch
                        (fn [e]
-                         (js/console.error "Joyride activate error" e)))
+                         (js/console.error "Joyride: Error while creating user project content" e)))
                       (p/then
                        (fn [_r]
                          (p/do! (life-cycle/maybe-run-init-script+ scripts-handler/run-user-script+
@@ -120,7 +129,7 @@
                                 (when vscode/workspace.rootPath
                                   (life-cycle/maybe-run-init-script+ scripts-handler/run-workspace-script+
                                                                      (:workspace (life-cycle/init-scripts))))
-                                (utils/sayln "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
+                                (output/append-line-other-out! "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
     (js/console.timeLog "activation" "Joyride activate END")
     (js/console.timeEnd "activation")
     api))

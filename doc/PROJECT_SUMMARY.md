@@ -387,7 +387,6 @@ Create custom VS Code extensions dynamically:
 ```clojure
 ;; Central app state
 (defonce !app-db (atom {:disposables []
-                        :output-channel nil
                         :extension-context nil
                         :workspace-root-path nil
                         :invoked-script nil}))

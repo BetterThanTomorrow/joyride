@@ -10,6 +10,7 @@
    [joyride.config :as conf]
    [joyride.db :as db]
    [joyride.flare :as flare]
+   [joyride.output :as output]
    [joyride.repl-utils :as repl-utils]
    [joyride.vscode-utils :as vscode-utils]
    [sci.configs.cljs.test :as cljs-test-config]
@@ -109,6 +110,30 @@
 
 (def pst-nyip (fn [_] (throw (js/Error. "pst not yet implemented"))))
 
+(defn- wrap-print-fn [delegate append-fn]
+  (fn [message]
+    (when (some? message)
+      (append-fn message))
+    (when delegate
+      (delegate message))))
+
+(defn install-terminal-print-hooks!
+  "Ensure SCI print functions mirror evaluation output to the Joyride terminal."
+  []
+  (let [current-out @sci/print-fn
+        current-err @sci/print-err-fn
+        {:keys [wrapped-out wrapped-err]} (:sci/print-hook-state @db/!app-db {})]
+    (when (or (not (identical? current-out wrapped-out))
+              (not (identical? current-err wrapped-err)))
+      (let [wrapped-out-fn (wrap-print-fn current-out output/append-eval-out!)
+            wrapped-err-fn (wrap-print-fn current-err output/append-eval-err!)]
+        (sci/alter-var-root sci/print-fn (constantly wrapped-out-fn))
+        (sci/alter-var-root sci/print-err-fn (constantly wrapped-err-fn))
+        (swap! db/!app-db assoc :sci/print-hook-state {:wrapped-out wrapped-out-fn
+                                                       :delegate-out current-out
+                                                       :wrapped-err wrapped-err-fn
+                                                       :delegate-err current-err})))))
+
 (def !last-ns (volatile! @sci/ns))
 
 (defn slurp+
@@ -135,6 +160,7 @@
    'extension-context (sci/copy-var db/extension-context core-ns)
    'invoked-script (sci/copy-var db/invoked-script core-ns)
    'output-channel (sci/copy-var db/output-channel core-ns)
+   'output-terminal (sci/copy-var db/output-terminal core-ns)
    'js-properties repl-utils/instance-properties
    'user-joyride-dir (conf/user-abs-joyride-path)
    'slurp (sci/copy-var slurp+ core-namespace)
@@ -206,12 +232,21 @@
                              {:handled true}))))}))
 
 (defn eval-string [s]
+  (install-terminal-print-hooks!)
   (sci/binding [sci/ns @!last-ns]
-    (let [rdr (sci/reader s)]
+    (let [code (str s)
+          reader (sci/reader code)]
       (loop [res nil]
-        (let [form (sci/parse-next (store/get-ctx) rdr)]
+        (let [form (sci/parse-next (store/get-ctx) reader)]
           (if (= :sci.core/eof form)
             (do
               (vreset! !last-ns @sci/ns)
+              (output/append-eval-result! (pr-str res) {:ns (str @sci/ns)})
               res)
-            (recur (sci/eval-form (store/get-ctx) form))))))))
+            (let [result (try
+                           (sci/eval-form (store/get-ctx) form)
+                           (catch js/Error e
+                             (let [message (or (.-message e) (str e))]
+                               (output/append-line-eval-err! message)
+                               (throw e))))]
+              (recur result))))))))

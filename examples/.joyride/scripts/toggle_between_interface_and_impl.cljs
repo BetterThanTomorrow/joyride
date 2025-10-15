@@ -68,7 +68,7 @@
           (p/let [rel-candidates (p/all (map (fn [c] (make-relative-path (.-path c))) candidates))
                   selection (vscode/window.showQuickPick (clj->js rel-candidates) #js {:title "Select implementation file"})
                   abs-selection (make-absolute-path selection)]
-            (doto (joyride/output-channel) (.show true) (.append (pr-str abs-selection)))
+            (println (pr-str abs-selection))
             (navigate-to abs-selection))))
       (navigate-to (str/replace file-name "/interface/" "/")))))
 

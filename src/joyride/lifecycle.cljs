@@ -2,7 +2,8 @@
   (:require ["path" :as path]
             [joyride.config :as conf]
             [joyride.vscode-utils :as vscode-utils]
-            [promesa.core :as p]))
+            [promesa.core :as p]
+            [joyride.output :as output]))
 
 (def user-init-script "user_activate.cljs")
 (def user-init-script-path (path/join conf/user-config-path
@@ -28,11 +29,11 @@
                :script-abs-path (workspace-init-script-abs-path)}})
 
 (defn maybe-run-init-script+ [run-fn {:keys [label script script-path script-abs-path]}]
-  (vscode-utils/say (str label " script: " script-path))
+  (output/append-other-out! (str label " script: " script-path))
   (-> (vscode-utils/path-or-uri-exists?+ script-abs-path)
       (p/then (fn [exists?]
                 (if exists?
                   (do
-                    (vscode-utils/sayln (str ".  Running..."))
+                    (output/append-line-other-out! (str ".  Running..."))
                     (run-fn script))
-                  (vscode-utils/sayln (str ".  No " label " script present")))))))
+                  (output/append-line-other-out! (str ".  No " label " script present")))))))

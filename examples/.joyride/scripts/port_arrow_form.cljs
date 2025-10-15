@@ -10,9 +10,6 @@
 
 ;; This code relies on the active selection
 
-(defn log [x]
-  (.appendLine (joyride.core/output-channel) (str x)))
-
 (defn get-arrow-clause
   "Make a pseudo-form since we're just using this for parsing."
   [text]
@@ -23,7 +20,7 @@
     [lhs arrow rhs]))
 
 (defn main []
-  (log "port-arrow-form started")
+  (println "port-arrow-form started")
   (-> (p/let [[lhs _ rhs] (get-arrow-clause (e/current-selection-text))]
         (e/replace-range! (str `(~'is (~'= ~rhs ~lhs)))))))
 

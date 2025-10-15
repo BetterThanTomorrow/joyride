@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Use pseudo terminal for evaluations and output, similar to Calva's repl](https://github.com/BetterThanTomorrow/joyride/pull/244)
+
 ## [0.0.66] - 2025-10-12
 
 - [Provide Copilot instructions using the new VS Code API](https://github.com/BetterThanTomorrow/joyride/pull/245)
