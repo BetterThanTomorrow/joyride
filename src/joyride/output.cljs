@@ -189,8 +189,7 @@
          :open (fn [_]
                  (.fire write-emitter terminal-banner))
          :handleInput (fn [data]
-                        (when (= data "\r")
-                          (.fire write-emitter "\r\n")))
+                        (.fire write-emitter (string/replace data #"\r" "\r\n")))
          :write (fn [message]
                   (let [normalized (normalize-line-endings (str message))]
                     (.fire write-emitter normalized)))}))
@@ -221,7 +220,8 @@
   ([preserve-focus?]
    (ensure-terminal!)
    (when-let [terminal (:output/terminal @db/!app-db)]
-     (.show terminal preserve-focus?))))
+     (.show terminal preserve-focus?)
+     terminal)))
 
 (defn write-to-terminal!
   "Write a raw message to the Joyride terminal."
