@@ -32,11 +32,15 @@
   []
   (if (:output-channel @!app-db)
     (:output-channel @!app-db)
-    (do
-      (swap! !app-db assoc :output-channel (vscode/window.createOutputChannel "Joyride"))
-      (.appendLine ^js (:output-channel @!app-db) "This is the old Joyride output destination.\nYou probably should be using plain `println` instead, to write the the Joyride output terminal.")
-      (.appendLine ^js (:output-channel @!app-db) "")
-      (:output-channel @!app-db))))
+    (let [^js channel (vscode/window.createOutputChannel "Joyride")
+          dispose-fn (.-dispose channel)]
+      (set! (.-dispose channel) (fn []
+                                  (swap! !app-db assoc :output-channel nil)
+                                  (dispose-fn)))
+      (swap! !app-db assoc :output-channel channel)
+      (.appendLine channel "This is the old Joyride output destination.\nYou probably should be using plain `println` instead, which writes to the Joyride output terminal.")
+      (.appendLine channel "🟢 Joyride VS Code with Clojure. 🚗💨\n")
+      channel)))
 
 (defn output-terminal
   "Returns the Joyride Output terminal instance."
