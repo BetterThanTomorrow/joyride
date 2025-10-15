@@ -9,23 +9,10 @@
 (def terminal-name "Joyride Output")
 
 (def terminal-banner
-  (str "Joyride Evaluation Output\r\n"
-       "This (pseudo) terminal displays Joyride messages, evaluated code, results, and output."))
-
-(defn- get-output-pty []
-  (:output/pty @db/!app-db))
-
-(defn- set-output-pty! [pty]
-  (swap! db/!app-db assoc :output/pty pty))
-
-(defn- get-output-terminal []
-  (:output/terminal @db/!app-db))
-
-(defn- set-output-terminal! [terminal]
-  (swap! db/!app-db assoc :output/terminal terminal))
-
-(defn- get-did-last-terminate-line []
-  (get @db/!app-db :output/did-last-terminate-line true))
+  (str "Joyride Evaluation Output"
+       "\r\n"
+       "This (pseudo) terminal displays Joyride messages, evaluated code, results, and output."
+       "\r\n\r\n"))
 
 (defn- set-did-last-terminate-line! [value]
   (swap! db/!app-db assoc :output/did-last-terminate-line value))
@@ -190,19 +177,17 @@
   [message]
   (string/replace message #"\r?\n" "\r\n"))
 
-(defn create-output-terminal
+(defn- create-pty!
   "Create a Joyride pseudo terminal implementation."
   []
   (let [write-emitter (vscode/EventEmitter.)
         close-emitter (vscode/EventEmitter.)]
     #js {:onDidWrite (.-event write-emitter)
          :onDidClose (.-event close-emitter)
-         :open (fn [_initial-dimensions]
-                 (.fire write-emitter terminal-banner))
          :close (fn []
-                  (.fire close-emitter)
-                  (set-output-terminal! nil)
-                  (set-output-pty! nil))
+                  (.fire close-emitter))
+         :open (fn [_]
+                 (.fire write-emitter terminal-banner))
          :handleInput (fn [data]
                         (when (= data "\r")
                           (.fire write-emitter "\r\n")))
@@ -213,22 +198,30 @@
 (defn ensure-terminal!
   "Ensure the output terminal exists and return the backing pseudoterminal."
   []
-  (when-not (get-output-pty)
-    (let [pty (create-output-terminal)
+  (if-let [pty (:output/pty @db/!app-db)]
+    pty
+    (let [pty (create-pty!)
           terminal (vscode/window.createTerminal #js {:name terminal-name
-                                                      :pty pty})]
-      (set-output-pty! pty)
-      (set-output-terminal! terminal)
-      (set-did-last-terminate-line! true)))
-  (get-output-pty))
+                                                      :pty pty})
+          dispose-fn (.-dispose terminal)]
+      (swap! db/!app-db assoc
+             :output/terminal terminal
+             :output/pty pty
+             :output/did-last-terminate-line true)
+      (set! (.-dispose terminal) (fn []
+                                   (swap! db/!app-db assoc
+                                          :output/terminal nil
+                                          :output/pty nil)
+                                   (dispose-fn)))
+      pty)))
 
 (defn show-terminal
   "Reveal the Joyride output terminal if it exists or can be created."
   ([] (show-terminal true))
   ([preserve-focus?]
    (ensure-terminal!)
-    (when-let [terminal (get-output-terminal)]
-      (.show terminal preserve-focus?))))
+   (when-let [terminal (:output/terminal @db/!app-db)]
+     (.show terminal preserve-focus?))))
 
 (defn write-to-terminal
   "Write a raw message to the Joyride terminal."

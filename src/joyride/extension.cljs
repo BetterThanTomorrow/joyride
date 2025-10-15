@@ -85,7 +85,9 @@
   (when context
     (swap! db/!app-db assoc
            :extension-context context
-           :workspace-root-path vscode/workspace.rootPath))
+           :workspace-root-path vscode/workspace.rootPath)
+    (output/ensure-terminal!))
+
   (let [{:keys [extension-context]} @db/!app-db]
     (register-command! extension-context "joyride.runCode" #'run-code+)
     (register-command! extension-context "joyride.evaluateSelection" #'evaluate-selection+)
@@ -113,7 +115,7 @@
     (when context (-> (content-utils/maybe-create-user-project+)
                       (p/catch
                        (fn [e]
-                         (js/console.error "Joyride activate error" e)))
+                         (js/console.error "Joyride: Error while creating user project content" e)))
                       (p/then
                        (fn [_r]
                          (p/do! (life-cycle/maybe-run-init-script+ scripts-handler/run-user-script+
