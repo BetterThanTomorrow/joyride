@@ -97,8 +97,8 @@
                                       (fn [s]
                                         (send-fn request {"out" s}))))
     (if load-file?
-      (output/append-line-other-out (str "Loading file: " file))
-      (output/append-clojure-eval code))
+      (output/append-line-other-out! (str "Loading file: " file))
+      (output/append-clojure-eval! code))
     (try (let [v (jsci/eval-string code)]
            (sci/alter-var-root sci/*3 (constantly @sci/*2))
            (sci/alter-var-root sci/*2 (constantly @sci/*1))
@@ -267,7 +267,7 @@
                         (let [addr (-> server (.address))
                               port (-> addr .-port)
                               host (-> addr .-address)]
-                          (output/append-line-other-out
+                          (output/append-line-other-out!
                            (str "nREPL server started on port " port "on host "
                                 host " - nrepl://" host ":" port))
                           (-> (vscode/workspace.fs.writeFile
@@ -304,9 +304,9 @@
                                                (-> (remove-port-file (::root-path @!db))
                                                    (p/then (fn []
                                                              (swap! !db dissoc ::root-path)
-                                                             (output/append-other-out "nREPL server stopped")
+                                                             (output/append-other-out! "nREPL server stopped")
                                                              (resolve server))))))))
-                                 (do (output/append-other-err "There is no nREPL Server running")
+                                 (do (output/append-other-err! "There is no nREPL Server running")
                                      (reject (js/Error. "There is no nREPL Server running"))))))]
     (sci/alter-var-root sci/print-fn (constantly *print-fn*))
     stopped+))

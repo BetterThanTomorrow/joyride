@@ -51,7 +51,7 @@
                            :ns (str @sci/ns)
                            :stdout @stdout-buffer
                            :stderr @stderr-buffer})]
-        (output/append-clojure-eval code)
+        (output/append-clojure-eval! code)
         (if wait-for-promise?
           ;; Async path with p/let (existing behavior)
           (try

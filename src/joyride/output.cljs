@@ -131,7 +131,7 @@
 ;; ============================================================================
 
 (defn- syntax-highlight-clojure
-  "Apply syntax highlighting to Clojure code using zprint with Calva colors"
+  "Apply syntax highlighting to Clojure code using zprint with Calva default colors"
   [code]
   (try
     (zp/zprint-file-str code
@@ -215,15 +215,15 @@
                                    (dispose-fn)))
       pty)))
 
-(defn show-terminal
+(defn show-terminal!
   "Reveal the Joyride output terminal if it exists or can be created."
-  ([] (show-terminal true))
+  ([] (show-terminal! true))
   ([preserve-focus?]
    (ensure-terminal!)
    (when-let [terminal (:output/terminal @db/!app-db)]
      (.show terminal preserve-focus?))))
 
-(defn write-to-terminal
+(defn write-to-terminal!
   "Write a raw message to the Joyride terminal."
   [message]
   (let [pty (ensure-terminal!)]
@@ -234,73 +234,68 @@
   [normalized-message]
   (set-did-last-terminate-line! (string/ends-with? normalized-message "\r\n")))
 
-(defn append
+(defn append!
   "Append message without forcing a trailing newline."
   [message]
   (when (some? message)
     (let [normalized (normalize-line-endings (str message))]
-      (write-to-terminal normalized)
+      (write-to-terminal! normalized)
       (update-line-state! normalized))))
 
-(defn append-line
+(defn append-line!
   "Append message and ensure a trailing newline."
   [message]
-  (append (str message "\n")))
+  (append! (str message "\n")))
 
-(defn append-eval-out
+(defn append-eval-out!
   "Append stdout generated during evaluation."
   [message]
-  (append (colorize-by-category :output/eval-out message)))
+  (append! (colorize-by-category :output/eval-out message)))
 
-(defn append-line-eval-out
-  "Append stdout and ensure a newline."
-  [message]
-  (append-line (colorize-by-category :output/eval-out message)))
-
-(defn append-eval-err
+(defn append-eval-err!
   "Append stderr generated during evaluation."
   [message]
-  (append (colorize-by-category :output/eval-err message)))
+  (append! (colorize-by-category :output/eval-err message)))
 
-(defn append-line-eval-err
+(defn append-line-eval-err!
   "Append stderr and ensure a newline."
   [message]
-  (append-line (colorize-by-category :output/eval-err message)))
+  (append-line! (colorize-by-category :output/eval-err message)))
 
-(defn append-other-out
+(defn append-other-out!
   "Append non-evaluation stdout messages."
   [message]
-  (append (colorize-by-category :output/other-out message)))
+  (append! (colorize-by-category :output/other-out message)))
 
-(defn append-line-other-out
+(defn append-line-other-out!
   "Append non-evaluation stdout and ensure newline."
   [message]
-  (append-line (colorize-by-category :output/other-out message)))
+  (append-line! (colorize-by-category :output/other-out message)))
 
-(defn append-other-err
+(defn append-other-err!
   "Append non-evaluation stderr messages."
   [message]
-  (append (colorize-by-category :output/other-err message)))
+  (append! (colorize-by-category :output/other-err message)))
 
-(defn append-line-other-err
+(defn append-line-other-err!
   "Append non-evaluation stderr and ensure newline."
   [message]
-  (append-line (colorize-by-category :output/other-err message)))
+  (append-line! (colorize-by-category :output/other-err message)))
 
 (defn- maybe-append-and-set-ns! [ns]
   (when (not= ns (:output/last-printed-ns @db/!app-db))
     (swap! db/!app-db assoc :output/last-printed-ns ns)
-    (append-line-other-out (str (colorize-by-category :output/info "; ")
-                                (colorize-by-category :output/eval-ns ns)))))
+    (append-line-other-out! (str (colorize-by-category :output/info "; ")
+                                 (colorize-by-category :output/eval-ns ns)))))
 
-(defn append-eval-result
+(defn append-eval-result!
   "Append the value returned from an evaluation."
   [data {:keys [ns]}]
   (maybe-append-and-set-ns! ns)
-  (append-line (syntax-highlight-clojure data)))
+  (append-line! (syntax-highlight-clojure data)))
 
-(defn append-clojure-eval
+(defn append-clojure-eval!
   "Echo evaluated code to the terminal with namespace context."
   [code]
   (let [highlighted (syntax-highlight-clojure code)]
-    (append-line highlighted)))
+    (append-line! highlighted)))

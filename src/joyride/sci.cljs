@@ -125,8 +125,8 @@
         {:keys [wrapped-out wrapped-err]} (:sci/print-hook-state @db/!app-db {})]
     (when (or (not (identical? current-out wrapped-out))
               (not (identical? current-err wrapped-err)))
-      (let [wrapped-out-fn (wrap-print-fn current-out output/append-eval-out)
-            wrapped-err-fn (wrap-print-fn current-err output/append-eval-err)]
+      (let [wrapped-out-fn (wrap-print-fn current-out output/append-eval-out!)
+            wrapped-err-fn (wrap-print-fn current-err output/append-eval-err!)]
         (sci/alter-var-root sci/print-fn (constantly wrapped-out-fn))
         (sci/alter-var-root sci/print-err-fn (constantly wrapped-err-fn))
         (swap! db/!app-db assoc :sci/print-hook-state {:wrapped-out wrapped-out-fn
@@ -241,12 +241,12 @@
           (if (= :sci.core/eof form)
             (do
               (vreset! !last-ns @sci/ns)
-              (output/append-eval-result (pr-str res) {:ns (str @sci/ns)})
+              (output/append-eval-result! (pr-str res) {:ns (str @sci/ns)})
               res)
             (let [result (try
                            (sci/eval-form (store/get-ctx) form)
                            (catch js/Error e
                              (let [message (or (.-message e) (str e))]
-                               (output/append-line-eval-err message)
+                               (output/append-line-eval-err! message)
                                (throw e))))]
               (recur result))))))))

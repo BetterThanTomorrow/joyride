@@ -114,7 +114,7 @@
                message (if script-kind
                          (str "Evaluating " script-kind " script: " script-path)
                          (str "Evaluating script: " script-path))]
-         (output/append-line-other-out message)
+         (output/append-line-other-out! message)
          (swap! db/!app-db assoc :invoked-script abs-path)
          (sci/with-bindings {sci/file abs-path}
            (jsci/eval-string code)))
@@ -123,9 +123,9 @@
                    (if error
                      (let [message (or (ex-message error) (.-message error) (str error))
                            headline (str title " Failed: " script-path " " message)]
-                       (output/append-line-other-err headline)
+                       (output/append-line-other-err! headline)
                        (.then (vscode/window.showErrorMessage (str title " error") "Reveal output terminal")
-                              (output/show-terminal)))
+                              (output/show-terminal!)))
                      result))))))
 
 (defn open-script+
@@ -140,9 +140,9 @@
        (p/catch (fn [error]
                   (let [message (or (ex-message error) (.-message error) (str error))
                         headline (str title " Failed: " script-path " " message)]
-                    (output/append-line-other-err headline)
+                    (output/append-line-other-err! headline)
                     (.then (vscode/window.showErrorMessage (str title " error") "Reveal output terminal")
-                           (output/show-terminal))))))))
+                           (output/show-terminal!))))))))
 
 (defn run-or-open-workspace-script-args [menu-conf-or-title+]
   [menu-conf-or-title+
@@ -447,9 +447,9 @@
               joyride-uri (vscode/Uri.file joyride-path)]
         (vscode/commands.executeCommand "vscode.openFolder" joyride-uri true))
       (p/catch (fn [error]
-                 (output/append-line-other-err (str "Failed to open User Joyride directory: " (.-message error)))
+                 (output/append-line-other-err! (str "Failed to open User Joyride directory: " (.-message error)))
                  (.then (vscode/window.showErrorMessage "Failed to open User Joyride directory: " "Reveal output")
-                        (output/show-terminal))))))
+                        (output/show-terminal!))))))
 
 (def open-user-joyride-directory-menu-item
   {:label (menu-label-with-icon "Open User Joyride Directory in New Window" "folder")

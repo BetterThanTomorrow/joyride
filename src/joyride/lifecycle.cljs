@@ -29,11 +29,11 @@
                :script-abs-path (workspace-init-script-abs-path)}})
 
 (defn maybe-run-init-script+ [run-fn {:keys [label script script-path script-abs-path]}]
-  (output/append-other-out (str label " script: " script-path))
+  (output/append-other-out! (str label " script: " script-path))
   (-> (vscode-utils/path-or-uri-exists?+ script-abs-path)
       (p/then (fn [exists?]
                 (if exists?
                   (do
-                    (output/append-line-other-out (str ".  Running..."))
+                    (output/append-line-other-out! (str ".  Running..."))
                     (run-fn script))
-                  (output/append-line-other-out (str ".  No " label " script present")))))))
+                  (output/append-line-other-out! (str ".  No " label " script present")))))))

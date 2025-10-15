@@ -36,19 +36,19 @@
   vscode/workspace.rootPath)
 
 (defn info [title & xs]
-  (output/append-line-other-err (str title "\n" (str/join " " (mapv str xs))))
+  (output/append-line-other-err! (str title "\n" (str/join " " (mapv str xs))))
   (.then (vscode/window.showInformationMessage title "Reveal output terminal")
-         (output/show-terminal)))
+         (output/show-terminal!)))
 
 (defn warn [title & xs]
-  (output/append-line-other-err (str title "\n" (str/join " " (mapv str xs))))
+  (output/append-line-other-err! (str title "\n" (str/join " " (mapv str xs))))
   (.then (vscode/window.showWarningMessage title "Reveal output terminal")
-         (output/show-terminal)))
+         (output/show-terminal!)))
 
 (defn error [title & xs]
-  (output/append-line-other-err (str title "\n" (str/join " " (mapv str xs))))
+  (output/append-line-other-err! (str title "\n" (str/join " " (mapv str xs))))
   (.then (vscode/window.showErrorMessage (str/join " " (mapv str xs)) "Reveal output terminal")
-         (output/show-terminal)))
+         (output/show-terminal!)))
 
 (defn extension-path []
   (-> ^js (:extension-context @db/!app-db)

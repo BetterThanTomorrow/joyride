@@ -39,12 +39,12 @@
      (when input
        (run-code+ input))))
   ([code]
-   (output/append-clojure-eval code)
+   (output/append-clojure-eval! code)
    (-> (p/let [result (jsci/eval-string code)]
          result)
        (p/catch (fn [e]
-                  (output/append-line-other-err (some-> e ex-data pr-str))
-                  (output/show-terminal)
+                  (output/append-line-other-err! (some-> e ex-data pr-str))
+                  (output/show-terminal!)
                   (throw (js/Error. e)))))))
 
 (defn evaluate-selection+
@@ -123,7 +123,7 @@
                                 (when vscode/workspace.rootPath
                                   (life-cycle/maybe-run-init-script+ scripts-handler/run-workspace-script+
                                                                      (:workspace (life-cycle/init-scripts))))
-                                (output/append-line-other-out "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
+                                (output/append-line-other-out! "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
     (js/console.timeLog "activation" "Joyride activate END")
     (js/console.timeEnd "activation")
     api))
