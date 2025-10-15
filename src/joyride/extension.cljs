@@ -66,6 +66,11 @@
       (when (not-empty selected-text)
         (run-code+ selected-text)))))
 
+(defn reveal-output-terminal
+  "Reveal the Joyride output terminal without taking focus."
+  []
+  (output/show-terminal! true))
+
 (defn choose-file [default-uri]
   (vscode/window.showOpenDialog #js {:canSelectMany false
                                      :defaultUri default-uri
@@ -91,6 +96,7 @@
   (let [{:keys [extension-context]} @db/!app-db]
     (register-command! extension-context "joyride.runCode" #'run-code+)
     (register-command! extension-context "joyride.evaluateSelection" #'evaluate-selection+)
+    (register-command! extension-context "joyride.revealOutputTerminal" #'reveal-output-terminal)
     (register-command! extension-context "joyride.runWorkspaceScript" #'scripts-handler/run-workspace-script+)
     (register-command! extension-context "joyride.runUserScript" #'scripts-handler/run-user-script+)
     (register-command! extension-context "joyride.openWorkspaceScript" #'scripts-handler/open-workspace-script+)
