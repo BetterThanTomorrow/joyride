@@ -185,7 +185,11 @@
     #js {:onDidWrite (.-event write-emitter)
          :onDidClose (.-event close-emitter)
          :close (fn []
-                  (.fire close-emitter))
+                  (.fire close-emitter)
+                  (fn []
+                    (.fire close-emitter)
+                    (when-let [terminal (:output/terminal @db/!app-db)]
+                      (.dispose terminal))))
          :open (fn [_]
                  (.fire write-emitter terminal-banner))
          :handleInput (fn [data]
