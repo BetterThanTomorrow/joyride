@@ -182,3 +182,12 @@ When debugging timing issues between VS Code API callbacks and extension logic, 
 ```
 
 This prevents race conditions where VS Code APIs depend on context state for resource creation.
+
+## REPL State Inspection Ergonomics
+
+When atoms store VS Code API objects like ExtensionContext, ensure smooth REPL inspection by excluding problematic keys that may cause printing issues or verbose output.
+
+```clojure
+(dissoc @db/!app-db :extension-context)
+```
+
