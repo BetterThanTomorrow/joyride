@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.67] - 2025-10-22
+
 - [Use pseudo terminal for evaluations and output, similar to Calva's repl](https://github.com/BetterThanTomorrow/joyride/pull/244)
 
 ## [0.0.66] - 2025-10-12
