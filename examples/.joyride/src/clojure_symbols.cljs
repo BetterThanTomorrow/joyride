@@ -7,7 +7,7 @@
 ;; NB: Will create a separate Outline tree, we know of no way to
 ;; blend it with some existing Outline tree.
 
-(.appendLine (joyride/output-channel) "clojure-symbols loading...")
+(println "clojure-symbols loading...")
 
 (defn- line-seq [document]
   (map #(.lineAt document %) (range (.-lineCount document))))

@@ -5,6 +5,7 @@
             [joyride.constants :as const]
             [joyride.db :as db]
             [joyride.getting-started :as getting-started]
+            [joyride.output :as output]
             [joyride.sci :as jsci]
             [joyride.utils :refer [cljify jsify]]
             [joyride.vscode-utils :as utils]
@@ -104,17 +105,28 @@
                script-uri (vscode/Uri.file abs-path)
                code (if (.endsWith script-path ".js")
                       (cljs-snippet-requiring-js abs-path)
-                      (utils/vscode-read-uri+ script-uri))]
+                      (utils/vscode-read-uri+ script-uri))
+               workspace-root (:workspace-root-path @db/!app-db)
+               script-kind (cond
+                             (= base-path conf/user-config-path) "user"
+                             (and workspace-root (= base-path workspace-root)) "workspace"
+                             :else nil)
+               message (if script-kind
+                         (str "Evaluating " script-kind " script: " script-path)
+                         (str "Evaluating script: " script-path))]
+         (output/append-line-other-out! message)
          (swap! db/!app-db assoc :invoked-script abs-path)
          (sci/with-bindings {sci/file abs-path}
            (jsci/eval-string code)))
        (p/handle (fn [result error]
                    (swap! db/!app-db assoc :invoked-script nil)
                    (if error
-                     (binding [utils/*show-when-said?* true]
-                       (utils/say-error (str title " Failed: " script-path " " (.-message error))))
-                     (do (utils/say-result (str script-path " evaluated.") result)
-                         result)))))))
+                     (let [message (or (ex-message error) (.-message error) (str error))
+                           headline (str title " Failed: " script-path " " message)]
+                       (output/append-line-other-err! headline)
+                       (.then (vscode/window.showErrorMessage (str title " error") "Reveal output terminal")
+                              (output/show-terminal!)))
+                     result))))))
 
 (defn open-script+
   ([menu-conf+ base-path scripts-path]
@@ -126,8 +138,11 @@
                (vscode/window.showTextDocument
                 #js {:preview false, :preserveFocus false})))
        (p/catch (fn [error]
-                  (binding [utils/*show-when-said?* true]
-                    (utils/say-error (str title " Failed: " script-path " " (.-message error)))))))))
+                  (let [message (or (ex-message error) (.-message error) (str error))
+                        headline (str title " Failed: " script-path " " message)]
+                    (output/append-line-other-err! headline)
+                    (.then (vscode/window.showErrorMessage (str title " error") "Reveal output terminal")
+                           (output/show-terminal!))))))))
 
 (defn run-or-open-workspace-script-args [menu-conf-or-title+]
   [menu-conf-or-title+
@@ -432,8 +447,9 @@
               joyride-uri (vscode/Uri.file joyride-path)]
         (vscode/commands.executeCommand "vscode.openFolder" joyride-uri true))
       (p/catch (fn [error]
-                 (binding [utils/*show-when-said?* true]
-                   (utils/say-error (str "Failed to open User Joyride directory: " (.-message error))))))))
+                 (output/append-line-other-err! (str "Failed to open User Joyride directory: " (.-message error)))
+                 (.then (vscode/window.showErrorMessage "Failed to open User Joyride directory: " "Reveal output")
+                        (output/show-terminal!))))))
 
 (def open-user-joyride-directory-menu-item
   {:label (menu-label-with-icon "Open User Joyride Directory in New Window" "folder")

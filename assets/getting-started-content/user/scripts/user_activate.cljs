@@ -33,10 +33,8 @@
 
   (p/let [choice (vscode/window.showInformationMessage "Be a Joyrider 🎸" "Yes" "Of course!")]
     (if choice
-      (.appendLine (joyride/output-channel)
-                   (str "You choose: " choice " 🎉"))
-      (.appendLine (joyride/output-channel)
-                   "You just closed it? 😭")))
+      (println "You choose: " choice " 🎉")
+      (println "You just closed it? 😭")))
 
   ;; New to Calva and/or Clojure? Use the Calva command:
   ;;   *Calva: Start Joyride REPL and Connect*

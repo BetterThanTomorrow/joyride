@@ -45,18 +45,20 @@
 ;;                        evaluation takes place
 ;; * invoked-script - the absolute path of a script being run
 ;;                        `nil` in other execution contexts
-;; * output-channel - Joyride's output channel
+;; * output-terminal - Joyride's output channel
 
-(doto (joyride/output-channel)
-  (.show true)
-  (.append "Writing to the ")
-  (.appendLine "Joyride output channel.")
-  (.appendLine (str "Joyride extension path: "
-                    (-> (joyride/extension-context)
-                        .-extension
-                        .-extensionPath)))
-  (.appendLine (str "joyride/*file*: " joyride/*file*))
-  (.appendLine (str "Invoked script: " (joyride/invoked-script)))
-  (.appendLine "🎉"))
+(ns your-awesome-script
+  (:require [joyride.core :as joyride]
+            ...))
+
+(.show (joyride/output-terminal))
+(print "Writing to the ")
+(println "Joyride output channel.")
+(println "Joyride extension path: " (-> (joyride/extension-context)
+                                        .-extension
+                                        .-extensionPath))
+(println "joyride/*file*: " joyride/*file*)
+(println "Invoked script: " (joyride/invoked-script))
+(println "🎉")
 
 ;; Try both invoking this file as a script, and loading it in the REPL

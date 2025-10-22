@@ -6,7 +6,7 @@
 ;; This is an example Joyride User Script. You run it using the
 ;; command: *Joyride: Run User Script* and select this script
 ;; from the menu. Or you can bind a keyboard shortcut that
-;; runs it. See the README at: 
+;; runs it. See the README at:
 ;;    https://github.com/BetterThanTomorrow/joyride/
 ;; for how to do that. (And more)
 
@@ -14,9 +14,7 @@
   (p/let [choice (vscode/window.showInformationMessage "Hello World from a Joyride User script. Do you want to open the Joyride examples page in your browser" "Yes" "No")]
     (case choice
       "Yes" (vscode/env.openExternal (vscode/Uri.parse "https://github.com/BetterThanTomorrow/joyride/tree/master/examples"))
-      "No" (doto (joyride/output-channel)
-             (.show true)
-             (.appendLine "Well, that page is here, if you change your mind:\n  https://github.com/BetterThanTomorrow/joyride/tree/master/examples"))
+      "No" (println "Well, that page is here, if you change your mind:\n  https://github.com/BetterThanTomorrow/joyride/tree/master/examples")
       (println "¯\\_(ツ)_/¯"))))
 
 ;; You probably also want to install the Calva VS Code Extension.

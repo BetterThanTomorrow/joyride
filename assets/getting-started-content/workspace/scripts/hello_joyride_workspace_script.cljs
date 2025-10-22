@@ -24,9 +24,7 @@
                    "🐔" (str '(sort ["🥚" "🐔"]) " agrees, but where did it hatch from?")
                    "🥚" "That's just like your opinion. Who laid it?"
                    "You chickened out!")]
-    (doto (joyride/output-channel)
-      (.show true)
-      (.appendLine review))))
+    (println review)))
 
 ;; (joyride/invoked-script) will return
 ;; * the absolute path to the file of this script when

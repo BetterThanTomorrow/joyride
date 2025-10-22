@@ -14,7 +14,8 @@
    [sci.core :as sci]
    [sci.ctx-store :as store]
    [clojure.pprint :as pp]
-   [clojure.string :as string]))
+   [clojure.string :as string]
+   [joyride.output :as output]))
 
 (defonce !db (atom {::log-messages? false
                     ::server nil
@@ -84,7 +85,7 @@
         (pr-str value)))
     (pr-str value)))
 
-(defn do-handle-eval [{:keys [ns code _sci-ctx _load-file? file] :as request} send-fn]
+(defn do-handle-eval [{:keys [ns code _sci-ctx load-file? file] :as request} send-fn]
   (sci/with-bindings
     {sci/ns ns
      sci/print-length @sci/print-length
@@ -95,6 +96,9 @@
     (sci/alter-var-root sci/print-fn (constantly
                                       (fn [s]
                                         (send-fn request {"out" s}))))
+    (if load-file?
+      (output/append-line-other-out! (str "Loading file: " file))
+      (output/append-clojure-eval! code))
     (try (let [v (jsci/eval-string code)]
            (sci/alter-var-root sci/*3 (constantly @sci/*2))
            (sci/alter-var-root sci/*2 (constantly @sci/*1))
@@ -263,8 +267,9 @@
                         (let [addr (-> server (.address))
                               port (-> addr .-port)
                               host (-> addr .-address)]
-                          (info "nREPL server started on port" port "on host"
-                                (str host "- nrepl://" host ":" port))
+                          (output/append-line-other-out!
+                           (str "nREPL server started on port " port "on host "
+                                host " - nrepl://" host ":" port))
                           (-> (vscode/workspace.fs.writeFile
                                (port-file-uri root-path)
                                (-> (new js/TextEncoder) (.encode (str port))))
@@ -277,7 +282,7 @@
                     (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning false)
                     (.close server)
                     (error "Problems with the nREPL server connection:" e))))
-           (error "Invalid host address, check setting `joyride.nreplHostAddress`")))))))
+           (error "Invalid host address" "Check setting `joyride.nreplHostAddress`")))))))
 
 (defn start-server+ [opts]
   (if-not (server-running?)
@@ -299,9 +304,9 @@
                                                (-> (remove-port-file (::root-path @!db))
                                                    (p/then (fn []
                                                              (swap! !db dissoc ::root-path)
-                                                             (info "nREPL server stopped")
+                                                             (output/append-other-out! "nREPL server stopped")
                                                              (resolve server))))))))
-                                 (do (info "There is no nREPL Server running")
+                                 (do (output/append-other-err! "There is no nREPL Server running")
                                      (reject (js/Error. "There is no nREPL Server running"))))))]
     (sci/alter-var-root sci/print-fn (constantly *print-fn*))
     stopped+))
