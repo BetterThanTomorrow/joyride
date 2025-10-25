@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Flares: Support using resources from Joyride User directory](https://github.com/BetterThanTomorrow/joyride/pull/251)
+
 ## [0.0.67] - 2025-10-22
 
 - [Use pseudo terminal for evaluations and output, similar to Calva's repl](https://github.com/BetterThanTomorrow/joyride/pull/244)

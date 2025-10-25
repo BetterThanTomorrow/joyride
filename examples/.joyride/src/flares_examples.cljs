@@ -45,6 +45,12 @@
     ; flare => {42 <view-object>}
     )
 
+  ;; Scittle + Replicant
+  (flare/flare!+
+   {:file "assets/scittle/replicant_tictactoe.html"
+    :title "Replicant Tic Tac Toe"
+    :key :replicant/tic-tac-toe})
+
   ;; Sidebar example
   (flare/flare!+ {:html [:div {:style {:padding "10px"}}
                          [:h3 "Joyride Sidebar"]
@@ -58,6 +64,12 @@
                   :title "Sidebar Demo"
                   :reveal? true
                   :key :sidebar-1})
+
+  ;; Sidebar Scittle + Replicant
+  (flare/flare!+
+   {:file "assets/scittle/replicant_tictactoe.html"
+    :title "Replicant Tic Tac Toe"
+    :key :sidebar-5})
 
   ; List all currently open flares
   (flare/ls)

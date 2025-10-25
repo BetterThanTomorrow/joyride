@@ -3,6 +3,8 @@
    ["fs" :as fs]
    ["vscode" :as vscode]
    [clojure.edn :as edn]
+   [clojure.string]
+   [joyride.config :as config]
    [joyride.db :as db]
    [joyride.html.file-paths :as file-paths]
    [joyride.html.to-hiccup :as h2h]
@@ -93,10 +95,26 @@
 </body>
 </html>"))
 
+(defn- expand-path-templates
+  "Expands template placeholders in path strings to absolute paths.
+   Supported templates:
+   - {joyride/user-dir} → User's Joyride directory (~/.config/joyride)
+   - {joyride/extension-dir} → Joyride extension installation directory
+   - {joyride/workspace-dir} → Current workspace root directory"
+  [path-str]
+  (-> path-str
+      (clojure.string/replace "{joyride/user-dir}" (config/user-abs-joyride-path))
+      (clojure.string/replace "{joyride/extension-dir}"
+                              (.-path (.-extensionUri ^js (db/extension-context))))
+      (clojure.string/replace "{joyride/workspace-dir}"
+                              (or vscode/workspace.rootPath ""))))
+
 (defn- ->webview-uri-str
-  "Transforms a path or a uri to a webview local resource uri string"
+  "Transforms a path or a uri to a webview local resource uri string.
+   Expands {joyride/*} templates before resolution."
   [^js webview path]
   (->> path
+       expand-path-templates
        vscode-utils/as-workspace-abs-path
        vscode/Uri.file
        (.asWebviewUri webview)
