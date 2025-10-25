@@ -251,12 +251,6 @@ Example:
 
 Relative paths without templates resolve relative to the workspace root.
 
-- `close!`: Close a flare by key. Returns `true` if a flare was closed, `false` if the key was not found.
-- `post-message!+`: Post a message to a flare by key. Returns the `postMessage` promise.
-- `close-all!`: Close all active flares. Returns the count of flares that were closed.
-- `ls`: List all active flares as a map `key → flare`.
-- `get-flare`: Get a flare by its key, returning only the view and optional message handler when active.
-
 **Icon Options:**
 - String - Path or URL to icon file
 - Map - `{:light "path-or-url" :dark "path-or-url"}` for themed icons

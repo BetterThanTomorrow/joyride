@@ -34,7 +34,7 @@
   (let [workspace-roots (if vscode/workspace.workspaceFolders
                           (into [] (map #(.-uri %) vscode/workspace.workspaceFolders))
                           [])
-        extension-uri (.-extensionUri ^js (:extension-context @db/!app-db))
+        extension-uri (.-extensionUri ^js (db/extension-context))
         joyride-user-uri (vscode/Uri.file (config/user-abs-joyride-path))]
     (into [] (concat workspace-roots [extension-uri joyride-user-uri]))))
 
