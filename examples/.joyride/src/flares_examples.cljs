@@ -47,8 +47,31 @@
 
   ;; Scittle + Replicant
   (flare/flare!+
-   {:file "assets/scittle/replicant_tictactoe.html"
-    :title "Replicant Tic Tac Toe"
+   {:html [:html
+           [:head
+            [:script {:src "https://cdn.jsdelivr.net/npm/scittle@0.7.28/dist/scittle.js"
+                      :type "application/javascript"}]
+            [:script {:src "https://cdn.jsdelivr.net/npm/scittle@0.7.28/dist/scittle.replicant.js"
+                      :type "application/javascript"}]
+            [:script {:type "application/x-scittle"
+                      :src "assets/scittle/replicant_tictactoe/ui.cljs"}]
+            [:script {:type "application/x-scittle"
+                      :src "assets/scittle/replicant_tictactoe/game.cljs"}]
+            [:script {:type "application/x-scittle"
+                      :src "assets/scittle/replicant_tictactoe/core.cljs"}]
+            [:link {:rel "stylesheet"
+                    :href "assets/scittle/replicant_tictactoe/style.css"}]]
+           [:body
+            [:h1 "Scittle tic-tac-toe built with Replicant"]
+            [:ul {:style {:list-style :none
+                          :padding-left 0
+                          :display :flex
+                          :flex-direction :row
+                          :gap "0.5rem"}}
+             [:li [:a {:href "https://github.com/babashka/scittle"} "Scittle"]]
+             [:li [:a {:href "https://replicant.fun"} "Replicant"]]]
+            [:div#app]]]
+    :title "Replicant Tic Tac Toe EDN"
     :key :replicant/tic-tac-toe})
 
   ;; Sidebar example
@@ -64,12 +87,6 @@
                   :title "Sidebar Demo"
                   :reveal? true
                   :key :sidebar-1})
-
-  ;; Sidebar Scittle + Replicant
-  (flare/flare!+
-   {:file "assets/scittle/replicant_tictactoe.html"
-    :title "Replicant Tic Tac Toe"
-    :key :sidebar-5})
 
   ; List all currently open flares
   (flare/ls)
