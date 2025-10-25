@@ -210,6 +210,11 @@ Here's a snippet from the [joyride_api.cljs](../examples/.joyride/scripts/joyrid
 
 WebView panel and sidebar view creation convenience.
 
+- `close!`: Close a flare by key. Returns `true` if a flare was closed, `false` if the key was not found.
+- `post-message!+`: Post a message to a flare by key. Returns the `postMessage` promise.
+- `close-all!`: Close all active flares. Returns the count of flares that were closed.
+- `ls`: List all active flares as a map `key → flare`.
+- `get-flare`: Get a flare by its key, returning only the view and optional message handler when active.
 - `flare!+`: Create or update a flare. The argument is an options map with:
    - `:html` - HTML content string OR Hiccup data structure
    - `:url` - URL to display in iframe
@@ -227,6 +232,25 @@ WebView panel and sidebar view creation convenience.
    - `:preserve-focus?` - Whether to preserve focus when revealing the panel (default: `true`)
    - `:message-handler` - Function to handle messages from webview. Receives message object.
    - `:webview-options` - A map with vscode WebviewPanelOptions & WebviewOptions for the webview (default: `{:enableScripts true, :localResourceRoots [workspace-folders, extension-dir, joyride-user-dir]}`)
+
+**Path Templates in HTML/Hiccup Content:**
+
+In HTML/Hiccup content, file paths in attributes (like `src`, `href`) support template placeholders for portable resource references:
+- `{joyride/user-dir}` → Expands to your Joyride user directory (`~/.config/joyride`)
+- `{joyride/extension-dir}` → Expands to the Joyride extension installation directory
+- `{joyride/workspace-dir}` → Expands to the current workspace root directory (but consider using relative paths instead for this)
+
+Example:
+```clojure
+(flare/flare!+
+  {:html [:div
+          [:img {:src "{joyride/user-dir}/shared/logo.png"}]
+          [:script {:src "{joyride/extension-dir}/vendor/lib.js"}]]
+   :key :my-flare})
+```
+
+Relative paths without templates resolve relative to the workspace root.
+
 - `close!`: Close a flare by key. Returns `true` if a flare was closed, `false` if the key was not found.
 - `post-message!+`: Post a message to a flare by key. Returns the `postMessage` promise.
 - `close-all!`: Close all active flares. Returns the count of flares that were closed.
