@@ -226,7 +226,7 @@ WebView panel and sidebar view creation convenience.
       - sidebar: Will always respect `false`
    - `:preserve-focus?` - Whether to preserve focus when revealing the panel (default: `true`)
    - `:message-handler` - Function to handle messages from webview. Receives message object.
-   - `:webview-options` - A map with vscode WebviewPanelOptions & WebviewOptions for the webview (default: `{:enableScripts true}`)
+   - `:webview-options` - A map with vscode WebviewPanelOptions & WebviewOptions for the webview (default: `{:enableScripts true, :localResourceRoots [workspace-folders, extension-dir, joyride-user-dir]}`)
 - `close!`: Close a flare by key. Returns `true` if a flare was closed, `false` if the key was not found.
 - `post-message!+`: Post a message to a flare by key. Returns the `postMessage` promise.
 - `close-all!`: Close all active flares. Returns the count of flares that were closed.
@@ -237,7 +237,7 @@ WebView panel and sidebar view creation convenience.
 - String - Path or URL to icon file
 - Map - `{:light "path-or-url" :dark "path-or-url"}` for themed icons
 
-See the [examples README](../examples/README.md#flares).
+See also the [examples README](../examples/README.md#flares).
 
 #### promesa.core
 

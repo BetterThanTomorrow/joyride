@@ -6,7 +6,8 @@
    [joyride.db :as db]
    [joyride.flare.panel :as panel]
    [joyride.flare.sidebar :as sidebar]
-   [promesa.core :as p]))
+   [promesa.core :as p]
+   [joyride.config :as config]))
 
 (defn- current-api-flares
   "Return the current active flares in API shape"
@@ -27,6 +28,16 @@
         ^js view (:view flare-data)]
     (.postMessage (.-webview view) (clj->js message))))
 
+(defn- default-local-resource-roots
+  "Returns default local resource roots: workspace folders + extension dir + joyride user dir"
+  []
+  (let [workspace-roots (if vscode/workspace.workspaceFolders
+                          (into [] (map #(.-uri %) vscode/workspace.workspaceFolders))
+                          [])
+        extension-uri (.-extensionUri ^js (:extension-context @db/!app-db))
+        joyride-user-uri (vscode/Uri.file (config/user-abs-joyride-path))]
+    (into [] (concat workspace-roots [extension-uri joyride-user-uri]))))
+
 (defn- normalize-file-option [file-path-or-uri]
   (cond
     (.-scheme file-path-or-uri) file-path-or-uri
@@ -40,7 +51,14 @@
 
 (defn- normalize-flare-options
   [options]
-  (let [k (:key options :anonymous)]
+  (let [k (:key options :anonymous)
+        provided-webview-opts (js->clj (:webview-options options) :keywordize-keys true)
+        default-local-roots (default-local-resource-roots)
+        local-roots (or (:localResourceRoots provided-webview-opts)
+                        default-local-roots)
+        webview-options (merge {:enableScripts true
+                                :localResourceRoots local-roots}
+                               provided-webview-opts)]
     (merge {:title "Flare"
             :reveal? true
             :column js/undefined
@@ -49,8 +67,7 @@
            options
            {:key k
             :sidebar-slot (when (sidebar/sidebar-keys k) (sidebar/key->sidebar-slot k))
-            :webview-options (or (clj->js (:webview-options options))
-                                 #js {:enableScripts true})}
+            :webview-options (clj->js webview-options)}
            (when (:file options)
              {:file (normalize-file-option (:file options))}))))
 
@@ -67,7 +84,7 @@
    - :column - vscode.ViewColumn (default: js/undefined)
    - :reveal? - Whether to reveal the panel when created or reused (default: true)
    - :preserve-focus? - Whether to preserve focus when revealing the panel (default: true)
-   - :webview-options - JS object vscode WebviewPanelOptions & WebviewOptions for the webview (default: {:enableScripts true})
+   - :webview-options - A map with vscode WebviewPanelOptions & WebviewOptions for the webview (default: {:enableScripts true})
    - :message-handler - Function to handle messages from webview. Receives message object.
 
    Returns: {key view} where key is the flare key and view is the created panel or sidebar view."
