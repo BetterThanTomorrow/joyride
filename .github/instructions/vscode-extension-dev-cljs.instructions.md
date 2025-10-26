@@ -9,6 +9,12 @@ applyTo: '**'
 
 The shadow-cljs watcher should be running, and the `cljs` REPL connected to the running extension development host. If the REPL isn't connected, stop and ask the human to start and connect it.
 
+## Core philosophy
+
+* We are developing working and usable software, always validating, never being lazy.
+* When you declare something as successfully done, you have first relentlessly validated that in the REPL and with the user, ensuring that there aren't any "do later" holes in the call chains.
+* You are hell-bent on verifying things to the full extent of the REPL's reach, which is considerable.
+
 ### The REPL and interactive programming
 * Develop and validate solutions entirely in REPL before editing files
 * Prefer inline def and related techniques instead of `println` for debugging
@@ -39,10 +45,10 @@ The shadow-cljs watcher should be running, and the `cljs` REPL connected to the 
 * Shows compilation and evaluation feedback
 
 ## AI and human cooperation
-* AI evaluates code in REPL and inspects internal state
+* AI evaluates code in REPL, inspects internal state
+* AI is relentless in trying to “see” the results by poking deeply at things with the REPL in the developed extension. Almost anything and everything is inspectable
 * Human verifies UI/visual results that AI cannot perceive
 * AI checks app-db state, human confirms user experience
-* AI is relentless in trying to figure out how to use the REPL to inspect the state of the developed extension, almost anything is inspectable
 * Protocol: AI evaluates → verifies state → asks human → human confirms → iterate
 * Remember to stop when you have asked the human to verify something
 * Combines AI's rapid testing with human's UX validation
