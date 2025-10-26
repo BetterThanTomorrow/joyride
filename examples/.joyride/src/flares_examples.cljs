@@ -107,10 +107,113 @@
                   :title "SVG Shapes"
                   :key :some-svg})
 
-
-  ;; Bidirectional message example
+  ;; Scittle Bidirectional message example
   (flare/flare!+
    {:html [:div
+           [:script {:src "https://cdn.jsdelivr.net/npm/scittle@0.7.28/dist/scittle.js"
+                     :type "application/javascript"}]
+           [:style "
+              button { padding: 8px 16px; margin: 4px; cursor: pointer; }
+              input { padding: 8px; margin: 4px; }
+              #messageLog { background: #222; padding: 10px; border-radius: 4px; min-height: 100px; }"]
+           [:h1 "Scittle Message Handler Test"]
+           [:img {:src "assets/joyride-logo.png"}]
+           [:p "Testing bidirectional messaging with Scittle ClojureScript:"]
+           [:button {:id "sendButton"} "Send Message"]
+           [:div
+            [:input {:type "text" :id "textInput" :placeholder "Type something..."}]
+            [:button {:id "sendTextButton"} "Send Text"]]
+           [:div
+            [:strong "Message log:"]
+            [:pre {:id "messageLog"}]]
+           [:script {:type "application/x-scittle"}
+            (str
+             '(def vscode (js/acquireVsCodeApi))
+             '(defn log-message [text]
+                (let [log-element (js/document.getElementById "messageLog")
+                      timestamp (.toLocaleTimeString (js/Date.))
+                      entry (str "[" timestamp "] " text "\n")]
+                  (set! (.-textContent log-element)
+                        (str (.-textContent log-element) entry))))
+             '(defn send-message! [type data]
+                (.postMessage vscode (clj->js {:type type
+                                               :data data
+                                               :timestamp (.now js/Date)}))
+                (log-message (str "Sent: " type " - " data)))
+             '(defn handle-incoming-message [message-event]
+                (let [message (js->clj (.-data message-event) :keywordize-keys true)
+                      msg-type (:type message)
+                      msg-data (:data message)]
+                  (log-message (str "Received: " msg-type " - " msg-data))))
+             '(.addEventListener js/window "message" handle-incoming-message)
+             '(when-let [btn (js/document.getElementById "sendButton")]
+                (.addEventListener btn "click"
+                                   #(send-message! "button-click" "Hello from Scittle button!")))
+             '(when-let [text-btn (js/document.getElementById "sendTextButton")]
+                (.addEventListener text-btn "click"
+                                   #(when-let [input (js/document.getElementById "textInput")]
+                                      (send-message! "text-input" (.-value input))
+                                      (set! (.-value input) ""))))
+             '(log-message "Scittle initialized and ready! 🚀"))]]
+    :title "Scittle Message Test"
+    :key :sidebar-2
+    :reveal? false
+    :preserve-focus? true
+    :webview-options {:enableScripts true
+                      :retainContextWhenHidden true}
+    :message-handler (fn [message]
+                       (let [msg-type (.-type message)
+                             msg-data (.-data message)]
+                         (println "🔥 Received message from Scittle flare, type:" msg-type "data:" msg-data)
+                         (case msg-type
+                           "button-click" (println "✅ Button was clicked!")
+                           "text-input" (println "📝 Text input received:" msg-data)
+                           (println "❓ Unknown message type:" msg-type))))})
+
+  (flare/post-message!+ :sidebar-2 {:type "command" :data {:foo "foo"}})
+
+  ;; Scittle message example from EDN file
+  ;; Yes, vibe coded
+  (flare/flare!+
+   {:file "assets/example-flare.edn"
+    :title "Flare!"
+    :key :sidebar-5
+    :preserve-focus? true
+    :webview-options {:enableScripts true
+                      :retainContextWhenHidden true}
+    :message-handler (fn [message]
+                       (let [msg-type (.-type message)
+                             msg-data (.-data message)]
+                         (println "🔥 Received message from fancy flare, type:" msg-type "data:" msg-data)
+                         (case msg-type
+                           "alert-clicked" (vscode/window.showInformationMessage "🎉 Alert from Scittle ClojureScript!")
+                           "color-changed" (do
+                                             (println "🎨 Color changed to:" msg-data)
+                                             (flare/post-message!+ :sidebar-5
+                                                                   {:type "color-feedback"
+                                                                    :data (str "Love that " msg-data "! 🌈")}))
+                           "input-processed" (do
+                                               (println "📝 Input processed:" msg-data)
+                                               (flare/post-message!+ :sidebar-5
+                                                                     {:type "response"
+                                                                      :data (str "Joyride received: \"" msg-data "\" ✨")}))
+                           "progress-animated" (do
+                                                 (println "📊 Progress animated to:" msg-data "%")
+                                                 (flare/post-message!+ :sidebar-5
+                                                                       {:type "response"
+                                                                        :data (str "Nice progress: " msg-data "%! 🎯")}))
+                           "timer-completed" (println "⏰ Timer completed:" msg-data)
+                           (println "❓ Unknown message type:" msg-type))))})
+
+  (flare/post-message!+ :sidebar-5 {:type "animate-progress" :data {}})
+
+  ;; Bidirectional message example if you fancy doing it in JS
+  (flare/flare!+
+   {:html [:div
+           [:style "
+             button { padding: 8px 16px; margin: 4px; cursor: pointer; }
+             input { padding: 8px; margin: 4px; }
+             #messageLog { background: #333; padding: 10px; border-radius: 4px; min-height: 100px; }"]
            [:h1 "Message Handler Test"]
            [:img {:src "assets/joyride-logo.png"}]
            [:p "Testing message handling:"]
@@ -150,12 +253,9 @@
                window.addEventListener('message', event => {
                  const message = event.data; // Message from extension
                  handleMessage(message);
-               });
-
-
-               "]]
+               });"]]
     :title "Message Test"
-    :key :sidebar-2
+    :key :sidebar-3
     :reveal? false
     :preserve-focus? true
     :webview-options {:enableScripts true
@@ -169,85 +269,7 @@
                            "text-input" (println "📝 Text input received:" msg-data)
                            (println "❓ Unknown message type:" msg-type))))})
 
-  (flare/post-message!+ :sidebar-2 {:type "command" :data {:foo "foo"}})
-
-  (flare/get-flare :sidebar-2)
-
-  (flare/ls)
-
-  (flare/close! :sidebar-1)
-
-  (flare/close-all!)
-
-  ; Message example from hiccup file
-  (flare/flare!+ {:file "assets/example-flare.edn"
-                  :title "My Hiccup File"
-                  :key :sidebar-4
-                      ;:reveal? true
-                  :preserve-focus? true
-                  :webview-options {:enableScripts true
-                                    :retainContextWhenHidden true}
-                  :message-handler (fn [message]
-                                     (let [msg-type (.-type message)
-                                           msg-data (.-data message)]
-                                       (println "🔥 Received message from flare, type:" msg-type "data:" msg-data)
-                                       (case msg-type
-                                         "button-click" (println "✅ Button was clicked!")
-                                         "text-input" (println "📝 Text input received:" msg-data)
-                                         (println "❓ Unknown message type:" msg-type))))})
-
-  (flare/post-message!+ :sidebar-4 {:type "command" :data #js {:foo "foo"}})
-
-  ; Bidirectional messaging using a html file
-  (flare/flare!+
-   {:file "assets/example-flare.html"
-    :title "HTML File with Bi-directional Messaging"
-    :key "html-file-messaging"
-    :message-handler
-    (fn [message]
-      (let [msg-type (.-type message)
-            msg-data (.-data message)]
-        (println "🔥 Message from HTML file, type:" msg-type "data:" msg-data)
-        (case msg-type
-          "alert-clicked"
-          (do
-            (println "🚨 Alert button was clicked!" (pr-str msg-data))
-            (apply vscode/window.showInformationMessage msg-data)
-            (flare/post-message!+ "html-file-messaging"
-                                  {:type "response"
-                                   :data "Alert acknowledged from Clojure! 🎉"}))
-          "color-changed"
-          (do
-            (println "🎨 Color changed to:" msg-data)
-            (flare/post-message!+ "html-file-messaging"
-                                  {:type "color-feedback"
-                                   :data (str "Beautiful " msg-data " choice! 🌈")}))
-          "input-processed"
-          (do
-            (println "📝 Input processed:" msg-data)
-            (flare/post-message!+ "html-file-messaging"
-                                  {:type "input-response"
-                                   :data (str "Clojure processed: '" msg-data "' ✨")}))
-          "progress-animated"
-          (do
-            (println "📊 Progress animated to:" msg-data)
-            (flare/post-message!+ "html-file-messaging"
-                                  {:type "progress-feedback"
-                                   :data (str "Progress at " msg-data "% - "
-                                              (cond
-                                                (< msg-data 25) "Just getting started! 🌱"
-                                                (< msg-data 50) "Making good progress! 🚀"
-                                                (< msg-data 75) "More than halfway there! 💪"
-                                                (< msg-data 90) "Almost finished! 🔥"
-                                                :else "Excellent work! 🎯"))}))
-          "timer-completed"
-          (do
-            (println "⏰ Timer completed:" msg-data)
-            (flare/post-message!+ "html-file-messaging"
-                                  {:type "response"
-                                   :data "Timer event received in Clojure! ⏰"}))
-
-          (println "❓ Unknown message type:" msg-type))))})
+  (flare/post-message!+ :sidebar-3 {:type "command" :data {:foo "foo"}})
 
   (flare/post-message!+ "html-file-messaging" {:type "animate-progress" :data {}})
 
@@ -312,14 +334,15 @@
 (comment
   ;; Fancy SVG flare with animations
   ;; (Yes, vibe coded)
-  (flare/flare!+ {:title "Fancy SVG Showcase"
-                  :key "fancy-svg"
-                  :html [:div {:style {:background "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)"
-                                       :padding "30px"
-                                       :border-radius "20px"
-                                       :text-align :center}}
+  (flare/flare!+
+   {:title "Fancy SVG Showcase"
+    :key "fancy-svg"
+    :html [:div {:style {:background "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)"
+                         :padding "30px"
+                         :border-radius "20px"
+                         :text-align :center}}
 
-                         [:style "
+           [:style "
                              @keyframes rotate {
                                from { transform: rotate(0deg); }
                                to { transform: rotate(360deg); }
@@ -337,93 +360,93 @@
                              .floating { animation: pulse-svg 4s ease-in-out infinite 1s; }
                            "]
 
-                         [:h2 {:style {:color :white :margin-bottom "30px" :font-size "2.2em"}} "🎨 Fancy SVG Showcase"]
+           [:h2 {:style {:color :white :margin-bottom "30px" :font-size "2.2em"}} "🎨 Fancy SVG Showcase"]
 
-                         [:div {:style {:display :flex :justify-content :space-around :flex-wrap :wrap :gap "30px"}}
+           [:div {:style {:display :flex :justify-content :space-around :flex-wrap :wrap :gap "30px"}}
 
-                          ;; Animated geometric pattern
-                          [:div {:style {:background "rgba(255,255,255,0.1)" :border-radius "15px" :padding "20px"}}
-                           [:h3 {:style {:color :white :margin-bottom "15px"}} "Rotating Geometry"]
-                           [:svg {:width 200 :height 200 :style {:background "rgba(0,0,0,0.2)" :border-radius "10px"}}
-                            [:defs
-                             [:linearGradient {:id "grad1" :x1 "0%" :y1 "0%" :x2 "100%" :y2 "100%"}
-                              [:stop {:offset "0%" :style {:stop-color "#ff6b6b" :stop-opacity 1}}]
-                              [:stop {:offset "100%" :style {:stop-color "#4ecdc4" :stop-opacity 1}}]]
-                             [:radialGradient {:id "grad2" :cx "50%" :cy "50%" :r "50%"}
-                              [:stop {:offset "0%" :style {:stop-color "#ffe66d" :stop-opacity 1}}]
-                              [:stop {:offset "100%" :style {:stop-color "#ff6b6b" :stop-opacity 0.8}}]]]
+            ;; Animated geometric pattern
+            [:div {:style {:background "rgba(255,255,255,0.1)" :border-radius "15px" :padding "20px"}}
+             [:h3 {:style {:color :white :margin-bottom "15px"}} "Rotating Geometry"]
+             [:svg {:width 200 :height 200 :style {:background "rgba(0,0,0,0.2)" :border-radius "10px"}}
+              [:defs
+               [:linearGradient {:id "grad1" :x1 "0%" :y1 "0%" :x2 "100%" :y2 "100%"}
+                [:stop {:offset "0%" :style {:stop-color "#ff6b6b" :stop-opacity 1}}]
+                [:stop {:offset "100%" :style {:stop-color "#4ecdc4" :stop-opacity 1}}]]
+               [:radialGradient {:id "grad2" :cx "50%" :cy "50%" :r "50%"}
+                [:stop {:offset "0%" :style {:stop-color "#ffe66d" :stop-opacity 1}}]
+                [:stop {:offset "100%" :style {:stop-color "#ff6b6b" :stop-opacity 0.8}}]]]
 
-                            [:g {:class "rotating" :style {:transform-origin "100px 100px"}}
-                             [:polygon {:points "100,20 180,80 180,120 100,180 20,120 20,80"
-                                        :fill "url(#grad1)"
-                                        :opacity 0.8}]
-                             [:circle {:cx 100 :cy 100 :r 25 :fill "url(#grad2)"}]]
+              [:g {:class "rotating" :style {:transform-origin "100px 100px"}}
+               [:polygon {:points "100,20 180,80 180,120 100,180 20,120 20,80"
+                          :fill "url(#grad1)"
+                          :opacity 0.8}]
+               [:circle {:cx 100 :cy 100 :r 25 :fill "url(#grad2)"}]]
 
-                            [:circle {:cx 100 :cy 100 :r 85 :fill :none :stroke "#fff" :stroke-width 2 :opacity 0.3}]
-                            [:circle {:cx 100 :cy 100 :r 65 :fill :none :stroke "#fff" :stroke-width 1 :opacity 0.2}]]]
+              [:circle {:cx 100 :cy 100 :r 85 :fill :none :stroke "#fff" :stroke-width 2 :opacity 0.3}]
+              [:circle {:cx 100 :cy 100 :r 65 :fill :none :stroke "#fff" :stroke-width 1 :opacity 0.2}]]]
 
-                          ;; Pulsing data visualization
-                          [:div {:style {:background "rgba(255,255,255,0.1)" :border-radius "15px" :padding "20px"}}
-                           [:h3 {:style {:color :white :margin-bottom "15px"}} "Data Pulse"]
-                           [:svg {:width 200 :height 200 :style {:background "rgba(0,0,0,0.2)" :border-radius "10px"}}
-                            [:defs
-                             [:linearGradient {:id "barGrad" :x1 "0%" :y1 "100%" :x2 "0%" :y2 "0%"}
-                              [:stop {:offset "0%" :style {:stop-color "#667eea" :stop-opacity 1}}]
-                              [:stop {:offset "100%" :style {:stop-color "#764ba2" :stop-opacity 1}}]]]
+            ;; Pulsing data visualization
+            [:div {:style {:background "rgba(255,255,255,0.1)" :border-radius "15px" :padding "20px"}}
+             [:h3 {:style {:color :white :margin-bottom "15px"}} "Data Pulse"]
+             [:svg {:width 200 :height 200 :style {:background "rgba(0,0,0,0.2)" :border-radius "10px"}}
+              [:defs
+               [:linearGradient {:id "barGrad" :x1 "0%" :y1 "100%" :x2 "0%" :y2 "0%"}
+                [:stop {:offset "0%" :style {:stop-color "#667eea" :stop-opacity 1}}]
+                [:stop {:offset "100%" :style {:stop-color "#764ba2" :stop-opacity 1}}]]]
 
-                            ;; Animated bars representing data
-                            (for [i (range 6)]
-                              [:rect {:key i
-                                      :x (+ 20 (* i 25))
-                                      :y (- 180 (* (inc i) 20))
-                                      :width 20
-                                      :height (* (inc i) 20)
-                                      :fill "url(#barGrad)"
-                                      :class "pulsing"
-                                      :style {:animation-delay (str (* i 0.3) "s")}}])
+              ;; Animated bars representing data
+              (for [i (range 6)]
+                [:rect {:key i
+                        :x (+ 20 (* i 25))
+                        :y (- 180 (* (inc i) 20))
+                        :width 20
+                        :height (* (inc i) 20)
+                        :fill "url(#barGrad)"
+                        :class "pulsing"
+                        :style {:animation-delay (str (* i 0.3) "s")}}])
 
-                            ;; Grid lines
-                            (for [i (range 5)]
-                              [:line {:key i
-                                      :x1 10 :y1 (+ 40 (* i 30))
-                                      :x2 190 :y2 (+ 40 (* i 30))
-                                      :stroke "#fff"
-                                      :stroke-width 0.5
-                                      :opacity 0.3}])]]
+              ;; Grid lines
+              (for [i (range 5)]
+                [:line {:key i
+                        :x1 10 :y1 (+ 40 (* i 30))
+                        :x2 190 :y2 (+ 40 (* i 30))
+                        :stroke "#fff"
+                        :stroke-width 0.5
+                        :opacity 0.3}])]]
 
-                          ;; Organic flowing shapes
-                          [:div {:style {:background "rgba(255,255,255,0.1)" :border-radius "15px" :padding "20px"}}
-                           [:h3 {:style {:color :white :margin-bottom "15px"}} "Organic Flow"]
-                           [:svg {:width 200 :height 200 :style {:background "rgba(0,0,0,0.2)" :border-radius "10px"}}
-                            [:defs
-                             [:linearGradient {:id "flowGrad" :x1 "0%" :y1 "0%" :x2 "100%" :y2 "100%"}
-                              [:stop {:offset "0%" :style {:stop-color "#00f5ff" :stop-opacity 0.8}}]
-                              [:stop {:offset "50%" :style {:stop-color "#00bcd4" :stop-opacity 0.6}}]
-                              [:stop {:offset "100%" :style {:stop-color "#4fc3f7" :stop-opacity 0.8}}]]]
+            ;; Organic flowing shapes
+            [:div {:style {:background "rgba(255,255,255,0.1)" :border-radius "15px" :padding "20px"}}
+             [:h3 {:style {:color :white :margin-bottom "15px"}} "Organic Flow"]
+             [:svg {:width 200 :height 200 :style {:background "rgba(0,0,0,0.2)" :border-radius "10px"}}
+              [:defs
+               [:linearGradient {:id "flowGrad" :x1 "0%" :y1 "0%" :x2 "100%" :y2 "100%"}
+                [:stop {:offset "0%" :style {:stop-color "#00f5ff" :stop-opacity 0.8}}]
+                [:stop {:offset "50%" :style {:stop-color "#00bcd4" :stop-opacity 0.6}}]
+                [:stop {:offset "100%" :style {:stop-color "#4fc3f7" :stop-opacity 0.8}}]]]
 
-                            [:path {:d "M20,100 Q60,60 100,100 T180,100 Q160,140 120,140 Q80,140 60,120 Q40,120 20,100 Z"
-                                    :fill "url(#flowGrad)"
-                                    :class "floating"}]
+              [:path {:d "M20,100 Q60,60 100,100 T180,100 Q160,140 120,140 Q80,140 60,120 Q40,120 20,100 Z"
+                      :fill "url(#flowGrad)"
+                      :class "floating"}]
 
-                            [:circle {:cx 60 :cy 80 :r 8 :fill "#fff" :opacity 0.9 :class "pulsing"}]
-                            [:circle {:cx 140 :cy 120 :r 6 :fill "#fff" :opacity 0.7 :class "floating"}]
-                            [:circle {:cx 100 :cy 100 :r 4 :fill "#fff" :opacity 0.8 :class "pulsing"}]]]]
+              [:circle {:cx 60 :cy 80 :r 8 :fill "#fff" :opacity 0.9 :class "pulsing"}]
+              [:circle {:cx 140 :cy 120 :r 6 :fill "#fff" :opacity 0.7 :class "floating"}]
+              [:circle {:cx 100 :cy 100 :r 4 :fill "#fff" :opacity 0.8 :class "pulsing"}]]]]
 
-                         ;; Stats section
-                         [:div {:style {:margin-top "30px" :color :white}}
-                          [:h3 {:style {:margin-bottom "15px"}} "📊 SVG Performance"]
-                          [:div {:style {:display :flex :justify-content :space-around :text-align :center}}
-                           [:div
-                            [:div {:style {:font-size "2em" :color "#4ecdc4"}} "60"]
-                            [:div {:style {:font-size "0.9em" :opacity "0.8"}} "FPS"]]
-                           [:div
-                            [:div {:style {:font-size "2em" :color "#ffe66d"}} "12"]
-                            [:div {:style {:font-size "0.9em" :opacity "0.8"}} "Elements"]]
-                           [:div
-                            [:div {:style {:font-size "2em" :color "#ff6b6b"}} "3"]
-                            [:div {:style {:font-size "0.9em" :opacity "0.8"}} "Animations"]]]]
+           ;; Stats section
+           [:div {:style {:margin-top "30px" :color :white}}
+            [:h3 {:style {:margin-bottom "15px"}} "📊 SVG Performance"]
+            [:div {:style {:display :flex :justify-content :space-around :text-align :center}}
+             [:div
+              [:div {:style {:font-size "2em" :color "#4ecdc4"}} "60"]
+              [:div {:style {:font-size "0.9em" :opacity "0.8"}} "FPS"]]
+             [:div
+              [:div {:style {:font-size "2em" :color "#ffe66d"}} "12"]
+              [:div {:style {:font-size "0.9em" :opacity "0.8"}} "Elements"]]
+             [:div
+              [:div {:style {:font-size "2em" :color "#ff6b6b"}} "3"]
+              [:div {:style {:font-size "0.9em" :opacity "0.8"}} "Animations"]]]]
 
-                         [:p {:style {:color :white :opacity "0.8" :margin-top "20px" :font-size "0.9em"}}
-                          "Smooth SVG animations powered by Joyride Flares ✨"]]})
+           [:p {:style {:color :white :opacity "0.8" :margin-top "20px" :font-size "0.9em"}}
+            "Smooth SVG animations powered by Joyride Flares ✨"]]})
   :rcf)
 

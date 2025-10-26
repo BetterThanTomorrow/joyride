@@ -1,44 +1,144 @@
 [:div
- [:h1 "Message Handler Test"]
- [:img {:src "assets/joyride-logo.png"}]
- [:p "Testing message handling:"]
- [:button {:onclick "sendMessage('button-click', 'Hello from button!')"}
-  "Send Message"]
- [:div
-  [:input {:type "text" :id "textInput" :placeholder "Type something..."}]
-  [:button {:onclick "sendTextMessage()"}
-   "Send Text"]]
- [:div
-  "log:"
-  [:pre {:id "messageLog"}]]
- [:script {:type "text/javascript"}
-  "
-               // Acquire VS Code API once when the page loads
-               const vscode = acquireVsCodeApi();
+ [:script {:src "https://cdn.jsdelivr.net/npm/scittle@0.7.28/dist/scittle.js"
+           :type "application/javascript"}]
+ [:style "
+   body {
+     font-family: 'SF Pro Display', system-ui, sans-serif;
+     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+     color: white;
+     margin: 0;
+     padding: 20px;
+   }
+   .container {
+     max-width: 800px;
+     margin: 0 auto;
+     background: rgba(255, 255, 255, 0.1);
+     backdrop-filter: blur(10px);
+     border-radius: 20px;
+     padding: 30px;
+     border: 1px solid rgba(255, 255, 255, 0.2);
+     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+   }
+   h1 {
+     text-align: center;
+     font-size: 2.5em;
+     margin-bottom: 30px;
+     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+   }
+   .pulse { animation: pulse 2s infinite; }
+   @keyframes pulse {
+     0%, 100% { transform: scale(1); }
+     50% { transform: scale(1.05); }
+   }
+   .feature-grid {
+     display: grid;
+     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+     gap: 20px;
+     margin: 30px 0;
+   }
+   .feature-card {
+     background: rgba(255, 255, 255, 0.1);
+     border-radius: 15px;
+     padding: 20px;
+     text-align: center;
+     border: 1px solid rgba(255, 255, 255, 0.2);
+     transition: transform 0.2s;
+   }
+   .feature-card:hover { transform: translateY(-5px); }
+   .feature-icon { font-size: 3em; margin-bottom: 15px; }
+   .interactive-section {
+     margin: 30px 0;
+     padding: 20px;
+     background: rgba(255, 255, 255, 0.1);
+     border-radius: 15px;
+   }
+   button {
+     background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+     color: white;
+     border: none;
+     padding: 12px 24px;
+     border-radius: 25px;
+     font-size: 1em;
+     cursor: pointer;
+     margin: 5px;
+     transition: transform 0.2s;
+   }
+   button:hover { transform: translateY(-2px); }
+   input {
+     padding: 10px;
+     border: none;
+     border-radius: 10px;
+     margin: 5px;
+     background: rgba(255, 255, 255, 0.9);
+     color: #333;
+   }
+   .log {
+     background: rgba(0, 0, 0, 0.3);
+     border-radius: 10px;
+     padding: 15px;
+     margin-top: 20px;
+     font-family: 'Monaco', 'Menlo', monospace;
+     font-size: 0.9em;
+     max-height: 200px;
+     overflow-y: auto;
+   }
+   .progress-bar {
+     background: rgba(255, 255, 255, 0.2);
+     border-radius: 20px;
+     height: 20px;
+     overflow: hidden;
+     margin: 10px 0;
+   }
+   .progress-fill {
+     background: linear-gradient(90deg, #00ff88, #00ccff);
+     height: 100%;
+     width: 75%;
+     border-radius: 20px;
+     transition: width 0.3s ease;
+   }"]
+ [:div {:class "container"}
+  [:h1 {:class "pulse"} "Scittle Flare"]
+  [:img {:src "assets/joyride-logo.png" :style {:max-width "200px" :display "block" :margin "0 auto 20px"}}]
 
-               function sendMessage(type, data) {
-                 vscode.postMessage({type: type, data: data, timestamp: Date.now()});
-                 console.log('Sent message:', type, data);
-               }
+  [:div {:class "feature-grid"}
+   [:div {:class "feature-card"}
+    [:div {:class "feature-icon"} "🎨"]
+    [:h3 "Styled Content"]
+    [:p "CSS animations, gradients, and modern design"]]
+   [:div {:class "feature-card"}
+    [:div {:class "feature-icon"} "⚡"]
+    [:h3 "Interactive"]
+    [:p "ClojureScript powered interactions"]]
+   [:div {:class "feature-card"}
+    [:div {:class "feature-icon"} "📁"]
+    [:h3 "EDN File"]
+    [:p "Pure Hiccup data structure"]]
+   [:div {:class "feature-card"}
+    [:div {:class "feature-icon"} "🔗"]
+    [:h3 "Messaging"]
+    [:p "Bi-directional with Joyride"]]]
 
-               function sendTextMessage() {
-                 const input = document.getElementById('textInput');
-                 sendMessage('text-input', input.value);
-                 input.value = '';
-               }
+  [:div {:class "interactive-section"}
+   [:h3 "🎮 Interactive Demo"]
+   [:p "Test Scittle ClojureScript interactions:"]
+   [:div
+    [:button {:id "alertBtn"} "Show Alert"]
+    [:button {:id "colorBtn"} "Change Colors"]
+    [:button {:id "progressBtn"} "Animate Progress"]]
+   [:div
+    [:input {:type "text" :id "textInput" :placeholder "Type something..."}]
+    [:button {:id "processBtn"} "Process Input"]]
+   [:div
+    [:label "Progress: "]
+    [:div {:class "progress-bar"}
+     [:div {:class "progress-fill" :id "progressFill"}]]
+    [:span {:id "progressText"} "75%"]]
+   [:div {:class "log" :id "messageLog"}
+    [:div "📝 Scittle ClojureScript initialized..."]]]
 
-               function handleMessage(message) {
-                 console.log('Received message:', message);
-                 const messageLogElement = document.getElementById('messageLog');
-                 const logEntry = document.createElement('div');
-                 logEntry.textContent = `[${new Date().toLocaleTimeString()}] Type: ${message.type}, Data: ${message.data} ${message.data.foo}`;
-                 messageLogElement.appendChild(logEntry);
-               }
+  [:div {:style {:text-align "center" :margin-top "30px" :opacity "0.8"}}
+   [:p "✨ This flare is loaded from an EDN file with Scittle ClojureScript"]
+   [:p [:small "Pure Hiccup + ClojureScript in the browser! 🎉"]]]]
 
-               window.addEventListener('message', event => {
-                 const message = event.data; // Message from extension
-                 handleMessage(message);
-               });
-
-
-               "]]
+ [:script {:type "application/x-scittle"
+           :src "assets/scittle/message_flare/message_handler.cljs"}]]
