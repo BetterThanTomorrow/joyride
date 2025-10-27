@@ -15,6 +15,7 @@
   (-> (:flares @db/!app-db)
       (update-vals #(select-keys % [:view :message-handler]))))
 
+;; TODO Handle namespaced keys (Using `:keyword-fn` probably)
 (defn post-message!+
   "Send a message from extension to flare webview.
 
