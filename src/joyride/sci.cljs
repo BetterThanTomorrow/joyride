@@ -117,23 +117,6 @@
     (when delegate
       (delegate message))))
 
-(defn install-terminal-print-hooks!
-  "Ensure SCI print functions mirror evaluation output to the Joyride terminal."
-  []
-  (let [current-out @sci/print-fn
-        current-err @sci/print-err-fn
-        {:keys [wrapped-out wrapped-err]} (:sci/print-hook-state @db/!app-db {})]
-    (when (or (not (identical? current-out wrapped-out))
-              (not (identical? current-err wrapped-err)))
-      (let [wrapped-out-fn (wrap-print-fn current-out output/append-eval-out!)
-            wrapped-err-fn (wrap-print-fn current-err output/append-eval-err!)]
-        (sci/alter-var-root sci/print-fn (constantly wrapped-out-fn))
-        (sci/alter-var-root sci/print-err-fn (constantly wrapped-err-fn))
-        (swap! db/!app-db assoc :sci/print-hook-state {:wrapped-out wrapped-out-fn
-                                                       :delegate-out current-out
-                                                       :wrapped-err wrapped-err-fn
-                                                       :delegate-err current-err})))))
-
 (def !last-ns (volatile! @sci/ns))
 
 (defn slurp+
@@ -232,8 +215,9 @@
                              {:handled true}))))}))
 
 (defn eval-string [s]
-  (install-terminal-print-hooks!)
-  (sci/binding [sci/ns @!last-ns]
+  (sci/binding [sci/ns @!last-ns
+                sci/print-fn (wrap-print-fn @sci/print-fn output/append-eval-out!)
+                sci/print-err-fn (wrap-print-fn @sci/print-err-fn output/append-eval-err!)]
     (let [code (str s)
           reader (sci/reader code)]
       (loop [res nil]
