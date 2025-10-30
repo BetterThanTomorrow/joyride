@@ -110,8 +110,9 @@
 
 (def pst-nyip (fn [_] (throw (js/Error. "pst not yet implemented"))))
 
-(defn- wrap-print-fn [delegate append-fn]
+(defn- wrap-print-fn [output-type delegate append-fn]
   (fn [message]
+    (js/console.log "wrap-print-fn" output-type "message:" (pr-str message))
     (when (some? message)
       (append-fn message))
     (when delegate
@@ -216,8 +217,8 @@
 
 (defn eval-string [s]
   (sci/binding [sci/ns @!last-ns
-                sci/print-fn (wrap-print-fn @sci/print-fn output/append-eval-out!)
-                sci/print-err-fn (wrap-print-fn @sci/print-err-fn output/append-eval-err!)]
+                sci/print-fn (wrap-print-fn "stdout" @sci/print-fn output/append-eval-out!)
+                sci/print-err-fn (wrap-print-fn "stderr" @sci/print-err-fn output/append-eval-err!)]
     (let [code (str s)
           reader (sci/reader code)]
       (loop [res nil]
