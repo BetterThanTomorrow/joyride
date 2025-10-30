@@ -102,7 +102,8 @@
 (defn- ansi-escape-seq?
   "Check if message contains ANSI escape sequences"
   [message]
-  (boolean (re-find #"\u001b\[" message)))
+  (boolean (when message
+             (re-find #"\u001b\[" message))))
 
 (defn- colorize
   "Add ANSI color codes to message"

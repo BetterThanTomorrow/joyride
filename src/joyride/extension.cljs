@@ -43,7 +43,8 @@
    (-> (p/let [result (jsci/eval-string code)]
          result)
        (p/catch (fn [e]
-                  (output/append-line-other-err! (some-> e ex-data pr-str))
+                  (output/append-line-other-err! (or (some-> e ex-data pr-str)
+                                                     (.-message e)))
                   (output/show-terminal!)
                   (throw (js/Error. e)))))))
 
