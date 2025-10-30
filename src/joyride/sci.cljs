@@ -25,6 +25,9 @@
    [replicant.dom]))
 
 (sci/enable-unrestricted-access!) ;; allows mutating and set!-ing all vars from inside SCI
+(sci/alter-var-root sci/print-newline (constantly true)) ; Dodging strange issue with `println`
+                                                         ; not printing the trailing newline in release builds
+                                                         ; https://github.com/BetterThanTomorrow/joyride/issues/253
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
 (sci/alter-var-root sci/print-err-fn (constantly *print-err-fn*))
 
@@ -217,7 +220,6 @@
 
 (defn eval-string [s]
   (sci/binding [sci/ns @!last-ns
-                sci/print-newline true
                 sci/print-fn (wrap-print-fn "stdout" @sci/print-fn output/append-eval-out!)
                 sci/print-err-fn (wrap-print-fn "stderr" @sci/print-err-fn output/append-eval-err!)]
     (let [code (str s)
