@@ -29,7 +29,7 @@
         (:parinfer-error bracket-validation)
         (assoc :parinfer-error (:parinfer-error bracket-validation)))
       ;; Happy path: code is balanced - continue with execution
-      (let [stdout-buffer (atom "")
+      (let [stdout-buffer (atom "") ;; TODO: Try use sci/binding instead of the alter-var-root stuff to capture output
             stderr-buffer (atom "")
             original-print-fn @sci/print-fn
             original-print-err-fn @sci/print-err-fn
