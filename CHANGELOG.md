@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Update SCI and sci.configs to latest commits
+
 ## [0.0.68] - 2025-10-25
 
 - [Flares: Support using resources from Joyride User directory](https://github.com/BetterThanTomorrow/joyride/pull/251)
