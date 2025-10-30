@@ -110,14 +110,6 @@
 
 (def pst-nyip (fn [_] (throw (js/Error. "pst not yet implemented"))))
 
-(defn- wrap-print-fn [output-type delegate append-fn]
-  (fn [message]
-    (js/console.log "wrap-print-fn" output-type "message:" (pr-str message))
-    (when (some? message)
-      (append-fn message))
-    (when delegate
-      (delegate message))))
-
 (def !last-ns (volatile! @sci/ns))
 
 (defn slurp+
@@ -214,6 +206,14 @@
                                               (or (:as opts)
                                                   ns-sym))
                              {:handled true}))))}))
+
+(defn- wrap-print-fn [_output-type delegate append-fn]
+  (fn [message]
+    #_(js/console.log "wrap-print-fn" _output-type "message:" (pr-str message))
+    (when (some? message)
+      (append-fn message))
+    (when delegate
+      (delegate message))))
 
 (defn eval-string [s]
   (sci/binding [sci/ns @!last-ns
