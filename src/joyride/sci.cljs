@@ -217,6 +217,7 @@
 
 (defn eval-string [s]
   (sci/binding [sci/ns @!last-ns
+                sci/print-newline true
                 sci/print-fn (wrap-print-fn "stdout" @sci/print-fn output/append-eval-out!)
                 sci/print-err-fn (wrap-print-fn "stderr" @sci/print-err-fn output/append-eval-err!)]
     (let [code (str s)
