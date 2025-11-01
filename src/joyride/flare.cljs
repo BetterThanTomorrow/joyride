@@ -15,19 +15,19 @@
   (-> (:flares @db/!app-db)
       (update-vals #(select-keys % [:view :message-handler]))))
 
-;; TODO Handle namespaced keys (Using `:keyword-fn` probably)
 (defn post-message!+
   "Send a message from extension to flare webview.
 
    Args:
    - flare-key: The key of the flare to send message to
    - message: The message data to send (will be serialized to JSON)
+             Namespaced keywords are preserved: :user/name -> \"user/name\"
 
    Returns: the `postMessage` promise"
   [flare-key message]
   (let [flare-data (get (:flares @db/!app-db) flare-key)
         ^js view (:view flare-data)]
-    (.postMessage (.-webview view) (clj->js message))))
+    (.postMessage (.-webview view) (clj->js message :keyword-fn #(subs (str %) 1)))))
 
 (defn- default-local-resource-roots
   "Returns default local resource roots: workspace folders + extension dir + joyride user dir"

@@ -450,3 +450,45 @@
             "Smooth SVG animations powered by Joyride Flares ✨"]]})
   :rcf)
 
+(comment
+  ;; Example with namespaced keywords
+  ;; Namespaced keywords are preserved: :user/name -> "user/name" in JavaScript
+  (flare/flare!+
+   {:html [:div
+           [:h1 "Namespaced Keywords Demo"]
+           [:div#output "Waiting for message..."]
+           [:script {:type "text/javascript"}
+            "
+            window.addEventListener('message', event => {
+              const data = event.data;
+              const output = document.getElementById('output');
+              
+              // Access namespaced keywords using bracket notation
+              const userName = data['user/name'];
+              const userEmail = data['user/email'];
+              const actionType = data['action/type'];
+              
+              output.innerHTML = `
+                <h3>Received message with namespaced keywords:</h3>
+                <ul>
+                  <li><strong>user/name:</strong> ${userName}</li>
+                  <li><strong>user/email:</strong> ${userEmail}</li>
+                  <li><strong>action/type:</strong> ${actionType}</li>
+                </ul>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+              `;
+            });
+            "]]
+    :title "Namespaced Keys"
+    :key :namespaced-demo})
+
+  ;; Send message with namespaced keywords
+  (flare/post-message!+ :namespaced-demo
+                        {:user/name "Alice"
+                         :user/email "alice@example.com"
+                         :action/type "profile-update"
+                         :meta/timestamp (.now js/Date)})
+
+  (flare/close! :namespaced-demo)
+  :rcf)
+

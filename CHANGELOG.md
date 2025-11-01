@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: [Flares: Handle namespaced keys in `post-message!+`](https://github.com/BetterThanTomorrow/joyride/issues/TODO) - Namespaced keywords like `:user/name` are now properly preserved when sending messages from extension to webview
+
 ## [0.0.69] - 2025-10-31
 
 - Update SCI and sci.configs to latest commits; `f40ee1a6cf6c53b8271b41c101c3391773d67e76` and `aa84a1b4f1fe45735e5b748769309fc842f737c1` respectively.

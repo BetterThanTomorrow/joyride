@@ -58,6 +58,11 @@ Closes all active flare panels and sidebars. Returns count of closed flares.
 ### `post-message!+` - Send to Webview
 Send message from extension to flare webview. Takes `flare-key` and `message` (serialized to JSON).
 
+**Namespaced Keyword Handling**: Namespaced keywords are properly preserved when converting to JSON:
+- `:user/name` → `"user/name"` in JavaScript
+- `:action/type` → `"action/type"` in JavaScript
+- Access in webview using bracket notation: `message["user/name"]`
+
 ### `get-flare` - Retrieve Flare
 Get flare data by key. Returns `{:view ... :message-handler ...}` or `nil`.
 
