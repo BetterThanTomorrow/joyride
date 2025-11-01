@@ -118,7 +118,7 @@
 
 (defn maybe-create-user-project+ []
   (p/do
-    (vscode/workspace.fs.createDirectory (vscode-utils/path->uri (conf/user-abs-joyride-path) ["sripts"]))
+    (vscode/workspace.fs.createDirectory (vscode-utils/path->uri (conf/user-abs-joyride-path) ["scripts"]))
     (vscode/workspace.fs.createDirectory (vscode-utils/path->uri (conf/user-abs-joyride-path) ["src"]))
     (maybe-create-user-readme+)
     (maybe-create-user-config+)

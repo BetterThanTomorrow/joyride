@@ -5,6 +5,7 @@ Changes to Joyride
 ## [Unreleased]
 
 - **BREAKING CHANGE** - Fix: [Namespaces of namespaced keys don't survive flare/post-message!+](https://github.com/BetterThanTomorrow/joyride/pull/260)
+- Fix: [Default user project creates misspelled `scripts` folder (`sripts`)](https://github.com/BetterThanTomorrow/joyride/pull/257)
 
 ## [0.0.69] - 2025-10-31
 
