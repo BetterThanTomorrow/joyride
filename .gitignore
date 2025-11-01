@@ -32,3 +32,6 @@ examples/.calva
 
 .vscode-test/
 playground/hello-joyride/.calva/output-window/output.calva-repl
+
+# Build/installation scripts
+linux-install.sh
