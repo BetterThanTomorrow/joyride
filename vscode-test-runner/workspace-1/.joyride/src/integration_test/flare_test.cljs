@@ -7,32 +7,35 @@
 
 (deftest-async namespaced-keywords-in-messages
   (testing "post-message!+ handles namespaced keywords"
-    (p/let [received-message (atom nil)
-            message-handler (fn [msg]
-                              (reset! received-message (js->clj msg :keywordize-keys true)))
-            message {:msg/type "test"
-                     :foo 42
-                     :bar "42"
-                     :msg/data {:user/name "Alice"
-                                :user/id 123
-                                :nested {:action/name "click"}}}
-            ;; This flare echoes messages back
-            _ (flare/flare!+ {:key :test-namespaced-keywords
-                              :html [:div
-                                     [:h1 "Test"]
-                                     [:script
-                                      "const vscode = acquireVsCodeApi();
-                                       window.addEventListener('message', event => {
-                                        vscode.postMessage(event.data);
-                                       });"]]
-                              :title "Test"
-                              :message-handler message-handler})
-            ;; Wait a bit for the flare to be created
-            _ (p/delay 500)
-            _ (flare/post-message!+ :test-namespaced-keywords
-                                    message)
-            ;; Wait for the message to be received (next tick?)
-            _ (p/delay 0)]
-      (is (= message @received-message)
-          "The message survives the roundtrip intact")
-      (flare/close! :test-namespaced-keywords))))
+    (let [ready? (p/deferred)
+          received-message (p/deferred)]
+      (p/let [message-handler (fn [msg]
+                                (if (= true msg)
+                                  (p/resolve! ready? true)
+                                  (p/resolve! received-message (js->clj msg :keywordize-keys true))))
+              message {:msg/type "test",
+                       :foo 42,
+                       :bar "42",
+                       :msg/data {:user/name "Alice", :user/id 123, :nested {:action/name "click"}}}
+              ;; This flare echoes messages back
+              _ (flare/flare!+
+                 {:key :test/namespaced-keywords,
+                  :html [:div [:h1 "Test"]
+                         [:script
+                          "const vscode = acquireVsCodeApi();
+                           vscode.postMessage(true)
+                           window.addEventListener('message', event => {
+                             vscode.postMessage(event.data);
+                           });"]],
+                  :title "Test",
+                  :message-handler message-handler})
+              _ ready?
+              ;; Next tick we're ready for realz
+              _ (p/delay 0)
+              _ (flare/post-message!+ :test/namespaced-keywords message)
+              ;; We need to wait a tick before closing the flare
+              _ (p/delay 0)
+              _ (flare/close! :test/namespaced-keywords)
+              resolved-message received-message]
+        (is (= message resolved-message)
+            "The message survives the roundtrip intact")))))
