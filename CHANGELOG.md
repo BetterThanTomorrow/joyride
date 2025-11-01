@@ -4,7 +4,7 @@ Changes to Joyride
 
 ## [Unreleased]
 
-- **BREAKING CHANGE** - Fix: [Namespaces of namespaced keys don't survive flare flare/post-message!+](https://github.com/BetterThanTomorrow/joyride/pull/260)
+- **BREAKING CHANGE** - Fix: [Namespaces of namespaced keys don't survive flare/post-message!+](https://github.com/BetterThanTomorrow/joyride/pull/260)
 
 ## [0.0.69] - 2025-10-31
 
