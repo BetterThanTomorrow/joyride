@@ -273,6 +273,14 @@
 
   (flare/post-message!+ "html-file-messaging" {:type "animate-progress" :data {}})
 
+  ;; Example showing namespaced keywords in messages
+  ;; Namespaces are dropped when converting to JavaScript
+  ;; :msg/type becomes "type", :user/name becomes "name", etc.
+  (flare/post-message!+ :sidebar-3 {:msg/type "namespaced-example"
+                                     :msg/data {:user/name "Alice"
+                                               :user/id 123
+                                               :action/timestamp (.now js/Date)}})
+
   (flare/flare!+ {:url "https://calva.io/"
                   :title "My URL Flare"
                   :key :my-file-test})
