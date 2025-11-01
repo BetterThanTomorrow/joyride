@@ -27,7 +27,23 @@
   [flare-key message]
   (let [flare-data (get (:flares @db/!app-db) flare-key)
         ^js view (:view flare-data)]
-    (.postMessage (.-webview view) (clj->js message))))
+    (.postMessage (.-webview view) (clj->js message :keyword-fn #(subs (str %) 1)))))
+
+(comment
+  (clj->js {:foo/bar 42 :baz "43"} :keyword-fn #(subs (str %) 1))
+  ; what function does :foo/bar -> "foo/bar" and also :baz -> "baz"?
+
+  ; Option 1: subs with str (works for both namespaced and non-namespaced)
+  #(subs (str %) 1)
+
+  ; Option 2: Using name and namespace
+  #(if-let [ns (namespace %)] (str ns "/" (name %)) (name %))
+
+  ; Option 3: Regex replacement
+  #(clojure.string/replace (str %) #"^:" "")
+
+
+  :rcf)
 
 (defn- default-local-resource-roots
   "Returns default local resource roots: workspace folders + extension dir + joyride user dir"
