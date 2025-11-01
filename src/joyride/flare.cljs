@@ -27,7 +27,7 @@
   [flare-key message]
   (let [flare-data (get (:flares @db/!app-db) flare-key)
         ^js view (:view flare-data)]
-    (.postMessage (.-webview view) (clj->js message))))
+    (.postMessage (.-webview view) (clj->js message :keyword-fn #(subs (str %) 1)))))
 
 (defn- default-local-resource-roots
   "Returns default local resource roots: workspace folders + extension dir + joyride user dir"
