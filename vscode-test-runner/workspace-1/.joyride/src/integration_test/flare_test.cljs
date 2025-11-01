@@ -16,7 +16,7 @@
                      :msg/data {:user/name "Alice"
                                 :user/id 123
                                 :nested {:action/name "click"}}}
-            ;; This flare simply pongs the ping
+            ;; This flare echoes messages back
             _ (flare/flare!+ {:key :test-namespaced-keywords
                               :html [:div
                                      [:h1 "Test"]
@@ -27,15 +27,12 @@
                                        });"]]
                               :title "Test"
                               :message-handler message-handler})
-
             ;; Wait a bit for the flare to be created
-            _ (p/delay 200)
+            _ (p/delay 500)
             _ (flare/post-message!+ :test-namespaced-keywords
                                     message)
             ;; Wait for the message to be received (next tick?)
             _ (p/delay 0)]
-
       (is (= message @received-message)
           "The message survives the roundtrip intact")
-      ;; Clean up
       (flare/close! :test-namespaced-keywords))))
