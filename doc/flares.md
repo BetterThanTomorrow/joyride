@@ -60,6 +60,8 @@ Send message from extension to flare webview. Takes `flare-key` and `message` (s
 
 **Keyword Handling**: Namespaced keywords in the message are automatically converted to their simple name (namespace is dropped). For example, `:my-ns/action` becomes `"action"` in the JavaScript message. This allows you to use Clojure namespacing for organization on the extension side while keeping the JavaScript API clean.
 
+**Note**: If you use multiple keywords with the same name but different namespaces (e.g., `:ns1/action` and `:ns2/action`), they will both convert to `"action"` in JavaScript, and standard JavaScript object behavior applies (last value wins). Avoid such patterns or use distinct key names.
+
 ### `get-flare` - Retrieve Flare
 Get flare data by key. Returns `{:view ... :message-handler ...}` or `nil`.
 
