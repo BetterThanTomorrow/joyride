@@ -4,7 +4,7 @@ Changes to Joyride
 
 ## [Unreleased]
 
-- Fix: [Handle namespaced keywords in `post-message!+` by dropping the namespace when converting to JavaScript](https://github.com/BetterThanTomorrow/joyride/issues/TODO)
+- Fix: Handle namespaced keywords in `post-message!+` by dropping the namespace when converting to JavaScript
 
 ## [0.0.69] - 2025-10-31
 
