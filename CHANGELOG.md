@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.71] - 2025-11-02
+
 - Fix: [Hitting maximum stack size error when Evaluating Selection](https://github.com/BetterThanTomorrow/joyride/pull/218) (Works around a yet unfigured-out Promesa issue.)
 
 ## [0.0.70] - 2025-11-02
