@@ -63,7 +63,8 @@
                     'integration-test.joyride-core-test
                     'integration-test.rewrite-clj-test
                     'integration-test.reader-conditionals
-                    'integration-test.flare-test]]
+                    'integration-test.flare-test
+                    'integration-test.commands-test]]
       (println "Runner: Workspace activated, running tests...")
       (try
         (doseq [test-ns test-nss]

@@ -51,21 +51,19 @@
 (defn evaluate-selection+
   "Evaluates the selection by first copying it to the clipboard and reading it from there.
    Restores the original clipboard content after reading it from the clipboard.
-   The reason to do it like this is that it will work regardless of where text i selected.
+   The reason to do it like this is that it will work regardless of where text is selected.
    Also in Markdown previews or terminal, or QuickPick prompts, or anywhere."
   []
-  ; Delay needed when run from the command palette
-  ; lest the command palette is active when the copy is performed
   (p/do
-    (p/create
-     (fn [resolve _reject]
-       (js/setTimeout resolve 200)))
-    (p/let [original-clipboard-text (vscode/env.clipboard.readText)
+    (p/delay 200)
+    ; We use native JS promises for clipboard reading to avoid stack overflow issues
+    ; https://github.com/BetterThanTomorrow/joyride/issues/218
+    (p/let [before-clipboard (.then (vscode/env.clipboard.readText) identity)
             _ (vscode/commands.executeCommand "editor.action.clipboardCopyAction")
-            selected-text (vscode/env.clipboard.readText)
-            _ (vscode/env.clipboard.writeText original-clipboard-text)]
-      (when (not-empty selected-text)
-        (run-code+ selected-text)))))
+            selection (.then (vscode/env.clipboard.readText) identity)
+            _ (vscode/env.clipboard.writeText before-clipboard)]
+      (when (not= selection before-clipboard)
+        (run-code+ selection)))))
 
 (defn reveal-output-terminal
   "Reveal the Joyride output terminal without taking focus."

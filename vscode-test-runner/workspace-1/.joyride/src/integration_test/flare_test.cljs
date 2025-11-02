@@ -31,7 +31,7 @@
                   :message-handler message-handler})
               _ ready?
               ;; We need to wait a tiny bit to be be ready for realz
-              _ (p/delay 32)
+              _ (p/delay 200)
               _ (flare/post-message!+ :test/namespaced-keywords message)
               ;; We need to wait a tick before closing the flare
               _ (p/delay 0)

@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: [Hitting maximum stack size error when Evaluating Selection](https://github.com/BetterThanTomorrow/joyride/pull/218) (Works around a yet unfigured-out Promesa issue.)
+
 ## [0.0.70] - 2025-11-02
 
 - **BREAKING CHANGE** - Fix: [Namespaces of namespaced keys don't survive flare/post-message!+](https://github.com/BetterThanTomorrow/joyride/pull/260)
