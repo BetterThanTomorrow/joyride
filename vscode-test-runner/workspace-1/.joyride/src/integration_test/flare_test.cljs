@@ -33,8 +33,7 @@
               ;; We need to wait a tiny bit to be be ready for realz
               _ (p/delay 200)
               _ (flare/post-message!+ :test/namespaced-keywords message)
-              ;; We need to wait a tick before closing the flare
-              _ (p/delay 0)
+              _ (p/delay 100)
               _ (flare/close! :test/namespaced-keywords)
               resolved-message received-message]
         (is (= message resolved-message)
