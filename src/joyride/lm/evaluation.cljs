@@ -55,9 +55,13 @@
                                                 :toString (str result)}
                                                result)
                                 zprint-opts (cond-> {:width 10000}
-                                              (and max-length (not (zero? max-length)))
+                                              (and max-length
+                                                   (number? max-length)
+                                                   (not (zero? max-length)))
                                               (assoc :max-length max-length)
-                                              (and max-depth (not (zero? max-depth)))
+                                              (and max-depth
+                                                   (number? max-depth)
+                                                   (not (zero? max-depth)))
                                               (assoc :max-depth max-depth))
                                 limited-result-str (zp/zprint-str result-value zprint-opts)]
                             {:result limited-result-str
