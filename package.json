@@ -65,6 +65,16 @@
             "type": "boolean",
             "default": true,
             "description": "Enable Copilot Joyride REPL access"
+          },
+          "joyride.lm.evaluationResultsMaxLength": {
+            "type": "number",
+            "default": 25,
+            "markdownDescription": "Maximum number of items in collections returned to the agent during REPL evaluation. Use `0` to disable length limiting."
+          },
+          "joyride.lm.evaluationResultsMaxDepth": {
+            "type": "number",
+            "default": 7,
+            "markdownDescription": "Maximum nesting depth for evaluation results returned to the agent; deeper structures are replaced with `##`. Use `0` to disable depth limiting."
           }
         }
       }

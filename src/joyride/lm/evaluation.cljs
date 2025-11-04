@@ -10,6 +10,11 @@
    [sci.core :as sci]
    [sci.ctx-store :as store]))
 
+(defn- get-eval-config []
+  (let [config (vscode/workspace.getConfiguration "joyride.lm")]
+    {:max-length (.get config "evaluationResultsMaxLength")
+     :max-depth (.get config "evaluationResultsMaxDepth")}))
+
 (defn execute-code+
   "Execute ClojureScript code in Joyride's SCI environment with VS Code APIs.
    Returns a map with :result, :error, :ns, :stdout, and :stderr keys.
@@ -39,18 +44,25 @@
             restore-fns! (fn []
                            (sci/alter-var-root sci/print-fn (constantly original-print-fn))
                            (sci/alter-var-root sci/print-err-fn (constantly original-print-err-fn)))
+            {:keys [max-length max-depth]} (get-eval-config)
             make-result (fn [result error wait-for-promise?]
-                          {:result (if (and (not wait-for-promise?)
-                                            (not error)
-                                            (instance? js/Promise result))
-                                     {:type "promise"
-                                      :message "Promise returned but not awaited (fire-and-forget mode)"
-                                      :toString (str result)}
-                                     result)
-                           :error error
-                           :ns (str @sci/ns)
-                           :stdout @stdout-buffer
-                           :stderr @stderr-buffer})]
+                          (let [result-value (if (and (not wait-for-promise?)
+                                                      (not error)
+                                                      (instance? js/Promise result))
+                                               {:type "promise"
+                                                :message "Promise returned but not awaited (fire-and-forget mode)"
+                                                :toString (str result)}
+                                               result)
+                                effective-length (when-not (zero? max-length) max-length)
+                                effective-depth (when-not (zero? max-depth) max-depth)
+                                limited-result-str (binding [*print-length* effective-length
+                                                             *print-level* effective-depth]
+                                                     (pr-str result-value))]
+                            {:result limited-result-str
+                             :error error
+                             :ns (str @sci/ns)
+                             :stdout @stdout-buffer
+                             :stderr @stderr-buffer}))]
         (output/append-clojure-eval! code)
         (if wait-for-promise?
           ;; Async path with p/let (existing behavior)
