@@ -8,7 +8,8 @@
    [joyride.sci :as joyride-sci]
    [promesa.core :as p]
    [sci.core :as sci]
-   [sci.ctx-store :as store]))
+   [sci.ctx-store :as store]
+   [zprint.core :as zp]))
 
 (defn- get-eval-config []
   (let [config (vscode/workspace.getConfiguration "joyride.lm")]
@@ -53,11 +54,12 @@
                                                 :message "Promise returned but not awaited (fire-and-forget mode)"
                                                 :toString (str result)}
                                                result)
-                                effective-length (when-not (zero? max-length) max-length)
-                                effective-depth (when-not (zero? max-depth) max-depth)
-                                limited-result-str (binding [*print-length* effective-length
-                                                             *print-level* effective-depth]
-                                                     (pr-str result-value))]
+                                zprint-opts (cond-> {:width 10000}
+                                              (and max-length (not (zero? max-length)))
+                                              (assoc :max-length max-length)
+                                              (and max-depth (not (zero? max-depth)))
+                                              (assoc :max-depth max-depth))
+                                limited-result-str (zp/zprint-str result-value zprint-opts)]
                             {:result limited-result-str
                              :error error
                              :ns (str @sci/ns)
