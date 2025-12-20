@@ -76,7 +76,8 @@
 
 (defn generate-iframe-content
   "Create iframe wrapper following Calva's approach.
-   Adds cache-busting parameter to force reload on repeated calls."
+   Adds cache-busting parameter to force reload on repeated calls.
+   Uses white background like VS Code's Simple Browser."
   [url title]
   (str "<!DOCTYPE html>
 <html>
@@ -89,6 +90,7 @@
             padding: 0;
             height: 100%;
             overflow: hidden;
+            background: white;
         }
         iframe {
             width: 100%;
