@@ -68,8 +68,15 @@
                          :processed (process-hiccup hiccup-data)
                          :error (.-message e)}))))))
 
+(defn- url-with-cache-bust
+  "Add cache-busting query parameter to force iframe reload"
+  [url]
+  (let [separator (if (clojure.string/includes? url "?") "&" "?")]
+    (str url separator "_joyride_cb=" (.now js/Date))))
+
 (defn generate-iframe-content
-  "Create iframe wrapper following Calva's approach"
+  "Create iframe wrapper following Calva's approach.
+   Adds cache-busting parameter to force reload on repeated calls."
   [url title]
   (str "<!DOCTYPE html>
 <html>
@@ -91,7 +98,7 @@
     </style>
 </head>
 <body>
-    <iframe src=\"" url "\" sandbox=\"allow-scripts allow-same-origin allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-top-navigation-by-user-activation\"></iframe>
+    <iframe src=\"" (url-with-cache-bust url) "\" sandbox=\"allow-scripts allow-same-origin allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-top-navigation-by-user-activation\"></iframe>
 </body>
 </html>"))
 
