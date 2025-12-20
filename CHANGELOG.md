@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.72] - 2025-12-20
+
 - [AI: Restrict the depth and length of evaluation results returned to the agent](https://github.com/BetterThanTomorrow/joyride/pull/263)
 - [Make url flares refresh when reusing the same key and url](https://github.com/BetterThanTomorrow/joyride/pull/265)
 - [Make url flares background white, like Simple Browser](https://github.com/BetterThanTomorrow/joyride/pull/267)
