@@ -28,7 +28,9 @@
        (exec!+ "npx vsce package"
                #js {:cwd sidecar-dir
                     :shell true})
-       (exec!+ "code --install-extension joyride-sidecar-0.0.1.vsix"
+       
+       ;; append --profile <Profile Name> to install the extension into the specific profile
+       (exec!+ "code --install-extension joyride-sidecar-0.0.1.vsix" 
                #js {:cwd sidecar-dir
                     :shell true}))
       (p/catch (fn [e]
