@@ -8,7 +8,7 @@
         zprint/zprint {:mvn/version "1.3.0"}
         org.babashka/sci {;:local/root "../babashka/sci"
                           :git/url "https://github.com/babashka/sci"
-                          :git/sha "f40ee1a6cf6c53b8271b41c101c3391773d67e76"
+                          :git/sha "77c7827394bbb0cd39a24d9cf9b903daaf473c07"
                           ;:mvn/version "0.10.49"
                           }
         org.babashka/sci.configs {;:local/root "../sci.configs"
