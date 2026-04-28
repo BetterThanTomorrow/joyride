@@ -8,11 +8,10 @@
 
 (def terminal-name "Joyride Output")
 
-(def terminal-banner
-  (str "Joyride Evaluation Output"
-       "\r\n"
-       "This (pseudo) terminal displays Joyride messages, evaluated code, results, and output."
-       "\r\n\r\n"))
+
+
+
+
 
 (defn- set-did-last-terminate-line! [value]
   (swap! db/!app-db assoc :output/did-last-terminate-line value))
@@ -52,6 +51,21 @@
     (if (keyword? code-or-alias)
       (get ansi-codes code-or-alias)
       code-or-alias)))
+
+(defn- joyride-version []
+  (when-let [ext (vscode/extensions.getExtension "betterthantomorrow.joyride")]
+    (some-> ext .-packageJSON .-version)))
+
+(defn- terminal-banner []
+  (let [cmd-style (str (get-ansi-code :color/bg-bright-white)
+                       (get-ansi-code :color/black))
+        reset (get-ansi-code :color/reset)
+        version (or (joyride-version) "dev")]
+    (str "Joyride Evaluation Output (v" version ")\r\n"
+         "This (pseudo) terminal displays Joyride messages, evaluated code, results, and output.\r\n\r\n"
+         "To reveal this terminal, use the command " cmd-style " Joyride: Open Joyride Output Terminal " reset "\r\n\r\n"
+         "https://github.com/BetterThanTomorrow/joyride\r\n"
+         "Please consider sponsoring: https://github.com/niclasnilsson ♥️\r\n\r\n")))
 
 (defn- current-theme-kind
   "Get current VS Code theme kind"
@@ -199,12 +213,13 @@
                     (when-let [terminal (:output/terminal @db/!app-db)]
                       (.dispose terminal))))
          :open (fn [_]
-                 (.fire write-emitter terminal-banner))
+                 (.fire write-emitter (terminal-banner)))
          :handleInput (fn [data]
                         (.fire write-emitter (string/replace data #"\r" "\r\n")))
          :write (fn [message]
                   (let [normalized (normalize-line-endings (str message))]
                     (.fire write-emitter normalized)))}))
+
 
 (defn ensure-terminal!
   "Ensure the output terminal exists and return the backing pseudoterminal."
