@@ -9,9 +9,3 @@
     (p/let [result (vscode/commands.executeCommand "joyride.runCode" "(+ 1 2)")]
       (is (= 3 result)
           "Eval via runCode command works with updated output pipeline"))))
-
-
-
-
-
-
