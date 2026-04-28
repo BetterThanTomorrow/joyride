@@ -6,6 +6,7 @@
    [joyride.output :as output]
    [joyride.repl-utils :as repl-utils]
    [joyride.sci :as joyride-sci]
+   [joyride.integrations.calva :as calva-int]
    [joyride.who-tracking :as who-tracking]
    [promesa.core :as p]
    [sci.core :as sci]
@@ -65,16 +66,43 @@
                                                    (not (zero? max-depth)))
                                               (assoc :max-depth max-depth))
                                 limited-result-str (zp/zprint-str result-value zprint-opts)
-                                other-whos (who-tracking/get-other-whos-since-last! who)]
+                                other-whos (who-tracking/get-other-whos-since-last! who)
+                                result-ns (str @sci/ns)
+                                stdout @stdout-buffer
+                                stderr @stderr-buffer]
+                            (when error
+                              (calva-int/log-to-calva! {:category "evaluationErrorOutput"
+                                                        :text error
+                                                        :who who
+                                                        :ns result-ns}))
+                            (when-not error
+                              (calva-int/log-to-calva! {:category "evaluationResults"
+                                                        :text limited-result-str
+                                                        :who who
+                                                        :ns result-ns}))
+                            (when (seq stdout)
+                              (calva-int/log-to-calva! {:category "evaluationOutput"
+                                                        :text stdout
+                                                        :who who
+                                                        :ns result-ns}))
+                            (when (seq stderr)
+                              (calva-int/log-to-calva! {:category "evaluationErrorOutput"
+                                                        :text stderr
+                                                        :who who
+                                                        :ns result-ns}))
                             (cond-> {:result limited-result-str
                                      :error error
-                                     :ns (str @sci/ns)
-                                     :stdout @stdout-buffer
-                                     :stderr @stderr-buffer}
+                                     :ns result-ns
+                                     :stdout stdout
+                                     :stderr stderr}
                               (seq other-whos)
                               (assoc "otherWhosSinceLast" other-whos))))]
         (who-tracking/record-evaluation! who)
         (output/append-clojure-eval! code {:who who :ns (str @sci/ns)})
+        (calva-int/log-to-calva! {:category "evaluatedCode"
+                                  :text code
+                                  :who who
+                                  :ns (str @sci/ns)})
         (if wait-for-promise?
           ;; Async path with p/let (existing behavior)
           (try
