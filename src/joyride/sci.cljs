@@ -229,7 +229,7 @@
           (if (= :sci.core/eof form)
             (do
               (vreset! !last-ns @sci/ns)
-              (output/append-eval-result! (pr-str res) {:ns (str @sci/ns)})
+              (output/append-eval-result! (pr-str res))
               res)
             (let [result (try
                            (sci/eval-form (store/get-ctx) form)
@@ -238,3 +238,4 @@
                                (output/append-line-eval-err! message)
                                (throw e))))]
               (recur result))))))))
+

@@ -39,7 +39,7 @@
      (when input
        (run-code+ input))))
   ([code]
-   (output/append-clojure-eval! code)
+   (output/append-clojure-eval! code {:who "ui" :ns (str @jsci/!last-ns)})
    (-> (p/let [result (jsci/eval-string code)]
          result)
        (p/catch (fn [e]
@@ -47,6 +47,7 @@
                                                      (.-message e)))
                   (output/show-terminal!)
                   (throw (js/Error. e)))))))
+
 
 (defn evaluate-selection+
   "Evaluates the selection by first copying it to the clipboard and reading it from there.

@@ -69,7 +69,7 @@
                              :ns (str @sci/ns)
                              :stdout @stdout-buffer
                              :stderr @stderr-buffer}))]
-        (output/append-clojure-eval! code)
+        (output/append-clojure-eval! code {:who "lm-tool" :ns (str @sci/ns)})
         (if wait-for-promise?
           ;; Async path with p/let (existing behavior)
           (try
@@ -112,6 +112,7 @@
               (make-result nil (.-message e) wait-for-promise?))
             (finally
               (restore-fns!))))))))
+
 
 (defn prepare-invocation
   "Prepare confirmation message with rich code preview"

@@ -28,6 +28,7 @@
    ;; Basic colors
    :color/red     "\u001b[31m"
    :color/green   "\u001b[32m"
+   :color/black   "\u001b[30m"
 
    ;; Bright colors
    :color/bright-black   "\u001b[90m"
@@ -35,8 +36,11 @@
 
    ;; Colored background
    :color/bg-white        "\u001b[47m"
+   :color/bg-bright-white "\u001b[107m"
    :color/bg-magenta      "\u001b[45m"
    :color/bg-bright-blue  "\u001b[104m"
+   :color/bg-cyan         "\u001b[46m"
+   :color/bg-bright-cyan  "\u001b[106m"
 
    ;; Aliases matching Chalk
    :color/gray :color/bright-black})
@@ -76,7 +80,8 @@
   []
   (cond
     (high-contrast-theme?)
-    {:output/eval-ns :color/bg-magenta
+    {:output/eval-who :color/bg-bright-cyan
+     :output/eval-ns :color/bg-magenta
      :output/eval-out :color/bright-black
      :output/eval-err :color/bright-red
      :output/other-out :color/green
@@ -84,7 +89,8 @@
      :output/info :color/bg-white}
 
     (light-theme?)
-    {:output/eval-ns :color/bg-magenta
+    {:output/eval-who :color/bg-cyan
+     :output/eval-ns :color/bg-magenta
      :output/eval-out :color/gray
      :output/eval-err :color/red
      :output/other-out :color/green
@@ -92,7 +98,8 @@
      :output/info :color/bg-white}
 
     :else  ;; Dark theme
-    {:output/eval-ns :color/bg-magenta
+    {:output/eval-who :color/bg-bright-cyan
+     :output/eval-ns :color/bg-magenta
      :output/eval-out :color/gray
      :output/eval-err :color/bright-red
      :output/other-out :color/white
@@ -287,20 +294,35 @@
   [message]
   (append-line! (colorize-by-category :output/other-err message)))
 
-(defn- maybe-append-and-set-ns! [ns]
-  (when (not= ns (:output/last-printed-ns @db/!app-db))
-    (swap! db/!app-db assoc :output/last-printed-ns ns)
-    (append-line-other-out! (str (colorize-by-category :output/info "; ")
-                                 (colorize-by-category :output/eval-ns ns)))))
+(defn- info-line
+  "Build the info line string with optional who badge and ns badge.
+   The who badge is suppressed when who is \"ui\" (matching Calva's pattern)."
+  [{:keys [who ns]}]
+  (let [who-badge (when (and who (not= who "ui"))
+                    (str (colorize-by-category :output/eval-who (str " " who " ")) " "))
+        ns-badge (colorize-by-category :output/eval-ns (str " " ns " "))]
+    (str (colorize-by-category :output/info "; ") (or who-badge "") ns-badge)))
+
+(defn- info-changed?
+  "Check if the info line context has changed since last output."
+  [{:keys [who ns]}]
+  (not= (:output/last-info @db/!app-db) {:who who :ns ns}))
+
+(defn- maybe-append-info-line!
+  "Append info line if who or ns has changed since last output."
+  [opts]
+  (when (info-changed? opts)
+    (swap! db/!app-db assoc :output/last-info (select-keys opts [:who :ns]))
+    (append-line! (info-line opts))))
 
 (defn append-eval-result!
   "Append the value returned from an evaluation."
-  [data {:keys [ns]}]
-  (maybe-append-and-set-ns! ns)
+  [data]
   (append-line! (syntax-highlight-clojure data)))
 
 (defn append-clojure-eval!
-  "Echo evaluated code to the terminal with namespace context."
-  [code]
+  "Echo evaluated code to the terminal with namespace and who context."
+  [code opts]
+  (maybe-append-info-line! opts)
   (let [highlighted (syntax-highlight-clojure code)]
     (append-line! highlighted)))

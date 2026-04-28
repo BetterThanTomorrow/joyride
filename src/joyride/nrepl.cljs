@@ -85,20 +85,18 @@
         (pr-str value)))
     (pr-str value)))
 
-(defn do-handle-eval [{:keys [ns code _sci-ctx load-file? file] :as request} send-fn]
+(defn do-handle-eval [{:keys [ns code _sci-ctx load-file? file who] :as request} send-fn]
   (sci/with-bindings
     {sci/ns ns
      sci/print-length @sci/print-length
      sci/print-newline true
      sci/file (or file @sci/file)}
-    ;; we alter-var-root this because the print-fn may go out of scope in case
-    ;; of returned delays
     (sci/alter-var-root sci/print-fn (constantly
                                       (fn [s]
                                         (send-fn request {"out" s}))))
     (if load-file?
       (output/append-line-other-out! (str "Loading file: " file))
-      (output/append-clojure-eval! code))
+      (output/append-clojure-eval! code {:who (or who "nrepl") :ns (str ns)}))
     (try (let [v (jsci/eval-string code)]
            (sci/alter-var-root sci/*3 (constantly @sci/*2))
            (sci/alter-var-root sci/*2 (constantly @sci/*1))
@@ -116,6 +114,7 @@
              (send-fn request {"ex" (str e)
                                "ns" (str @sci/ns)
                                "status" ["done"]}))))))
+
 
 (defn handle-eval [{:keys [ns sci-ctx] :as request} send-fn]
   (do-handle-eval (assoc request :ns (or (when ns
