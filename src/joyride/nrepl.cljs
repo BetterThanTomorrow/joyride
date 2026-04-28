@@ -95,8 +95,10 @@
                                       (fn [s]
                                         (send-fn request {"out" s}))))
     (if load-file?
-      (output/append-line-other-out! (str "Loading file: " file))
-      (output/append-clojure-eval! code {:who (or who "nrepl") :ns (str ns)}))
+      (do
+        (output/maybe-append-info-line! {:who who :ns (str ns)})
+        (output/append-line-other-out! (str "Loading file: " file)))
+      (output/append-clojure-eval! code {:who who :ns (str ns)}))
     (try (let [v (jsci/eval-string code)]
            (sci/alter-var-root sci/*3 (constantly @sci/*2))
            (sci/alter-var-root sci/*2 (constantly @sci/*1))

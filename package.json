@@ -279,10 +279,15 @@
             "awaitResult": {
               "type": "boolean",
               "description": "Whether to wait for async operations to finish. Defaults to `false`. Use `true` when you need the result (user input, file contents, API responses, etcetera). Use  `false` to avoid blocking on promises that may never resolve."
+            },
+            "who": {
+              "type": "string",
+              "description": "A short, stable kebab-case slug identifying you as an evaluator (e.g. 'my-agent', 'test-runner'). Shown as a badge in terminal output so the user can tell evaluators apart. Must not be 'ui' or 'api' (reserved by Joyride)."
             }
           },
           "required": [
-            "code"
+            "code",
+            "who"
           ]
         }
       },

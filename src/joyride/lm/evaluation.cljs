@@ -21,7 +21,7 @@
    Returns a map with :result, :error, :ns, :stdout, and :stderr keys.
    Uses Joyride's full SCI context with VS Code API access and extensions.
    When wait-for-promise? is false, returns result synchronously (no promise)."
-  [{:keys [code ns wait-for-promise?]}]
+  [{:keys [code ns wait-for-promise? who]}]
   (let [bracket-validation (validation/validate-brackets code)]
     (if-not (:valid? bracket-validation)
       ;; Error: code has unbalanced brackets - don't execute
@@ -69,7 +69,7 @@
                              :ns (str @sci/ns)
                              :stdout @stdout-buffer
                              :stderr @stderr-buffer}))]
-        (output/append-clojure-eval! code {:who "lm-tool" :ns (str @sci/ns)})
+        (output/append-clojure-eval! code {:who who :ns (str @sci/ns)})
         (if wait-for-promise?
           ;; Async path with p/let (existing behavior)
           (try

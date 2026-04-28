@@ -65,7 +65,7 @@
          "This (pseudo) terminal displays Joyride messages, evaluated code, results, and output.\r\n\r\n"
          "To reveal this terminal, use the command " cmd-style " Joyride: Open Joyride Output Terminal " reset "\r\n\r\n"
          "https://github.com/BetterThanTomorrow/joyride\r\n"
-         "Please consider sponsoring: https://github.com/niclasnilsson ♥️\r\n\r\n")))
+         "Please consider sponsoring: https://github.com/sponsors/PEZ ♥️\r\n\r\n")))
 
 (defn- current-theme-kind
   "Get current VS Code theme kind"
@@ -323,7 +323,7 @@
   [{:keys [who ns]}]
   (not= (:output/last-info @db/!app-db) {:who who :ns ns}))
 
-(defn- maybe-append-info-line!
+(defn maybe-append-info-line!
   "Append info line if who or ns has changed since last output."
   [opts]
   (when (info-changed? opts)

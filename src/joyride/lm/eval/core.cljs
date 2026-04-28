@@ -29,18 +29,25 @@
   [^js input]
   (let [code (.-code input)
         ns (or (.-namespace input) "user")
-        wait-for-promise? (or (.-awaitResult input) false)]
-    {:code code :ns ns :wait-for-promise? wait-for-promise?}))
+        wait-for-promise? (or (.-awaitResult input) false)
+        who (.-who input)]
+    {:code code :ns ns :wait-for-promise? wait-for-promise? :who who}))
+
+(def ^:private reserved-whos #{"ui" "api"})
 
 (defn validate-input
   "Validate LM tool input data"
-  [{:keys [code ns wait-for-promise?]}]
+  [{:keys [code ns wait-for-promise? who]}]
   (cond
     (nil? code) {:valid? false :error "Code is required"}
     (empty? code) {:valid? false :error "Code cannot be empty"}
     (not (string? code)) {:valid? false :error "Code must be a string"}
     (not (string? ns)) {:valid? false :error "Namespace must be a string"}
     (not (boolean? wait-for-promise?)) {:valid? false :error "awaitResult must be a boolean"}
+    (or (nil? who) (and (string? who) (= "" who)))
+    {:valid? false :error "The `who` parameter is required. Provide a short kebab-case slug identifying you as an evaluator."}
+    (contains? reserved-whos who)
+    {:valid? false :error (str "The `who` value \"" who "\" is reserved by Joyride. Choose a unique slug for your agent.")}
     :else {:valid? true :error nil}))
 
 (defn confirmation-message->markdown
