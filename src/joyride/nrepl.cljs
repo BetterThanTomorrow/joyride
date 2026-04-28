@@ -87,21 +87,22 @@
     (pr-str value)))
 
 (defn do-handle-eval [{:keys [ns code _sci-ctx load-file? file who] :as request} send-fn]
-  (sci/with-bindings
-    {sci/ns ns
-     sci/print-length @sci/print-length
-     sci/print-newline true
-     sci/file (or file @sci/file)}
-    (sci/alter-var-root sci/print-fn (constantly
-                                      (fn [s]
-                                        (send-fn request {"out" s}))))
-    (who-tracking/record-evaluation! who)
-    (if load-file?
-      (do
-        (output/maybe-append-info-line! {:who who :ns (str ns)})
-        (output/append-line-other-out! (str "Loading file: " file)))
-      (output/append-clojure-eval! code {:who who :ns (str ns)}))
-    (try (let [v (jsci/eval-string code)]
+  (let [who (or who "ui")]
+    (sci/with-bindings
+      {sci/ns ns
+       sci/print-length @sci/print-length
+       sci/print-newline true
+       sci/file (or file @sci/file)}
+      (sci/alter-var-root sci/print-fn (constantly
+                                        (fn [s]
+                                          (send-fn request {"out" s}))))
+      (who-tracking/record-evaluation! who)
+      (if load-file?
+        (do
+          (output/maybe-append-info-line! {:who who :ns (str ns)})
+          (output/append-line-other-out! (str "Loading file: " file)))
+        (output/append-clojure-eval! code {:who who :ns (str ns)}))
+      (try (let [v (jsci/eval-string code)]
            (sci/alter-var-root sci/*3 (constantly @sci/*2))
            (sci/alter-var-root sci/*2 (constantly @sci/*1))
            (sci/alter-var-root sci/*1 (constantly v))
@@ -117,7 +118,7 @@
                (send-fn request {"err" (str message "\n")}))
              (send-fn request {"ex" (str e)
                                "ns" (str @sci/ns)
-                               "status" ["done"]}))))))
+                               "status" ["done"]})))))))
 
 
 (defn handle-eval [{:keys [ns sci-ctx] :as request} send-fn]
