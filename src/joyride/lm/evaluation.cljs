@@ -6,6 +6,7 @@
    [joyride.output :as output]
    [joyride.repl-utils :as repl-utils]
    [joyride.sci :as joyride-sci]
+   [joyride.who-tracking :as who-tracking]
    [promesa.core :as p]
    [sci.core :as sci]
    [sci.ctx-store :as store]
@@ -63,12 +64,16 @@
                                                    (number? max-depth)
                                                    (not (zero? max-depth)))
                                               (assoc :max-depth max-depth))
-                                limited-result-str (zp/zprint-str result-value zprint-opts)]
-                            {:result limited-result-str
-                             :error error
-                             :ns (str @sci/ns)
-                             :stdout @stdout-buffer
-                             :stderr @stderr-buffer}))]
+                                limited-result-str (zp/zprint-str result-value zprint-opts)
+                                other-whos (who-tracking/get-other-whos-since-last! who)]
+                            (cond-> {:result limited-result-str
+                                     :error error
+                                     :ns (str @sci/ns)
+                                     :stdout @stdout-buffer
+                                     :stderr @stderr-buffer}
+                              (seq other-whos)
+                              (assoc "otherWhosSinceLast" other-whos))))]
+        (who-tracking/record-evaluation! who)
         (output/append-clojure-eval! code {:who who :ns (str @sci/ns)})
         (if wait-for-promise?
           ;; Async path with p/let (existing behavior)

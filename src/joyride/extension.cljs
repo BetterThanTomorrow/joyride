@@ -15,6 +15,7 @@
    [joyride.utils :refer [jsify]]
    [joyride.vscode-utils :as utils :refer [info]]
    [joyride.when-contexts :as when-contexts]
+   [joyride.who-tracking :as who-tracking]
    [promesa.core :as p]
    [sci.core :as sci]))
 
@@ -39,6 +40,7 @@
      (when input
        (run-code+ input))))
   ([code]
+   (who-tracking/record-evaluation! "ui")
    (output/append-clojure-eval! code {:who "ui" :ns (str @jsci/!last-ns)})
    (-> (p/let [result (jsci/eval-string code)]
          result)

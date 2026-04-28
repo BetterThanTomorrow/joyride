@@ -10,6 +10,7 @@
    [joyride.sci :as jsci]
    [joyride.utils :refer [cljify]]
    [joyride.vscode-utils :refer [info warn error]]
+   [joyride.who-tracking :as who-tracking]
    [promesa.core :as p]
    [sci.core :as sci]
    [sci.ctx-store :as store]
@@ -94,6 +95,7 @@
     (sci/alter-var-root sci/print-fn (constantly
                                       (fn [s]
                                         (send-fn request {"out" s}))))
+    (who-tracking/record-evaluation! who)
     (if load-file?
       (do
         (output/maybe-append-info-line! {:who who :ns (str ns)})
