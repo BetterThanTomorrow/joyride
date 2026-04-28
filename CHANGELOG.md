@@ -4,8 +4,7 @@ Changes to Joyride
 
 ## [Unreleased]
 
-- [Add `who` badge and rework info line in terminal output](https://github.com/BetterThanTomorrow/joyride/issues/TBD)
-- [Style terminal open banner with version info and links](https://github.com/BetterThanTomorrow/joyride/issues/TBD)
+- Add `who` badge and rework info line in terminal output
 
 ## [0.0.72] - 2025-12-20
 
