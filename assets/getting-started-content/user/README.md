@@ -36,22 +36,7 @@ Use VS Code commands to create your first Joyride scripts:
 - **Create User Activate Script** - Runs automatically when Joyride starts
 - **Create Hello Joyride User Script** - Example script to run manually
 
-#### 1.b Install the Awesome Copilot Script
-
-**The Awesome Copilot Script** - A tool for exploring and installing GitHub Copilot instructions, prompts, and chatmodes from the [Awesome Copilot](https://github.com/github/awesome-copilot) repository.
-
-1. **Get the script**: Copy from [Awesome Copilot Joyride Script](https://pez.github.io/awesome-copilot-index/awesome-copilot-script)
-2. **Install in Joyride**:
-   1. Command Palette: `Joyride: Create User Script...`
-   2. Name it: `awesome-copilot` (**NB: It's important that you name it exactly this, because reasons.**)
-   3. Paste the script code
-   4. Save the file
-3. **Use the script**:
-   1. Command Palette: `Joyride: Run User Script...`
-   2. Select: `awesome_copilot.cljs`
-   3. Expect: A menu with content from the Awesome Copilot repository. Selecting an item gives you option to view or install it in your VS Code environment. See [this video](https://www.youtube.com/watch?v=AiL8LurZgSI) for a demo.
-
-#### 1.c Install the example `git-fuzzy` search function/command
+#### 1.b Install the example `git-fuzzy` search function/command
 
 The `git-fuzzy` script is a simple way to search through your Git commit history using a fuzzy search. It will open previews and highlight the changes as you search and navigate the results. It is a super fast way to find changes.
 
