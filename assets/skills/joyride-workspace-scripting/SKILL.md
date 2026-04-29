@@ -10,6 +10,8 @@ description: >-
 
 # Joyride Workspace Scripting
 
+> **Reference files**: This document links to `references/*.cljs` files. Resolve them relative to this file's path using `read_file`.
+
 Workspace scope scripts and source files live in `<workspace>/.joyride/` and are scoped to the project.
 
 If you haven't loaded the `joyride` skill yet, load it now — it covers core evaluation patterns, async handling, and API reference.

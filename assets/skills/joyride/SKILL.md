@@ -10,6 +10,8 @@ description: >-
 
 # Joyride — Core Skill
 
+> **Reference files**: This document links to `references/*.cljs` files. Resolve them relative to this file's path using `read_file`.
+
 Joyride makes VS Code hackable in user space — the Emacs/ELisp model for VS Code. A ClojureScript scripting runtime powered by SCI (Small Clojure Interpreter), giving users full Extension Host access with live REPL interaction.
 
 ## Tools

@@ -120,6 +120,10 @@
   (maybe-create-content+ (default-content-uri ["workspace" ".github" "copilot-instructions.md"])
                          (vscode-utils/path->uri (conf/workspace-abs-joyride-path) [".github" "copilot-instructions.md"])))
 
+(defn maybe-create-user-llm-contexts-marker+ []
+  (maybe-create-content+ (default-content-uri ["user" ".github" "llm-contexts-0.0.73.txt"])
+                         (vscode-utils/path->uri (conf/user-abs-joyride-path) [".github" "llm-contexts-0.0.73.txt"])))
+
 (defn maybe-create-user-project+ []
   (p/do
     (vscode/workspace.fs.createDirectory (vscode-utils/path->uri (conf/user-abs-joyride-path) ["scripts"]))
@@ -128,4 +132,7 @@
     (maybe-create-user-config+)
     (maybe-create-user-gitignore+)
     (maybe-create-user-workspace-activate+)
-    (maybe-create-user-copilot-instructions+)))
+    (p/let [created? (maybe-create-user-copilot-instructions+)]
+      (when created?
+        (maybe-create-user-llm-contexts-marker+)))))
+
