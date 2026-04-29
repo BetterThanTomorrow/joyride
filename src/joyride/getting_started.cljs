@@ -20,6 +20,7 @@
 (defn maybe-create-workspace-activate-script+ []
   (p/do
     (content-utils/maybe-create-workspace-config+)
+    (content-utils/maybe-create-workspace-copilot-instructions+)
     (maybe-create-and-open-content+
      (content-utils/default-content-uri ["workspace" "scripts" "workspace_activate.cljs"])
      (vscode-utils/path->uri (conf/workspace-abs-scripts-path) ["workspace_activate.cljs"]))))
@@ -27,6 +28,7 @@
 (defn maybe-create-workspace-hello-script+ []
   (p/do
     (content-utils/maybe-create-workspace-config+)
+    (content-utils/maybe-create-workspace-copilot-instructions+)
     (maybe-create-and-open-content+
      (content-utils/default-content-uri ["workspace" "scripts" "hello_joyride_workspace_script.cljs"])
      (vscode-utils/path->uri (conf/workspace-abs-scripts-path) ["hello_joyride_workspace_script.cljs"]))))

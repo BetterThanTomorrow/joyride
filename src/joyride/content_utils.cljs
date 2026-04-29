@@ -116,6 +116,10 @@
   (maybe-create-content+ (default-content-uri ["user" ".github" "copilot-instructions.md"])
                          (vscode-utils/path->uri (conf/user-abs-joyride-path) [".github" "copilot-instructions.md"])))
 
+(defn maybe-create-workspace-copilot-instructions+ []
+  (maybe-create-content+ (default-content-uri ["workspace" ".github" "copilot-instructions.md"])
+                         (vscode-utils/path->uri (conf/workspace-abs-joyride-path) [".github" "copilot-instructions.md"])))
+
 (defn maybe-create-user-project+ []
   (p/do
     (vscode/workspace.fs.createDirectory (vscode-utils/path->uri (conf/user-abs-joyride-path) ["scripts"]))

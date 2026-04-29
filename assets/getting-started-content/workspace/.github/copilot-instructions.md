@@ -1,12 +1,13 @@
 ---
-description: 'Joyride User project — scripts and source files available across all VS Code windows'
-applyTo: '**'
+description: 'Joyride Workspace project — scripts and source files for this specific workspace'
+applyTo: '**/.joyride/**'
 ---
 
-# Joyride User Project
+# Joyride Workspace Project
 
-This is your Joyride User project at `~/.config/joyride/`. Scripts and
-source files here are available globally across all VS Code windows.
+This is the Joyride Workspace project at `.joyride/` in this workspace.
+Scripts here are specific to this workspace and can be shared with the
+team via version control.
 
 The Joyride extension bundles skills with comprehensive API documentation
 and pattern guidance. These instructions focus on this project's specific
@@ -14,9 +15,8 @@ content.
 
 ## Project Inventory
 
-- `scripts/user_activate.cljs` — Activation script, manages disposables
-- `scripts/hello_joyride_user_script.cljs` — Example async dialog script
-- `src/joy_button.cljs` — Status bar button with QuickPick menu
+- `scripts/workspace_activate.cljs` — Workspace activation script
+- `scripts/hello_joyride_workspace_script.cljs` — Example greeting script
 
 ## Development
 
