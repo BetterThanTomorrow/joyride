@@ -3,8 +3,7 @@
             ["path" :as path]
             ["util" :as node-util]
             ["vscode" :as vscode]
-            [joyride.core :as joyride]
-            [promesa.core :as p]))
+            [joyride.core :as joyride]))
 
 (def exec!+ (node-util/promisify child-process/exec))
 (def sidecar-dir (path/resolve (path/dirname joyride/*file*) "../sidecar"))
@@ -23,31 +22,31 @@
       .-subscriptions
       (.push disposables)))
 
-(defn install-sidecar!+ []
-  (-> (p/do!
-       (exec!+ "npx vsce package"
-               #js {:cwd sidecar-dir
-                    :shell true})
-       
-       ;; append --profile <Profile Name> to install the extension into the specific profile
-       (exec!+ "code --install-extension joyride-sidecar-0.0.1.vsix" 
-               #js {:cwd sidecar-dir
-                    :shell true}))
-      (p/catch (fn [e]
-                 (js/console.error "Error installing Sidecar:" e)))))
+(defn ^:async install-sidecar!+ []
+  (try
+    (await (exec!+ "npx vsce package"
+                   #js {:cwd sidecar-dir
+                        :shell true}))
+    ;; append --profile <Profile Name> to install the extension into the specific profile
+    (await (exec!+ "code --install-extension joyride-sidecar-0.0.1.vsix"
+                   #js {:cwd sidecar-dir
+                        :shell true}))
+    (catch :default e
+      (js/console.error "Error installing Sidecar:" e))))
 
-(defn uninstall-sidecar!+ []
+(defn ^:async uninstall-sidecar!+ []
   (vscode/commands.executeCommand "setContext"
                                   "joyride.sidecar:helloWorldViewEnabled"
                                   false)
   (when (vscode/extensions.getExtension "betterthantomorrow.joyride-sidecar")
-    (-> (exec!+ "code --uninstall-extension betterthantomorrow.joyride-sidecar"
-                #js {:shell true})
-        (p/catch (fn [e]
-                   (js/console.error "Error uninstalling Sidecar:" (.-message e)))))))
+    (try
+      (await (exec!+ "code --uninstall-extension betterthantomorrow.joyride-sidecar"
+                     #js {:shell true}))
+      (catch :default e
+        (js/console.error "Error uninstalling Sidecar:" (.-message e))))))
 
 (defn wait-for-sidecar-extension+ []
-  (p/create
+  (js/Promise.
    (fn [resolve _reject]
      (letfn [(poll [tries]
                (js/console.log "Waiting for Sidecar to be available: " tries)
@@ -66,27 +65,26 @@
                                           :arguments #js ["Hello World From Joyride Sidecar"
                                                           "OK"]}}])})
 
-(defn activate!+ []
-  (-> (p/do!
-       (clear-disposables!)
-       (uninstall-sidecar!+)
-       (install-sidecar!+)
-       (js/console.log "Sidecar installed")
-       (p/-> (wait-for-sidecar-extension+)
-             (.activate))
-       (js/console.log "Sidecar activated"))
-      (p/catch (fn [e]
-                 (js/console.error "Error activating Joyride Sidecar:" e)))
-      (p/then (fn []
-                (push-disposables!
-                 (vscode/commands.registerCommand
-                  "hello-world.command"
-                  (fn [& args]
-                    (apply vscode/window.showInformationMessage args)))
-                 (vscode/window.registerTreeDataProvider "hello-world.view" hello-provider))
-                (vscode/commands.executeCommand "setContext"
-                                                "joyride.sidecar:helloWorldViewEnabled"
-                                                true)))))
+(defn ^:async activate!+ []
+  (try
+    (clear-disposables!)
+    (await (uninstall-sidecar!+))
+    (await (install-sidecar!+))
+    (js/console.log "Sidecar installed")
+    (let [sidecar (await (wait-for-sidecar-extension+))]
+      (await (.activate sidecar)))
+    (js/console.log "Sidecar activated")
+    (push-disposables!
+     (vscode/commands.registerCommand
+      "hello-world.command"
+      (fn [& args]
+        (apply vscode/window.showInformationMessage args)))
+     (vscode/window.registerTreeDataProvider "hello-world.view" hello-provider))
+    (vscode/commands.executeCommand "setContext"
+                                    "joyride.sidecar:helloWorldViewEnabled"
+                                    true)
+    (catch :default e
+      (js/console.error "Error activating Joyride Sidecar:" e))))
 
 (defn deactivate!+ []
   (clear-disposables!)

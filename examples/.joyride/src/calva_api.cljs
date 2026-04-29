@@ -2,15 +2,14 @@
   (:require ["vscode" :as vscode]
             ["ext://betterthantomorrow.calva$v0" :as calva]
             [joyride.core :as joyride]
-            [promesa.core :as p]
             [util.editor :as editor-utils]))
 
-(defn evaluate-in-session+ [session-key code]
-  (p/let [result (calva/repl.evaluateCode
-                  session-key
-                  code
-                  #js {:stdout println
-                       :stderr #(println (str "Error: " %))})]
+(defn ^:async evaluate-in-session+ [session-key code]
+  (let [result (await (calva/repl.evaluateCode
+                       session-key
+                       code
+                       #js {:stdout println
+                            :stderr #(println (str "Error: " %))}))]
     (.-result result)))
 
 (defn clj-evaluate+ [code]
@@ -24,9 +23,9 @@
   [code]
   (evaluate-in-session+ (calva/repl.currentSessionKey) code))
 
-(defn evaluate-selection+ []
-  (p/let [code (editor-utils/current-selection-text)
-          result (.-result (evaluate+ code))]
+(defn ^:async evaluate-selection+ []
+  (let [code (editor-utils/current-selection-text)
+        result (.-result (await (evaluate+ code)))]
     result))
 
 ;; Utils for REPL-ing Joyride code, when connected to a project REPL.
@@ -51,8 +50,8 @@
 
 ;; Ignore the current (enclosing) form
 
-(defn ignore-current-form []
-  (p/let [[range text] (calva/ranges.currentEnclosingForm)]
+(defn ^:async ignore-current-form []
+  (let [[range text] (await (calva/ranges.currentEnclosingForm))]
     (calva/editor.replace vscode/window.activeTextEditor range (str "#_" text))))
 
 ;; Bind something like so:

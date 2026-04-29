@@ -1,6 +1,5 @@
 (ns util.editor
-  (:require ["vscode" :as vscode]
-            [promesa.core :as p]))
+  (:require ["vscode" :as vscode]))
 
 (defn current-selection []
   (let [editor ^js vscode/window.activeTextEditor
@@ -15,45 +14,48 @@
 (defn current-selection-text []
   (.getText (current-document) (current-selection)))
 
-(defn insert-text!+ 
+(defn ^:async insert-text!+
   ([^js text]
    (insert-text!+ text vscode/window.activeTextEditor (.-active (current-selection))))
   ([text ^js editor ^js position]
-   (-> (p/do (.edit editor
-                    (fn [^js builder]
-                      (.insert builder position text))
-                    #js {:undoStopBefore true :undoStopAfter false}))
-       (p/catch (fn [e]
-                  (js/console.error e))))))
-
-(defn delete-range!+
-  [^js editor ^js range]
-  (-> (p/do (.edit editor
+   (try
+     (await (.edit editor
                    (fn [^js builder]
-                     (.delete builder range))
+                     (.insert builder position text))
                    #js {:undoStopBefore true :undoStopAfter false}))
-      (p/catch (fn [e]
-                 (js/console.error e)))))
+     (catch :default e
+       (js/console.error e)))))
+
+(defn ^:async delete-range!+
+  [^js editor ^js range]
+  (try
+    (await (.edit editor
+                  (fn [^js builder]
+                    (.delete builder range))
+                  #js {:undoStopBefore true :undoStopAfter false}))
+    (catch :default e
+      (js/console.error e))))
 
 (def delete-range! delete-range!+) ;; backwards compatible
 
-(defn replace-range!+
+(defn ^:async replace-range!+
   "Defaults to the current selection."
   ([^js text]
    (replace-range!+ text vscode/window.activeTextEditor (.-active (current-selection)) (current-selection)))
   ([^js text ^js editor ^js position ^js range]
-   (-> (p/do (.edit editor
-                    (fn [^js builder]
-                      (.delete builder range)
-                      (.insert builder position text))
-                    #js {:undoStopBefore true :undoStopAfter false}))
-       (p/catch (fn [e]
-                  (js/console.error e))))))
+   (try
+     (await (.edit editor
+                   (fn [^js builder]
+                     (.delete builder range)
+                     (.insert builder position text))
+                   #js {:undoStopBefore true :undoStopAfter false}))
+     (catch :default e
+       (js/console.error e)))))
 
 (comment
   (def a-selection (current-selection))
   (aset vscode/window.activeTextEditor "selection" a-selection)
-  (insert-text!+ "foo" 
+  (insert-text!+ "foo"
                  vscode/window.activeTextEditor
                  (.-active a-selection))
   (insert-text!+ "foo")

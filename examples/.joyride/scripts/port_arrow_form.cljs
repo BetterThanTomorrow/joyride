@@ -1,7 +1,6 @@
 (ns port-arrow-form
   (:require ["vscode" :as vscode]
             [joyride.core :as joyride]
-            [promesa.core :as p]
             [rewrite-clj.zip :as z]
             [util.editor :as e]))
 
@@ -19,10 +18,10 @@
         rhs (-> zloc z/right z/right z/sexpr)]
     [lhs arrow rhs]))
 
-(defn main []
+(defn ^:async main []
   (println "port-arrow-form started")
-  (-> (p/let [[lhs _ rhs] (get-arrow-clause (e/current-selection-text))]
-        (e/replace-range! (str `(~'is (~'= ~rhs ~lhs)))))))
+  (let [[lhs _ rhs] (get-arrow-clause (e/current-selection-text))]
+    (await (e/replace-range!+ (str `(~'is (~'= ~rhs ~lhs)))))))
 
 (when (= (joyride/invoked-script) joyride/*file*)
   (main))

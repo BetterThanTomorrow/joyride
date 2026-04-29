@@ -1,15 +1,17 @@
 (ns joyride-api
   (:require ["vscode" :as vscode]
             ["ext://betterthantomorrow.joyride" :as joy-api]
-            [promesa.core :as p]
             [joyride.core :as joyride]))
 
 (def joyrideExt (vscode/extensions.getExtension "betterthantomorrow.joyride"))
 
 (comment
   ;; Starting the nREPL server
-  (-> (joy-api/startNReplServer)
-      (p/catch (fn [e] (println (.-message e) e))))
+  ((^:async fn []
+     (try
+       (await (joy-api/startNReplServer))
+       (catch :default e
+         (println (.-message e) e)))))
   ;; (Oh, yes, it's already started, of course.)
   ;; Try first stopping the server? That will not help,
   ;; because you also need to disconnect from it before

@@ -1,7 +1,7 @@
 (ns clojars
   (:require ["vscode" :as vscode]
-            [joyride.core :as joyride]
-            [promesa.core :as p]))
+            [joyride.core :as joyride]))
+
 
 
 (defn lift-clojars-results
@@ -13,11 +13,11 @@
   results)
 
 
-(defn search-clojars
+(defn ^:async search-clojars
   "Search clojars for the given term. The count of results will be
    capped by the API at 24. Returns a promise containing a vector of the results,
    where a single result is a map like
-   
+
    {:created 1747047578708
     :description nil
     :group_name \"metosin\"
@@ -25,17 +25,23 @@
     :version \"0.18.0\"}
   "
   [term]
-  (let [uri-encoded-term (js->clj (js/encodeURI term))]
-    (-> (js/fetch (str "https://clojars.org/search?format=json&q=" uri-encoded-term))
-        (p/then #(.json %))
-        (p/then #(js->clj % :keywordize-keys true))
-        (p/then #(lift-clojars-results %))
-        (p/catch #(nil)))))
+  (try
+    (let [uri-encoded-term (js->clj (js/encodeURI term))
+          response (await (js/fetch (str "https://clojars.org/search?format=json&q=" uri-encoded-term)))
+          json (await (.json response))
+          data (js->clj json :keywordize-keys true)]
+      (lift-clojars-results data))
+    (catch :default _e
+      nil)))
+
 
 
 (comment
-  (p/let [result (search-clojars "malli")]
-    (println result)))
+  ((^:async fn []
+     (let [result (await (search-clojars "malli"))]
+       (println result))))
+  )
+
 
 
 (defn clojars-result->QuickPickItem
@@ -70,19 +76,20 @@
   (insert-at-cursor-position "hello"))
 
 
-(defn ask-for-input
+(defn ^:async ask-for-input
   "The main function of the script. Asks for a search term, queries
    clojars, displays the results and inserts the selected result
    at cursor position."
   []
-  (p/let [input (vscode/window.showInputBox #js {:title "Search clojars"
-                                                 :placeHolder "E.g. malli or reitit or ring/ring"})]
+  (let [input (await (vscode/window.showInputBox #js {:title "Search clojars"
+                                                      :placeHolder "E.g. malli or reitit or ring/ring"}))]
     (when input
-      (p/let [clojars-results (search-clojars input)]
+      (let [clojars-results (await (search-clojars input))]
         (when clojars-results
-          (p/let [picked-item (vscode/window.showQuickPick (clojars-results->QuickPickItems clojars-results))
-                  pick-text (js->clj picked-item :keywordize-keys true)]
+          (let [picked-item (await (vscode/window.showQuickPick (clojars-results->QuickPickItems clojars-results)))
+                pick-text (js->clj picked-item :keywordize-keys true)]
             (insert-at-cursor-position (:label pick-text))))))))
+
 
 
 (comment

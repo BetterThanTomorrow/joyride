@@ -23,12 +23,11 @@
 ;;    },
 
 (ns js-repl
-    (:require ["vscode" :as vscode]
-              [clojure.string :as string]
-              [joyride.core :as joyride]
-              [promesa.core :as p]
-              ["repl" :as node-repl]
-              ["vm" :as vm]))
+  (:require ["vscode" :as vscode]
+            [clojure.string :as string]
+            [joyride.core :as joyride]
+            ["repl" :as node-repl]
+            ["vm" :as vm]))
 
 (def js-repl-active?-when-key "joyride-js-repl:isActive")
 (def decorations?-when-key "joyride-js-repl:hasDecorations")
@@ -48,7 +47,7 @@
 (defn eval+ [code {:keys [filename line-offset column-offset]}]
   (let [!resolve (atom nil)
         repl (:repl @!db)]
-    (-> (p/create
+    (-> (js/Promise.
          (fn [resolve _reject]
            (reset! !resolve resolve)
            (.eval repl
@@ -57,17 +56,17 @@
                   #js {:filename filename
                        :lineOffset line-offset
                        :columnOffset column-offset}
-                  (fn [err, result]
+                  (fn [err result]
                     ;; Some results (and errors are promises)
-                    (-> (p/let [resolved-result result]
-                          (if err
-                            (resolve {:err err})
-                            (resolve {:result resolved-result})))
-                        (p/catch (fn [p-err]
-                                   (resolve {:err p-err}))))))))
-        ;; Some errors are not sent to the eval callback...
-        (p/catch (fn [err]
-                   (@!resolve {:err err}))))))
+                    (-> (js/Promise.resolve result)
+                        (.then (fn [resolved-result]
+                                 (if err
+                                   (resolve {:err err})
+                                   (resolve {:result resolved-result}))))
+                        (.catch (fn [p-err]
+                                  (resolve {:err p-err}))))))))
+        (.catch (fn [err]
+                  (@!resolve {:err err}))))))
 
 (defn- clear-disposables! []
   (run! (fn [disposable]
@@ -131,21 +130,21 @@
                           (not (re-find #"at Script.runInContext" line))))
             (string/join "\n"))))
 
-(defn ^:export evaluate-selection! []
-  (p/let [selection vscode/window.activeTextEditor.selection
-          line (-> selection .-start .-line)
-          column (-> selection .-start .-character)
-          document vscode/window.activeTextEditor.document
-          filename (.-fileName document)
-          selectedText (.getText document selection)
-          result (eval+ selectedText {:filename filename
-                                      :line-offset line
-                                      :column-offset column})
-          pretty-printed-result (stringify (:result result))]
+(defn ^:export ^:async evaluate-selection! []
+  (let [selection vscode/window.activeTextEditor.selection
+        line (-> selection .-start .-line)
+        column (-> selection .-start .-character)
+        document vscode/window.activeTextEditor.document
+        filename (.-fileName document)
+        selectedText (.getText document selection)
+        result (await (eval+ selectedText {:filename filename
+                                           :line-offset line
+                                           :column-offset column}))
+        pretty-printed-result (stringify (:result result))]
     (doto (:output-channel @!db)
       (.append (if (:err result)
-                     (format-error (:err result))
-                     pretty-printed-result))
+                 (format-error (:err result))
+                 pretty-printed-result))
       (.append "\n---\n\n"))
     (decorate! vscode/window.activeTextEditor.selection
                pretty-printed-result

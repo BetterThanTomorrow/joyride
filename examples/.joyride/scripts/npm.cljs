@@ -3,12 +3,10 @@
 
 (.format (moment) "dddd")
 
-(require '["axios" :as axios]
-         '[promesa.core :as p])
+(require '["axios" :as axios])
 
 (def result (atom nil))
-(->
- (axios.get "https://clojure.org")
- (p/then #(reset! result %)))
+((^:async fn []
+   (reset! result (await (axios.get "https://clojure.org")))))
 
 @result
