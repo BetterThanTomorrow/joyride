@@ -4,8 +4,11 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Update SCI to a version that supports async/await
 - Add `who` badge and rework info line in terminal output
 - Log agent evaluations to Calva's output subscriber bus when Calva is installed
+- Update bundled agent instructions
+- Make most examples use SCI await instead of Promesa
 
 ## [0.0.72] - 2025-12-20
 
