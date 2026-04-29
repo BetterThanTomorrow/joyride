@@ -480,26 +480,4 @@ Joyride makes VS Code hackable in user space — the Emacs-ELisp model brought t
     three_repl_flow: backseat_driver(builds) → local_joyride(interacts) → dev_host_joyride(tests_user_api)
 ```
 
-# Joyride — Source Architecture
 
-## Namespace Map
-
-```
-λ joyride_namespaces.
-  joyride.extension     ≡ entry_point | activate ∧ deactivate ∧ hot_reload_hooks
-  joyride.db            ≡ app_state | !app-db ∧ init-db ∧ accessor_functions
-  joyride.sci           ≡ sci_interpreter | namespaces ∧ load-fn ∧ eval-string
-  joyride.config        ≡ path_resolution | user_dir ∧ workspace_dir ∧ joyride_dir
-  joyride.lifecycle     ≡ activation_scripts | user_activate ∧ workspace_activate
-  joyride.output        ≡ terminal_output | ANSI_colors ∧ theme_aware ∧ who_tracking
-  joyride.when-contexts ≡ when_context_mgmt | !db ∧ set-context!
-  joyride.nrepl         ≡ nrepl_server | !db ∧ middleware ∧ bencode
-  joyride.flare         ≡ flare_api | panels ∧ sidebars ∧ hiccup ∧ messaging
-  joyride.flare.sidebar ≡ sidebar_provider | webview_view_registration
-  joyride.flare.panel   ≡ panel_creation | replicant_rendering
-  joyride.lm            ≡ lm_tool_entry | registration
-  joyride.lm.evaluation ≡ lm_tool_impl | code_execution ∧ output_capture
-  joyride.lm.eval.core  ≡ pure_functions | input_validation ∧ message_formatting
-  joyride.lm.eval.validation ≡ pure_validation | bracket_check_via_parinfer
-  joyride.who-tracking  ≡ evaluator_awareness | cross_evaluator_attribution
-```
