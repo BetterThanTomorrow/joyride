@@ -85,6 +85,8 @@ Or install at the project root — Joyride resolves from the workspace root too.
  :paths ["src" "scripts"]}
 ```
 
+The Promesa dependency is for clojure-lsp analysis — at runtime, prefer `^:async`/`await`.
+
 ## clojure-lsp Configuration
 
 To get clojure-lsp to analyze workspace Joyride code:

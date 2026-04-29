@@ -82,24 +82,27 @@ joyride/load-file                 ; Async. Use instead of `load-file` (not imple
 
 ## Async Patterns
 
-```clojure
-(require '[promesa.core :as p])
+Joyride uses SCI's built-in `^:async`/`await` for async operations. No require needed.
 
+```clojure
 ;; Use awaitResult: true for all of these:
 
-;; User input
-(p/let [input (vscode/window.showInputBox #js {:prompt "Enter value:"})]
-  (when input
-    (vscode/window.showInformationMessage (str "You entered: " input))))
+;; Define async functions with ^:async metadata
+(defn ^:async get-user-input []
+  (let [input (await (vscode/window.showInputBox #js {:prompt "Enter value:"}))]
+    (when input
+      (vscode/window.showInformationMessage (str "You entered: " input)))))
 
 ;; Capture async result for later REPL use
-(p/let [files (vscode/workspace.findFiles "**/*.cljs")]
-  (def found-files files))
+(defn ^:async find-scripts []
+  (let [files (await (vscode/workspace.findFiles "**/*.cljs"))]
+    (def found-files files)))
 ;; Now `found-files` is available in the namespace
 
 ;; File reading
-(p/let [content (joyride.core/slurp "some/file.csv")]
-  (def file-content content))
+(defn ^:async read-content []
+  (let [content (await (joyride.core/slurp "some/file.csv"))]
+    (def file-content content)))
 
 ;; Loading namespace files
 (joyride.core/load-file "src/my_namespace.cljs")
@@ -168,7 +171,7 @@ Workspace files take precedence over User files.
 
 ## Available Libraries
 
-`clojure.core`, `clojure.set`, `clojure.string`, `clojure.walk`, `clojure.data`, `clojure.edn`, `clojure.zip`, `promesa.core` (partial), `rewrite-clj`
+`clojure.core`, `clojure.set`, `clojure.string`, `clojure.walk`, `clojure.data`, `clojure.edn`, `clojure.zip`, `promesa.core` (partial, legacy — prefer `^:async`/`await`), `rewrite-clj`
 
 ## Error Handling
 
@@ -179,10 +182,11 @@ Workspace files take precedence over User files.
     {:error (.-message e)}))
 
 ;; Async error handling
-(p/catch
-  (risky-async-operation)
-  (fn [error]
-    (vscode/window.showErrorMessage (str "Error: " (.-message error)))))
+(defn ^:async safe-operation []
+  (try
+    (await (risky-async-operation))
+    (catch js/Error error
+      (vscode/window.showErrorMessage (str "Error: " (.-message error))))))
 ```
 
 ## Backseat Driver Boundary
@@ -203,8 +207,9 @@ When both Joyride and Backseat Driver are installed: **"use the REPL" means `joy
 Structure code as a data pipeline: gather data from VS Code, transform as pure Clojure data, then act with side effects.
 
 ```clojure
-(p/let [editor vscode/window.activeTextEditor]
-  (let [doc-data {:doc/uri     (-> editor .-document .-uri .-fsPath)
+(defn ^:async show-doc-info []
+  (let [editor vscode/window.activeTextEditor
+        doc-data {:doc/uri     (-> editor .-document .-uri .-fsPath)
                   :doc/lang    (-> editor .-document .-languageId)
                   :cursor/line (-> editor .-selection .-active .-line)}]
     (when (= (:doc/lang doc-data) "clojure")
@@ -219,9 +224,10 @@ The data map IS the testable unit — print it, filter it, assert on it in the R
 Before building something new, check the user's existing Joyride scripts and source:
 
 ```clojure
-(p/let [files (vscode/workspace.findFiles
-               (str (joyride/user-joyride-dir) "/**/*.cljs"))]
-  (mapv #(.-fsPath %) files))
+(defn ^:async find-existing-scripts []
+  (let [files (await (vscode/workspace.findFiles
+                      (str (joyride/user-joyride-dir) "/**/*.cljs")))]
+    (mapv #(.-fsPath %) files)))
 ```
 
 ## REPL State vs Script Execution
@@ -262,17 +268,18 @@ Combine `doto` with threading for setting properties on JS objects:
 ## Fetching Web Resources
 
 ```clojure
-(p/let [response (js/fetch "https://raw.githubusercontent.com/user/repo/main/README.md")
-        text     (.text response)]
-  (def readme-content text))
+(defn ^:async fetch-readme []
+  (let [response (await (js/fetch "https://raw.githubusercontent.com/user/repo/main/README.md"))
+        text     (await (.text response))]
+    (def readme-content text)))
 ```
 
 ## SCI / Scittle Async Gotchas
 
-- Use `^:async` + `await` for async functions in SCI
+- Use `^:async` + `await` for async functions in SCI — no require needed
 - `js-await` is Squint-specific — fails in SCI with "Unable to resolve symbol"
 - Top-level `await` is unsupported — must be inside an `^:async` function
-- Use `promesa.core/let` (`p/let`) as the primary async coordination tool
+- `promesa.core` is available but legacy — prefer `^:async`/`await` for new code
 
 ## Anti-Patterns
 
@@ -295,7 +302,7 @@ Combine `doto` with threading for setting properties on JS objects:
 | Issue | Solution |
 |-------|----------|
 | Function not found after REPL eval | Check namespace targeting — may have ended up in `user` |
-| Promise result is `#object[Promise]` | Use `p/let` to unwrap, or `awaitResult: true` in eval tool |
+| Promise result is `#object[Promise]` | Use `await` inside `^:async` fn, or `awaitResult: true` in eval tool |
 | Extension API returns nil | Check `isActive` — extension may not be activated yet |
 | Status bar item not showing | Call `.show` and verify it's not disposed |
 | Script runs on `require` | Add script execution guard |
@@ -314,4 +321,4 @@ Pure-function-first design enables testing in the REPL with `cljs.test`:
 - [Joyride repo](https://github.com/BetterThanTomorrow/joyride)
 - [Flare API docs](https://github.com/BetterThanTomorrow/joyride/blob/master/doc/api.md#joyrideflare)
 - [VS Code API](https://code.visualstudio.com/api/references/vscode-api)
-- [Promesa docs](https://funcool.github.io/promesa/latest/)
+- [Promesa docs](https://funcool.github.io/promesa/latest/) (legacy — prefer `^:async`/`await`)

@@ -124,7 +124,7 @@ Then require in scripts:
  :paths ["src" "scripts"]}
 ```
 
-This file also configures the classpath for clojure-lsp analysis.
+This file configures the classpath for clojure-lsp analysis. The Promesa dependency is for clojure-lsp — at runtime, prefer `^:async`/`await`.
 
 ## clojure-lsp Configuration
 

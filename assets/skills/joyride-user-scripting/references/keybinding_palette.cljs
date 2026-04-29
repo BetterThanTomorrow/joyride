@@ -5,8 +5,7 @@
             ["path" :as path]
             ["vscode" :as vscode]
             [clojure.string :as str]
-            [joyride.core :as joyride]
-            [promesa.core :as p]))
+            [joyride.core :as joyride]))
 
 ;; "Install" by placing this file in ~/.config/joyride/src
 ;; and adding this keybinding to keybindings.json:
@@ -80,7 +79,7 @@
                         (clojure.core/when when-clause
                           (str " · when: " when-clause)))
            :_command command
-           :_args args})}))
+           :_args args})))
 
 (defn- execute-keybinding! [item]
   (let [command (.-_command item)
@@ -89,18 +88,18 @@
       (vscode/commands.executeCommand command args)
       (vscode/commands.executeCommand command))))
 
-(defn show-palette!+ []
-  (p/let [entries (read-keybindings)
-          items (->> entries
-                     (keep js-entry->item)
-                     (sort-by #(str/lower-case (.-label %)))
-                     into-array)
-          selected (vscode/window.showQuickPick
-                    items
-                    #js {:title "Keybinding Command Palette"
-                         :placeHolder "Search keybindings..."
-                         :matchOnDescription true
-                         :matchOnDetail true})]
+(defn ^:async show-palette!+ []
+  (let [entries (read-keybindings)
+        items (->> entries
+                   (keep js-entry->item)
+                   (sort-by #(str/lower-case (.-label %)))
+                   into-array)
+        selected (await (vscode/window.showQuickPick
+                         items
+                         #js {:title "Keybinding Command Palette"
+                              :placeHolder "Search keybindings..."
+                              :matchOnDescription true
+                              :matchOnDetail true}))]
     (clojure.core/when selected
       (execute-keybinding! selected))))
 

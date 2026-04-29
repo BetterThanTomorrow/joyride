@@ -2,7 +2,6 @@
   (:require ["vscode" :as vscode]
             [joyride.core :as joyride]
             joy-button
-            [promesa.core :as p]
             :reload))
 
 (def show-demo-joyride-button false) ; Initialize to `true` to enable demo button, save
@@ -31,10 +30,11 @@
       (+ 1)
       inc)
 
-  (p/let [choice (vscode/window.showInformationMessage "Be a Joyrider 🎸" "Yes" "Of course!")]
-    (if choice
-      (println "You choose: " choice " 🎉")
-      (println "You just closed it? 😭")))
+  (defn ^:async demo-choice []
+    (let [choice (await (vscode/window.showInformationMessage "Be a Joyrider 🎸" "Yes" "Of course!"))]
+      (if choice
+        (println "You choose: " choice " 🎉")
+        (println "You just closed it? 😭"))))
 
   ;; New to Calva and/or Clojure? Use the Calva command:
   ;;   *Calva: Start Joyride REPL and Connect*
