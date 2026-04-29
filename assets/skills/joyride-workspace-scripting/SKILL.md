@@ -77,6 +77,28 @@ cd <workspace>/.joyride && npm install some-package
 
 Or install at the project root — Joyride resolves from the workspace root too.
 
+## Clojure Dependencies — `.joyride/deps.edn`
+
+```clojure
+{:deps {org.clojure/clojurescript {:mvn/version "1.11.54"}
+        funcool/promesa {:mvn/version "9.0.471"}}
+ :paths ["src" "scripts"]}
+```
+
+## clojure-lsp Configuration
+
+To get clojure-lsp to analyze workspace Joyride code:
+
+1. Add a `:source-alias` to `.joyride/.lsp/config.edn`:
+   ```clojure
+   {:source-aliases #{:joyride}}
+   ```
+
+2. Add a `:joyride` alias to the project root `deps.edn`:
+   ```clojure
+   {:aliases {:joyride {:extra-deps {joyride/workspace {:local/root ".joyride"}}}}}
+   ```
+
 ## Team Sharing
 
 Include `.joyride/` in version control to share scripts with your team:
@@ -84,7 +106,21 @@ Include `.joyride/` in version control to share scripts with your team:
 - `deps.edn` — Clojure dependencies (e.g., libraries for data processing)
 - `scripts/` — Runnable automation for the project
 - `src/` — Shared utility functions
-- Consider adding a `README.md` inside `.joyride/` explaining the scripts
+- Consider adding a `README.md` inside `.joyride/` explaining the scripts and keybindings team members should add
+
+Team members need the Joyride extension installed. Scripts auto-run via `workspace_activate.cljs` and appear in the workspace script menu.
+
+## Workspace vs User — Decision Guide
+
+| Criterion | Workspace (`.joyride/`) | User (`~/.config/joyride/`) |
+|-----------|------------------------|------------------------------|
+| Applies to | This project only | All workspaces |
+| Shareable with team | Yes — commit to repo | No — personal setup |
+| Overrides | Wins over user-level code | Provides defaults |
+| Typical use | Project tooling, build helpers | Personal editor customizations |
+| Activation | `workspace_activate.cljs` | `user_activate.cljs` |
+
+**Rule of thumb:** If it's useful in every workspace, put it in user. If it's project-specific or team-shareable, put it in workspace.
 
 ## Workspace Commands
 

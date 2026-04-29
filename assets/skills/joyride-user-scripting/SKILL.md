@@ -116,6 +116,35 @@ Then require in scripts:
 (require '["lodash" :as _])
 ```
 
+## Clojure Dependencies — `deps.edn`
+
+```clojure
+{:deps {org.clojure/clojurescript {:mvn/version "1.11.54"}
+        funcool/promesa {:mvn/version "9.0.471"}}
+ :paths ["src" "scripts"]}
+```
+
+This file also configures the classpath for clojure-lsp analysis.
+
+## clojure-lsp Configuration
+
+To get clojure-lsp to analyze user Joyride code:
+
+1. Add a `:source-alias` to `<user-joyride-dir>/.lsp/config.edn`:
+   ```clojure
+   {:source-aliases #{:joyride-user}}
+   ```
+
+2. Add `:joyride-user` to your global/user `deps.edn` aliases:
+   ```clojure
+   {:aliases
+    {:joyride-user {:extra-deps {joyride/user {:local/root "<user-joyride-dir>"}}}}}
+   ```
+
+## Version Control
+
+Put the User Joyride directory under version control — treat it like dotfiles.
+
 ## Getting Started Commands
 
 - **Joyride: Create User Activate Script** — creates `user_activate.cljs`
