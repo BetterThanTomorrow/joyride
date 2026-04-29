@@ -3,8 +3,7 @@
   (:require
    ["vscode" :as vscode]
    [joyride.core]
-   [joyride.flare :as flare]
-   [promesa.core :as p]))
+   [joyride.flare :as flare]))
 
 (comment
   ;; Simple greeting panel, with themed icon
@@ -38,12 +37,13 @@
                   :title "Because the same default key"})
 
   ; Inspect the result in the repl
-  (p/let [editor-flare (flare/flare!+ {:html [:h1 "A Flare"]
-                                       :title "a flare"
-                                       :key 42})]
-    (def flare editor-flare)
-    ; flare => {42 <view-object>}
-    )
+  ((^:async fn []
+     (let [editor-flare (await (flare/flare!+ {:html [:h1 "A Flare"]
+                                               :title "a flare"
+                                               :key 42}))]
+       (def flare editor-flare)
+       ; flare => {42 <view-object>}
+       )))
 
   ;; Scittle + Replicant
   (flare/flare!+
