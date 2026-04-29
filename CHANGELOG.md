@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.73] - 2026-04-29
+
 - Update SCI to latest version, to get async/await for Joyride scripts
 - Add `who` badge and rework info line in terminal output
 - Log agent evaluations to Calva's output subscriber bus when Calva is installed
