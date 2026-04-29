@@ -166,3 +166,34 @@ Install as a user source file (`Joyride: Create User Source File...` → `git-fu
   "args": "(require '[git-fuzzy :as gz] :reload) (gz/show-git-history!+)"
 }
 ```
+
+## Example: keybinding-palette
+
+A personal command palette for your keybindings. Reads `keybindings.json` (including comments via JSONC parsing), renders keys with Unicode symbols (⌘⌥⇧⌃), and executes the selected command — including commands with arguments. Add `"title"` fields to your keybindings for best experience.
+
+Demonstrates: npm dependency (`jsonc-parser`), Node.js `fs`/`path`/`os` modules, platform-specific path construction, QuickPick with `matchOnDescription` and `matchOnDetail`, command execution with args.
+
+See [references/keybinding_palette.cljs](references/keybinding_palette.cljs) for the complete implementation.
+
+### Installation
+
+1. **Install the npm dependency** in the user Joyride directory:
+   ```bash
+   cd ~/.config/joyride && npm install jsonc-parser
+   ```
+
+2. **Create the source file**: Use `Joyride: Create User Source File...` → name it `keybinding_palette`, then paste the reference content. Or copy the file directly to `~/.config/joyride/src/keybinding_palette.cljs`.
+
+3. **Add the keybinding** to VS Code's `keybindings.json`:
+   ```json
+   {
+     "title": "Keybinding Command Palette",
+     "key": "ctrl+alt+j ctrl+alt+j",
+     "command": "joyride.runCode",
+     "args": "(require '[keybinding-palette :as kp] :reload) (kp/show-palette!+)"
+   }
+   ```
+
+4. **Add `"title"` fields** to other keybindings in `keybindings.json` — these become the searchable labels in the palette. Keybindings without titles are filtered out.
+
+**Platform note:** The `keybindings-path` function currently constructs a macOS-specific path (`~/Library/Application Support/...`). For Linux or Windows, adapt the path construction to use the appropriate VS Code config directory.
