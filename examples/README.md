@@ -73,6 +73,8 @@ Source: [examples/.joyride/src/keybinding_palette.cljs](.joyride/src/keybinding_
 
 ## Pastedown — Paste as Markdown
 
+https://github.com/user-attachments/assets/9e2ab00d-1754-4b92-9733-126a774edf29
+
 A `DocumentPasteEditProvider` that converts clipboard HTML to clean Markdown using [Turndown](https://github.com/mixmark-io/turndown) with GFM support. When you copy rich text (from a browser, Copilot Chat, etc.) and paste it, Pastedown appears in the "Paste As…" menu offering Markdown formatting.
 
 Features:
