@@ -41,6 +41,36 @@ A quick-pick menu for fuzzy searching your git history
 
 Source: [examples/.joyride/src/git_fuzzy.cljs](.joyride/src/git_fuzzy.cljs)
 
+## Keybinding Command Palette
+
+A personal command palette for your VS Code keybindings. Reads your `keybindings.json` (JSONC-aware, so comments are fine), filters entries that have a `"title"` field, renders key combos with Unicode symbols (⌘⌥⇧⌃⏎↑↓…), and executes the selected command — including commands with arguments.
+
+![Keybinding palette screenshot](assets/keybinding-palette.png)
+
+Source: [examples/.joyride/src/keybinding_palette.cljs](.joyride/src/keybinding_palette.cljs)
+
+### Installation
+
+1. Install the npm dependency:
+   ```bash
+   cd ~/.config/joyride && npm install jsonc-parser
+   ```
+2. Copy the source file to `~/.config/joyride/src/keybinding_palette.cljs`
+3. Add this keybinding to your `keybindings.json`:
+   ```json
+   {
+     "title": "Keybinding Command Palette",
+     "key": "ctrl+alt+j ctrl+alt+j",
+     "command": "joyride.runCode",
+     "args": "(require '[keybinding-palette :as kp] :reload) (kp/show-palette!+)"
+   }
+   ```
+4. Add `"title"` fields to your other keybindings — these become the searchable labels in the palette. Keybindings without titles are filtered out.
+
+**Platform note:** The `keybindings-path` function constructs a macOS-specific path. For Linux or Windows, adapt the path construction to match your VS Code config directory.
+
+**Note:** You can ask Copilot to help you with all this. It knows what to do if you ask it to install the keybindings-palette example for you.
+
 ## Give yourself a JavaScript REPL
 
 Evaluate code in JavaScript files, similar to how it's done with Clojure and ClojureScript.

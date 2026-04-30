@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "jsonc-parser": "^3.3.1",
     "posthtml-parser": "^0.11.0"
   }
 }
