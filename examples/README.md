@@ -71,6 +71,49 @@ Source: [examples/.joyride/src/keybinding_palette.cljs](.joyride/src/keybinding_
 
 **Note:** You can ask Copilot to help you with all this. It knows what to do if you ask it to install the keybindings-palette example for you.
 
+## Pastedown — Paste as Markdown
+
+A `DocumentPasteEditProvider` that converts clipboard HTML to clean Markdown using [Turndown](https://github.com/mixmark-io/turndown) with GFM support. When you copy rich text (from a browser, Copilot Chat, etc.) and paste it, Pastedown appears in the "Paste As…" menu offering Markdown formatting.
+
+Features:
+* Converts rich text (HTML) to clean Markdown on paste
+* Full GFM support (tables, strikethrough, task lists)
+* Proper nested list indentation (2 spaces for bullets, 3 for numbered)
+* Converts Copilot Chat's `data-href` links to workspace-relative Markdown file links
+* Includes a `pastedown-in-chat!` workaround for the chat input (which doesn't support paste providers)
+
+Source: [examples/.joyride/src/pastedown.cljs](.joyride/src/pastedown.cljs)
+
+### Installation
+
+1. Install the npm dependencies:
+   ```bash
+   cd ~/.config/joyride && npm install turndown turndown-plugin-gfm
+   ```
+2. Copy the source file to `~/.config/joyride/src/pastedown.cljs`
+3. Require and activate from your `user_activate.cljs`:
+   ```clojure
+   (require '[pastedown])
+   (pastedown/activate!)
+   ```
+4. Add keybindings to `keybindings.json`:
+   ```json
+   {
+     "key": "ctrl+alt+j ctrl+alt+v",
+     "command": "joyride.runCode",
+     "when": "inChatInput",
+     "args": "(require 'pastedown :reload) (pastedown/pastedown-in-chat!)"
+   },
+   {
+     "key": "ctrl+alt+j ctrl+alt+v",
+     "command": "editor.action.pasteAs",
+     "when": "editorTextFocus",
+     "args": {
+       "kind": "pastedown"
+     }
+   }
+   ```
+
 ## Give yourself a JavaScript REPL
 
 Evaluate code in JavaScript files, similar to how it's done with Clojure and ClojureScript.

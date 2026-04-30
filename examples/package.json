@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "jsonc-parser": "^3.3.1",
-    "posthtml-parser": "^0.11.0"
+    "posthtml-parser": "^0.11.0",
+    "turndown": "^7.2.0",
+    "turndown-plugin-gfm": "^1.0.2"
   }
 }
