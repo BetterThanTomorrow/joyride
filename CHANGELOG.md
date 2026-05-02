@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.74] - 2026-05-02
+
 - Bundle skills as `chatSkills` (bacause fixed in VS Code https://github.com/microsoft/vscode/pull/313749)
 
 ## [0.0.73] - 2026-04-29
