@@ -246,7 +246,9 @@
     "chatInstructions": [
       {
         "path": "./assets/instructions/joyride.instructions.md"
-      },
+      }
+    ],
+    "chatSkills": [
       {
         "path": "./assets/skills/joyride/SKILL.md"
       },

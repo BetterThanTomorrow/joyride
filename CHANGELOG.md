@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Bundle skills as `chatSkills` (bacause fixed in VS Code https://github.com/microsoft/vscode/pull/313749)
+
 ## [0.0.73] - 2026-04-29
 
 - Update SCI to latest version, to get async/await for Joyride scripts
