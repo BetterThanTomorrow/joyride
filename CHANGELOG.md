@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.75] - 2026-05-08
+
 - Make the nrepl server return promises resolved, inspired by Scittle
 
 ## [0.0.74] - 2026-05-02
