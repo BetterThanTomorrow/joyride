@@ -53,11 +53,15 @@
 
 (deftest test-validate-input
   (testing "Input validation"
-    (is (:valid? (core/validate-input {:code "(+ 1 2)" :ns "user" :wait-for-promise? false})))
-    (is (not (:valid? (core/validate-input {:code "(+ 1 2)" :ns "user" :wait-for-promise? ""}))))
-    (is (not (:valid? (core/validate-input {:code nil :ns "user"}))))
-    (is (not (:valid? (core/validate-input {:code "" :ns "user"}))))
-    (is (not (:valid? (core/validate-input {:code "(+ 1 2)" :ns nil}))))))
+    (is (:valid? (core/validate-input {:code "(+ 1 2)" :ns "user" :wait-for-promise? false :who "tester"})))
+    (is (not (:valid? (core/validate-input {:code "(+ 1 2)" :ns "user" :wait-for-promise? "" :who "tester"}))))
+    (is (not (:valid? (core/validate-input {:code nil :ns "user" :who "tester"}))))
+    (is (not (:valid? (core/validate-input {:code "" :ns "user" :who "tester"}))))
+    (is (not (:valid? (core/validate-input {:code "(+ 1 2)" :ns nil :who "tester"}))))
+    (is (not (:valid? (core/validate-input {:code "(+ 1 2)" :ns "user" :wait-for-promise? false})))
+        "who is required")
+    (is (not (:valid? (core/validate-input {:code "(+ 1 2)" :ns "user" :wait-for-promise? false :who "ui"})))
+        "reserved who values are rejected")))
 
 (deftest test-extract-input-data
   (testing "Input data extraction"

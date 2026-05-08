@@ -119,6 +119,24 @@ jobs:
             - artifacts
             - build
             - env
+
+  test-cljslib:
+    docker:
+      - image: cimg/clojure:1.12.0-openjdk-21.0-node
+    working_directory: ~/joyride
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Restore build
+          command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
+      - restore_cache:
+          name: Restore dependencies
+          key: npm-{{ checksum "package.json" }}-cljs-{{ checksum "deps.edn" }}
+      - run:
+          name: Compile and run unit tests
+          command: npx shadow-cljs compile :test-compile && node out/extension-tests.js
+
   test-integration-fs:
     docker:
       - image: cimg/clojure:1.11-browsers
@@ -302,9 +320,9 @@ workflows:
       - build:
           requires:
             - checkout
-      #- test-cljslib:
-      #    requires:
-      #      - build
+      - test-cljslib:
+          requires:
+            - build
       - test-integration-fs:
           requires:
             - build
@@ -327,14 +345,14 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v\d+\.\d+\.\d+-?.*/
-      #- test-cljslib:
-      #    requires:
-      #      - build
-      #    filters:
-      #      branches:
-      #        ignore: /.*/
-      #      tags:
-      #        only: /^v\d+\.\d+\.\d+-?.*/
+      - test-cljslib:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+-?.*/
       - test-integration-fs:
           requires:
             - build
