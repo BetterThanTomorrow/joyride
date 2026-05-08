@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Make the nrepl server return promises resolved, inspired by Scittle
+
 ## [0.0.74] - 2026-05-02
 
 - Bundle skills as `chatSkills` (bacause fixed in VS Code https://github.com/microsoft/vscode/pull/313749)

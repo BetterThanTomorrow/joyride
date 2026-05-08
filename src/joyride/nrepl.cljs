@@ -102,23 +102,38 @@
           (output/maybe-append-info-line! {:who who :ns (str ns)})
           (output/append-line-other-out! (str "Loading file: " file)))
         (output/append-clojure-eval! code {:who who :ns (str ns)}))
-      (try (let [v (jsci/eval-string code)]
-           (sci/alter-var-root sci/*3 (constantly @sci/*2))
-           (sci/alter-var-root sci/*2 (constantly @sci/*1))
-           (sci/alter-var-root sci/*1 (constantly v))
-           (send-fn request {"value" (format-value (:nrepl.middleware.print/print request)
-                                                   (:nrepl.middleware.print/options request)
-                                                   v)
-                             "ns" (str @sci/ns)})
-           (send-fn request {"status" ["done"]}))
-         (catch :default e
-           (sci/alter-var-root sci/*e (constantly e))
-           (let [data (ex-data e)]
-             (when-let [message (or (:message data) (.-message e))]
-               (send-fn request {"err" (str message "\n")}))
-             (send-fn request {"ex" (str e)
-                               "ns" (str @sci/ns)
-                               "status" ["done"]})))))))
+      (try (let [v (jsci/eval-string code)
+                 send-result! (fn [val promise?]
+                                (sci/alter-var-root sci/*3 (constantly @sci/*2))
+                                (sci/alter-var-root sci/*2 (constantly @sci/*1))
+                                (sci/alter-var-root sci/*1 (constantly val))
+                                (let [formatted (format-value (:nrepl.middleware.print/print request)
+                                                              (:nrepl.middleware.print/options request)
+                                                              val)]
+                                  (send-fn request {"value" (if promise?
+                                                              (str "#<Promise " formatted ">")
+                                                              formatted)
+                                                    "ns" (str @sci/ns)}))
+                                (send-fn request {"status" ["done"]}))]
+             (if (instance? js/Promise v)
+               (-> v
+                   (.then (fn [resolved]
+                            (send-result! resolved true)))
+                   (.catch (fn [rejected]
+                             (sci/alter-var-root sci/*e (constantly rejected))
+                             (send-fn request {"err" (str rejected "\n")})
+                             (send-fn request {"ex" (str rejected)
+                                               "ns" (str @sci/ns)
+                                               "status" ["done"]}))))
+               (send-result! v false)))
+           (catch :default e
+             (sci/alter-var-root sci/*e (constantly e))
+             (let [data (ex-data e)]
+               (when-let [message (or (:message data) (.-message e))]
+                 (send-fn request {"err" (str message "\n")}))
+               (send-fn request {"ex" (str e)
+                                 "ns" (str @sci/ns)
+                                 "status" ["done"]})))))))
 
 
 (defn handle-eval [{:keys [ns sci-ctx] :as request} send-fn]
