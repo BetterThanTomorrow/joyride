@@ -13,6 +13,14 @@ Joyride makes VS Code hackable in user space — the Emacs/ELisp model for VS Co
 
 When the user reports issues, they occurred in the Extension Development Host — use the Backseat Driver REPL to investigate.
 
+## Watch Task
+
+The "Watch" task (`shadow-cljs watch :extension :test-watch`) runs continuously, compiling the extension and auto-running all unit tests (namespaces matching `-test$`) on every file save. After making changes, check the Watch task output to verify zero compilation warnings/errors and all tests passing. The latest status is at the tail of the output. Trust the watcher — do not run separate terminal commands to compile or test.
+
+## Unit Tests
+
+When adding or modifying functionality, look for opportunities to add unit tests for pure logic. Unit tests run in Node.js via shadow-cljs and cannot require `vscode` — factor code so that pure logic lives in namespaces free of VS Code dependencies. Strive to make code more pure and testable. Test files go in `test/` mirroring the `src/` structure (e.g., `src/joyride/foo.cljs` → `test/joyride/foo_test.cljs`). The watcher picks up new test namespaces automatically.
+
 ## State Inspection Safety
 
 - `@db/!app-db` — always `dissoc :extension-context` before inspecting (circular references)
