@@ -332,11 +332,11 @@
     "package": "npx vsce package --allow-star-activation",
     "package:prerelease": "npx vsce package --allow-star-activation --pre-release",
     "vscode:prepublish": "npm run clean && npm run release",
-    "preintegration-test": "cd ./vscode-test-runner/workspace-1 && npm i",
-    "integration-test": "node ./vscode-test-runner/launch.js",
-    "preintegration-test:vsix": "bb ./vscode-test-runner/setup-isolated-workspace.clj > /tmp/joyride-test-runner-path.txt",
+    "preintegration-test": "cd ./seatbelt-e2e/workspace-1 && npm i",
+    "integration-test": "node ./seatbelt-e2e/launch.js",
+    "preintegration-test:vsix": "bb ./seatbelt-e2e/setup-isolated-workspace.clj > /tmp/joyride-test-runner-path.txt",
     "integration-test:vsix": "cd $(cat /tmp/joyride-test-runner-path.txt) && node launch.js --test-workspace=../workspace",
-    "integration-test-containerized": "./vscode-test-runner/run-containerized.sh"
+    "integration-test-containerized": "./seatbelt-e2e/run-containerized.sh"
   },
   "dependencies": {
     "@vscode/codicons": "^0.0.30",

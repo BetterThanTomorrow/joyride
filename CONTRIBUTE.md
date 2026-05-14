@@ -33,7 +33,7 @@ Please do not use `git push --force` on your PR branch for the following reasons
 
 Each bug fix, change or new feature should be tested well to prevent future
 regressions.  Tests should be added to
-[vscode-test-runner/workspace-1/.joyride/src/integration_test](vscode-test-runner/workspace-1/.joyride/src/integration_test)
+[seatbelt-e2e/workspace-1/.joyride/src/integration_test](seatbelt-e2e/workspace-1/.joyride/src/integration_test)
 
 We use [@vscode/test-electron](https://code.visualstudio.com/api/working-with-extensions/testing-extension) configured to spawn VS Code Insiders and run the tests in there. The test runner is written using Joyride.
 
@@ -80,7 +80,7 @@ You will have two REPLs.
 
 ### About the default Extension Development project
 
-By default, the debug extension host session opens up [the integration testing project](vscode-test-runner/workspace-1/), which is part of this repository/project. (See [Tests](#tests) for more on the tests.) This makes it easy to test Joyride with relevant sample content, manually, or via integration test code. It also means that content you create or change there can be committed back to the repository. Please note that we want any Joyride content in this integration test project's `script` and `src` directories to be consumed by integration tests, so if you think some content should be added, please also add integration tests for it.
+By default, the debug extension host session opens up [the integration testing project](seatbelt-e2e/workspace-1/), which is part of this repository/project. (See [Tests](#tests) for more on the tests.) This makes it easy to test Joyride with relevant sample content, manually, or via integration test code. It also means that content you create or change there can be committed back to the repository. Please note that we want any Joyride content in this integration test project's `script` and `src` directories to be consumed by integration tests, so if you think some content should be added, please also add integration tests for it.
 
 ## Feedback welcome
 

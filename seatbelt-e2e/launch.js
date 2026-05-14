@@ -16,7 +16,7 @@ function init() {
       if (!process.env[USER_CONFIG_PATH_KEY]) {
         const tmpConfigPath = path.join(
           os.tmpdir(),
-          "vscode-test-runner-joyride",
+          "seatbelt-e2e-joyride",
           "user-config"
         );
         if (fs.existsSync(tmpConfigPath)) {
@@ -87,7 +87,7 @@ const joyrideVSIX = args["joyride-vsix"]
   : "extension-development";
 const testWorkspace = args["test-workspace"]
   ? path.resolve(args["test-workspace"])
-  : path.resolve(__dirname, "..", "vscode-test-runner", "workspace-1");
+  : path.resolve(__dirname, "..", "seatbelt-e2e", "workspace-1");
 console.info(
   `Using:\n  Joyride: ${joyrideVSIX}\n  Test workspace: ${testWorkspace}`
 );

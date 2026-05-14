@@ -12,8 +12,8 @@
             "args": [
                 "--disable-extensions",
                 "--extensionDevelopmentPath=${workspaceRoot}",
-                "--extensionTestsPath=${workspaceRoot}/vscode-test-runner/runTests.js",
-                "--folder-uri=${workspaceRoot}/vscode-test-runner/workspace-1"
+                "--extensionTestsPath=${workspaceRoot}/seatbelt-e2e/runTests.js",
+                "--folder-uri=${workspaceRoot}/seatbelt-e2e/workspace-1"
             ],
             //"sourceMaps": true,
             //"outFiles": [
@@ -27,7 +27,7 @@
             "runtimeExecutable": "${execPath}",
             "args": [
                 "--extensionDevelopmentPath=${workspaceRoot}",
-                "--folder-uri=${workspaceRoot}/vscode-test-runner/workspace-1"
+                "--folder-uri=${workspaceRoot}/seatbelt-e2e/workspace-1"
              ],
             "sourceMaps": true,
             "outFiles": [
@@ -115,7 +115,7 @@
             "runtimeExecutable": "${execPath}",
             "args": [
                 "--extensionDevelopmentPath=${workspaceRoot}",
-                "${workspaceRoot}/vscode-test-runner/workspace-1"
+                "${workspaceRoot}/seatbelt-e2e/workspace-1"
             ],
             "sourceMaps": true,
             "env": {},

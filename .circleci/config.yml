@@ -149,7 +149,7 @@ jobs:
           command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
       - restore_cache:
           name: Restore dependencies (VS Code install, Joyride workspace node_modules)
-          key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
+          key: npm-{{ checksum "./seatbelt-e2e/workspace-1/package.json" }}
       - run:
           name: Apt install missing dependencies
           command: |
@@ -160,11 +160,11 @@ jobs:
           command: npm run integration-test
       - save_cache:
           name: Save dependencies (VS Code install, Joyride workspace node_modules)
-          key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
+          key: npm-{{ checksum "./seatbelt-e2e/workspace-1/package.json" }}
           paths:
             - .vscode-test/extensions
             - .vscode-test/vscode-linux-x64-insiders
-            - ./vscode-test-runner/workspace-1/node_modules
+            - ./seatbelt-e2e/workspace-1/node_modules
   test-integration-vsix:
     docker:
       - image: cimg/clojure:1.11-browsers
@@ -177,7 +177,7 @@ jobs:
           command: rmdir ~/joyride && cp -r /tmp/build ~/joyride
       - restore_cache:
           name: Restore dependencies (VS Code install, Joyride workspace node_modules)
-          key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
+          key: npm-{{ checksum "./seatbelt-e2e/workspace-1/package.json" }}
       - run:
           name: Install Babashka
           command: |
@@ -194,11 +194,11 @@ jobs:
           command: npm run integration-test:vsix -- --joyride-vsix=/tmp/artifacts/joyride-$(node -p 'require("./package.json").version').vsix
       - save_cache:
           name: Save dependencies (VS Code install, Joyride workspace node_modules)
-          key: npm-{{ checksum "./vscode-test-runner/workspace-1/package.json" }}
+          key: npm-{{ checksum "./seatbelt-e2e/workspace-1/package.json" }}
           paths:
             - .vscode-test/extensions
             - .vscode-test/vscode-linux-x64-insiders
-            - ./vscode-test-runner/workspace-1/node_modules
+            - ./seatbelt-e2e/workspace-1/node_modules
   github-release:
     docker:
       - image: cibuilds/github:0.10

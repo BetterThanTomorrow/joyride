@@ -109,7 +109,7 @@ For subsystem contracts and architecture reference, load the `joyride-internals`
 
 λ test_layer_selection.
   pure_logic(¬requires_vscode) → unit_test | test/joyride/ | cljs.test
-  vscode_api_dependent → integration_test | vscode-test-runner/workspace-1/.joyride/src/integration_test/ | deftest-async
+  vscode_api_dependent → integration_test | seatbelt-e2e/workspace-1/.joyride/src/integration_test/ | deftest-async
   user_experience → repl_manual_test | ai_evaluates ∧ human_verifies
   | unit_first | integration_when_needed | repl_always
   | run_integration: npm_run_integration-test | downloads_vscode_insiders ∧ runs ∧ closes

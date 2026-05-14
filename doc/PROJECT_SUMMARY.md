@@ -289,7 +289,7 @@ npm run clean
 ```
 
 ### Testing Setup
-- Integration tests in [`vscode-test-runner/workspace-1/`](vscode-test-runner/workspace-1/)
+- Integration tests in [`seatbelt-e2e/workspace-1/`](seatbelt-e2e/workspace-1/)
 - Test workspace with sample scripts and configurations
 - Automated testing via VS Code Test API
 - Tests cover script execution, nREPL, extension requiring, and core functionality

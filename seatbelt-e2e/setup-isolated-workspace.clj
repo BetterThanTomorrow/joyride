@@ -3,8 +3,8 @@
 (require '[babashka.fs :as fs]
          '[babashka.process :refer [shell]])
 
-(def vscode-test-runner-dir (fs/parent *file*))
-(def source-workspace (fs/path vscode-test-runner-dir "workspace-1"))
+(def seatbelt-e2e-dir (fs/parent *file*))
+(def source-workspace (fs/path seatbelt-e2e-dir "workspace-1"))
 (def temp-base (fs/path "/tmp" "joyride-test"))
 (def temp-workspace (fs/path temp-base "workspace"))
 (def temp-runner (fs/path temp-base "runner"))
@@ -12,7 +12,7 @@
 (binding [*out* *err*]
   (println "Setting up isolated test environment...")
   (println "  Source workspace:" (str source-workspace))
-  (println "  Source runner:" (str vscode-test-runner-dir))
+  (println "  Source runner:" (str seatbelt-e2e-dir))
   (println "  Target base:" (str temp-base))
 
   (when (fs/exists? temp-base)
@@ -25,7 +25,7 @@
   (println "  Copying test runner...")
   (fs/create-dirs temp-runner)
   (doseq [file ["launch.js" "runTests.js"]]
-    (fs/copy (fs/path vscode-test-runner-dir file)
+    (fs/copy (fs/path seatbelt-e2e-dir file)
              (fs/path temp-runner file)))
 
   (spit (str (fs/path temp-runner "package.json"))
