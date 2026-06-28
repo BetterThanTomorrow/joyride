@@ -20,7 +20,7 @@
         (p/then (fn [server-info]
                   (swap! db/!app-db assoc :mcp/server-info server-info)
                   (mcp-cursor/register-and-reload-mcp-client!+
-                   "Joyride MCP"
+                   "joyride"
                    context
                    "dist/joyride-mcp-server.js"
                    (:server/port-file-uri server-info))))
