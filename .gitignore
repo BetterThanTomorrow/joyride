@@ -16,6 +16,7 @@ node_modules
 
 # Calva
 **/.calva/output-window/
+.calva/mcp-server/port
 
 # clj-kondo, clojure-lsp
 .cache
@@ -32,3 +33,5 @@ examples/.calva
 
 .vscode-test/
 playground/hello-joyride/.calva/output-window/output.calva-repl
+
+dist/

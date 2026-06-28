@@ -8,6 +8,7 @@
    [joyride.lifecycle :as life-cycle]
    [joyride.lm :as lm]
    [joyride.lm.docs :as lm-docs]
+   [joyride.mcp.server :as mcp-server]
    [joyride.nrepl :as nrepl]
    [joyride.output :as output]
    [joyride.sci :as jsci]
@@ -120,6 +121,7 @@
       (swap! db/!app-db update :disposables conj lm-disposable)
       (.push (.-subscriptions ^js extension-context) lm-disposable))
     (lm-docs/sync-all-guides-background! extension-context)
+    (mcp-server/start! extension-context)
     (when context (-> (content-utils/maybe-create-user-project+)
                       (p/catch
                        (fn [e]
@@ -140,6 +142,7 @@
   (when-contexts/set-context! ::when-contexts/joyride.isActive false)
   (when (nrepl/server-running?)
     (nrepl/stop-server+))
+  (mcp-server/stop!)
   (clear-disposables!))
 
 (defn before [done]

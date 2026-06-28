@@ -13,6 +13,9 @@
                          :after-load joyride.extension/after}
               :dev {:compiler-options {:optimizations :none
                                        :source-map true}}}
+  :stdio-wrapper {:target :node-script
+                  :main vscode-mcp.stdio.wrapper/main
+                  :output-to "dist/joyride-mcp-server.js"}
   :test-watch
   {:target    :node-test
    :output-to "out/extension-tests.js"
