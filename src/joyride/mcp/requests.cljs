@@ -52,9 +52,8 @@
       "tools/call"
       (let [tool-name (:name params)
             args (:arguments params)]
-        (-> (p/resolved (call-tool-impl tool-name args))
-            (p/then (fn [lm-result]
-                      (responses/success-response id (lm-result->mcp-result lm-result))))
+        (-> (p/let [lm-result (call-tool-impl tool-name args)]
+              (responses/success-response id (lm-result->mcp-result lm-result)))
             (p/catch (fn [e]
                        (responses/success-response id {:content [{:type "text" :text (.-message e)}]
                                                        :isError true})))))
@@ -70,4 +69,5 @@
           (responses/error-response id -32602 "Resource not found")))
 
       ;; Default for unknown methods
-      (responses/error-response id -32601 (str "Method not found: " method)))))
+      (when id
+        (responses/error-response id -32601 (str "Method not found: " method))))))
