@@ -9,7 +9,7 @@
    [vscode-mcp.server :as mcp-server]))
 
 (defn start! [^js context]
-  (let [wrapper-path (path/join (.-extensionPath context) "dist" "joyride-mcp-server.js")
+  (let [wrapper-path (path/join "dist" "joyride-mcp-server.js")
         storage-uri (.-storageUri context)
         port-file-uri (when storage-uri (vscode/Uri.joinPath storage-uri "mcp-server" "port"))]
     (-> (mcp-server/start-server!+ {:on-request (partial requests/handle-request {:extension-context context})
@@ -22,7 +22,7 @@
                   (mcp-cursor/register-and-reload-mcp-client!+
                    "joyride"
                    context
-                   "dist/joyride-mcp-server.js"
+                   wrapper-path
                    (:server/port-file-uri server-info))))
         (p/catch (fn [e]
                    (js/console.error "Failed to start Joyride MCP server:" (.-message e)))))))
