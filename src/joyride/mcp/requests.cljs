@@ -38,12 +38,18 @@
                          {"config.joyride.lm.enableReplTool" (.get config "enableReplTool")}))]
     (case method
       "initialize"
-      (responses/success-response id
-       {:protocolVersion "2024-11-05"
-        :capabilities {:tools {}
-                       :resources {}}
-        :serverInfo {:name "joyride-mcp-server"
-                     :version "0.0.1"}})
+      (let [tools (manifest/get-tools extension-context {:settings (get-settings)})
+            resources (manifest/get-resources extension-context {:settings (get-settings)})
+            instructions (manifest/build-server-instructions {:base-text "Joyride MCP server provides access to VS Code Extension API via the Small Clojure Interpreter (SCI)."
+                                                              :tools tools
+                                                              :resources resources})]
+        (responses/success-response id
+         {:protocolVersion "2024-11-05"
+          :capabilities {:tools {}
+                         :resources {}}
+          :instructions instructions
+          :serverInfo {:name "joyride"
+                       :version "0.0.1"}}))
 
       "tools/list"
       (let [tools (manifest/get-tools extension-context {:settings (get-settings)})]

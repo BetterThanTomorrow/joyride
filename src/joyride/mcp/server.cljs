@@ -29,7 +29,7 @@
 
 (defn stop! []
   (when-let [server-info (:mcp/server-info @db/!app-db)]
-    (-> (mcp-cursor/unregister-mcp-server!+ "Joyride MCP")
+    (-> (mcp-cursor/unregister-mcp-server!+ "joyride")
         (p/then (fn [_]
                   (mcp-server/stop-server!+ server-info)))
         (p/then (fn [_]
