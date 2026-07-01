@@ -5,6 +5,7 @@
             [promesa.core :as p]))
 
 (defonce ^:private !db (atom {:contexts {::joyride.isActive false
+                                         ::joyride.isMcpServerRunning false
                                          ::joyride.isNReplServerRunning false
                                          ::joyride.userActivateScriptExists false
                                          ::joyride.userHelloScriptExists false
