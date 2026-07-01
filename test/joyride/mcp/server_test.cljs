@@ -17,10 +17,10 @@
 
 (deftest copy-command-strings-test
   (let [wrapper "/ext/dist/joyride-mcp-server.js"
+        port-file-path "/storage/mcp-server/port"
         server-info {:server/assigned-port 5432
                      :server/host "127.0.0.1"
-                     :server/port-file-uri #js {:fsPath "/storage/mcp-server/port"}}
-        port-file-path (.-fsPath (:server/port-file-uri server-info))]
+                     :server/port-file-uri #js {:fsPath port-file-path}}]
     (testing "port command includes host (matches joyride.mcp.server/copy-command-strings)"
       (is (= "node /ext/dist/joyride-mcp-server.js 5432 127.0.0.1"
              (stdio-config/stdio-command-string "node" wrapper (str (:server/assigned-port server-info)) (:server/host server-info)))))
