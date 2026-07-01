@@ -1,1 +1,15 @@
-{:tasks {dev (shell "npx shadow-cljs watch extension")}}
+{:paths ["script"]
+ :deps {org.babashka/cli {:mvn/version "0.8.67"}}
+ :tasks
+ {:requires [[babashka.cli :as cli]
+             [tasks :as t]]
+
+  dev
+  {:doc "Watch the extension with shadow-cljs"
+   :task (shell "npx shadow-cljs watch extension")}
+
+  package-pre-release
+  {:doc "Usage: bb package-pre-release [<slug>] [--dry]"
+   :task (t/package-pre-release!
+          (cli/parse-opts *command-line-args* {:restrict [:slug :dry]
+                                               :args->opts [:slug]}))}}}

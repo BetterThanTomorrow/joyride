@@ -49,12 +49,19 @@
 
       "tools/call"
       (let [tool-name (:name params)
-            args (:arguments params)]
-        (-> (p/let [lm-result (call-tool-impl tool-name args)]
-              (responses/success-response id (lm-result->mcp-result lm-result)))
-            (p/catch (fn [e]
-                       (responses/success-response id {:content [{:type "text" :text (.-message e)}]
-                                                       :isError true})))))
+            args (:arguments params)
+            settings (get-settings)
+            allowed (manifest/tool-call-allowed? extension-context tool-name {:settings settings})]
+        (cond
+          (= :disabled allowed)
+          (responses/error-response id -32601 "Unknown tool")
+
+          :else
+          (-> (p/let [lm-result (call-tool-impl tool-name args)]
+                (responses/success-response id (lm-result->mcp-result lm-result)))
+              (p/catch (fn [e]
+                         (responses/success-response id {:content [{:type "text" :text (.-message e)}]
+                                                         :isError true}))))))
 
       "resources/list"
       (let [resources (manifest/get-resources extension-context {:settings (get-settings)})]

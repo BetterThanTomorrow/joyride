@@ -121,7 +121,7 @@
       (swap! db/!app-db update :disposables conj lm-disposable)
       (.push (.-subscriptions ^js extension-context) lm-disposable))
     (lm-docs/sync-all-guides-background! extension-context)
-    (mcp-server/start! extension-context)
+    (mcp-server/maybe-start! extension-context)
     (when context (-> (content-utils/maybe-create-user-project+)
                       (p/catch
                        (fn [e]

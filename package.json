@@ -61,6 +61,21 @@
             "default": "127.0.0.1",
             "markdownDescription": "The host address to use for the nREPL server."
           },
+          "joyride.mcp.autoStartServer": {
+            "type": "boolean",
+            "default": false,
+            "description": "Automatically start the MCP socket server when Joyride activates."
+          },
+          "joyride.mcp.autoRegisterCursor": {
+            "type": "boolean",
+            "default": true,
+            "description": "In Cursor, automatically register the Joyride MCP server with the IDE Agent. When enabled and Cursor MCP API is available, the socket server starts silently on activation."
+          },
+          "joyride.mcp.host": {
+            "type": "string",
+            "default": "127.0.0.1",
+            "markdownDescription": "Host address for the MCP socket server to bind to."
+          },
           "joyride.lm.enableReplTool": {
             "type": "boolean",
             "default": true,
