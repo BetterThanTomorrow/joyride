@@ -6,7 +6,7 @@
    [joyride.mcp.requests :as requests]
    [joyride.when-contexts :as when-contexts]
    [promesa.core :as p]
-   [vscode-mcp.lifecycle :as lifecycle]))
+   [vscode-mcp.core :as vscode-mcp]))
 
 (defn- read-mcp-config []
   (let [config (vscode/workspace.getConfiguration "joyride.mcp")]
@@ -20,7 +20,7 @@
 
 (defn- build-lifecycle-config [^js context]
   (let [mcp-config (read-mcp-config)]
-    (lifecycle/create-config
+    (vscode-mcp/create-config
      (merge mcp-config
             {:vscode/extension-context context
              :cursor/server-name "joyride"
@@ -38,7 +38,7 @@
                                              (set-server-running-context! running?))}))))
 
 (defn- lifecycle-state []
-  (or (:mcp/lifecycle-state @db/!app-db) (lifecycle/init-state)))
+  (or (:mcp/lifecycle-state @db/!app-db) (vscode-mcp/init-state)))
 
 (defn- update-lifecycle-state!+ [state+]
   (p/then state+ (fn [state]
@@ -46,19 +46,19 @@
                    state)))
 
 (defn server-running? []
-  (lifecycle/running? (lifecycle-state)))
+  (vscode-mcp/running? (lifecycle-state)))
 
 (defn maybe-start! [^js context]
   (update-lifecycle-state!+
-   (lifecycle/maybe-start!+ (build-lifecycle-config context) (lifecycle-state))))
+   (vscode-mcp/maybe-start!+ (build-lifecycle-config context) (lifecycle-state) true)))
 
 (defn start! [^js context]
   (update-lifecycle-state!+
-   (lifecycle/start!+ (build-lifecycle-config context) (lifecycle-state))))
+   (vscode-mcp/start!+ (build-lifecycle-config context) (lifecycle-state) false)))
 
 (defn stop!
   ([] (stop! nil {:lifecycle/silent? true}))
   ([^js context] (stop! context {:lifecycle/silent? false}))
-  ([^js context opts]
+  ([^js context {:lifecycle/keys [silent?]}]
    (update-lifecycle-state!+
-    (lifecycle/stop!+ (build-lifecycle-config context) (lifecycle-state) opts))))
+    (vscode-mcp/stop!+ (build-lifecycle-config context) (lifecycle-state) silent?))))

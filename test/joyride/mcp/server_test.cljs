@@ -1,10 +1,10 @@
 (ns joyride.mcp.server-test
   (:require
    [cljs.test :refer [deftest is testing]]
-   [vscode-mcp.lifecycle.state :as lifecycle]
+   [vscode-mcp.lifecycle :as lifecycle]
    [vscode-mcp.manual-setup :as manual-setup]))
 
-;; Targets the shared vscode-mcp.lifecycle.state / vscode-mcp.manual-setup
+;; Targets the shared vscode-mcp.lifecycle / vscode-mcp.manual-setup
 ;; namespaces directly (the same predicates and string builders
 ;; joyride.mcp.server delegates to) rather than duplicating their logic here.
 ;; joyride.mcp.server itself requires "vscode" and is verified live via the
