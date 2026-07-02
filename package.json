@@ -76,6 +76,11 @@
             "default": "127.0.0.1",
             "markdownDescription": "Host address for the MCP socket server to bind to."
           },
+          "joyride.mcp.port": {
+            "type": "number",
+            "default": 0,
+            "markdownDescription": "Port for the MCP socket server. Use `0` to let the server choose an available port."
+          },
           "joyride.lm.enableReplTool": {
             "type": "boolean",
             "default": true,
