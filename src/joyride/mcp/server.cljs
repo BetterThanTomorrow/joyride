@@ -31,25 +31,8 @@
 (defn- get-port-file-uri+ [ctx-or-base-uri]
   (vscode/Uri.joinPath (get-server-dir+ ctx-or-base-uri) "port"))
 
-(defn random-anon-id []
-  (str "anon-" (subs (str (random-uuid)) 0 8)))
-
-(defn- cursor-unique-id [workspace-root-path-or-nil storage-uri-path-or-nil]
-  (cond
-    workspace-root-path-or-nil
-    (str "ws-" (hash workspace-root-path-or-nil))
-
-    storage-uri-path-or-nil
-    (str "win-" (hash storage-uri-path-or-nil))
-
-    :else
-    (random-anon-id)))
-
-(defn- get-cursor-port-file-uri [^js workspace-root-uri ^js storage-uri]
-  (let [unique-id (cursor-unique-id (some-> workspace-root-uri .-fsPath)
-                                    (some-> storage-uri .-fsPath))
-        port-file-path (.join path (os/tmpdir) "joyride-mcp-server" unique-id "port")]
-    (vscode/Uri.file port-file-path)))
+(defn- get-cursor-port-file-uri [instance-slug]
+  (vscode/Uri.file (path/join (os/tmpdir) "joyride-mcp-server" instance-slug "port")))
 
 (defn- set-server-running-context! [running?]
   (when-contexts/set-context! ::when-contexts/joyride.isMcpServerRunning running?))
@@ -64,10 +47,9 @@
              :mcp/on-request (partial requests/handle-request {:extension-context context})
              :mcp/on-log (fn [level & args]
                            (apply js/console.log (str "[MCP " (name level) "]") args))
-             :lifecycle/port-file-uri+ (fn [^js ctx {:lifecycle/keys [cursor-mode?]}]
+             :lifecycle/port-file-uri+ (fn [^js ctx {:lifecycle/keys [cursor-mode? instance-slug]}]
                                          (if cursor-mode?
-                                           (get-cursor-port-file-uri (get-workspace-root-uri-or-nil)
-                                                                     (.-storageUri ctx))
+                                           (get-cursor-port-file-uri instance-slug)
                                            (get-port-file-uri+ ctx)))
              :lifecycle/request-port (fn [_ctx {:lifecycle/keys [cursor-mode?]}]
                                        (if cursor-mode?
