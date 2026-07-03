@@ -43,6 +43,7 @@
      (merge mcp-config
             {:vscode/extension-context context
              :cursor/server-name "joyride"
+             :manual-setup/extension-name "Joyride"
              :cursor/script-relative-path "dist/joyride-mcp-server.js"
              :mcp/on-request (partial requests/handle-request {:extension-context context})
              :mcp/on-log (fn [level & args]
