@@ -80,9 +80,14 @@
   (update-lifecycle-state!+
    (vscode-mcp/start!+ (build-lifecycle-config context) (lifecycle-state) false)))
 
+(defn register-with-cursor! [^js context]
+  (update-lifecycle-state!+
+   (p/let [result (vscode-mcp/register-with-cursor!+ (build-lifecycle-config context) (lifecycle-state))]
+     (:state result))))
+
 (defn stop!
-  ([] (stop! nil {:lifecycle/silent? true}))
-  ([^js context] (stop! context {:lifecycle/silent? false}))
-  ([^js context {:lifecycle/keys [silent?]}]
+  ([] (stop! nil {:lifecycle/silent? true :cursor/unregister? false}))
+  ([^js context] (stop! context {:lifecycle/silent? false :cursor/unregister? true}))
+  ([^js context stop-options]
    (update-lifecycle-state!+
-    (vscode-mcp/stop!+ (build-lifecycle-config context) (lifecycle-state) silent?))))
+    (vscode-mcp/stop!+ (build-lifecycle-config context) (lifecycle-state) stop-options))))
