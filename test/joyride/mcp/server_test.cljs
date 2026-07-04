@@ -40,9 +40,15 @@
               (manual-setup/copy-command-strings wrapper (assoc server-info :server/host "0.0.0.0"))))))))
 
 (deftest command-enablement-context-test
-  (testing "when-context key matches package.json enablement"
+  (testing "when-context keys match package.json enablement"
     (is (= "joyride.isMcpServerRunning"
-           (name :joyride.when-contexts/joyride.isMcpServerRunning))))
+           (name :joyride.when-contexts/joyride.isMcpServerRunning)))
+    (is (= "joyride.isMcpCursorRegistered"
+           (name :joyride.when-contexts/joyride.isMcpCursorRegistered)))
+    (is (= "joyride.isCursorMcpAvailable"
+           (name :joyride.when-contexts/joyride.isCursorMcpAvailable)))
+    (is (= "joyride.canRegisterMcpWithCursor"
+           (name :joyride.when-contexts/joyride.canRegisterMcpWithCursor))))
 
   (testing "server-running predicate reflects state for command enablement"
     (is (not (lifecycle/running? (lifecycle/init-state)))

@@ -7,7 +7,8 @@
    [joyride.mcp.requests :as requests]
    [joyride.when-contexts :as when-contexts]
    [promesa.core :as p]
-   [vscode-mcp.core :as vscode-mcp]))
+   [vscode-mcp.core :as vscode-mcp]
+   [vscode-mcp.cursor :as vscode-mcp-cursor]))
 
 (defn- read-mcp-config []
   (let [config (vscode/workspace.getConfiguration "joyride.mcp")]
@@ -37,6 +38,27 @@
 (defn- set-server-running-context! [running?]
   (when-contexts/set-context! ::when-contexts/joyride.isMcpServerRunning running?))
 
+(defn- set-cursor-registered-context! [registered?]
+  (when-contexts/set-context! ::when-contexts/joyride.isMcpCursorRegistered registered?))
+
+(defn- lifecycle-state []
+  (or (:mcp/lifecycle-state @db/!app-db) (vscode-mcp/init-state)))
+
+(defn sync-cursor-mcp-when-contexts!
+  "Refreshes Cursor MCP when-contexts from current lifecycle state and settings."
+  []
+  (let [{:mcp/keys [auto-register?]} (read-mcp-config)
+        lifecycle (lifecycle-state)
+        cursor-available? (vscode-mcp-cursor/cursor-mcp-available?)
+        server-running? (vscode-mcp/running? lifecycle)
+        cursor-registered? (boolean (:lifecycle/cursor-registered? lifecycle))
+        can-register? (and cursor-available?
+                           (not cursor-registered?)
+                           (or (not auto-register?) server-running?))]
+    (when-contexts/set-context! ::when-contexts/joyride.isCursorMcpAvailable cursor-available?)
+    (set-cursor-registered-context! cursor-registered?)
+    (when-contexts/set-context! ::when-contexts/joyride.canRegisterMcpWithCursor can-register?)))
+
 (defn- build-lifecycle-config [^js context]
   (let [mcp-config (read-mcp-config)]
     (vscode-mcp/create-config
@@ -59,18 +81,44 @@
              :lifecycle/wrapper-path (fn [^js ctx _server-info]
                                        (path/join (.-extensionPath ctx) "dist" "joyride-mcp-server.js"))
              :lifecycle/on-running-changed (fn [running? _server-info]
-                                             (set-server-running-context! running?))}))))
-
-(defn- lifecycle-state []
-  (or (:mcp/lifecycle-state @db/!app-db) (vscode-mcp/init-state)))
+                                             (set-server-running-context! running?)
+                                             (when-not running?
+                                               (set-cursor-registered-context! false))
+                                             (sync-cursor-mcp-when-contexts!))
+             :lifecycle/on-cursor-registered (fn [_result]
+                                               (set-cursor-registered-context! true)
+                                               (sync-cursor-mcp-when-contexts!))
+             :lifecycle/on-cursor-registration-failed (fn [_failure]
+                                                        (sync-cursor-mcp-when-contexts!))}))))
 
 (defn- update-lifecycle-state!+ [state+]
-  (p/then state+ (fn [state]
-                   (swap! db/!app-db assoc :mcp/lifecycle-state state)
-                   state)))
+  (p/then state+
+          (fn [state]
+            (swap! db/!app-db assoc :mcp/lifecycle-state state)
+            (sync-cursor-mcp-when-contexts!)
+            state)))
+
+(defn- register-failure-message [{:keys [reason]}]
+  (case reason
+    :server-not-running
+    "Start the MCP server first, or disable auto-register and use Register to start and register in one step."
+
+    :cursor-api-unavailable
+    "Cursor MCP registration API is not available in this editor."
+
+    :already-registered
+    "Joyride MCP server is already registered with Cursor."
+
+    :registration-failed-or-skipped
+    "Could not register Joyride MCP server with Cursor."
+
+    "Could not register Joyride MCP server with Cursor."))
 
 (defn server-running? []
   (vscode-mcp/running? (lifecycle-state)))
+
+(defn init-cursor-mcp-when-contexts! []
+  (sync-cursor-mcp-when-contexts!))
 
 (defn maybe-start! [^js context]
   (update-lifecycle-state!+
@@ -81,9 +129,13 @@
    (vscode-mcp/start!+ (build-lifecycle-config context) (lifecycle-state) false)))
 
 (defn register-with-cursor! [^js context]
-  (update-lifecycle-state!+
-   (p/let [result (vscode-mcp/register-with-cursor!+ (build-lifecycle-config context) (lifecycle-state))]
-     (:state result))))
+  (p/let [result (vscode-mcp/register-or-start-with-cursor!+
+                   (build-lifecycle-config context)
+                   (lifecycle-state))
+          _ (when-not (:ok result)
+              (vscode/window.showInformationMessage
+               (register-failure-message result)))]
+    (update-lifecycle-state!+ (p/resolved (:state result)))))
 
 (defn stop!
   ([] (stop! nil {:lifecycle/silent? true :cursor/unregister? false}))
