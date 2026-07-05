@@ -8,7 +8,6 @@
                                          ::joyride.isMcpServerRunning false
                                          ::joyride.isMcpCursorRegistered false
                                          ::joyride.isCursorMcpAvailable false
-                                         ::joyride.canRegisterMcpWithCursor false
                                          ::joyride.isNReplServerRunning false
                                          ::joyride.userActivateScriptExists false
                                          ::joyride.userHelloScriptExists false

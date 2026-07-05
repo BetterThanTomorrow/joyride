@@ -46,9 +46,7 @@
     (is (= "joyride.isMcpCursorRegistered"
            (name :joyride.when-contexts/joyride.isMcpCursorRegistered)))
     (is (= "joyride.isCursorMcpAvailable"
-           (name :joyride.when-contexts/joyride.isCursorMcpAvailable)))
-    (is (= "joyride.canRegisterMcpWithCursor"
-           (name :joyride.when-contexts/joyride.canRegisterMcpWithCursor))))
+           (name :joyride.when-contexts/joyride.isCursorMcpAvailable))))
 
   (testing "server-running predicate reflects state for command enablement"
     (is (not (lifecycle/running? (lifecycle/init-state)))
