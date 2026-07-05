@@ -50,7 +50,7 @@
         cursor-registered? (and server-running?
                                 (boolean (:lifecycle/cursor-registered? lifecycle)))]
     (when-contexts/set-context! ::when-contexts/joyride.isCursorMcpAvailable cursor-available?)
-    (when-contexts/set-context! ::when-contexts/joyride.isMcpCursorRegistered cursor-registered?)))
+    (when-contexts/set-context! ::when-contexts/joyride.mcpServerRegisteredWithCursor cursor-registered?)))
 
 (defn- build-lifecycle-config [^js context]
   (let [mcp-config (read-mcp-config)]

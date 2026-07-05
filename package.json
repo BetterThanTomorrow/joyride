@@ -226,7 +226,7 @@
         "command": "joyride.registerMcpServerWithCursor",
         "title": "Register MCP Server with Cursor",
         "category": "Joyride",
-        "enablement": "joyride.isCursorMcpAvailable && !joyride.isMcpCursorRegistered"
+        "enablement": "joyride.isCursorMcpAvailable && !joyride.mcpServerRegisteredWithCursor"
       },
       {
         "command": "joyride.enableNReplMessageLogging",

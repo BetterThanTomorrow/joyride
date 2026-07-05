@@ -6,7 +6,7 @@
 
 (defonce ^:private !db (atom {:contexts {::joyride.isActive false
                                          ::joyride.isMcpServerRunning false
-                                         ::joyride.isMcpCursorRegistered false
+                                         ::joyride.mcpServerRegisteredWithCursor false
                                          ::joyride.isCursorMcpAvailable false
                                          ::joyride.isNReplServerRunning false
                                          ::joyride.userActivateScriptExists false

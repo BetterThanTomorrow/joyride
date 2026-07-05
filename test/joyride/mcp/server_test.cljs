@@ -43,8 +43,8 @@
   (testing "when-context keys match package.json enablement"
     (is (= "joyride.isMcpServerRunning"
            (name :joyride.when-contexts/joyride.isMcpServerRunning)))
-    (is (= "joyride.isMcpCursorRegistered"
-           (name :joyride.when-contexts/joyride.isMcpCursorRegistered)))
+    (is (= "joyride.mcpServerRegisteredWithCursor"
+           (name :joyride.when-contexts/joyride.mcpServerRegisteredWithCursor)))
     (is (= "joyride.isCursorMcpAvailable"
            (name :joyride.when-contexts/joyride.isCursorMcpAvailable))))
 
