@@ -2,7 +2,6 @@
   (:require
    ["vscode" :as vscode]
    [joyride.lm.evaluation :as evaluation]
-   [joyride.lm.human-intelligence :as human-intelligence]
    [promesa.core :as p]
    [vscode-mcp.manifest :as manifest]
    [vscode-mcp.requests :as mcp-requests]
@@ -24,9 +23,6 @@
     (case tool-name
       "joyride_evaluate_code"
       (evaluation/invoke-tool options token)
-
-      "joyride_request_human_input"
-      ((human-intelligence/invoke-tool!) options token)
 
       (throw (js/Error. (str "Unknown tool: " tool-name))))))
 

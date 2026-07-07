@@ -5,7 +5,7 @@ description: >-
   Flares, JS interop, and available libraries. Use when: working with
   Joyride evaluation, writing ClojureScript in any Joyride context,
   creating Flares/WebViews, exploring VS Code APIs via the REPL, or
-  using joyride_evaluate_code / joyride_request_human_input tools.
+  using joyride_evaluate_code.
 ---
 
 # Joyride — Core Skill
@@ -29,10 +29,6 @@ Execute ClojureScript in VS Code's Extension Host. **"Use the REPL" means this t
 **`awaitResult` decision:**
 - `true` — when you need the resolved value: user input dialogs, file operations, extension API calls, messages with buttons
 - `false` (default) — synchronous operations, fire-and-forget async (e.g., simple information messages). **Never** use `true` for sync code — it hangs indefinitely
-
-### `joyride_request_human_input`
-
-Ask the human for input or guidance. Give context in chat first, then use this tool.
 
 ## Interactive Programming Workflow
 

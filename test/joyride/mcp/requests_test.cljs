@@ -9,8 +9,7 @@
 (deftest joyride-evaluate-code-gating-test
   (let [ctx (mock-context
              #js [#js {:name "joyride_evaluate_code"
-                       :when "config.joyride.lm.enableReplTool"}
-                   #js {:name "joyride_request_human_input"}])]
+                       :when "config.joyride.lm.enableReplTool"}])]
     (testing "evaluate tool allowed when enableReplTool is true"
       (is (= :allowed
              (manifest/tool-call-allowed? ctx "joyride_evaluate_code"
@@ -20,9 +19,6 @@
       (is (= :disabled
              (manifest/tool-call-allowed? ctx "joyride_evaluate_code"
               {:settings {"config.joyride.lm.enableReplTool" false}}))))
-
-    (testing "human input tool has no when clause"
-      (is (= :allowed (manifest/tool-call-allowed? ctx "joyride_request_human_input"))))
 
     (testing "unknown tool is not a manifest decision"
       (is (= :unknown (manifest/tool-call-allowed? ctx "missing_tool"))))))
