@@ -5,6 +5,7 @@
    [joyride.lm.human-intelligence :as human-intelligence]
    [promesa.core :as p]
    [vscode-mcp.manifest :as manifest]
+   [vscode-mcp.requests :as mcp-requests]
    [vscode-mcp.responses :as responses]))
 
 (defn- lm-result->mcp-result [^js result]
@@ -29,50 +30,29 @@
 
       (throw (js/Error. (str "Unknown tool: " tool-name))))))
 
+(defn- get-settings []
+  (let [config (vscode/workspace.getConfiguration "joyride.lm")]
+    {"config.joyride.lm.enableReplTool" (.get config "enableReplTool")}))
+
+(defn- request-opts []
+  {:settings (get-settings)
+   :initialize-opts {:base-text "Joyride MCP server provides access to VS Code Extension API via the Small Clojure Interpreter (SCI)."
+                      :settings (get-settings)}})
+
 (defn handle-request
-  "Dispatches MCP JSON-RPC requests to Joyride's tools and resources."
   [{:keys [extension-context]} request]
   (let [{:keys [method params id]} request
-        get-settings (fn []
-                       (let [config (vscode/workspace.getConfiguration "joyride.lm")]
-                         {"config.joyride.lm.enableReplTool" (.get config "enableReplTool")}))]
+        opts (request-opts)]
     (case method
-      "initialize"
-      (responses/success-response id
-       (manifest/build-initialize-result extension-context
-        {:base-text "Joyride MCP server provides access to VS Code Extension API via the Small Clojure Interpreter (SCI)."
-         :settings (get-settings)}))
-
-      "tools/list"
-      (let [tools (manifest/get-tools extension-context {:settings (get-settings)})]
-        (responses/success-response id {:tools tools}))
-
       "tools/call"
       (let [tool-name (:name params)
             args (:arguments params)
-            settings (get-settings)
-            allowed (manifest/tool-call-allowed? extension-context tool-name {:settings settings})]
+            allowed (manifest/tool-call-allowed? extension-context tool-name {:settings (:settings opts)})]
         (cond
-          (= :disabled allowed)
-          (responses/error-response id -32601 "Unknown tool")
-
-          :else
-          (-> (p/let [lm-result (call-tool-impl tool-name args)]
-                (responses/success-response id (lm-result->mcp-result lm-result)))
-              (p/catch (fn [e]
-                         (responses/success-response id {:content [{:type "text" :text (.-message e)}]
-                                                         :isError true}))))))
-
-      "resources/list"
-      (let [resources (manifest/get-resources extension-context {:settings (get-settings)})]
-        (responses/success-response id {:resources resources}))
-
-      "resources/read"
-      (let [resource (manifest/read-resource extension-context (:uri params) {:settings (get-settings)})]
-        (if resource
-          (responses/success-response id {:contents [(dissoc resource :skill-path)]})
-          (responses/error-response id -32602 "Resource not found")))
-
-      ;; Default for unknown methods
-      (when id
-        (responses/error-response id -32601 (str "Method not found: " method))))))
+          (= :disabled allowed) (responses/error-response id -32601 "Unknown tool")
+          :else (-> (p/let [lm-result (call-tool-impl tool-name args)]
+                      (responses/success-response id (lm-result->mcp-result lm-result)))
+                    (p/catch (fn [e]
+                               (responses/success-response id {:content [{:type "text" :text (.-message e)}]
+                                                               :isError true}))))))
+      (mcp-requests/handle-manifest-request extension-context request opts))))
