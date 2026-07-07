@@ -48,7 +48,7 @@
         cursor-available? (vscode-mcp-cursor/cursor-mcp-available?)
         server-running? (vscode-mcp/running? lifecycle)
         cursor-registered? (and server-running?
-                                (boolean (:lifecycle/cursor-registered? lifecycle)))]
+                                (vscode-mcp/cursor-registered? lifecycle))]
     (when-contexts/set-context! ::when-contexts/joyride.isCursorMcpAvailable cursor-available?)
     (when-contexts/set-context! ::when-contexts/joyride.mcpServerRegisteredWithCursor cursor-registered?)))
 
@@ -90,16 +90,10 @@
 
 (defn- register-failure-message [{:keys [reason]}]
   (case reason
-    :server-not-running
-    "Start the MCP server first, or disable auto-register and use Register to start and register in one step."
-
     :cursor-api-unavailable
     "Cursor MCP registration API is not available in this editor."
 
-    :already-registered
-    "Joyride MCP server is already registered with Cursor."
-
-    :registration-failed-or-skipped
+    :registration-failed
     "Could not register Joyride MCP server with Cursor."
 
     "Could not register Joyride MCP server with Cursor."))
@@ -119,7 +113,7 @@
    (vscode-mcp/start!+ (build-lifecycle-config context) (lifecycle-state) false)))
 
 (defn register-with-cursor! [^js context]
-  (p/let [result (vscode-mcp/register-or-start-with-cursor!+
+  (p/let [result (vscode-mcp/register-with-cursor!+
                    (build-lifecycle-config context)
                    (lifecycle-state))
           _ (when-not (:ok result)
