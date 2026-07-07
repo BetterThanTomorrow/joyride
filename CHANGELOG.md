@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.76] - 2026-07-07
+
 - Remove the Human Input (`joyride_request_human_input`) AI tool
 - Add an MCP server for Clojure exposing the Copilot tools to other AI agent harnesses
   - Including zero config MCP for Cursor
