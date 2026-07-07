@@ -4,6 +4,9 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Add an MCP server for Clojure exposing the Copilot tools to other AI agent harnesses
+  - Including zero config MCP for Cursor
+
 ## [0.0.75] - 2026-05-08
 
 - Make the nrepl server return promises resolved, inspired by Scittle
