@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Update SCI to 0.15.56, which JIT-compiles interpreted function bodies to JavaScript at runtime, speeding up loops and numerical code
+
 ## [0.0.76] - 2026-07-07
 
 - Remove the Human Input (`joyride_request_human_input`) AI tool

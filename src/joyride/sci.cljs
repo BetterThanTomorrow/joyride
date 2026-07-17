@@ -24,7 +24,6 @@
    [rewrite-clj.zip]
    [replicant.dom]))
 
-(sci/enable-unrestricted-access!) ;; allows mutating and set!-ing all vars from inside SCI
 (sci/alter-var-root sci/print-newline (constantly true)) ; Dodging strange issue with `println`
                                                          ; not printing the trailing newline in release builds
                                                          ; https://github.com/BetterThanTomorrow/joyride/issues/253
@@ -157,6 +156,7 @@
  (sci/init {:classes {'js (doto goog/global
                             (aset "require" js/require))
                       :allow :all}
+            :unrestricted true ;; allows mutating and set!-ing all vars from inside SCI
             :features #{:joyride :cljs}
             :namespaces {'clojure.core {'IFn (sci/copy-var IFn core-namespace)
                                         'tap> (sci/copy-var tap> core-namespace)
