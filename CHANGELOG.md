@@ -8,6 +8,7 @@ Changes to Joyride
   - `goog.math.Long`
   - `Math` (`js/Math`)
   - `clojure.core`: `write-all`, `MapEntry`, `Keyword`, `Symbol`, `PersistentVector`, `Cons`, `EmptyList`, `List`, `PersistentArrayMap`, `PersistentHashMap`, `PersistentTreeMap`, `Subvec`, `PersistentHashSet`, and `PersistentTreeSet`
+- Make `joyride.core/slurp` handle http(s) urls
 
 ## [0.0.77] - 2026-07-17
 

@@ -115,13 +115,26 @@
 
 (def !last-ns (volatile! @sci/ns))
 
+(defn- http-url?
+  [s]
+  (or (str/starts-with? s "http://")
+      (str/starts-with? s "https://")))
+
 (defn slurp+
-  "Asynchronously returns string from file f using vscode.workspace.fs.
-   Relative paths are resolved relative to the workspace root.
+  "Asynchronously returns string contents of `path-or-url`.
+   http(s) URLs are fetched; other paths use vscode.workspace.fs
+   (relative paths resolve from the workspace root).
    Returns a promise."
-  [file-path]
-  (let [absolute-path (vscode-utils/as-workspace-abs-path file-path)]
-    (vscode-utils/vscode-read-uri+ absolute-path)))
+  [path-or-url]
+  (if (http-url? path-or-url)
+    (p/let [response (js/fetch path-or-url)
+            _ (when-not (.-ok response)
+                (throw (js/Error. (str "HTTP " (.-status response)
+                                       " for " path-or-url))))
+            text (.text response)]
+      text)
+    (let [absolute-path (vscode-utils/as-workspace-abs-path path-or-url)]
+      (vscode-utils/vscode-read-uri+ absolute-path))))
 
 (defn- load-file+
   "Asynchronously evaluate the content of the file at `file-path`.
