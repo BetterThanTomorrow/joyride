@@ -51,6 +51,7 @@
     "onStartupFinished"
   ],
   "main": "./out/joyride.js",
+  "browser": "./out/joyride.js",
   "contributes": {
     "configuration": [
       {
