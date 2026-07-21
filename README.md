@@ -38,6 +38,7 @@ See the [examples](./examples) for examples including:
 * The Joyride Extension API
 * The `joyride.core` namespace
 * Using [clojure.zip](https://clojuredocs.org/clojure.zip)
+* Using [babashka.fs](https://github.com/babashka/fs) path helpers (see [examples](examples/.joyride/scripts/babashka_fs.cljs))
 * Using [Hickory](https://github.com/clj-commons/hickory) (well, `hickory.select`, at least)
 
 ## User and Workspace scripts

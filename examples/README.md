@@ -431,6 +431,10 @@ clojure.walk is wonderful, and so is [clojure.zip](https://clojuredocs.org/cloju
 
 ![](assets/joyride-clojure-zip.png)
 
+### babashka.fs
+
+Joyride includes [babashka.fs](https://github.com/babashka/fs) for path helpers and temp directories. See [babashka_fs.cljs](.joyride/scripts/babashka_fs.cljs) for a small demo of `cwd` / `exists?` / `path` / `file-name` and `with-temp-dir`.
+
 ### Hickory
 
 [Hickory](https://github.com/clj-commons/hickory) is not included with Joyride, but that doesn't mean you can't use it! In [.joyride/src/hickory](.joyride/src/hickory) there is the slightly (very slightly) modified source of `hickory.select` as well as the unmodified source of `hickory.zip`. This makes the [find-in-html](.joyride/scripts/find_in_html.cljs) possible. (See [npm packages](#npm-packages) about the `npm` dependency.)

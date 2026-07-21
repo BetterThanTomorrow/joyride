@@ -166,6 +166,8 @@ In addition to `clojure.core`, `clojure.set`, `clojure.edn`, `clojure.string`,
 
 * [Promesa](https://cljdoc.org/d/funcool/promesa/) (partly, see [below](#promesacore)
 * [rewrite-clj](https://github.com/clj-commons/rewrite-clj)
+* [babashka.fs](https://github.com/babashka/fs/blob/master/API.md)
+  Uses synchronous Node fs; for remote workspaces prefer joyride.core/slurp or vscode.workspace.fs.
 
 Lacking some particular library? Please consider contributing to [babashka/sci.configs](https://github.com/babashka/sci.configs)!
 

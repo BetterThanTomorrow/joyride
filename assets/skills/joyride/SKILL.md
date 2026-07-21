@@ -167,7 +167,7 @@ Workspace files take precedence over User files.
 
 ## Available Libraries
 
-`clojure.core`, `clojure.set`, `clojure.string`, `clojure.walk`, `clojure.data`, `clojure.edn`, `clojure.zip`, `promesa.core` (partial, legacy — prefer `^:async`/`await`), `rewrite-clj`
+`clojure.core`, `clojure.set`, `clojure.string`, `clojure.walk`, `clojure.data`, `clojure.edn`, `clojure.zip`, `promesa.core` (partial, legacy — prefer `^:async`/`await`), `rewrite-clj`, `babashka.fs`
 
 ## Error Handling
 
