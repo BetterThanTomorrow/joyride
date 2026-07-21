@@ -6,6 +6,7 @@
    ["vscode" :as vscode]
    [clojure.string :as str]
    [clojure.zip]
+   [goog.math.Long]
    [goog.object :as gobject]
    [joyride.config :as conf]
    [joyride.db :as db]
@@ -114,13 +115,26 @@
 
 (def !last-ns (volatile! @sci/ns))
 
+(defn- http-url?
+  [s]
+  (or (str/starts-with? s "http://")
+      (str/starts-with? s "https://")))
+
 (defn slurp+
-  "Asynchronously returns string from file f using vscode.workspace.fs.
-   Relative paths are resolved relative to the workspace root.
+  "Asynchronously returns string contents of `path-or-url`.
+   http(s) URLs are fetched; other paths use vscode.workspace.fs
+   (relative paths resolve from the workspace root).
    Returns a promise."
-  [file-path]
-  (let [absolute-path (vscode-utils/as-workspace-abs-path file-path)]
-    (vscode-utils/vscode-read-uri+ absolute-path)))
+  [path-or-url]
+  (if (http-url? path-or-url)
+    (p/let [response (js/fetch path-or-url)
+            _ (when-not (.-ok response)
+                (throw (js/Error. (str "HTTP " (.-status response)
+                                       " for " path-or-url))))
+            text (.text response)]
+      text)
+    (let [absolute-path (vscode-utils/as-workspace-abs-path path-or-url)]
+      (vscode-utils/vscode-read-uri+ absolute-path))))
 
 (defn- load-file+
   "Asynchronously evaluate the content of the file at `file-path`.
@@ -152,9 +166,20 @@
    'get-flare (sci/copy-var flare/get-flare flare-ns)
    'post-message!+ (sci/copy-var flare/post-message!+ flare-ns)})
 
+(def goog-math-long-namespace
+  {'getMaxValue goog.math.Long/getMaxValue
+   'getMinValue goog.math.Long/getMinValue
+   'getZero goog.math.Long/getZero
+   'getOne goog.math.Long/getOne
+   'fromInt goog.math.Long/fromInt
+   'fromNumber goog.math.Long/fromNumber
+   'fromString goog.math.Long/fromString})
+
 (store/reset-ctx!
  (sci/init {:classes {'js (doto goog/global
                             (aset "require" js/require))
+                      'goog.math.Long goog.math.Long
+                      'Math js/Math
                       :allow :all}
             :unrestricted true ;; allows mutating and set!-ing all vars from inside SCI
             :features #{:joyride :cljs}
@@ -162,7 +187,21 @@
                                         'tap> (sci/copy-var tap> core-namespace)
                                         'add-tap (sci/copy-var add-tap core-namespace)
                                         'remove-tap (sci/copy-var remove-tap core-namespace)
-                                        'uuid (sci/copy-var uuid core-namespace)}
+                                        'uuid (sci/copy-var uuid core-namespace)
+                                        'write-all (sci/copy-var write-all core-namespace)
+                                        'MapEntry (sci/copy-var MapEntry core-namespace)
+                                        'Keyword (sci/copy-var Keyword core-namespace)
+                                        'Symbol (sci/copy-var Symbol core-namespace)
+                                        'PersistentVector (sci/copy-var PersistentVector core-namespace)
+                                        'Cons (sci/copy-var Cons core-namespace)
+                                        'EmptyList (sci/copy-var EmptyList core-namespace)
+                                        'List (sci/copy-var List core-namespace)
+                                        'PersistentArrayMap (sci/copy-var PersistentArrayMap core-namespace)
+                                        'PersistentHashMap (sci/copy-var PersistentHashMap core-namespace)
+                                        'PersistentTreeMap (sci/copy-var PersistentTreeMap core-namespace)
+                                        'Subvec (sci/copy-var Subvec core-namespace)
+                                        'PersistentHashSet (sci/copy-var PersistentHashSet core-namespace)
+                                        'PersistentTreeSet (sci/copy-var PersistentTreeSet core-namespace)}
                          'clojure.zip zip-namespace
                          'clojure.repl {'pst pst-nyip}
                          'cljs.test cljs-test-config/cljs-test-namespace
@@ -173,7 +212,8 @@
                          'rewrite-clj.zip rewrite-clj-zip-ns
                          'rewrite-clj.parser rewrite-clj-parser-ns
                          'rewrite-clj.node rewrite-clj-node-ns
-                         'replicant.dom replicant-dom-ns}
+                         'replicant.dom replicant-dom-ns
+                         'goog.math.Long goog-math-long-namespace}
             :ns-aliases '{clojure.test cljs.test
                           cljs.repl clojure.repl}
             :load-fn (fn [{:keys [ns libname opts]}]

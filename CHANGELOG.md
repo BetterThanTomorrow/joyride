@@ -4,6 +4,12 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Levarage recent SCI updates to make Joyride more CLJS complete, adding:
+  - `goog.math.Long`
+  - `Math` (`js/Math`)
+  - `clojure.core`: `write-all`, `MapEntry`, `Keyword`, `Symbol`, `PersistentVector`, `Cons`, `EmptyList`, `List`, `PersistentArrayMap`, `PersistentHashMap`, `PersistentTreeMap`, `Subvec`, `PersistentHashSet`, and `PersistentTreeSet`
+- Make `joyride.core/slurp` handle http(s) urls
+
 ## [0.0.77] - 2026-07-17
 
 - Update SCI to 0.15.56, which JIT-compiles interpreted function bodies to JavaScript at runtime, speeding up loops and numerical code
