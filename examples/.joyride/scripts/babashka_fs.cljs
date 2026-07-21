@@ -27,5 +27,13 @@
   (println "paths:" (demo-paths))
   (println "temp:" (demo-temp-dir)))
 
+(comment
+  (fs/exists? ".")
+  (fs/with-temp-dir [d nil]
+    (println "temp dir: " d)
+    (fs/create-file (fs/path d "smoke.txt"))
+    (fs/exists? (fs/path d "smoke.txt")))
+  :rcf)
+
 (when (= (joyride/invoked-script) joyride/*file*)
   (main))
