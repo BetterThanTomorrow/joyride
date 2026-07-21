@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.79] - 2026-07-21
+
 - Add [babashka.fs](https://github.com/babashka/fs) as a built-in library (includes `with-temp-dir`)
 - Levarage recent SCI updates to make Joyride more CLJS complete, adding:
   - `goog.math.Long`
