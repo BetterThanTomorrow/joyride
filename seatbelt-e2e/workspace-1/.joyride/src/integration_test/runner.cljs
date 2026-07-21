@@ -62,6 +62,7 @@
                     'integration-test.nrepl-eval-test
                     'integration-test.joyride-core-test
                     'integration-test.rewrite-clj-test
+                    'integration-test.babashka-fs-test
                     'integration-test.reader-conditionals
                     'integration-test.flare-test
                     'integration-test.commands-test

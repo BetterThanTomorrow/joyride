@@ -13,6 +13,7 @@
    [joyride.flare :as flare]
    [joyride.output :as output]
    [joyride.repl-utils :as repl-utils]
+   [joyride.sci.fs :as sci-fs]
    [joyride.vscode-utils :as vscode-utils]
    [sci.configs.cljs.test :as cljs-test-config]
    [sci.configs.cljs.pprint :as cljs-pprint-config]
@@ -212,6 +213,7 @@
                          'rewrite-clj.zip rewrite-clj-zip-ns
                          'rewrite-clj.parser rewrite-clj-parser-ns
                          'rewrite-clj.node rewrite-clj-node-ns
+                         'babashka.fs sci-fs/fs-namespace
                          'replicant.dom replicant-dom-ns
                          'goog.math.Long goog-math-long-namespace}
             :ns-aliases '{clojure.test cljs.test
