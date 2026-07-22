@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Auto-register Joyride MCP with ECA (project-local `.eca/config.json`) when `joyride.mcp.autoRegisterEca` is enabled (default `true`)
+
 ## [0.0.79] - 2026-07-21
 
 - Add [babashka.fs](https://github.com/babashka/fs) as a built-in library (includes `with-temp-dir`)
