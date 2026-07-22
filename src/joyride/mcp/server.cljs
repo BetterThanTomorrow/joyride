@@ -14,6 +14,7 @@
   (let [config (vscode/workspace.getConfiguration "joyride.mcp")]
     {:mcp/auto-start? (.get config "autoStartServer" false)
      :mcp/auto-register? (.get config "autoRegisterCursor" true)
+     :mcp/auto-register-eca? (.get config "autoRegisterEca" true)
      :server/host (.get config "host")
      :server/request-port (.get config "port" 0)}))
 

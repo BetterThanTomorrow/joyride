@@ -71,6 +71,11 @@
             "default": true,
             "description": "In Cursor, automatically register the Joyride MCP server with the IDE Agent. When enabled and Cursor MCP API is available, the socket server starts silently on activation."
           },
+          "joyride.mcp.autoRegisterEca": {
+            "type": "boolean",
+            "default": true,
+            "description": "When the ECA extension is installed, automatically register the Joyride MCP server in the project-local `.eca/config.json`. When enabled and a workspace folder is open, the socket server starts silently on activation."
+          },
           "joyride.mcp.host": {
             "type": "string",
             "default": "127.0.0.1",
