@@ -74,8 +74,7 @@
                                        (if cursor-mode?
                                          0
                                          (:server/request-port (read-mcp-config))))
-             :lifecycle/wrapper-path (fn [^js ctx _server-info]
-                                       (path/join (.-extensionPath ctx) "dist" "joyride-mcp-server.js"))
+             :lifecycle/wrapper-install-dir (path/join (os/homedir) ".config" "joyride")
              :lifecycle/on-running-changed (fn [running? _server-info]
                                              (set-server-running-context! running?)
                                              (sync-cursor-mcp-when-contexts!))
