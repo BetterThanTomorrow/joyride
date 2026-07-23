@@ -5,6 +5,7 @@ Changes to Joyride
 ## [Unreleased]
 
 - Auto-register Joyride MCP with ECA (project-local `.eca/config.json`) when `joyride.mcp.autoRegisterEca` is enabled (default `true`)
+- ECA config uses workspace-stable port file `.joyride/mcp-server/port` (not Cursor tmpdir)
 
 ## [0.0.79] - 2026-07-21
 
