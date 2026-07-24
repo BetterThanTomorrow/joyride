@@ -9,6 +9,40 @@ const {
   runTests,
 } = require("@vscode/test-electron");
 
+// @vscode/test-electron still returns …/MacOS/Electron on darwin.
+// VS Code 1.110+ renamed that binary (Code / Code - Insiders); the Electron
+// compat symlink was removed ~2026-07-20. Upstream fix:
+// https://github.com/microsoft/vscode-test/pull/350 — not on npm yet.
+// Remove this helper once @vscode/test-electron publishes that fix.
+function resolveDarwinVSCodeExecutable(vscodeExecutablePath) {
+  if (process.platform !== "darwin" || fs.existsSync(vscodeExecutablePath)) {
+    return vscodeExecutablePath;
+  }
+  const macosDir = path.dirname(vscodeExecutablePath);
+  const infoPlistPath = path.resolve(macosDir, "..", "Info.plist");
+  try {
+    const plist = fs.readFileSync(infoPlistPath, "utf8");
+    const match = plist.match(
+      /<key>CFBundleExecutable<\/key>\s*<string>([^<]+)<\/string>/
+    );
+    if (match) {
+      const resolved = path.resolve(macosDir, match[1]);
+      if (fs.existsSync(resolved)) {
+        console.info(
+          `Resolved VS Code executable via Info.plist: ${resolved}`
+        );
+        return resolved;
+      }
+    }
+  } catch (err) {
+    console.warn(
+      "Failed to resolve darwin VS Code executable from Info.plist:",
+      err
+    );
+  }
+  return vscodeExecutablePath;
+}
+
 function init() {
   return new Promise((resolve, reject) => {
     try {
@@ -36,7 +70,9 @@ function init() {
 async function main(joyrideVSIXPathOrLabel, testWorkspace) {
   try {
     const extensionTestsPath = path.resolve(__dirname, "runTests");
-    const vscodeExecutablePath = await downloadAndUnzipVSCode("insiders");
+    const vscodeExecutablePath = resolveDarwinVSCodeExecutable(
+      await downloadAndUnzipVSCode("insiders")
+    );
     const [cliPath, ...args] =
       resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
 
