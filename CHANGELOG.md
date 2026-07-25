@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.80] - 2026-07-25
+
 - Auto-register Joyride MCP with [ECA](https://eca.dev/) (project-local `.eca/config.json`) when `joyride.mcp.autoRegisterEca` is enabled (default `true`)
   - MCP stdio wrapper installed under `~/.config/joyride/joyride-mcp-server.js` for portable ECA and manual config
 
