@@ -76,6 +76,11 @@
             "default": true,
             "description": "When the ECA extension is installed, automatically register the Joyride MCP server in the project-local `.eca/config.json`."
           },
+          "joyride.mcp.enableRegistry": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "Write a live registry entry so external agents can discover and understand how to connect this window's MCP server (`bb list` at `~/.config/vscode-mcp/registry`). Enabled by default. Changes take effect on the next MCP server start."
+          },
           "joyride.mcp.host": {
             "type": "string",
             "default": "127.0.0.1",

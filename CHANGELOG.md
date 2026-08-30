@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Write a vscode-mcp registry entry for the live Joyride window (`joyride.mcp.enableRegistry`, default on). Writer stays in vscode-mcp.
+
 - Fix: Recreate Joyride Output after the tab is closed, even when the host skips `Pseudoterminal.close()`. Close a stuck tab and use **Joyride: Open Joyride Output Terminal** — earlier output is gone.
 
 ## [0.0.80] - 2026-07-25
