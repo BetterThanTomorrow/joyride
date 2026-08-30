@@ -33,7 +33,7 @@
 (defn- request-opts []
   {:settings (get-settings)
    :initialize-opts {:base-text "Joyride MCP server provides access to VS Code Extension API via the Small Clojure Interpreter (SCI)."
-                      :settings (get-settings)}})
+                     :settings (get-settings)}})
 
 (defn handle-request
   [{:keys [extension-context]} request]

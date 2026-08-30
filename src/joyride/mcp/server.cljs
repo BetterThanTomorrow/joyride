@@ -4,6 +4,7 @@
    ["path" :as path]
    ["vscode" :as vscode]
    [joyride.db :as db]
+   [joyride.mcp.registry :as registry]
    [joyride.mcp.requests :as requests]
    [joyride.when-contexts :as when-contexts]
    [promesa.core :as p]
@@ -15,8 +16,13 @@
     {:mcp/auto-start? (.get config "autoStartServer" false)
      :mcp/auto-register? (.get config "autoRegisterCursor" true)
      :mcp/auto-register-eca? (.get config "autoRegisterEca" true)
+     :registry/enabled? (registry/enabled? (.get config "enableRegistry" true))
      :server/host (.get config "host")
      :server/request-port (.get config "port" 0)}))
+
+(defn- registry-custom-data+
+  [_state]
+  (p/resolved (registry/compact-data)))
 
 (defn- get-workspace-root-uri-or-nil []
   (some-> vscode/workspace.workspaceFolders
@@ -75,6 +81,8 @@
                                          0
                                          (:server/request-port (read-mcp-config))))
              :lifecycle/wrapper-install-dir (path/join (os/homedir) ".config" "joyride")
+             :registry/enabled? (:registry/enabled? mcp-config)
+             :registry/custom-data+ registry-custom-data+
              :lifecycle/on-running-changed (fn [running? _server-info]
                                              (set-server-running-context! running?)
                                              (sync-cursor-mcp-when-contexts!))
@@ -116,8 +124,8 @@
 
 (defn register-with-cursor! [^js context]
   (p/let [result (vscode-mcp/register-with-cursor!+
-                   (build-lifecycle-config context)
-                   (lifecycle-state))
+                  (build-lifecycle-config context)
+                  (lifecycle-state))
           _ (when-not (:ok result)
               (vscode/window.showInformationMessage
                (register-failure-message result)))]

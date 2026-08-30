@@ -6,8 +6,6 @@
    else touched the REPL."
   (:require [joyride.db :as db]))
 
-
-
 (defn record-evaluation!
   "Record that `who` evaluated. Adds `who` to every other tracked
    evaluator's 'others since last' set."

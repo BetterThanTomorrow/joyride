@@ -146,7 +146,6 @@
             (finally
               (restore-fns!))))))))
 
-
 (defn prepare-invocation
   "Prepare confirmation message with rich code preview"
   [options _token]

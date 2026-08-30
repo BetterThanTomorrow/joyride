@@ -135,7 +135,6 @@
                                  "ns" (str @sci/ns)
                                  "status" ["done"]})))))))
 
-
 (defn handle-eval [{:keys [ns sci-ctx] :as request} send-fn]
   (do-handle-eval (assoc request :ns (or (when ns
                                            (the-sci-ns sci-ctx (symbol ns)))
