@@ -25,6 +25,7 @@
   ([args stdin]
    (p/create
     (fn [resolve reject]
+      (fs/mkdirSync registry-home #js {:recursive true})
       (let [proc (cp/spawn bb-bin (clj->js args) #js {:cwd registry-home})
             out (atom "")
             err (atom "")]
@@ -77,7 +78,7 @@
   {:after (vscode/commands.executeCommand "joyride.stopMcpServer")}
   (testing "MCP registry entry is discoverable, connectable, and usable via bb list and bb mcp"
     (p/let [_ (vscode/commands.executeCommand "joyride.startMcpServer")
-            workspace-root vscode/workspace.rootPath
+            workspace-root (some-> vscode/workspace.workspaceFolders first .-uri .-fsPath)
             window (wait-for-window+ workspace-root 20)
             server-name (:serverName window)
             window-id (:windowId window)

@@ -51,18 +51,19 @@
                      :server/port-file-uri #js {:fsPath "/tmp/joyride-mcp-server/ws-abc/port"}}]
            (-> (writer/on-started!+ config info)
                (p/then (fn [_]
-                         (let [entry-file (path/join dir "joyride-ws-abc.json")
-                               doc (js->clj (js/JSON.parse (fs/readFileSync entry-file "utf8"))
-                                            :keywordize-keys true)]
+                         (let [entry-file (path/join dir "joyride-ws-abc.json")]
                            (is (fs/existsSync entry-file))
-                           (is (= "joyride-ws-abc" (:name doc)))
-                           (is (= "joyride" (:serverName doc)))
-                           (is (= "ws-abc" (:windowId doc)))
-                           (is (= "/proj/joyride" (:workspaceRoot doc)))
-                           (is (= "127.0.0.1" (get-in doc [:mcp :host])))
-                           (is (= 50541 (get-in doc [:mcp :port])))
-                           (is (= "/tmp/joyride-mcp-server/ws-abc/port"
-                                  (get-in doc [:mcp :portFilePath]))))))
+                           (when (fs/existsSync entry-file)
+                             (let [doc (js->clj (js/JSON.parse (fs/readFileSync entry-file "utf8"))
+                                                :keywordize-keys true)]
+                               (is (= "joyride-ws-abc" (:name doc)))
+                               (is (= "joyride" (:serverName doc)))
+                               (is (= "ws-abc" (:windowId doc)))
+                               (is (= "/proj/joyride" (:workspaceRoot doc)))
+                               (is (= "127.0.0.1" (get-in doc [:mcp :host])))
+                               (is (= 50541 (get-in doc [:mcp :port])))
+                               (is (= "/tmp/joyride-mcp-server/ws-abc/port"
+                                      (get-in doc [:mcp :portFilePath]))))))))
                (p/finally (fn []
                             (cleanup! dir)
                             (done)))))))

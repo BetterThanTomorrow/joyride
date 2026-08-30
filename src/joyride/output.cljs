@@ -8,11 +8,6 @@
 
 (def terminal-name "Joyride Output")
 
-
-
-
-
-
 (defn- set-did-last-terminate-line! [value]
   (swap! db/!app-db assoc :output/did-last-terminate-line value))
 
@@ -245,7 +240,6 @@
             (when (identical? impl (:output/pty @db/!app-db))
               (forget-output-terminal!))))
     impl))
-
 
 (defn ensure-terminal!
   "Ensure the output terminal exists and return the backing pseudoterminal."

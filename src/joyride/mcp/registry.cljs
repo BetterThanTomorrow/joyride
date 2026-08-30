@@ -6,6 +6,6 @@
   (not (false? setting)))
 
 (defn compact-data
-  "Extra registry fields. vscode-mcp owns name, workspace, host, and port file."
+  "Extra registry fields. vscode-mcp owns name, serverName, windowId, workspace, and the mcp envelope."
   []
   {})

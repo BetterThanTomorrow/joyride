@@ -13,12 +13,12 @@
     (testing "evaluate tool allowed when enableReplTool is true"
       (is (= :allowed
              (manifest/tool-call-allowed? ctx "joyride_evaluate_code"
-              {:settings {"config.joyride.lm.enableReplTool" true}}))))
+                                          {:settings {"config.joyride.lm.enableReplTool" true}}))))
 
     (testing "evaluate tool disabled when enableReplTool is false"
       (is (= :disabled
              (manifest/tool-call-allowed? ctx "joyride_evaluate_code"
-              {:settings {"config.joyride.lm.enableReplTool" false}}))))
+                                          {:settings {"config.joyride.lm.enableReplTool" false}}))))
 
     (testing "unknown tool is not a manifest decision"
       (is (= :unknown (manifest/tool-call-allowed? ctx "missing_tool"))))))

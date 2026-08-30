@@ -124,8 +124,8 @@
 
 (defn register-with-cursor! [^js context]
   (p/let [result (vscode-mcp/register-with-cursor!+
-                   (build-lifecycle-config context)
-                   (lifecycle-state))
+                  (build-lifecycle-config context)
+                  (lifecycle-state))
           _ (when-not (:ok result)
               (vscode/window.showInformationMessage
                (register-failure-message result)))]

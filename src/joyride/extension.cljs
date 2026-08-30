@@ -51,7 +51,6 @@
                   (output/show-terminal!)
                   (throw (js/Error. e)))))))
 
-
 (defn evaluate-selection+
   "Evaluates the selection by first copying it to the clipboard and reading it from there.
    Restores the original clipboard content after reading it from the clipboard.
