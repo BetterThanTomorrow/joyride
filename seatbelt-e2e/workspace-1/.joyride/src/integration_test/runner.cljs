@@ -66,7 +66,8 @@
                     'integration-test.reader-conditionals
                     'integration-test.flare-test
                     'integration-test.commands-test
-                    'integration-test.output-test]]
+                    'integration-test.output-test
+                    'integration-test.mcp-registry-test]]
       (println "Runner: Workspace activated, running tests...")
       (try
         (doseq [test-ns test-nss]
