@@ -63,7 +63,8 @@
         version (or (joyride-version) "dev")]
     (str "Joyride Evaluation Output (v" version ")\r\n"
          "This (pseudo) terminal displays Joyride messages, evaluated code, results, and output.\r\n\r\n"
-         "To reveal this terminal, use the command " cmd-style " Joyride: Open Joyride Output Terminal " reset "\r\n\r\n"
+         "To reveal this terminal, use the command " cmd-style " Joyride: Open Joyride Output Terminal " reset ".\r\n"
+         "If this terminal stops updating, close the tab and run that command again. Earlier output will be gone.\r\n\r\n"
          "https://github.com/BetterThanTomorrow/joyride\r\n"
          "Please consider sponsoring: https://github.com/sponsors/PEZ ♥️\r\n\r\n")))
 
@@ -199,46 +200,67 @@
   [message]
   (string/replace message #"\r?\n" "\r\n"))
 
+(defn- forget-output-terminal!
+  "Clear the Joyride Output singleton. With a terminal, only if it is the tracked one."
+  ([]
+   (swap! db/!app-db assoc :output/terminal nil :output/pty nil))
+  ([terminal]
+   (when (identical? terminal (:output/terminal @db/!app-db))
+     (forget-output-terminal!))))
+
+(defn- output-terminal-live?
+  []
+  (let [terminal (:output/terminal @db/!app-db)]
+    (boolean (and terminal
+                  (not (.-exitStatus terminal))
+                  (some #(identical? % terminal)
+                        (.-terminals vscode/window))))))
+
+(defn register-lifecycle!
+  "Subscribe once to onDidCloseTerminal. Push the disposable onto the extension context."
+  [^js context]
+  (let [sub (.onDidCloseTerminal vscode/window
+                                 (fn [t]
+                                   (forget-output-terminal! t)))]
+    (swap! db/!app-db update :disposables conj sub)
+    (.push (.-subscriptions context) sub)))
+
 (defn- create-pty!
   "Create a Joyride pseudo terminal implementation."
   []
   (let [write-emitter (vscode/EventEmitter.)
-        close-emitter (vscode/EventEmitter.)]
-    #js {:onDidWrite (.-event write-emitter)
-         :onDidClose (.-event close-emitter)
-         :close (fn []
-                  (.fire close-emitter)
-                  (fn []
-                    (.fire close-emitter)
-                    (when-let [terminal (:output/terminal @db/!app-db)]
-                      (.dispose terminal))))
-         :open (fn [_]
-                 (.fire write-emitter (terminal-banner)))
-         :handleInput (fn [data]
-                        (.fire write-emitter (string/replace data #"\r" "\r\n")))
-         :write (fn [message]
-                  (let [normalized (normalize-line-endings (str message))]
-                    (.fire write-emitter normalized)))}))
+        close-emitter (vscode/EventEmitter.)
+        impl #js {:onDidWrite (.-event write-emitter)
+                  :onDidClose (.-event close-emitter)
+                  :open (fn [_]
+                          (.fire write-emitter (terminal-banner)))
+                  :handleInput (fn [data]
+                                 (.fire write-emitter (string/replace data #"\r" "\r\n")))
+                  :write (fn [message]
+                           (let [normalized (normalize-line-endings (str message))]
+                             (.fire write-emitter normalized)))}]
+    (set! (.-close impl)
+          (fn []
+            (.fire close-emitter)
+            (when (identical? impl (:output/pty @db/!app-db))
+              (forget-output-terminal!))))
+    impl))
 
 
 (defn ensure-terminal!
   "Ensure the output terminal exists and return the backing pseudoterminal."
   []
+  (when-not (output-terminal-live?)
+    (forget-output-terminal!))
   (if-let [pty (:output/pty @db/!app-db)]
     pty
     (let [pty (create-pty!)
           terminal (vscode/window.createTerminal #js {:name terminal-name
-                                                      :pty pty})
-          dispose-fn (.-dispose terminal)]
+                                                      :pty pty})]
       (swap! db/!app-db assoc
              :output/terminal terminal
              :output/pty pty
              :output/did-last-terminate-line true)
-      (set! (.-dispose terminal) (fn []
-                                   (swap! db/!app-db assoc
-                                          :output/terminal nil
-                                          :output/pty nil)
-                                   (dispose-fn)))
       pty)))
 
 (defn show-terminal!

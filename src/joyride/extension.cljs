@@ -94,6 +94,7 @@
     (swap! db/!app-db assoc
            :extension-context context
            :workspace-root-path vscode/workspace.rootPath)
+    (output/register-lifecycle! context)
     (output/ensure-terminal!))
 
   (let [{:keys [extension-context]} @db/!app-db]

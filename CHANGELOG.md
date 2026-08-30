@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: Recreate Joyride Output after the tab is closed, even when the host skips `Pseudoterminal.close()`. Close a stuck tab and use **Joyride: Open Joyride Output Terminal** — earlier output is gone.
+
 ## [0.0.80] - 2026-07-25
 
 - Auto-register Joyride MCP with [ECA](https://eca.dev/) (project-local `.eca/config.json`) when `joyride.mcp.autoRegisterEca` is enabled (default `true`)
