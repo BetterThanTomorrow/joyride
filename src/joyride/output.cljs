@@ -210,7 +210,7 @@
 
 (defn- output-terminal-live?
   []
-  (let [terminal (:output/terminal @db/!app-db)]
+  (let [^js terminal (:output/terminal @db/!app-db)]
     (boolean (and terminal
                   (not (.-exitStatus terminal))
                   (some #(identical? % terminal)
