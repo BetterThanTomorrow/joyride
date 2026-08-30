@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.81] - 2026-08-30
+
 - [Write a vscode-mcp registry entry for the live Joyride window](https://github.com/BetterThanTomorrow/joyride/issues/274) (`joyride.mcp.enableRegistry`, default on).
 - Fix: Recreate Joyride Output after the tab is closed, even when the host skips `Pseudoterminal.close()`. Close a stuck tab and use **Joyride: Open Joyride Output Terminal** — earlier output is gone.
 
