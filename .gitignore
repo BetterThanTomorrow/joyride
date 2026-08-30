@@ -36,3 +36,5 @@ playground/hello-joyride/.calva/output-window/output.calva-repl
 
 dist/
 **/.joyride/mcp-server/port
+
+.eca/config.json
