@@ -104,6 +104,7 @@ jobs:
           name: Copy build
           command: |
             cp -r out /tmp/build
+            cp -r dist /tmp/build
             cp  package.json /tmp/build
       - save_cache:
           name: Save dependencies
@@ -150,6 +151,12 @@ jobs:
       - restore_cache:
           name: Restore dependencies (VS Code install, Joyride workspace node_modules)
           key: npm-{{ checksum "./seatbelt-e2e/workspace-1/package.json" }}
+      - run:
+          name: Install Babashka
+          command: |
+            curl -sLO https://raw.githubusercontent.com/babashka/babashka/master/install
+            chmod +x install
+            sudo ./install
       - run:
           name: Apt install missing dependencies
           command: |
