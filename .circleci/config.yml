@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
   checkout:
     docker:
@@ -317,7 +317,6 @@ jobs:
             git commit -m "Bring on version $(node -p "require('./package').version")!"
             git push origin HEAD
 workflows:
-  version: 2
   build-test:
     jobs:
       - checkout:
