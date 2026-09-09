@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Create MCP wrapper port files in a stable directory]https://github.com/BetterThanTomorrow/calva-backseat-driver/issues/276
+
 ## [0.0.81] - 2026-08-30
 
 - [Write a vscode-mcp registry entry for the live Joyride window](https://github.com/BetterThanTomorrow/joyride/issues/274) (`joyride.mcp.enableRegistry`, default on).
