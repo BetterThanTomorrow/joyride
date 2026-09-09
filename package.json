@@ -74,7 +74,7 @@
           "joyride.mcp.autoRegisterEca": {
             "type": "boolean",
             "default": true,
-            "description": "When the ECA extension is installed, automatically register the Joyride MCP server in the project-local `.eca/config.json`."
+            "markdownDescription": "When the ECA extension is installed, automatically register the Joyride MCP server in the project-local `.eca/config.json`. Managed registration points at the primary port file under `~/.config/vscode-mcp/port-files/` (survives reboot). A `.joyride/mcp-server/port` mirror remains for legacy manual configs."
           },
           "joyride.mcp.enableRegistry": {
             "type": "boolean",

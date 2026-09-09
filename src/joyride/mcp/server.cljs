@@ -39,9 +39,6 @@
 (defn- get-port-file-uri+ [ctx-or-base-uri]
   (vscode/Uri.joinPath (get-server-dir+ ctx-or-base-uri) "port"))
 
-(defn- get-cursor-port-file-uri [instance-slug]
-  (vscode/Uri.file (path/join (os/tmpdir) "joyride-mcp-server" instance-slug "port")))
-
 (defn- set-server-running-context! [running?]
   (when-contexts/set-context! ::when-contexts/joyride.isMcpServerRunning running?))
 
@@ -70,10 +67,8 @@
              :mcp/on-request (partial requests/handle-request {:extension-context context})
              :mcp/on-log (fn [level & args]
                            (apply js/console.log (str "[MCP " (name level) "]") args))
-             :lifecycle/port-file-uri+ (fn [^js ctx {:lifecycle/keys [cursor-mode? instance-slug]}]
-                                         (if cursor-mode?
-                                           (get-cursor-port-file-uri instance-slug)
-                                           (get-port-file-uri+ ctx)))
+             ;; Primary port file is library-owned (~/.config/vscode-mcp/port-files/...).
+             ;; This callback is the legacy workspace mirror for manual configs only.
              :lifecycle/eca-port-file-uri+ (fn [^js ctx _strategy-opts]
                                              (get-port-file-uri+ ctx))
              :lifecycle/request-port (fn [_ctx {:lifecycle/keys [cursor-mode?]}]
