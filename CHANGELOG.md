@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.82] - 2026-09-09
+
 - [Create MCP wrapper port files in a stable directory]https://github.com/BetterThanTomorrow/calva-backseat-driver/issues/276
 
 ## [0.0.81] - 2026-08-30
