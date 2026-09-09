@@ -32,6 +32,7 @@
 (deftest start-writes-joyride-entry-test
   (async done
          (let [dir (tmp-dir)
+               primary-port (path/join (os/homedir) ".config" "vscode-mcp" "port-files" "joyride-ws-abc.port")
                config {:registry/enabled? true
                        :registry/dir dir
                        :registry/debounce-ms 15
@@ -48,7 +49,7 @@
                      :server/app-id "cursor"
                      :server/workspace-root "/proj/joyride"
                      :server/workspace-folder "/proj/joyride"
-                     :server/port-file-uri #js {:fsPath "/tmp/joyride-mcp-server/ws-abc/port"}}]
+                     :server/port-file-uri #js {:fsPath primary-port}}]
            (-> (writer/on-started!+ config info)
                (p/then (fn [_]
                          (let [entry-file (path/join dir "joyride-ws-abc.json")]
@@ -62,7 +63,7 @@
                                (is (= "/proj/joyride" (:workspaceRoot doc)))
                                (is (= "127.0.0.1" (get-in doc [:mcp :host])))
                                (is (= 50541 (get-in doc [:mcp :port])))
-                               (is (= "/tmp/joyride-mcp-server/ws-abc/port"
+                               (is (= primary-port
                                       (get-in doc [:mcp :portFilePath]))))))))
                (p/finally (fn []
                             (cleanup! dir)

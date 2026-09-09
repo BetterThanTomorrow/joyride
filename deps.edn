@@ -16,8 +16,8 @@
                                   :git/url "https://github.com/babashka/sci.configs"
                                   :git/sha "a785be2090991bf99ddc1c8cb4923a7217f6e098"}
         no.cjohansen/replicant {:mvn/version "2025.12.1"}
-        io.github.betterthantomorrow/vscode-mcp {;:local/root "../vscode-mcp"
-                                                 :git/url "https://github.com/BetterThanTomorrow/vscode-mcp.git"
-                                                 :git/sha "4954ac96a37c60355cca3f756beb20c678edbdcc"
+        io.github.betterthantomorrow/vscode-mcp {:local/root "../vscode-mcp"
+                                                 ;:git/url "https://github.com/BetterThanTomorrow/vscode-mcp.git"
+                                                 ;:git/sha "4954ac96a37c60355cca3f756beb20c678edbdcc"
                                                  }}
  :aliases {:dev {}}}
