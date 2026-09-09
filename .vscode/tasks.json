@@ -2,16 +2,23 @@
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "2.0.0",
+    // Task script names must exist in package.json (watch:local / watch).
     "tasks": [
         {
             "label": "Watch",
             "type": "npm",
-            "script": "watch",
+            "script": "watch:local",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Watch (pinned vscode-mcp)",
+            "type": "npm",
+            "script": "watch",
+            "problemMatcher": []
         }
     ]
 }
