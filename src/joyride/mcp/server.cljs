@@ -67,8 +67,6 @@
              :mcp/on-request (partial requests/handle-request {:extension-context context})
              :mcp/on-log (fn [level & args]
                            (apply js/console.log (str "[MCP " (name level) "]") args))
-             ;; Primary port file is library-owned (~/.config/vscode-mcp/port-files/...).
-             ;; This callback is the legacy workspace mirror for manual configs only.
              :lifecycle/eca-port-file-uri+ (fn [^js ctx _strategy-opts]
                                              (get-port-file-uri+ ctx))
              :lifecycle/request-port (fn [_ctx {:lifecycle/keys [cursor-mode?]}]
