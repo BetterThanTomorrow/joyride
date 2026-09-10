@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.83] - 2026-09-10
+
 - [Prettify Joyride “owned” ECA config](https://github.com/BetterThanTomorrow/joyride/issues/277)
 
 ## [0.0.82] - 2026-09-09
