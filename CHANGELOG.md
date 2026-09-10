@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Prettify Joyride “owned” ECA config](https://github.com/BetterThanTomorrow/joyride/issues/277)
+
 ## [0.0.82] - 2026-09-09
 
 - [Create MCP wrapper port files in a stable directory]https://github.com/BetterThanTomorrow/calva-backseat-driver/issues/276
