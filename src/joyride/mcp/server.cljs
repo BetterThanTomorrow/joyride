@@ -24,21 +24,6 @@
   [_state]
   (p/resolved (registry/compact-data)))
 
-(defn- get-workspace-root-uri-or-nil []
-  (some-> vscode/workspace.workspaceFolders
-          first
-          .-uri))
-
-(defn- get-server-dir+ [ctx-or-base-uri]
-  (let [base (cond
-               (instance? vscode/Uri ctx-or-base-uri) ctx-or-base-uri
-               (get-workspace-root-uri-or-nil) (get-workspace-root-uri-or-nil)
-               :else (.-globalStorageUri ^js ctx-or-base-uri))]
-    (vscode/Uri.joinPath base ".joyride" "mcp-server")))
-
-(defn- get-port-file-uri+ [ctx-or-base-uri]
-  (vscode/Uri.joinPath (get-server-dir+ ctx-or-base-uri) "port"))
-
 (defn- set-server-running-context! [running?]
   (when-contexts/set-context! ::when-contexts/joyride.isMcpServerRunning running?))
 
@@ -67,8 +52,6 @@
              :mcp/on-request (partial requests/handle-request {:extension-context context})
              :mcp/on-log (fn [level & args]
                            (apply js/console.log (str "[MCP " (name level) "]") args))
-             :lifecycle/eca-port-file-uri+ (fn [^js ctx _strategy-opts]
-                                             (get-port-file-uri+ ctx))
              :lifecycle/request-port (fn [_ctx {:lifecycle/keys [cursor-mode?]}]
                                        (if cursor-mode?
                                          0
