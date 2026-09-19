@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- [Stop writing MCP port under .joyride](https://github.com/BetterThanTomorrow/joyride/issues/278)
+
 ## [0.0.83] - 2026-09-10
 
 - [Prettify Joyride “owned” ECA config](https://github.com/BetterThanTomorrow/joyride/issues/277)
