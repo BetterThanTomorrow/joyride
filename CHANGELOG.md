@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.84] - 2026-09-19
+
 - [Stop writing MCP port under .joyride](https://github.com/BetterThanTomorrow/joyride/issues/278)
 
 ## [0.0.83] - 2026-09-10
