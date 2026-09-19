@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: [Generated ECA config has hardcoded absolute path to MCP port file](https://github.com/BetterThanTomorrow/joyride/issues/280)
+
 ## [0.0.84] - 2026-09-19
 
 - [Stop writing MCP port under .joyride](https://github.com/BetterThanTomorrow/joyride/issues/278)

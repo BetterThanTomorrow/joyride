@@ -17,5 +17,5 @@
                                   :git/sha "a785be2090991bf99ddc1c8cb4923a7217f6e098"}
         no.cjohansen/replicant {:mvn/version "2025.12.1"}
         io.github.betterthantomorrow/vscode-mcp {:git/url "https://github.com/BetterThanTomorrow/vscode-mcp.git"
-                                                 :git/sha "f199396f7392f4a7171c330fc7653672b9bcaa40"}}
+                                                 :git/sha "e55b32ce949cfa76a9a0f2b564562159a203344a"}}
  :aliases {:local-dev {:override-deps {io.github.betterthantomorrow/vscode-mcp {:local/root "../vscode-mcp"}}}}}
