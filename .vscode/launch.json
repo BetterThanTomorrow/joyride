@@ -109,6 +109,25 @@
             }
         },
         {
+            "name": "Launch in examples folder (Run Without Debugging)",
+            "type": "extensionHost",
+            "request": "launch",
+            "noDebug": true,
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceRoot}",
+                "${workspaceFolder}/examples"
+            ],
+            "sourceMaps": true,
+            "env": {},
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ],
+            "sourceMapPathOverrides": {
+                "joyride/*": "${workspaceFolder}/src/joyride/*"
+            }
+        },
+        {
             "name": "Launch in tests folder",
             "type": "extensionHost",
             "request": "launch",
