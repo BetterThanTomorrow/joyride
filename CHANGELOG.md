@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.86] - 2026-10-19
+
 - Update bundled skills with calva.jackIn knowledge
 
 ## [0.0.85] - 2026-09-19
