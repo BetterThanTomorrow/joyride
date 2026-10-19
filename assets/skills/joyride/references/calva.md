@@ -6,6 +6,49 @@ Task graph, matcher wait, window reload, and `"ok"`: [vscode.md](vscode.md). **j
 
 `calva.autoConnectRepl` is connect-on-open when a port file exists. That is a different path from this task + activate pattern.
 
+## calva.jackIn
+
+Command `calva.jackIn`. Options:
+
+- `connectSequence` — a sequence object, or a string name Calva looks up
+
+Pass a sequence object when you want to name the project type and the project root in the call. Fields:
+
+- `name`
+- `projectType` — `"babashka"`, `"deps.edn"`, …
+- `cljsType` — `"none"` when the project has no ClojureScript
+- `projectRootPath` — absolute path. Calva uses it as the project root.
+- `menuSelections` — optional. For `deps.edn`, `:cljAliases []` launches with no aliases. Leave `:cljAliases` out and Calva asks which aliases to launch with when the project has aliases.
+
+The command returns a JavaScript object, which trips Joyride's printer up. End the evaluation with `"ok"`.
+
+Both these are prompt-less for the user:
+
+```clojure
+(vscode/commands.executeCommand
+  "calva.jackIn"
+  (clj->js {:connectSequence {:name "Babashka"
+                              :projectType "babashka"
+                              :cljsType "none"
+                              :projectRootPath "/absolute/path/to/project"}}))
+"ok"
+```
+
+`deps.edn`, we provide `cljAliases` to suppress the prompt:
+
+```clojure
+(vscode/commands.executeCommand
+  "calva.jackIn"
+  (clj->js {:connectSequence {:name "deps.edn"
+                              :projectType "deps.edn"
+                              :cljsType "none"
+                              :projectRootPath "/absolute/path/to/project"
+                              :menuSelections {:cljAliases []}}}))
+"ok"
+```
+
+Inform yourself from project documentation and/or the user which alieses should be used.
+
 ## calva.connect
 
 Command `calva.connect`. Options:
