@@ -19,11 +19,14 @@
                              :wait-for-promise? true
                              :who "host-tests"}))
 
+(defn- current-print-fns []
+  [@sci/print-fn @sci/print-err-fn])
+
 (defn- overlap+
   "Starts two awaited evaluations, ends them in the order `first-k` then `second-k`, and resolves
-   to whether SCI printed elsewhere between them, and through the original print function after both."
+   to whether SCI printed elsewhere between them, and through the original print functions after both."
   [first-k second-k]
-  (let [print-fn-before @sci/print-fn
+  (let [print-fns-before (current-print-fns)
         open! {"joyrideGateA" (gate! "joyrideGateA")
                "joyrideGateB" (gate! "joyrideGateB")}
         results {"joyrideGateA" (evaluate-gated+ "joyrideGateA")
@@ -31,12 +34,12 @@
     ((open! first-k))
     (-> (results first-k)
         (.then (fn [_]
-                 (let [capturing-between? (not (identical? print-fn-before @sci/print-fn))]
+                 (let [capturing-between? (not= print-fns-before (current-print-fns))]
                    ((open! second-k))
                    (.then (results second-k)
                           (fn [_]
                             {:capturing-between? capturing-between?
-                             :restored? (identical? print-fn-before @sci/print-fn)}))))))))
+                             :restored? (= print-fns-before (current-print-fns))}))))))))
 
 (deftest overlapping-awaited-evaluations-restore-printing
   (async done
@@ -53,3 +56,22 @@
                     (js-delete js/globalThis "joyrideGateA")
                     (js-delete js/globalThis "joyrideGateB")
                     (done))))))
+
+(deftest print-fn-replaced-during-awaited-evaluation
+  (async done
+    (let [[out-before err-before] (current-print-fns)
+          nrepl-like-out (fn [_])
+          open! (gate! "joyrideGateC")
+          result (evaluate-gated+ "joyrideGateC")]
+      (sci/alter-var-root sci/print-fn (constantly nrepl-like-out))
+      (open!)
+      (-> result
+          (.then (fn [_]
+                   (is (identical? nrepl-like-out @sci/print-fn)
+                       "A print-fn set by someone else meanwhile is left in place")
+                   (is (identical? err-before @sci/print-err-fn)
+                       "print-err-fn goes back to the original")))
+          (.finally (fn []
+                      (sci/alter-var-root sci/print-fn (constantly out-before))
+                      (js-delete js/globalThis "joyrideGateC")
+                      (done)))))))

@@ -28,10 +28,10 @@
    (collision/with-collision+
      #(mcp-client/evaluate+ @!window (merge {:code code :who "lm-tool-test"} opts)))))
 
-(defn- root-print-fn+
-  "Resolves to SCI's root `*print-fn*`, read outside the evaluation's own bindings."
+(defn- root-print-fns+
+  "Resolves to SCI's root `*print-fn*` and `*print-err-fn*`, read outside the evaluation's own bindings."
   []
-  (p/then (p/delay 0) (fn [_] *print-fn*)))
+  (p/then (p/delay 0) (fn [_] [*print-fn* *print-err-fn*])))
 
 (deftest-async awaited-promise
   (testing "An awaited promise's value comes back as #<Promise …>"
@@ -75,11 +75,11 @@
 
 (deftest-async awaited-rejections
   (testing "Awaited rejections come back as errors, with output from before them, and leave printing in place"
-    (p/let [print-fn-before (root-print-fn+)
+    (p/let [print-fns-before (root-print-fns+)
             error-rejection (evaluate+ "(do (println \"before\") (js/Promise.reject (js/Error. \"boom\")))" {:awaitResult true})
             string-rejection (evaluate+ "(js/Promise.reject \"just a string\")" {:awaitResult true})
             nil-rejection (evaluate+ "(js/Promise.reject nil)" {:awaitResult true})
-            print-fn-after (root-print-fn+)]
+            print-fns-after (root-print-fns+)]
       (is (= ["error" "boom" "before\n"]
              ((juxt :type :error :stdout) error-rejection))
           (str "An Error rejection, with output: " error-rejection))
@@ -87,5 +87,6 @@
           (str "A string rejection: " string-rejection))
       (is (= "nil" (:error nil-rejection))
           (str "A nil rejection: " nil-rejection))
-      (is (identical? print-fn-before print-fn-after)
+      (is (and (identical? (first print-fns-before) (first print-fns-after))
+               (identical? (second print-fns-before) (second print-fns-after)))
           "Printing goes where it went before"))))

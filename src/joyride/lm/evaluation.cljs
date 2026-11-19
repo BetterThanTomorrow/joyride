@@ -41,13 +41,16 @@
      :capture/fns fns}))
 
 (defn- end-capture!
-  "Ends `capture`. When SCI prints through it, printing goes back to the latest capture still running,
-   or to the print functions from before the first capture."
+  "Ends `capture`. Each of SCI's print functions that still prints through it goes back to the latest
+   capture still running, or to the print function from before the first capture."
   [{:capture/keys [fns]}]
   (let [{:keys [base active]} (swap! !captures update :active (fn [active]
-                                                               (filterv #(not= fns %) active)))]
+                                                               (filterv #(not= fns %) active)))
+        target (or (peek active) base)]
     (when (identical? @sci/print-fn (:out-fn fns))
-      (set-print-fns! (or (peek active) base)))))
+      (sci/alter-var-root sci/print-fn (constantly (:out-fn target))))
+    (when (identical? @sci/print-err-fn (:err-fn fns))
+      (sci/alter-var-root sci/print-err-fn (constantly (:err-fn target))))))
 
 (defn- bracket-error-result [ns {:keys [error balanced-code parinfer-error]}]
   (cond-> {:result nil
