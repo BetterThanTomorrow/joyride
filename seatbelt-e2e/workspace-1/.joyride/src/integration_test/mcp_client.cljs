@@ -48,13 +48,20 @@
 (defn parse-envelope [stdout]
   (js->clj (js/JSON.parse stdout) :keywordize-keys true))
 
-(defn- this-joyride-window [windows workspace-root]
-  (let [base (and workspace-root (path/basename workspace-root))]
+(defn- real-path [p]
+  (try
+    (fs/realpathSync p)
+    (catch :default _ p)))
+
+(defn- this-joyride-window
+  "Returns the Joyride entry in `windows` whose workspace root is `workspace-root`, compared as real
+   paths, so `/tmp` and `/private/tmp` match. Other windows, such as the developer's own, never match."
+  [windows workspace-root]
+  (let [this-root (some-> workspace-root real-path)]
     (some (fn [w]
             (when (and (= "joyride" (:serverName w))
-                       (let [root (:workspaceRoot w)]
-                         (or (= workspace-root root)
-                             (and base root (string/ends-with? root base)))))
+                       this-root
+                       (= this-root (some-> (:workspaceRoot w) real-path)))
               w))
           windows)))
 
