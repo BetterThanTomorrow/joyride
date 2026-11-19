@@ -85,8 +85,10 @@
       (value->str e {})))
 
 (defn pprint-dispatch
-  "`cljs.pprint` dispatch that pretty prints Clojure collections and writes every other value with `value->str`."
+  "`cljs.pprint` dispatch that pretty prints Clojure collections and writes every other value
+   with `value->str`, within the current `*print-length*` and `*print-level*`."
   [x]
   (if (coll? x)
     (pp/simple-dispatch x)
-    (-write *out* (value->str x {}))))
+    (-write *out* (value->str x {:print-length *print-length*
+                                 :print-level *print-level*}))))
