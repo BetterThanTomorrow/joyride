@@ -68,6 +68,7 @@
                     'integration-test.commands-test
                     'integration-test.output-test
                     'integration-test.promise-results-test
+                    'integration-test.lm-tool-test
                     'integration-test.mcp-registry-test]]
       (println "Runner: Workspace activated, running tests...")
       (try

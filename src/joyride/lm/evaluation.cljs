@@ -4,142 +4,170 @@
    [joyride.lm.eval.core :as core]
    [joyride.lm.eval.validation :as validation]
    [joyride.output :as output]
+   [joyride.printing :as printing]
    [joyride.repl-utils :as repl-utils]
    [joyride.sci :as joyride-sci]
    [joyride.integrations.calva :as calva-int]
    [joyride.who-tracking :as who-tracking]
    [promesa.core :as p]
    [sci.core :as sci]
-   [sci.ctx-store :as store]
-   [zprint.core :as zp]))
+   [sci.ctx-store :as store]))
+
+(def ^:private not-awaited-message "Promise returned but not awaited (fire-and-forget mode)")
+
+(defonce ^:private !captures (atom {:base nil :active []}))
+
+(defn- current-print-fns []
+  {:out-fn @sci/print-fn
+   :err-fn @sci/print-err-fn})
+
+(defn- set-print-fns! [{:keys [out-fn err-fn]}]
+  (sci/alter-var-root sci/print-fn (constantly out-fn))
+  (sci/alter-var-root sci/print-err-fn (constantly err-fn)))
+
+(defn- start-capture!
+  "Points SCI's print functions at fresh buffers and returns the capture, with `:capture/out` and `:capture/err` buffers."
+  []
+  (let [out (atom "")
+        err (atom "")
+        fns {:out-fn (fn [s] (swap! out str s))
+             :err-fn (fn [s] (swap! err str s))}]
+    (swap! !captures (fn [{:keys [active] :as captures}]
+                       (cond-> (update captures :active conj fns)
+                         (empty? active) (assoc :base (current-print-fns)))))
+    (set-print-fns! fns)
+    {:capture/out out
+     :capture/err err
+     :capture/fns fns}))
+
+(defn- end-capture!
+  "Ends `capture`. When SCI prints through it, printing goes back to the latest capture still running,
+   or to the print functions from before the first capture."
+  [{:capture/keys [fns]}]
+  (let [{:keys [base active]} (swap! !captures update :active (fn [active]
+                                                               (filterv #(not= fns %) active)))]
+    (when (identical? @sci/print-fn (:out-fn fns))
+      (set-print-fns! (or (peek active) base)))))
+
+(defn- bracket-error-result [ns {:keys [error balanced-code parinfer-error]}]
+  (cond-> {:result nil
+           :error error
+           :ns ns
+           :stdout ""
+           :stderr ""}
+    balanced-code (assoc :balanced-code balanced-code)
+    parinfer-error (assoc :parinfer-error parinfer-error)))
+
+(defn- resolve-ns
+  "Returns the SCI namespace named `ns`, created when missing, or the last used namespace when it can't be created."
+  [ns]
+  (let [target-ns (symbol ns)]
+    (try
+      (repl-utils/the-sci-ns (store/get-ctx) target-ns)
+      (catch js/Error _
+        (try
+          (sci/eval-form (store/get-ctx) (list 'clojure.core/create-ns (list 'quote target-ns)))
+          (catch js/Error _
+            @joyride-sci/!last-ns))))))
+
+(defn- eval-in-ns [code ns]
+  (sci/binding [sci/ns (resolve-ns ns)]
+    (joyride-sci/eval-string code)))
+
+(defn- result-str
+  "Returns `result` printed within the `joyride.lm` result limits. An awaited promise's value
+   prints as `#<Promise …>`, and a promise that isn't awaited as the not awaited message."
+  [result {:keys [promise? wait-for-promise?]}]
+  (let [{:keys [max-length max-depth]} (joyride-sci/get-eval-config)
+        opts {:print-length max-length
+              :print-level max-depth
+              :fallback-length max-length
+              :fallback-level max-depth}]
+    (cond
+      (not promise?) (printing/value->str result opts)
+      wait-for-promise? (str "#<Promise " (printing/value->str result opts) ">")
+      :else (printing/value->str {:type "promise"
+                                  :message not-awaited-message
+                                  :toString (str result)}
+                                 opts))))
+
+(defn- log-result!
+  [{:keys [error result-str stdout stderr who ns]}]
+  (let [log! (fn [category text]
+               (calva-int/log-to-calva! {:category category :text text :who who :ns ns}))]
+    (if error
+      (log! "evaluationErrorOutput" error)
+      (log! "evaluationResults" result-str))
+    (when (seq stdout)
+      (log! "evaluationOutput" stdout))
+    (when (seq stderr)
+      (log! "evaluationErrorOutput" stderr))))
+
+(defn- make-result
+  "Returns the tool result for an evaluation `outcome`, with the output `capture` collected, and logs it to Calva."
+  [{:keys [result error who] :as outcome} {:capture/keys [out err]}]
+  (let [printed (result-str result outcome)
+        other-whos (who-tracking/get-other-whos-since-last! who)
+        result-ns (str @sci/ns)
+        stdout @out
+        stderr @err]
+    (log-result! {:error error :result-str printed :stdout stdout :stderr stderr :who who :ns result-ns})
+    (cond-> {:result printed
+             :error error
+             :ns result-ns
+             :stdout stdout
+             :stderr stderr}
+      (seq other-whos) (assoc "otherWhosSinceLast" other-whos))))
+
+(defn- awaited-outcome+
+  "Evaluates `code` and resolves to the evaluation's outcome, with a promise result awaited.
+   Native promise calls keep a rejection with `nil` a rejection, which promesa turns into a resolution."
+  [{:keys [code ns who]}]
+  (let [!raw (volatile! nil)]
+    (.then (js/Promise. (fn [resolve]
+                          (resolve (vreset! !raw (eval-in-ns code ns)))))
+           (fn [v]
+             {:result v :promise? (instance? js/Promise @!raw) :wait-for-promise? true :who who})
+           (fn [e]
+             {:error (printing/error-message e) :who who}))))
+
+(defn- execute-awaited+ [input capture]
+  (-> (awaited-outcome+ input)
+      (.then #(make-result % capture))
+      (.finally #(end-capture! capture))))
+
+(defn- execute-sync [{:keys [code ns who]} capture]
+  (try
+    (let [result (eval-in-ns code ns)]
+      (make-result {:result result :promise? (instance? js/Promise result) :who who} capture))
+    (catch :default e
+      (make-result {:error (printing/error-message e) :who who} capture))
+    (finally
+      (end-capture! capture))))
+
+(defn- log-evaluation! [{:keys [code who]}]
+  (who-tracking/record-evaluation! who)
+  (output/append-clojure-eval! code {:who who :ns (str @sci/ns)})
+  (calva-int/log-to-calva! {:category "evaluatedCode"
+                            :text code
+                            :who who
+                            :ns (str @sci/ns)}))
 
 (defn execute-code+
   "Execute ClojureScript code in Joyride's SCI environment with VS Code APIs.
    Returns a map with :result, :error, :ns, :stdout, and :stderr keys.
    Uses Joyride's full SCI context with VS Code API access and extensions.
    When wait-for-promise? is false, returns result synchronously (no promise)."
-  [{:keys [code ns wait-for-promise? who]}]
+  [{:keys [code ns wait-for-promise?] :as input}]
   (let [bracket-validation (validation/validate-brackets code)]
     (if-not (:valid? bracket-validation)
-      ;; Error: code has unbalanced brackets - don't execute
-      (cond-> {:result nil
-               :error (:error bracket-validation)
-               :ns ns
-               :stdout ""
-               :stderr ""}
-        (:balanced-code bracket-validation)
-        (assoc :balanced-code (:balanced-code bracket-validation))
-        (:parinfer-error bracket-validation)
-        (assoc :parinfer-error (:parinfer-error bracket-validation)))
-      ;; Happy path: code is balanced - continue with execution
-      (let [stdout-buffer (atom "") ;; TODO: Try use sci/binding instead of the alter-var-root stuff to capture output
-            stderr-buffer (atom "")
-            original-print-fn @sci/print-fn
-            original-print-err-fn @sci/print-err-fn
-            setup-capture! (fn []
-                             (sci/alter-var-root sci/print-fn (constantly (fn [s] (swap! stdout-buffer str s))))
-                             (sci/alter-var-root sci/print-err-fn (constantly (fn [s] (swap! stderr-buffer str s)))))
-            restore-fns! (fn []
-                           (sci/alter-var-root sci/print-fn (constantly original-print-fn))
-                           (sci/alter-var-root sci/print-err-fn (constantly original-print-err-fn)))
-            {:keys [max-length max-depth]} (joyride-sci/get-eval-config)
-            make-result (fn [result error wait-for-promise?]
-                          (let [result-value (if (and (not wait-for-promise?)
-                                                      (not error)
-                                                      (instance? js/Promise result))
-                                               {:type "promise"
-                                                :message "Promise returned but not awaited (fire-and-forget mode)"
-                                                :toString (str result)}
-                                               result)
-                                zprint-opts (cond-> {:width 10000}
-                                              (and max-length
-                                                   (number? max-length)
-                                                   (not (zero? max-length)))
-                                              (assoc :max-length max-length)
-                                              (and max-depth
-                                                   (number? max-depth)
-                                                   (not (zero? max-depth)))
-                                              (assoc :max-depth max-depth))
-                                limited-result-str (zp/zprint-str result-value zprint-opts)
-                                other-whos (who-tracking/get-other-whos-since-last! who)
-                                result-ns (str @sci/ns)
-                                stdout @stdout-buffer
-                                stderr @stderr-buffer]
-                            (when error
-                              (calva-int/log-to-calva! {:category "evaluationErrorOutput"
-                                                        :text error
-                                                        :who who
-                                                        :ns result-ns}))
-                            (when-not error
-                              (calva-int/log-to-calva! {:category "evaluationResults"
-                                                        :text limited-result-str
-                                                        :who who
-                                                        :ns result-ns}))
-                            (when (seq stdout)
-                              (calva-int/log-to-calva! {:category "evaluationOutput"
-                                                        :text stdout
-                                                        :who who
-                                                        :ns result-ns}))
-                            (when (seq stderr)
-                              (calva-int/log-to-calva! {:category "evaluationErrorOutput"
-                                                        :text stderr
-                                                        :who who
-                                                        :ns result-ns}))
-                            (cond-> {:result limited-result-str
-                                     :error error
-                                     :ns result-ns
-                                     :stdout stdout
-                                     :stderr stderr}
-                              (seq other-whos)
-                              (assoc "otherWhosSinceLast" other-whos))))]
-        (who-tracking/record-evaluation! who)
-        (output/append-clojure-eval! code {:who who :ns (str @sci/ns)})
-        (calva-int/log-to-calva! {:category "evaluatedCode"
-                                  :text code
-                                  :who who
-                                  :ns (str @sci/ns)})
-        (if wait-for-promise?
-          ;; Async path with p/let (existing behavior)
-          (try
-            (setup-capture!)
-            (p/-> (p/let [target-ns (symbol ns)
-                          resolved-ns (try
-                                        (repl-utils/the-sci-ns (store/get-ctx) target-ns)
-                                        (catch js/Error _
-                                          (try
-                                            (sci/eval-form (store/get-ctx)
-                                                           (list 'clojure.core/create-ns (list 'quote target-ns)))
-                                            (catch js/Error _
-                                              @joyride-sci/!last-ns))))
-                          eval-result (sci/binding [sci/ns resolved-ns]
-                                        (joyride-sci/eval-string code))
-                          _ (restore-fns!)
-                          result (make-result eval-result nil wait-for-promise?)]
-                    result)
-                  (p/catch (fn [e] ;; Todo, this doesn't catch evalutation errors
-                             (make-result nil (.-message e) wait-for-promise?)
-                             (restore-fns!))))
-            (catch js/Error e
-              (make-result nil (.-message e) wait-for-promise?)))
-          ;; Sync path without promises
-          (try
-            (setup-capture!)
-            (let [target-ns (symbol ns)
-                  resolved-ns (try
-                                (repl-utils/the-sci-ns (store/get-ctx) target-ns)
-                                (catch js/Error _
-                                  (try
-                                    (sci/eval-form (store/get-ctx)
-                                                   (list 'clojure.core/create-ns (list 'quote target-ns)))
-                                    (catch js/Error _
-                                      @joyride-sci/!last-ns))))
-                  result (sci/binding [sci/ns resolved-ns]
-                           (joyride-sci/eval-string code))]
-              (make-result result nil wait-for-promise?))
-            (catch js/Error e
-              (make-result nil (.-message e) wait-for-promise?))
-            (finally
-              (restore-fns!))))))))
+      (bracket-error-result ns bracket-validation)
+      (do
+        (log-evaluation! input)
+        (let [capture (start-capture!)]
+          (if wait-for-promise?
+            (execute-awaited+ input capture)
+            (execute-sync input capture)))))))
 
 (defn prepare-invocation
   "Prepare confirmation message with rich code preview"
