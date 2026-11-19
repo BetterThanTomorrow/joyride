@@ -19,7 +19,7 @@ NB: Clojure conventions apply. This is SCI: `^:async` / `await`, not Squint's `j
 
 Deeper layers (load when needed):
 
-- [vscode.md](references/vscode.md) — printable last values; commands from a task; background `dependsOn` and matcher wait
+- [vscode.md](references/vscode.md) — commands from a task; background `dependsOn` and matcher wait
 - [calva.md](references/calva.md) — Calva REPL from Joyride or a task
 - [standup.md](references/standup.md) — open a folder / start tasks (external agents)
 - [flares_examples.cljs](references/flares_examples.cljs) — Flare examples
@@ -76,7 +76,7 @@ joyride/load-file                 ; async; SCI has no load-file
 (some-> vscode/window.activeTextEditor .-document .-fileName)
 ```
 
-Use another extension only after `getExtension` and `.-isActive`. Convert JS to Clojure data at the edge (`js->clj`, `seq`, or pick properties). Work with maps inside. Commands, tasks, and printable last values: [vscode.md](references/vscode.md).
+Use another extension only after `getExtension` and `.-isActive`. Convert JS to Clojure data at the edge (`js->clj`, `seq`, or pick properties). Work with maps inside. Commands and tasks: [vscode.md](references/vscode.md).
 
 ## ns `:require`
 
@@ -151,7 +151,6 @@ REPL defs live in memory until a script load overwrites them. If a function "van
 
 Load [vscode.md](references/vscode.md) / [calva.md](references/calva.md) when you hit these:
 
-- Printable last value — end scripts and `joyride.runCode` with `"ok"` (or another Clojure value); JS objects throw on `IWriter`
 - `executeTask` the connect **leaf**, not a parent that only `dependsOn` it
 - After reload, if `repl` is already running → call connect (do not re-`executeTask` connect; the matcher will not fire)
 - Session key, not default `"clj"`, when two Clojure REPLs share `replType`

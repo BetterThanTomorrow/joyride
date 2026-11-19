@@ -1,21 +1,6 @@
 # VS Code from Joyride
 
-Load when running VS Code commands, tasks, or anything whose last value might be a JS object.
-
-## Printable last values
-
-Joyride `pr-str`s the last value of a script and of `joyride.runCode`. JS objects (Promise, Thenable, Task, Error, most `vscode` types) do not implement `IWriter`. That throws:
-
-`No protocol method IWriter.-write defined for type object: [object Object]`
-
-Return a Clojure value: `"ok"`, `nil`, or a map of picked fields. Convert at the edge with `js->clj`, `.-message`, `js/String`, or `joyride/js-properties`. Do not `str`, `pr-str`, or `println` a raw JS object. For errors: `(or (.-message e) (js/String e))`.
-
-```clojure
-(vscode/commands.executeCommand "workbench.action.files.save")
-"ok"
-```
-
-`executeCommand` returns a Thenable. Without `"ok"`, Joyride prints that object and the task fails.
+Load when running VS Code commands or tasks.
 
 ## Any VS Code command from a task
 
