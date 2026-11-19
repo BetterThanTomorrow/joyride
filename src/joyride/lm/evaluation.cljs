@@ -13,11 +13,6 @@
    [sci.ctx-store :as store]
    [zprint.core :as zp]))
 
-(defn- get-eval-config []
-  (let [config (vscode/workspace.getConfiguration "joyride.lm")]
-    {:max-length (.get config "evaluationResultsMaxLength")
-     :max-depth (.get config "evaluationResultsMaxDepth")}))
-
 (defn execute-code+
   "Execute ClojureScript code in Joyride's SCI environment with VS Code APIs.
    Returns a map with :result, :error, :ns, :stdout, and :stderr keys.
@@ -47,7 +42,7 @@
             restore-fns! (fn []
                            (sci/alter-var-root sci/print-fn (constantly original-print-fn))
                            (sci/alter-var-root sci/print-err-fn (constantly original-print-err-fn)))
-            {:keys [max-length max-depth]} (get-eval-config)
+            {:keys [max-length max-depth]} (joyride-sci/get-eval-config)
             make-result (fn [result error wait-for-promise?]
                           (let [result-value (if (and (not wait-for-promise?)
                                                       (not error)

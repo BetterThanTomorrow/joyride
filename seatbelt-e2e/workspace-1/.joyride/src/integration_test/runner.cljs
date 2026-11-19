@@ -67,6 +67,7 @@
                     'integration-test.flare-test
                     'integration-test.commands-test
                     'integration-test.output-test
+                    'integration-test.promise-results-test
                     'integration-test.mcp-registry-test]]
       (println "Runner: Workspace activated, running tests...")
       (try

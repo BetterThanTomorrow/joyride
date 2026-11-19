@@ -12,6 +12,7 @@
    [joyride.db :as db]
    [joyride.flare :as flare]
    [joyride.output :as output]
+   [joyride.printing :as printing]
    [joyride.repl-utils :as repl-utils]
    [joyride.sci.fs :as sci-fs]
    [joyride.vscode-utils :as vscode-utils]
@@ -260,6 +261,36 @@
     (when delegate
       (delegate message))))
 
+(defn get-eval-config
+  "Returns the `joyride.lm` limits for printed evaluation results, as `:max-length` and `:max-depth`."
+  []
+  (let [config (vscode/workspace.getConfiguration "joyride.lm")]
+    {:max-length (.get config "evaluationResultsMaxLength")
+     :max-depth (.get config "evaluationResultsMaxDepth")}))
+
+(defn print-fallback-opts
+  "Returns `printing/value->str` fallback limits from the `joyride.lm` result settings,
+   or no limits, so the defaults apply, when the settings can't be read."
+  []
+  (try
+    (let [{:keys [max-length max-depth]} (get-eval-config)]
+      {:fallback-length max-length
+       :fallback-level max-depth})
+    (catch :default _
+      {})))
+
+(defn- echo-result!
+  "Appends `res` to Joyride Output. A promise is appended when it settles, as `#<Promise …>` or as its rejection."
+  [res]
+  (let [opts (print-fallback-opts)]
+    (if (instance? js/Promise res)
+      (.then res
+             (fn [v]
+               (output/append-eval-result! (str "#<Promise " (printing/value->str v opts) ">")))
+             (fn [e]
+               (output/append-line-eval-err! (printing/error-message e))))
+      (output/append-eval-result! (printing/value->str res opts)))))
+
 (defn eval-string [s]
   (sci/binding [sci/ns @!last-ns
                 sci/print-fn (wrap-print-fn "stdout" @sci/print-fn output/append-eval-out!)
@@ -271,7 +302,7 @@
           (if (= :sci.core/eof form)
             (do
               (vreset! !last-ns @sci/ns)
-              (output/append-eval-result! (pr-str res))
+              (echo-result! res)
               res)
             (let [result (try
                            (sci/eval-form (store/get-ctx) form)
