@@ -6,6 +6,7 @@
    ["vscode" :as vscode]
    [joyride.bencode :refer [encode decode-all]]
    [joyride.when-contexts :as when-contexts]
+   [joyride.printing :as printing]
    [joyride.repl-utils :as repl-utils :refer [the-sci-ns]]
    [joyride.sci :as jsci]
    [joyride.utils :refer [cljify]]
@@ -73,18 +74,34 @@
 (def pretty-print-fns-map
   {"cider.nrepl.pprint/pprint" pp/write})
 
+(defn- pprint-str
+  "Returns `value` pretty printed with `pprint-fn` and the client's `pprint-options`,
+   or on one line within the same limits when pretty printing throws."
+  [pprint-fn {:keys [right-margin length level]} value fallback-opts]
+  (try
+    (binding [*print-length* length
+              *print-level* level
+              pp/*print-right-margin* right-margin]
+      (with-out-str (pprint-fn value :dispatch printing/pprint-dispatch)))
+    (catch :default _
+      (printing/value->str value (assoc fallback-opts :print-length length :print-level level)))))
+
 (defn format-value [nrepl-pprint pprint-options value]
-  (if nrepl-pprint
-    (if-let [pprint-fn (pretty-print-fns-map nrepl-pprint)]
-      (let [{:keys [right-margin length level]} pprint-options]
-        (binding [*print-length* length
-                  *print-level* level
-                  pp/*print-right-margin* right-margin]
-          (with-out-str (pprint-fn value))))
+  (let [fallback-opts (jsci/print-fallback-opts)]
+    (if-let [pprint-fn (some-> nrepl-pprint pretty-print-fns-map)]
+      (pprint-str pprint-fn pprint-options value fallback-opts)
       (do
-        (debug "Pretty-Printing is only supported for cider.nrepl.pprint/pprint")
-        (pr-str value)))
-    (pr-str value)))
+        (when nrepl-pprint
+          (debug "Pretty-Printing is only supported for cider.nrepl.pprint/pprint"))
+        (printing/value->str value fallback-opts)))))
+
+(defn- error-str
+  "Returns `x` as `str` gives it, or printed with `printing/value->str` when `str` throws."
+  [x]
+  (try
+    (str x)
+    (catch :default _
+      (printing/value->str x {}))))
 
 (defn do-handle-eval [{:keys [ns code _sci-ctx load-file? file who] :as request} send-fn]
   (let [who (or who "ui")]
@@ -121,8 +138,8 @@
                             (send-result! resolved true)))
                    (.catch (fn [rejected]
                              (sci/alter-var-root sci/*e (constantly rejected))
-                             (send-fn request {"err" (str rejected "\n")})
-                             (send-fn request {"ex" (str rejected)
+                             (send-fn request {"err" (str (error-str rejected) "\n")})
+                             (send-fn request {"ex" (error-str rejected)
                                                "ns" (str @sci/ns)
                                                "status" ["done"]}))))
                (send-result! v false)))
@@ -130,8 +147,8 @@
              (sci/alter-var-root sci/*e (constantly e))
              (let [data (ex-data e)]
                (when-let [message (or (:message data) (.-message e))]
-                 (send-fn request {"err" (str message "\n")}))
-               (send-fn request {"ex" (str e)
+                 (send-fn request {"err" (str (error-str message) "\n")}))
+               (send-fn request {"ex" (error-str e)
                                  "ns" (str @sci/ns)
                                  "status" ["done"]})))))))
 
