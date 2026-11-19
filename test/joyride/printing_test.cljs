@@ -125,7 +125,9 @@
   (is (= "nil" (printing/error-message nil))
       "nil prints as nil")
   (is (= "{:a 1}" (printing/error-message {:a 1}))
-      "Other values print"))
+      "Other values print")
+  (is (= "thrown string" (printing/error-message (ex-info nil {} "thrown string")))
+      "An error without a message gives its cause's message"))
 
 (defn- pprint-str [x]
   (with-out-str (pp/write x :dispatch printing/pprint-dispatch)))
@@ -135,11 +137,12 @@
     (is (= (with-out-str (pp/write x)) (pprint-str x))
         (str "Pretty prints like the default dispatch: " (pr-str x))))
   (testing "With print limits bound"
-    (binding [*print-length* 3
-              *print-level* 2]
-      (doseq [x [(range 30) [[[1]]] {:k (vec (repeat 12 "a-long-string"))}]]
-        (is (= (with-out-str (pp/write x)) (pprint-str x))
-            (str "Pretty prints like the default dispatch: " (pr-str x)))))))
+    (doseq [[length level] [[3 2] [0 nil]]]
+      (binding [*print-length* length
+                *print-level* level]
+        (doseq [x [(range 30) [[[1]]] {:k (vec (repeat 12 "a-long-string"))} #js {:a 1} (atom 1)]]
+          (is (= (with-out-str (pp/write x)) (pprint-str x))
+              (str "Pretty prints like the default dispatch at length " length ": " (pr-str x))))))))
 
 (deftest pprint-dispatch-promises
   (let [p (js/Promise.resolve 1)]

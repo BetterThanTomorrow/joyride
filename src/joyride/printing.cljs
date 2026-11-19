@@ -78,17 +78,24 @@
           (str "#<unprintable: " (or (some-> e .-message) (str e)) ">"))))))
 
 (defn error-message
-  "Returns the message of the thrown or rejected value `e`: an error's message, a string as is, or anything else printed."
+  "Returns the message of the thrown or rejected value `e`: an error's message, else its cause's
+   message, a string as is, or anything else printed."
   [e]
-  (or (some-> e .-message)
-      (when (string? e) e)
-      (value->str e {})))
+  (cond
+    (seq (some-> e .-message)) (.-message e)
+    (ex-cause e) (error-message (ex-cause e))
+    (string? e) e
+    :else (value->str e {})))
 
 (defn pprint-dispatch
-  "`cljs.pprint` dispatch that pretty prints Clojure collections and writes every other value
-   with `value->str`, within the current `*print-length*` and `*print-level*`."
+  "`cljs.pprint` dispatch that pretty prints Clojure collections, and prints every other value the
+   way `pr` does within the current print bindings, with native promises as `#<js/Promise[~]>`.
+   When that printing throws, the value is printed with `value->str`."
   [x]
   (if (coll? x)
     (pp/simple-dispatch x)
-    (-write *out* (value->str x {:print-length *print-length*
-                                 :print-level *print-level*}))))
+    (-write *out* (try
+                    (pr-str-with-opts [x] (print-opts))
+                    (catch :default _
+                      (value->str x {:print-length *print-length*
+                                     :print-level *print-level*}))))))
