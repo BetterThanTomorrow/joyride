@@ -139,10 +139,22 @@
       (.then #(make-result % capture))
       (.finally #(end-capture! capture))))
 
+(defn- log-late-rejection!
+  "Logs a rejection of the not awaited `promise` to the Calva output log, under `who` and `ns`."
+  [promise who ns]
+  (.catch promise (fn [e]
+                    (calva-int/log-to-calva! {:category "evaluationErrorOutput"
+                                              :text (printing/error-message e)
+                                              :who who
+                                              :ns ns}))))
+
 (defn- execute-sync [{:keys [code ns who]} capture]
   (try
-    (let [result (eval-in-ns code ns)]
-      (make-result {:result result :promise? (instance? js/Promise result) :who who} capture))
+    (let [result (eval-in-ns code ns)
+          promise? (instance? js/Promise result)]
+      (when promise?
+        (log-late-rejection! result who (str @sci/ns)))
+      (make-result {:result result :promise? promise? :who who} capture))
     (catch :default e
       (make-result {:error (printing/error-message e) :who who} capture))
     (finally

@@ -3,6 +3,7 @@
    The name doesn't end in `-test`, so the node test build leaves them out. Run them from the
    Extension Development Host REPL with `(cljs.test/run-tests 'joyride.lm.evaluation-host-tests)`."
   (:require [cljs.test :refer [async deftest is]]
+            [joyride.db :as db]
             [joyride.lm.evaluation :as evaluation]
             [sci.core :as sci]))
 
@@ -56,6 +57,43 @@
                     (js-delete js/globalThis "joyrideGateA")
                     (js-delete js/globalThis "joyrideGateB")
                     (done))))))
+
+(defn- record-calva-log!
+  "Points Calva logging at a recorder and returns the recorded messages and a function that undoes it."
+  []
+  (let [!logged (atom [])
+        original (get @db/!app-db :calva/log-fn ::none)]
+    (swap! db/!app-db assoc :calva/log-fn (fn [msg]
+                                           (swap! !logged conj (js->clj msg :keywordize-keys true))))
+    {:logged !logged
+     :undo! #(if (= ::none original)
+               (swap! db/!app-db dissoc :calva/log-fn)
+               (swap! db/!app-db assoc :calva/log-fn original))}))
+
+(deftest late-rejection-logged-to-calva
+  (async done
+    (let [{:keys [logged undo!]} (record-calva-log!)]
+      (evaluation/execute-code+ {:code "(js/Promise.reject (js/Error. \"late\"))"
+                                 :ns "user"
+                                 :wait-for-promise? false
+                                 :who "host-tests"})
+      (evaluation/execute-code+ {:code "(js/Promise.resolve :fine)"
+                                 :ns "user"
+                                 :wait-for-promise? false
+                                 :who "host-tests"})
+      (-> (js/Promise. (fn [resolve] (js/setTimeout resolve 50)))
+          (.then (fn []
+                   (is (= [{:category "evaluationErrorOutput"
+                            :text "late"
+                            :who "host-tests"
+                            :ns "user"}]
+                          (->> @logged
+                               (filter #(= "evaluationErrorOutput" (:category %)))
+                               (map #(select-keys % [:category :text :who :ns]))))
+                       "The late rejection is logged once, and the resolved promise logs no error")))
+          (.finally (fn []
+                      (undo!)
+                      (done)))))))
 
 (deftest print-fn-replaced-during-awaited-evaluation
   (async done
