@@ -4,6 +4,9 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: The REPL reports a promise rejected with `nil` as an error with the text `nil`
+- Fix: **Joyride: Run Code** reports a promise rejected with `nil` as `nil`
+
 ## [0.0.87] - 2026-11-20
 
 - Fix: [Evaluating code that returns a promise fails with "No protocol method IWriter.-write"](https://github.com/BetterThanTomorrow/joyride/issues/283)
