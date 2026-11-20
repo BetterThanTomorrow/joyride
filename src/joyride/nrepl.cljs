@@ -96,12 +96,12 @@
         (printing/value->str value fallback-opts)))))
 
 (defn- error-str
-  "Returns `x` as `str` gives it, or printed with `printing/value->str` when `str` throws."
+  "Returns `x` as `str` gives it, or printed with `printing/value->str` when `str` throws or gives an empty string."
   [x]
-  (try
-    (str x)
-    (catch :default _
-      (printing/value->str x {}))))
+  (or (try
+        (not-empty (str x))
+        (catch :default _ nil))
+      (printing/value->str x {})))
 
 (defn do-handle-eval [{:keys [ns code _sci-ctx load-file? file who] :as request} send-fn]
   (let [who (or who "ui")]

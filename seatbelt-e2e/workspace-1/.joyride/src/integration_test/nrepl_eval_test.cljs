@@ -113,3 +113,10 @@
              "A thrown error is reported")
          (is (re-find #"rejected boom" (from-nrepl-messages rejected "ex"))
              "A rejection is reported")))))
+
+(deftest-async rejection-with-nil
+  (testing "nREPL reports a rejection with nil as nil"
+    (p/let [rejected (send+ {:op "eval"
+                             :code "(js/Promise.reject nil)"})]
+      (is (= "nil" (from-nrepl-messages rejected "ex"))
+          "The error text is nil"))))
