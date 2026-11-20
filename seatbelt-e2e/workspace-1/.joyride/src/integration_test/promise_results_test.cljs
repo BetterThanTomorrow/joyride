@@ -53,3 +53,12 @@
                            (p/catch (fn [e] (str (.-message e)))))]
          (is (string/includes? outcome "boom")
              "The rejection reaches the caller")))))
+
+(deftest-async run-code-rejects-with-nil-rejection
+  (testing "Run Code rejects with the rejection when the promise rejects with nil"
+    (p/let [outcome (js/Promise. (fn [resolve]
+                                   (.then (run-code+ "(js/Promise.reject nil)")
+                                          (fn [_] (resolve "resolved"))
+                                          (fn [e] (resolve (.-message e))))))]
+      (is (= "null" outcome)
+          "The nil rejection reaches the caller"))))

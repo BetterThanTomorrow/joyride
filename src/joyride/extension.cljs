@@ -11,6 +11,7 @@
    [joyride.mcp.server :as mcp-server]
    [joyride.nrepl :as nrepl]
    [joyride.output :as output]
+   [joyride.printing :as printing]
    [joyride.sci :as jsci]
    [joyride.scripts-handler :as scripts-handler]
    [joyride.utils :refer [jsify]]
@@ -43,13 +44,13 @@
   ([code]
    (who-tracking/record-evaluation! "ui")
    (output/append-clojure-eval! code {:who "ui" :ns (str @jsci/!last-ns)})
-   (-> (p/let [result (jsci/eval-string code)]
-         result)
-       (p/catch (fn [e]
-                  (output/append-line-other-err! (or (some-> e ex-data pr-str)
-                                                     (.-message e)))
-                  (output/show-terminal!)
-                  (throw (js/Error. e)))))))
+   (-> (js/Promise. (fn [resolve]
+                      (resolve (jsci/eval-string code))))
+       (.catch (fn [e]
+                 (output/append-line-other-err! (or (some-> e ex-data pr-str)
+                                                    (printing/error-message e)))
+                 (output/show-terminal!)
+                 (throw (js/Error. e)))))))
 
 (defn evaluate-selection+
   "Evaluates the selection by first copying it to the clipboard and reading it from there.
