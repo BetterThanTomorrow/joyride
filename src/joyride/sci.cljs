@@ -280,13 +280,18 @@
       {})))
 
 (defn- echo-result!
-  "Appends `res` to Joyride Output. A promise is appended when it settles, as `#<Promise …>` or as its rejection."
+  "Appends `res` to Joyride Output. A promise is appended when it settles, as `#<Promise …>` within the
+   `joyride.lm` result limits, or as its rejection."
   [res]
-  (let [opts (print-fallback-opts)]
+  (let [{:keys [fallback-length fallback-level] :as opts} (print-fallback-opts)]
     (if (instance? js/Promise res)
       (.then res
              (fn [v]
-               (output/append-eval-result! (str "#<Promise " (printing/value->str v opts) ">")))
+               (output/append-eval-result! (str "#<Promise "
+                                                (printing/value->str v (assoc opts
+                                                                              :print-length fallback-length
+                                                                              :print-level fallback-level))
+                                                ">")))
              (fn [e]
                (output/append-line-eval-err! (printing/error-message e))))
       (output/append-eval-result! (printing/value->str res opts)))))

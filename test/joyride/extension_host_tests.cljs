@@ -4,7 +4,8 @@
    Extension Development Host REPL with `(cljs.test/run-tests 'joyride.extension-host-tests)`."
   (:require [cljs.test :refer [async deftest is]]
             [joyride.extension :as extension]
-            [joyride.output :as output]))
+            [joyride.output :as output]
+            [joyride.sci :as jsci]))
 
 (defn- run-code-err-lines+
   "Runs `code` with Run Code and resolves to the error lines it appends to Joyride Output."
@@ -45,4 +46,30 @@
                                             (str code " appends one error line")))))))
                 (js/Promise.resolve nil)
                 failures)
+        (.finally done))))
+
+(defn- echoed-results+
+  "Evaluates each of `codes` with `joyride.sci/eval-string` and resolves to the results it echoes to Joyride Output."
+  [codes]
+  (let [!echoed (atom [])
+        append-eval-result output/append-eval-result!]
+    (set! output/append-eval-result! #(swap! !echoed conj %))
+    (-> (js/Promise.all (into-array (map jsci/eval-string codes)))
+        (.then (fn [_] @!echoed))
+        (.finally #(set! output/append-eval-result! append-eval-result)))))
+
+(deftest promise-echo-within-result-limits
+  (async done
+    (-> (echoed-results+ ["(vec (range 30))"
+                          "(js/Promise.resolve (vec (range 100)))"
+                          "(js/Promise.resolve [[[[[[[[[1]]]]]]]]])"
+                          "(js/Promise.resolve (range))"])
+        (.then (fn [echoed]
+                 (is (= ["[0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29]"
+                         "#<Promise [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 ...]>"
+                         "#<Promise [[[[[[[#]]]]]]]>"
+                         "#<Promise (0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 ...)>"]
+                        echoed)
+                     "A value that isn't a promise echoes in full, and a promise's value within the result limits")))
+        (.catch (fn [e] (is (nil? e) "The evaluations settle")))
         (.finally done))))
