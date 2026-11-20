@@ -4,8 +4,10 @@ Changes to Joyride
 
 ## [Unreleased]
 
-- Fix: The REPL reports a promise rejected with `nil` as an error with the text `nil`
-- Fix: **Joyride: Run Code** reports a promise rejected with `nil` as `nil`
+- Fix: The REPL reports a promise rejected with `nil` as an error with no text
+- Fix: **Joyride: Run Code** reports a promise rejected with `nil` as `TypeError: expected thenable`
+- Fix: **Joyride: Run Code** prints errors twice in Joyride Output, and code that can't be read as internal error data
+- Fix: A script whose promise rejects with `nil` is reported as successful
 
 ## [0.0.87] - 2026-11-20
 
