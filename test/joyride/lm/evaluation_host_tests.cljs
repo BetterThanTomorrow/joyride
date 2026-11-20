@@ -113,3 +113,15 @@
                       (sci/alter-var-root sci/print-fn (constantly out-before))
                       (js-delete js/globalThis "joyrideGateC")
                       (done)))))))
+
+(deftest awaited-rejection-with-non-string-message
+  (async done
+    (-> (evaluation/execute-code+ {:code "(js/Promise.reject #js {:message 42})"
+                                   :ns "user"
+                                   :wait-for-promise? true
+                                   :who "host-tests"})
+        (.then (fn [result]
+                 (is (= "#js {:message 42}" (:error result))
+                     "The rejection is the error result")))
+        (.catch (fn [e] (is (nil? e) "The evaluation resolves to a result")))
+        (.finally done))))

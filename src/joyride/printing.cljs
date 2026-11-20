@@ -78,14 +78,15 @@
           (str "#<unprintable: " (or (some-> e .-message) (str e)) ">"))))))
 
 (defn error-message
-  "Returns the message of the thrown or rejected value `e`: an error's message, else its cause's
-   message, a string as is, or anything else printed."
+  "Returns the message of the thrown or rejected value `e`: an error's message when it is a non-empty
+   string, else its cause's message, a string as is, or anything else printed."
   [e]
-  (cond
-    (seq (some-> e .-message)) (.-message e)
-    (ex-cause e) (error-message (ex-cause e))
-    (string? e) e
-    :else (value->str e {})))
+  (let [message (some-> e .-message)]
+    (cond
+      (and (string? message) (seq message)) message
+      (ex-cause e) (error-message (ex-cause e))
+      (string? e) e
+      :else (value->str e {}))))
 
 (defn pprint-dispatch
   "`cljs.pprint` dispatch that pretty prints Clojure collections, and prints every other value the

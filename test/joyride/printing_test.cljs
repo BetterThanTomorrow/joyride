@@ -127,7 +127,15 @@
   (is (= "{:a 1}" (printing/error-message {:a 1}))
       "Other values print")
   (is (= "thrown string" (printing/error-message (ex-info nil {} "thrown string")))
-      "An error without a message gives its cause's message"))
+      "An error without a message gives its cause's message")
+  (is (= "the cause" (printing/error-message (ex-info "" {} (js/Error. "the cause"))))
+      "An error with an empty message gives its cause's message")
+  (is (= "#js {:message 42}" (printing/error-message #js {:message 42}))
+      "A value whose message is a number prints")
+  (is (= "#js {:message #js {}}" (printing/error-message #js {:message #js {}}))
+      "A value whose message is an object prints")
+  (is (= "#js {:message 42}" (printing/error-message (ex-info 42 {} #js {:message 42})))
+      "An error whose message is a number gives its cause"))
 
 (defn- pprint-str [x]
   (with-out-str (pp/write x :dispatch printing/pprint-dispatch)))

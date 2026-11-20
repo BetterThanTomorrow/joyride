@@ -31,6 +31,8 @@
    ["(js/Promise.reject (js/Error. \"boom\"))" "boom"]
    ["(throw (ex-info \"sync\" {:a 1}))" "sync"]
    ["(throw \"a string\")" "a string"]
+   ["(throw #js {:message 42})" "#js {:message 42}"]
+   ["(js/Promise.reject #js {:message 42})" "#js {:message 42}"]
    ["(inc" "EOF while reading, expected ) to match ( at [1,1]"]])
 
 (deftest run-code-prints-each-failure-once
