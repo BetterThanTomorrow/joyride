@@ -40,7 +40,7 @@ Execute ClojureScript in VS Code's Extension Host. **"Use the REPL" means this t
 **`awaitResult` decision:**
 
 - `true` — when you need the resolved value: user input dialogs, file operations, extension API calls, messages with buttons
-- `false` (default) — synchronous operations, fire-and-forget async (e.g. simple information messages). **Never** use `true` for sync code — it hangs indefinitely
+- `false` (default) — synchronous operations, fire-and-forget async (e.g. simple information messages). With `true`, a promise result is waited for and any other result returns straight away
 
 ## Interactive programming
 
