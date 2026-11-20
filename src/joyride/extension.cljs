@@ -17,8 +17,7 @@
    [joyride.vscode-utils :as utils :refer [info]]
    [joyride.when-contexts :as when-contexts]
    [joyride.who-tracking :as who-tracking]
-   [promesa.core :as p]
-   [sci.core :as sci]))
+   [promesa.core :as p]))
 
 (defn- register-command! [^js context command-id var]
   (let [disposable (vscode/commands.registerCommand command-id var)]
@@ -83,6 +82,30 @@
                  :getContextValue when-contexts/context
                  :runCode run-code+}))
 
+(defn- register-commands!
+  "Registers Joyride's commands in `extension-context`."
+  [extension-context]
+  (register-command! extension-context "joyride.runCode" #'run-code+)
+  (register-command! extension-context "joyride.evaluateSelection" #'evaluate-selection+)
+  (register-command! extension-context "joyride.revealOutputTerminal" #'reveal-output-terminal)
+  (register-command! extension-context "joyride.runWorkspaceScript" #'scripts-handler/run-workspace-script+)
+  (register-command! extension-context "joyride.runUserScript" #'scripts-handler/run-user-script+)
+  (register-command! extension-context "joyride.openWorkspaceScript" #'scripts-handler/open-workspace-script+)
+  (register-command! extension-context "joyride.openUserScript" #'scripts-handler/open-user-script+)
+  (register-command! extension-context "joyride.createUserScript" #(scripts-handler/create-and-open-user-file+ :scripts))
+  (register-command! extension-context "joyride.createUserSourceFile" #(scripts-handler/create-and-open-user-file+ :src))
+  (register-command! extension-context "joyride.openUserDirectory" #'scripts-handler/open-user-joyride-directory+)
+  (register-command! extension-context "joyride.createUserActivateScript" #'getting-started/maybe-create-user-activate-script+)
+  (register-command! extension-context "joyride.createUserHelloScript" #'getting-started/maybe-create-user-hello-script+)
+  (register-command! extension-context "joyride.createWorkspaceActivateScript" #'getting-started/maybe-create-workspace-activate-script+)
+  (register-command! extension-context "joyride.createWorkspaceHelloScript" #'getting-started/maybe-create-workspace-hello-script+)
+  (register-command! extension-context "joyride.startNReplServer" #'start-nrepl-server+)
+  (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server+)
+  (register-command! extension-context "joyride.startMcpServer" (fn [] (mcp-server/start! extension-context)))
+  (register-command! extension-context "joyride.stopMcpServer" (fn [] (mcp-server/stop! extension-context)))
+  (register-command! extension-context "joyride.registerMcpServerWithCursor" (fn [] (mcp-server/register-with-cursor! extension-context)))
+  (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!))
+
 (defn ^:export activate [^js context]
   (js/console.time "activation")
   (js/console.timeLog "activation" "Joyride activate START")
@@ -95,26 +118,7 @@
     (output/ensure-terminal!))
 
   (let [{:keys [extension-context]} @db/!app-db]
-    (register-command! extension-context "joyride.runCode" #'run-code+)
-    (register-command! extension-context "joyride.evaluateSelection" #'evaluate-selection+)
-    (register-command! extension-context "joyride.revealOutputTerminal" #'reveal-output-terminal)
-    (register-command! extension-context "joyride.runWorkspaceScript" #'scripts-handler/run-workspace-script+)
-    (register-command! extension-context "joyride.runUserScript" #'scripts-handler/run-user-script+)
-    (register-command! extension-context "joyride.openWorkspaceScript" #'scripts-handler/open-workspace-script+)
-    (register-command! extension-context "joyride.openUserScript" #'scripts-handler/open-user-script+)
-    (register-command! extension-context "joyride.createUserScript" #(scripts-handler/create-and-open-user-file+ :scripts))
-    (register-command! extension-context "joyride.createUserSourceFile" #(scripts-handler/create-and-open-user-file+ :src))
-    (register-command! extension-context "joyride.openUserDirectory" #'scripts-handler/open-user-joyride-directory+)
-    (register-command! extension-context "joyride.createUserActivateScript" #'getting-started/maybe-create-user-activate-script+)
-    (register-command! extension-context "joyride.createUserHelloScript" #'getting-started/maybe-create-user-hello-script+)
-    (register-command! extension-context "joyride.createWorkspaceActivateScript" #'getting-started/maybe-create-workspace-activate-script+)
-    (register-command! extension-context "joyride.createWorkspaceHelloScript" #'getting-started/maybe-create-workspace-hello-script+)
-    (register-command! extension-context "joyride.startNReplServer" #'start-nrepl-server+)
-    (register-command! extension-context "joyride.stopNReplServer" #'nrepl/stop-server+)
-    (register-command! extension-context "joyride.startMcpServer" (fn [] (mcp-server/start! extension-context)))
-    (register-command! extension-context "joyride.stopMcpServer" (fn [] (mcp-server/stop! extension-context)))
-    (register-command! extension-context "joyride.registerMcpServerWithCursor" (fn [] (mcp-server/register-with-cursor! extension-context)))
-    (register-command! extension-context "joyride.disableNReplMessageLogging" #'nrepl/disable-message-logging!)
+    (register-commands! extension-context)
     (when-contexts/set-context! ::when-contexts/joyride.isActive true)
     (when-contexts/initialize-flare-contexts!)
     (flare-sidebar/register-flare-provider! 1)
