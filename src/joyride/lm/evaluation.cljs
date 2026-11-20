@@ -25,16 +25,29 @@
   (sci/alter-var-root sci/print-fn (constantly out-fn))
   (sci/alter-var-root sci/print-err-fn (constantly err-fn)))
 
+(defn- capture-base
+  "Returns the print functions to restore once every capture in `active` has ended: for each of
+   `:out-fn` and `:err-fn`, the `current` one, or the one in `base` when an active capture set it."
+  [{:keys [base active]} current]
+  (let [base-fn (fn [k]
+                  (if (some #(identical? (k current) (k %)) active)
+                    (k base)
+                    (k current)))]
+    {:out-fn (base-fn :out-fn)
+     :err-fn (base-fn :err-fn)}))
+
 (defn- start-capture!
   "Points SCI's print functions at fresh buffers and returns the capture, with `:capture/out` and `:capture/err` buffers."
   []
   (let [out (atom "")
         err (atom "")
         fns {:out-fn (fn [s] (swap! out str s))
-             :err-fn (fn [s] (swap! err str s))}]
-    (swap! !captures (fn [{:keys [active] :as captures}]
-                       (cond-> (update captures :active conj fns)
-                         (empty? active) (assoc :base (current-print-fns)))))
+             :err-fn (fn [s] (swap! err str s))}
+        current (current-print-fns)]
+    (swap! !captures (fn [captures]
+                       (-> captures
+                           (assoc :base (capture-base captures current))
+                           (update :active conj fns))))
     (set-print-fns! fns)
     {:capture/out out
      :capture/err err

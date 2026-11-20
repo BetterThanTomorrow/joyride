@@ -125,3 +125,44 @@
                      "The rejection is the error result")))
         (.catch (fn [e] (is (nil? e) "The evaluation resolves to a result")))
         (.finally done))))
+
+(defn- overlap-around-new-print-fn+
+  "Starts awaited evaluation A, points SCI's print-fn at a new function, as an nREPL evaluation does,
+   and starts awaited evaluation B. Ends A first when `a-first?`, else B first, and resolves to whether
+   print-fn is then the new function and print-err-fn the original."
+  [a-first?]
+  (let [[out-before err-before] (current-print-fns)
+        new-out (fn [_])
+        open-a! (gate! "joyrideGateD")
+        result-a (evaluate-gated+ "joyrideGateD")]
+    (sci/alter-var-root sci/print-fn (constantly new-out))
+    (let [open-b! (gate! "joyrideGateE")
+          result-b (evaluate-gated+ "joyrideGateE")
+          [open-first! result-first open-second! result-second] (if a-first?
+                                                                  [open-a! result-a open-b! result-b]
+                                                                  [open-b! result-b open-a! result-a])]
+      (open-first!)
+      (-> result-first
+          (.then (fn [_]
+                   (open-second!)
+                   result-second))
+          (.then (fn [_]
+                   {:out-is-new? (identical? new-out @sci/print-fn)
+                    :err-restored? (identical? err-before @sci/print-err-fn)}))
+          (.finally (fn []
+                      (sci/alter-var-root sci/print-fn (constantly out-before))
+                      (js-delete js/globalThis "joyrideGateD")
+                      (js-delete js/globalThis "joyrideGateE")))))))
+
+(deftest print-fn-set-between-overlapping-evaluations
+  (async done
+    (-> (overlap-around-new-print-fn+ true)
+        (.then (fn [started-first-ends-first]
+                 (is (= {:out-is-new? true :err-restored? true} started-first-ends-first)
+                     "Ended in start order, print-fn goes back to the function set between the starts")
+                 (overlap-around-new-print-fn+ false)))
+        (.then (fn [started-last-ends-first]
+                 (is (= {:out-is-new? true :err-restored? true} started-last-ends-first)
+                     "Ended in reverse order, print-fn goes back to the function set between the starts")))
+        (.catch (fn [e] (is (nil? e) "The evaluations settle")))
+        (.finally done))))
