@@ -291,24 +291,26 @@
                (output/append-line-eval-err! (printing/error-message e))))
       (output/append-eval-result! (printing/value->str res opts)))))
 
+(defn- call-echoing-error!
+  "Calls `f`. Appends what it throws to Joyride Output and rethrows it."
+  [f]
+  (try
+    (f)
+    (catch js/Error e
+      (output/append-line-eval-err! (printing/error-message e))
+      (throw e))))
+
 (defn eval-string [s]
   (sci/binding [sci/ns @!last-ns
                 sci/print-fn (wrap-print-fn "stdout" @sci/print-fn output/append-eval-out!)
                 sci/print-err-fn (wrap-print-fn "stderr" @sci/print-err-fn output/append-eval-err!)]
-    (let [code (str s)
-          reader (sci/reader code)]
+    (let [reader (sci/reader (str s))]
       (loop [res nil]
-        (let [form (sci/parse-next (store/get-ctx) reader)]
+        (let [form (call-echoing-error! #(sci/parse-next (store/get-ctx) reader))]
           (if (= :sci.core/eof form)
             (do
               (vreset! !last-ns @sci/ns)
               (echo-result! res)
               res)
-            (let [result (try
-                           (sci/eval-form (store/get-ctx) form)
-                           (catch js/Error e
-                             (let [message (or (.-message e) (str e))]
-                               (output/append-line-eval-err! message)
-                               (throw e))))]
-              (recur result))))))))
+            (recur (call-echoing-error! #(sci/eval-form (store/get-ctx) form)))))))))
 
