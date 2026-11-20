@@ -20,7 +20,7 @@
 
 (use-fixtures :once
   {:before
-   #(async done 
+   #(async done
            (p/do!
             (p/create (fn [resolve reject]
                         (p/let [port (vscode/commands.executeCommand "joyride.startNReplServer")
@@ -120,3 +120,16 @@
                              :code "(js/Promise.reject nil)"})]
       (is (= "nil" (from-nrepl-messages rejected "ex"))
           "The error text is nil"))))
+
+(deftest-async empty-error-messages
+  (testing "nREPL reports an error with an empty message as an empty line"
+    (p/let [thrown (send+ {:op "eval"
+                           :code "(throw (js/Error.))"})
+            rejected (send+ {:op "eval"
+                             :code "(js/Promise.reject \"\")"})]
+      (is (= "\n" (from-nrepl-messages thrown "err"))
+          "A thrown error without a message sends an empty err line")
+      (is (= "\n" (from-nrepl-messages rejected "err"))
+          "A rejection with an empty string sends an empty err line")
+      (is (= "" (from-nrepl-messages rejected "ex"))
+          "A rejection with an empty string has empty error text"))))
