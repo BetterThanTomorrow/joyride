@@ -3,6 +3,7 @@
    The name doesn't end in `-test`, so the node test build leaves them out. Run them from the
    Extension Development Host REPL with `(cljs.test/run-tests 'joyride.extension-host-tests)`."
   (:require [cljs.test :refer [async deftest is]]
+            [clojure.string :as str]
             [joyride.extension :as extension]
             [joyride.output :as output]
             [joyride.sci :as jsci]))
@@ -52,11 +53,15 @@
   "Evaluates each of `codes` with `joyride.sci/eval-string` and resolves to the results it echoes to Joyride Output."
   [codes]
   (let [!echoed (atom [])
-        append-eval-result output/append-eval-result!]
+        append-eval-result output/append-eval-result!
+        append-promise-result output/append-promise-result!]
     (set! output/append-eval-result! #(swap! !echoed conj %))
+    (set! output/append-promise-result! #(swap! !echoed conj (str "#<Promise " % ">")))
     (-> (js/Promise.all (into-array (map jsci/eval-string codes)))
         (.then (fn [_] @!echoed))
-        (.finally #(set! output/append-eval-result! append-eval-result)))))
+        (.finally (fn []
+                    (set! output/append-eval-result! append-eval-result)
+                    (set! output/append-promise-result! append-promise-result))))))
 
 (deftest promise-echo-within-result-limits
   (async done
@@ -71,5 +76,27 @@
                          "#<Promise (0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 ...)>"]
                         echoed)
                      "A value that isn't a promise echoes in full, and a promise's value within the result limits")))
+        (.catch (fn [e] (is (nil? e) "The evaluations settle")))
+        (.finally done))))
+
+(defn- terminal-lines+
+  "Evaluates each of `codes` with `joyride.sci/eval-string` and resolves to the lines it appends to Joyride Output, without colors."
+  [codes]
+  (let [!lines (atom [])
+        append-line output/append-line!]
+    (set! output/append-line! #(swap! !lines conj (str/replace % #"\u001b\[[0-9;]*m" "")))
+    (-> (js/Promise.all (into-array (map jsci/eval-string codes)))
+        (.then (fn [_] @!lines))
+        (.finally #(set! output/append-line! append-line)))))
+
+(deftest promise-echo-on-one-line
+  (async done
+    (-> (terminal-lines+ ["(js/Promise.resolve [1 2])"
+                          "(js/Promise.resolve {:a 1})"
+                          "(js/Promise.resolve 42)"])
+        (.then (fn [lines]
+                 (is (= ["#<Promise [1 2]>" "#<Promise {:a 1}>" "#<Promise 42>"]
+                        lines)
+                     "A promise's echo keeps its closing > with the value")))
         (.catch (fn [e] (is (nil? e) "The evaluations settle")))
         (.finally done))))

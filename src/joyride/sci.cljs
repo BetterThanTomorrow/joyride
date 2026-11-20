@@ -287,11 +287,9 @@
     (if (instance? js/Promise res)
       (.then res
              (fn [v]
-               (output/append-eval-result! (str "#<Promise "
-                                                (printing/value->str v (assoc opts
-                                                                              :print-length fallback-length
-                                                                              :print-level fallback-level))
-                                                ">")))
+               (output/append-promise-result! (printing/value->str v (assoc opts
+                                                                            :print-length fallback-length
+                                                                            :print-level fallback-level))))
              (fn [e]
                (output/append-line-eval-err! (printing/error-message e))))
       (output/append-eval-result! (printing/value->str res opts)))))

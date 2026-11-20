@@ -351,6 +351,11 @@
   [data]
   (append-line! (syntax-highlight-clojure data)))
 
+(defn append-promise-result!
+  "Appends the printed value a promise from an evaluation settled to, as `#<Promise <value>>`."
+  [data]
+  (append-line! (str "#<Promise " (syntax-highlight-clojure data) ">")))
+
 (defn append-clojure-eval!
   "Echo evaluated code to the terminal with namespace and who context."
   [code opts]
