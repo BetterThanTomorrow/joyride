@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.88] - 2026-11-20
+
 - Fix: The REPL and **Joyride: Run Code** reports a promise rejected wrongly
 - Fix: **Joyride: Run Code** prints errors twice in Joyride Output, and code that can't be read as internal error data
 - Fix: A script whose promise rejects with `nil` is reported as successful
