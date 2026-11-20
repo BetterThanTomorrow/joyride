@@ -6,6 +6,7 @@
             [joyride.db :as db]
             [joyride.getting-started :as getting-started]
             [joyride.output :as output]
+            [joyride.printing :as printing]
             [joyride.sci :as jsci]
             [joyride.utils :refer [cljify jsify]]
             [joyride.vscode-utils :as utils]
@@ -97,36 +98,48 @@
           (aset (.-cache req) resolved js/undefined)
           (js/require resolved))")))
 
+(defn- read-script+
+  "Reads the script at `script-path` and announces it in Joyride Output. Resolves to its absolute path and code."
+  [base-path scripts-path script-path]
+  (p/let [abs-path (path/join base-path scripts-path script-path)
+          script-uri (vscode/Uri.file abs-path)
+          code (if (.endsWith script-path ".js")
+                 (cljs-snippet-requiring-js abs-path)
+                 (utils/vscode-read-uri+ script-uri))
+          workspace-root (:workspace-root-path @db/!app-db)
+          script-kind (cond
+                        (= base-path conf/user-config-path) "user"
+                        (and workspace-root (= base-path workspace-root)) "workspace"
+                        :else nil)
+          message (if script-kind
+                    (str "Evaluating " script-kind " script: " script-path)
+                    (str "Evaluating script: " script-path))]
+    (output/append-line-other-out! message)
+    {:script/abs-path abs-path
+     :script/code code}))
+
+(defn- report-script-error!
+  "Appends the failed script run to Joyride Output and offers to reveal it."
+  [title script-path error]
+  (output/append-line-other-err! (str title " Failed: " script-path " " (printing/error-message error)))
+  (.then (vscode/window.showErrorMessage (str title " error") "Reveal output terminal")
+         (output/show-terminal!)))
+
 (defn run-script+
   ([menu-conf+ base-path scripts-path]
    (handle-script-menu-selection+ menu-conf+ run-script+ base-path scripts-path))
   ([title base-path scripts-path script-path]
-   (-> (p/let [abs-path (path/join base-path scripts-path script-path)
-               script-uri (vscode/Uri.file abs-path)
-               code (if (.endsWith script-path ".js")
-                      (cljs-snippet-requiring-js abs-path)
-                      (utils/vscode-read-uri+ script-uri))
-               workspace-root (:workspace-root-path @db/!app-db)
-               script-kind (cond
-                             (= base-path conf/user-config-path) "user"
-                             (and workspace-root (= base-path workspace-root)) "workspace"
-                             :else nil)
-               message (if script-kind
-                         (str "Evaluating " script-kind " script: " script-path)
-                         (str "Evaluating script: " script-path))]
-         (output/append-line-other-out! message)
-         (swap! db/!app-db assoc :invoked-script abs-path)
-         (sci/with-bindings {sci/file abs-path}
-           (jsci/eval-string code)))
-       (p/handle (fn [result error]
-                   (swap! db/!app-db assoc :invoked-script nil)
-                   (if error
-                     (let [message (or (ex-message error) (.-message error) (str error))
-                           headline (str title " Failed: " script-path " " message)]
-                       (output/append-line-other-err! headline)
-                       (.then (vscode/window.showErrorMessage (str title " error") "Reveal output terminal")
-                              (output/show-terminal!)))
-                     result))))))
+   (-> (js/Promise.resolve (read-script+ base-path scripts-path script-path))
+       (.then (fn [{:script/keys [abs-path code]}]
+                (swap! db/!app-db assoc :invoked-script abs-path)
+                (sci/with-bindings {sci/file abs-path}
+                  (jsci/eval-string code))))
+       (.then (fn [result]
+                (swap! db/!app-db assoc :invoked-script nil)
+                result)
+              (fn [error]
+                (swap! db/!app-db assoc :invoked-script nil)
+                (report-script-error! title script-path error))))))
 
 (defn open-script+
   ([menu-conf+ base-path scripts-path]
