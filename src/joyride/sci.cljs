@@ -301,7 +301,7 @@
   [f]
   (try
     (f)
-    (catch js/Error e
+    (catch :default e
       (output/append-line-eval-err! (printing/error-message e))
       (throw e))))
 

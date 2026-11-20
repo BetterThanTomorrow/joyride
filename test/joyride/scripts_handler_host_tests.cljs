@@ -20,17 +20,20 @@
     base-path))
 
 (defn- run-script-reports+
-  "Runs `script-name`, answering error popups with `choice`. Resolves to the failure headlines,
+  "Runs `script-name`, answering error popups with `choice`. Resolves to the error lines in Joyride Output,
    error popups and reveals of Joyride Output it produced."
   [base-path script-name choice]
   (let [!reports (atom [])
+        eval-err output/append-line-eval-err!
         other-err output/append-line-other-err!
         show-terminal output/show-terminal!
         show-error-message (.-showErrorMessage vscode/window)
         restore! (fn []
+                   (set! output/append-line-eval-err! eval-err)
                    (set! output/append-line-other-err! other-err)
                    (set! output/show-terminal! show-terminal)
                    (set! (.-showErrorMessage vscode/window) show-error-message))]
+    (set! output/append-line-eval-err! #(swap! !reports conj %))
     (set! output/append-line-other-err! #(swap! !reports conj %))
     (set! output/show-terminal! (fn reveal ([] (reveal false)) ([_] (swap! !reports conj :output-revealed))))
     (set! (.-showErrorMessage vscode/window) (fn [message & _]
@@ -46,7 +49,8 @@
     (let [base-path (write-scripts! {"reject_nil.cljs" "(js/Promise.reject nil)"})]
       (-> (run-script-reports+ base-path "reject_nil.cljs" js/undefined)
           (.then (fn [reports]
-                   (is (= ["Run Test Script Failed: reject_nil.cljs nil"
+                   (is (= ["nil"
+                           "Run Test Script Failed: reject_nil.cljs"
                            "Run Test Script error"]
                           reports)
                        "The run is reported as failed, with nil as the error, and Joyride Output stays hidden")))
@@ -59,11 +63,62 @@
     (let [base-path (write-scripts! {"boom.cljs" "(throw (js/Error. \"boom\"))"})]
       (-> (run-script-reports+ base-path "boom.cljs" "Reveal output terminal")
           (.then (fn [reports]
-                   (is (= ["Run Test Script Failed: boom.cljs boom"
+                   (is (= ["boom"
+                           "Run Test Script Failed: boom.cljs"
                            "Run Test Script error"
                            :output-revealed]
                           reports)
                        "Clicking the popup's button reveals Joyride Output")))
+          (.finally (fn []
+                      (fs/rmSync base-path #js {:recursive true})
+                      (done)))))))
+
+(def ^:private failing-scripts
+  [["throw_string.cljs" "(throw \"a string\")" "a string"]
+   ["reject.cljs" "(js/Promise.reject (js/Error. \"later\"))" "later"]
+   ["reject_message_42.cljs" "(js/Promise.reject #js {:message 42})" "#js {:message 42}"]])
+
+(deftest script-failure-printed-once
+  (async done
+    (let [base-path (write-scripts! (into {} (map (juxt first second)) failing-scripts))]
+      (-> (reduce (fn [acc [script-name _ message]]
+                    (.then acc (fn [_]
+                                 (.then (run-script-reports+ base-path script-name js/undefined)
+                                        (fn [reports]
+                                          (is (= [message
+                                                  (str "Run Test Script Failed: " script-name)
+                                                  "Run Test Script error"]
+                                                 reports)
+                                              (str script-name " prints its error once, then the script that failed")))))))
+                  (js/Promise.resolve nil)
+                  failing-scripts)
+          (.finally (fn []
+                      (fs/rmSync base-path #js {:recursive true})
+                      (done)))))))
+
+(deftest rejecting-thenable-failure-has-its-message
+  (async done
+    (let [base-path (write-scripts! {"thenable.cljs" "#js {:then (fn [_ reject] (reject (js/Error. \"thenable\")))}"})]
+      (-> (run-script-reports+ base-path "thenable.cljs" js/undefined)
+          (.then (fn [reports]
+                   (is (= ["Run Test Script Failed: thenable.cljs thenable"
+                           "Run Test Script error"]
+                          reports)
+                       "A rejecting thenable that isn't a native promise isn't echoed, so the Failed line carries its error")))
+          (.finally (fn []
+                      (fs/rmSync base-path #js {:recursive true})
+                      (done)))))))
+
+(deftest unreadable-script-failure-has-its-message
+  (async done
+    (let [base-path (write-scripts! {})]
+      (-> (run-script-reports+ base-path "missing.cljs" js/undefined)
+          (.then (fn [reports]
+                   (is (= [(str "Run Test Script Failed: missing.cljs Error: ENOENT: no such file or directory, stat '"
+                                (path/join base-path "scripts" "missing.cljs") "'")
+                           "Run Test Script error"]
+                          reports)
+                       "The Failed line carries the error, since nothing else prints it")))
           (.finally (fn []
                       (fs/rmSync base-path #js {:recursive true})
                       (done)))))))

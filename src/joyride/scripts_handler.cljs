@@ -119,26 +119,38 @@
      :script/code code}))
 
 (defn- report-script-error!
-  "Appends the failed script run to Joyride Output and offers to reveal it."
-  [title script-path error]
-  (output/append-line-other-err! (str title " Failed: " script-path " " (printing/error-message error)))
+  "Appends the failed script run to Joyride Output, with `message` when there is one, and offers to reveal it."
+  [title script-path message]
+  (output/append-line-other-err! (str title " Failed: " script-path (some->> message (str " "))))
   (utils/show-message-offering-output+ vscode/window.showErrorMessage (str title " error")))
+
+(defn- eval-script+
+  "Evaluates the script's `code` as the invoked script `abs-path` and resolves to its result. A failure is
+   reported under `title`, with its error only when the evaluation's echo didn't show it: when the script
+   ended in a thenable that isn't a native promise."
+  [title script-path {:script/keys [abs-path code]}]
+  (swap! db/!app-db assoc :invoked-script abs-path)
+  (let [!result (volatile! nil)]
+    (-> (js/Promise. (fn [resolve]
+                       (resolve (vreset! !result (sci/with-bindings {sci/file abs-path}
+                                                   (jsci/eval-string code))))))
+        (.finally #(swap! db/!app-db assoc :invoked-script nil))
+        (.catch (fn [error]
+                  (let [result @!result]
+                    (report-script-error! title script-path
+                                          (when (and (some? result)
+                                                     (not (instance? js/Promise result)))
+                                            (printing/error-message error)))))))))
 
 (defn run-script+
   ([menu-conf+ base-path scripts-path]
    (handle-script-menu-selection+ menu-conf+ run-script+ base-path scripts-path))
   ([title base-path scripts-path script-path]
    (-> (js/Promise.resolve (read-script+ base-path scripts-path script-path))
-       (.then (fn [{:script/keys [abs-path code]}]
-                (swap! db/!app-db assoc :invoked-script abs-path)
-                (sci/with-bindings {sci/file abs-path}
-                  (jsci/eval-string code))))
-       (.then (fn [result]
-                (swap! db/!app-db assoc :invoked-script nil)
-                result)
-              (fn [error]
-                (swap! db/!app-db assoc :invoked-script nil)
-                (report-script-error! title script-path error))))))
+       (.then (fn [script]
+                (eval-script+ title script-path script))
+              (fn [read-error]
+                (report-script-error! title script-path (printing/error-message read-error)))))))
 
 (defn open-script+
   ([menu-conf+ base-path scripts-path]
