@@ -384,7 +384,7 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v\d+\.\d+\.\d+-?.*/
-          #context: Joyride
+          context: Calva
       - marketplace-publish:
           requires:
             - github-release
@@ -393,7 +393,7 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v\d+\.\d+\.\d+$/
-          #context: Joyride
+          context: Calva
       - open-vsx-publish:
           requires:
             - github-release
@@ -402,7 +402,7 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v\d+\.\d+\.\d+$/
-          #context: Joyride
+          context: Calva
       - bump-version:
           requires:
             - marketplace-publish
@@ -411,4 +411,4 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v\d+\.\d+\.\d+$/
-          #context: Joyride
+          context: Calva
