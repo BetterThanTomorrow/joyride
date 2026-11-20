@@ -164,7 +164,7 @@ jobs:
             sudo apt update && sudo apt install -y libnss3
       - run:
           name: Run Extension Tests
-          command: npm run integration-test
+          command: npm run integration-test -- --local
       - save_cache:
           name: Save dependencies (VS Code install, Joyride workspace node_modules)
           key: npm-{{ checksum "./seatbelt-e2e/workspace-1/package.json" }}

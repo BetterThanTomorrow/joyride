@@ -117,7 +117,17 @@ async function main(joyrideVSIXPathOrLabel, testWorkspace) {
   }
 }
 
-const args = require("minimist")(process.argv.slice(2));
+const args = require("minimist")(process.argv.slice(2), {
+  boolean: ["local"],
+});
+// Without --local the tests run in a container, see run-containerized.sh
+if (!args.local) {
+  const containerRunner = path.resolve(__dirname, "run-containerized.sh");
+  const { status } = cp.spawnSync(containerRunner, process.argv.slice(2), {
+    stdio: "inherit",
+  });
+  process.exit(status ?? 1);
+}
 const joyrideVSIX = args["joyride-vsix"]
   ? args["joyride-vsix"]
   : "extension-development";

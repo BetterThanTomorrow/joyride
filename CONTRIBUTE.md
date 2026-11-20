@@ -42,7 +42,9 @@ Run the tests from the command line like so:
 0. Build the extension (as per the [Development](#development) instructions)
 1. `npm run integration-test`
 
-This will download VS Code Insiders, start it, run the tests and then close VS Code Insiders. (If some test results in an error, VS Code Insiders might be left hanging. You then need to force quit it.)
+This runs the tests headless in a Docker container, so you need Docker. The container downloads VS Code Insiders, starts it on a virtual display, runs the tests and then closes it. The first run also builds the image, which takes a few minutes. The tests run against the `out/` folder your build keeps compiled, so the container doesn't build anything itself.
+
+To run the tests on your own machine instead, add `--local`: `npm run integration-test -- --local`. VS Code Insiders then opens on your desktop. (If some test results in an error, VS Code Insiders might be left hanging. You then need to force quit it.)
 
 You can also run tests from the [development](#development) extension host. However, the test suite is designed to run with a special environment, to give it control over the user script content. This environment is set as part of the test run when run from the command line. If you run the tests from the REPL, some of them might not work, and _some of them might even mess with your user scripts content_. It's our recommendation to only run specific tests from the REPL and to use the command line for the full suite.
 

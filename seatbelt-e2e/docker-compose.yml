@@ -1,21 +1,18 @@
-version: '3.8'
+name: joyride-integration-test
 
+# Started by run-containerized.sh, which sets JOYRIDE_REPO to the checkout's host path.
+# The checkout is mounted at that same path, so paths given on the command line work in the container.
 services:
-  vscode-testing:
+  integration-test:
     build:
       context: .
       dockerfile: Dockerfile
-    working_dir: /workspace
-    environment:
-      - DISPLAY=:99
-      - VSCODE_JOYRIDE_USER_CONFIG_PATH=/tmp/seatbelt-e2e-joyride/user-config
+    working_dir: ${JOYRIDE_REPO:?Start through run-containerized.sh}
     volumes:
-      - ../:/workspace
-      - vscode-cache:/tmp/vscode-test
-      - vscode-extensions:/tmp/vscode-extensions
-    entrypoint: ["bash", "-c", "exec \"$@\"", "--"]
+      - ${JOYRIDE_REPO}:${JOYRIDE_REPO}
+      # Linux VS Code, its user data and extensions, apart from the host's
+      - vscode-test:${JOYRIDE_REPO}/.vscode-test
     init: true
 
 volumes:
-  vscode-cache:
-  vscode-extensions:
+  vscode-test:

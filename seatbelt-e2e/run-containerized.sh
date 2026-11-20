@@ -1,27 +1,20 @@
 #!/bin/bash
 
-# Containerized VS Code Integration Test Runner
-# Forwards all arguments to npm run integration-test inside Docker container
+# Containerized integration test runner, the default for `npm run integration-test`
+# Runs `launch.js --local` on a virtual display, passing on the arguments.
+# The tests run against out/, which the host's watcher keeps current. The container doesn't compile.
 
 set -e
 
-# Change to the directory containing docker-compose.yml
+if ! command -v docker > /dev/null; then
+    echo "Docker not found. To run the integration tests on this machine instead: npm run integration-test -- --local" >&2
+    exit 1
+fi
+
 cd "$(dirname "$0")"
+JOYRIDE_REPO="$(cd .. && pwd)"
+export JOYRIDE_REPO
 
-# Build the command with proper argument escaping
-ARGS=""
-for arg in "$@"; do
-    # Escape the argument and add it to the command
-    ARGS="$ARGS \"$(printf '%s\n' "$arg" | sed 's/"/\\"/g')\""
-done
-
-docker compose run --rm --entrypoint bash vscode-testing -c "
-    # Start virtual display in background
-    Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-
-    # Wait a moment for X server to start
-    sleep 2
-
-    # Run the tests
-    npm run integration-test -- $ARGS
-"
+docker compose run --rm integration-test \
+    xvfb-run --auto-servernum --server-args="-screen 0 1280x1024x24" \
+    node seatbelt-e2e/launch.js --local "$@"
