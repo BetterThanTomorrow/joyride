@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.87] - 2026-11-20
+
 - Fix: [Evaluating code that returns a promise fails with "No protocol method IWriter.-write"](https://github.com/BetterThanTomorrow/joyride/issues/283)
 
 ## [0.0.86] - 2026-10-19
