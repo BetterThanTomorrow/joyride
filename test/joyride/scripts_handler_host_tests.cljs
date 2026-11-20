@@ -20,8 +20,9 @@
     base-path))
 
 (defn- run-script-reports+
-  "Runs `script-name` and resolves to the failure headlines and error popups it produced."
-  [base-path script-name]
+  "Runs `script-name`, answering error popups with `choice`. Resolves to the failure headlines,
+   error popups and reveals of Joyride Output it produced."
+  [base-path script-name choice]
   (let [!reports (atom [])
         other-err output/append-line-other-err!
         show-terminal output/show-terminal!
@@ -31,10 +32,10 @@
                    (set! output/show-terminal! show-terminal)
                    (set! (.-showErrorMessage vscode/window) show-error-message))]
     (set! output/append-line-other-err! #(swap! !reports conj %))
-    (set! output/show-terminal! (constantly nil))
+    (set! output/show-terminal! (fn reveal ([] (reveal false)) ([_] (swap! !reports conj :output-revealed))))
     (set! (.-showErrorMessage vscode/window) (fn [message & _]
                                                 (swap! !reports conj message)
-                                                (js/Promise.resolve nil)))
+                                                (js/Promise.resolve choice)))
     (-> (scripts-handler/run-script+ "Run Test Script" base-path "scripts" script-name)
         (.then (constantly nil) (constantly nil))
         (.then (fn [_] @!reports))
@@ -43,12 +44,26 @@
 (deftest script-run-reports-rejection-with-nil
   (async done
     (let [base-path (write-scripts! {"reject_nil.cljs" "(js/Promise.reject nil)"})]
-      (-> (run-script-reports+ base-path "reject_nil.cljs")
+      (-> (run-script-reports+ base-path "reject_nil.cljs" js/undefined)
           (.then (fn [reports]
                    (is (= ["Run Test Script Failed: reject_nil.cljs nil"
                            "Run Test Script error"]
                           reports)
-                       "The run is reported as failed, with nil as the error")))
+                       "The run is reported as failed, with nil as the error, and Joyride Output stays hidden")))
+          (.finally (fn []
+                      (fs/rmSync base-path #js {:recursive true})
+                      (done)))))))
+
+(deftest script-failure-reveals-output-on-click
+  (async done
+    (let [base-path (write-scripts! {"boom.cljs" "(throw (js/Error. \"boom\"))"})]
+      (-> (run-script-reports+ base-path "boom.cljs" "Reveal output terminal")
+          (.then (fn [reports]
+                   (is (= ["Run Test Script Failed: boom.cljs boom"
+                           "Run Test Script error"
+                           :output-revealed]
+                          reports)
+                       "Clicking the popup's button reveals Joyride Output")))
           (.finally (fn []
                       (fs/rmSync base-path #js {:recursive true})
                       (done)))))))

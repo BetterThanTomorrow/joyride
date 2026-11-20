@@ -35,20 +35,25 @@
 (defn workspace-root []
   vscode/workspace.rootPath)
 
+(defn show-message-offering-output+
+  "Shows `message` with `show-message`, such as `vscode/window.showErrorMessage`, and a button that reveals Joyride Output."
+  [show-message message]
+  (.then (show-message message "Reveal output terminal")
+         (fn [choice]
+           (when choice
+             (output/show-terminal!)))))
+
 (defn info [title & xs]
   (output/append-line-other-err! (str title "\n" (str/join " " (mapv str xs))))
-  (.then (vscode/window.showInformationMessage title "Reveal output terminal")
-         (output/show-terminal!)))
+  (show-message-offering-output+ vscode/window.showInformationMessage title))
 
 (defn warn [title & xs]
   (output/append-line-other-err! (str title "\n" (str/join " " (mapv str xs))))
-  (.then (vscode/window.showWarningMessage title "Reveal output terminal")
-         (output/show-terminal!)))
+  (show-message-offering-output+ vscode/window.showWarningMessage title))
 
 (defn error [title & xs]
   (output/append-line-other-err! (str title "\n" (str/join " " (mapv str xs))))
-  (.then (vscode/window.showErrorMessage (str/join " " (mapv str xs)) "Reveal output terminal")
-         (output/show-terminal!)))
+  (show-message-offering-output+ vscode/window.showErrorMessage (str/join " " (mapv str xs))))
 
 (defn extension-path []
   (-> ^js (:extension-context @db/!app-db)

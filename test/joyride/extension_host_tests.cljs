@@ -19,7 +19,7 @@
                    (set! output/show-terminal! show-terminal))]
     (set! output/append-line-eval-err! #(swap! !lines conj %))
     (set! output/append-line-other-err! #(swap! !lines conj %))
-    (set! output/show-terminal! (fn [& _] nil))
+    (set! output/show-terminal! (fn ([] nil) ([_] nil)))
     (-> (extension/run-code+ code)
         (.then (constantly nil) (constantly nil))
         (.then #(js/Promise. (fn [resolve] (js/setTimeout resolve 20))))

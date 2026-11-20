@@ -122,8 +122,7 @@
   "Appends the failed script run to Joyride Output and offers to reveal it."
   [title script-path error]
   (output/append-line-other-err! (str title " Failed: " script-path " " (printing/error-message error)))
-  (.then (vscode/window.showErrorMessage (str title " error") "Reveal output terminal")
-         (output/show-terminal!)))
+  (utils/show-message-offering-output+ vscode/window.showErrorMessage (str title " error")))
 
 (defn run-script+
   ([menu-conf+ base-path scripts-path]
@@ -154,8 +153,7 @@
                   (let [message (or (ex-message error) (.-message error) (str error))
                         headline (str title " Failed: " script-path " " message)]
                     (output/append-line-other-err! headline)
-                    (.then (vscode/window.showErrorMessage (str title " error") "Reveal output terminal")
-                           (output/show-terminal!))))))))
+                    (utils/show-message-offering-output+ vscode/window.showErrorMessage (str title " error"))))))))
 
 (defn run-or-open-workspace-script-args [menu-conf-or-title+]
   [menu-conf-or-title+
@@ -461,8 +459,7 @@
         (vscode/commands.executeCommand "vscode.openFolder" joyride-uri true))
       (p/catch (fn [error]
                  (output/append-line-other-err! (str "Failed to open User Joyride directory: " (.-message error)))
-                 (.then (vscode/window.showErrorMessage "Failed to open User Joyride directory: " "Reveal output")
-                        (output/show-terminal!))))))
+                 (utils/show-message-offering-output+ vscode/window.showErrorMessage "Failed to open User Joyride directory: ")))))
 
 (def open-user-joyride-directory-menu-item
   {:label (menu-label-with-icon "Open User Joyride Directory in New Window" "folder")
