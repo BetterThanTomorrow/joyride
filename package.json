@@ -376,7 +376,7 @@
     "posthtml-parser": "^0.12.1"
   },
   "devDependencies": {
-    "@vscode/test-electron": "^2.5.2",
+    "@vscode/test-electron": "^3.1.0",
     "@vscode/vsce": "^3.9.2",
     "axios": "^1.15.2",
     "moment": "^2.30.1",
