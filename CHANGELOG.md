@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Support starting the MCP server without specififying port file for harnesses running inside VS Code
+
 ## [0.0.88] - 2026-11-20
 
 - Fix: The REPL and **Joyride: Run Code** reports a promise rejected wrongly
