@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.89] - 2026-11-22
+
 - Support starting the MCP server without specififying port file for harnesses running inside VS Code
 
 ## [0.0.88] - 2026-11-20
