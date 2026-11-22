@@ -158,7 +158,8 @@
                            {:jsonrpc "2.0" :id 2 :method "tools/call"
                             :params {:name "joyride_evaluate_code"
                                      :arguments {:code token-code :who "gb-test-engineer"}}}]
-                          30000)]
+                          ;; A cold PowerShell process query took 45 s in a Windows VM
+                          60000)]
       (is (string? wrapper-path) "the registry entry names the installed wrapper")
       (is (= "joyride" (get-in responses [1 :result :serverInfo :name]))
           (str "the wrapper answers initialize from Joyride, stderr: " stderr))
