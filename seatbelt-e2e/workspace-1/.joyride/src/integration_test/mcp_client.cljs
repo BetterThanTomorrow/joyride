@@ -66,7 +66,7 @@
           windows)))
 
 (defn wait-for-window+ [workspace-root tries]
-  (-> (p/let [out (run-bb+ ["list" "--json"])
+  (-> (p/let [out (run-bb+ ["list" "--all" "--json"])
               match (this-joyride-window (parse-windows out) workspace-root)]
         (if match
           match

@@ -69,7 +69,8 @@
                     'integration-test.output-test
                     'integration-test.promise-results-test
                     'integration-test.lm-tool-test
-                    'integration-test.mcp-registry-test]]
+                    'integration-test.mcp-registry-test
+                    'integration-test.mcp-caller-window-test]]
       (println "Runner: Workspace activated, running tests...")
       (try
         (doseq [test-ns test-nss]
