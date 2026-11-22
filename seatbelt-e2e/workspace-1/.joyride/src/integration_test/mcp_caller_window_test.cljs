@@ -68,6 +68,18 @@
 (defn- tool-text [response]
   (string/join " " (map :text (get-in response [:result :content]))))
 
+(defn- terminal-writing-env-var
+  "Options for a terminal that writes the value of `env-var` in its environment to
+   `out-file`: `cmd.exe` on Windows, `/bin/sh` elsewhere."
+  [env-var out-file]
+  (if (= "win32" js/process.platform)
+    #js {:name "caller window test"
+         :shellPath "cmd.exe"
+         :shellArgs #js ["/d" "/c" (str "echo %" env-var "%>\"" out-file "\"")]}
+    #js {:name "caller window test"
+         :shellPath "/bin/sh"
+         :shellArgs #js ["-c" (str "printf %s \"$" env-var "\" > " out-file)]}))
+
 (defn- wait-for-file-text+
   "The text of `file` once it has some, or nil after `tries` waits of 250 ms."
   [file tries]
@@ -190,14 +202,11 @@
             mutator (.get (.-environmentVariableCollection (joyride/extension-context))
                           window-id-env)
             out-file (path/join (os/tmpdir) (str "joyride-terminal-window-id-" (random-uuid)))
-            terminal (vscode/window.createTerminal
-                      #js {:name "caller window test"
-                           :shellPath "/bin/sh"
-                           :shellArgs #js ["-c" (str "printf %s \"$" window-id-env "\" > " out-file)]})
+            terminal (vscode/window.createTerminal (terminal-writing-env-var window-id-env out-file))
             _ (log "terminal")
             text (wait-for-file-text+ out-file 40)]
       (.dispose terminal)
       (is (= (:windowId window) (some-> mutator .-value))
           "Joyride's terminal environment collection names this window")
-      (is (= (:windowId window) text)
+      (is (= (:windowId window) (some-> text string/trim))
           (str "a new terminal has " window-id-env " set to this window's id, got: " (pr-str text))))))
