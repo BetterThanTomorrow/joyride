@@ -4,8 +4,9 @@ description: >-
   Joyride core — REPL evaluation, async patterns, VS Code API access,
   Flares, JS interop, and available libraries. Use when: working with
   Joyride evaluation, writing ClojureScript in any Joyride context,
-  creating Flares/WebViews, exploring VS Code APIs via the REPL, or
-  using joyride_evaluate_code.
+  creating Flares/WebViews, exploring VS Code APIs via the REPL,
+  using joyride_evaluate_code, or setting up an agent's MCP connection
+  to Joyride.
 ---
 # Joyride — Core Skill
 
@@ -242,6 +243,10 @@ Pure-function-first design enables testing in the REPL with `cljs.test`:
 ```clojure
 (do (require 'run-all-tests :reload) (run-all-tests/run!+))
 ```
+
+## Connecting an agent over MCP
+
+When the user asks to set up Joyride's MCP server for an agent, a harness, a bot or another editor: the registry home is `~/.config/vscode-mcp/registry`. Point the agent at that directory, or read its `AGENTS.md` and follow it. An agent inside a VS Code window, or in one of its terminals, writes the config with only the stdio wrapper, `node <wrapperPath>`, in its user-level config, and that one config reaches whichever window the agent runs in. An agent outside VS Code names the window, with the port file `bb list --all` shows. The server must be running in the window: **Joyride: Start MCP Server**, or the setting `joyride.mcp.autoStartServer`. `bb-mcp.md` there covers `bb mcp`, for agents that can't hold an MCP session.
 
 ## References
 
