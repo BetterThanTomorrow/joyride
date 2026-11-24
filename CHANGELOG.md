@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: [Generated ECA config fails on Windows: ${env:HOME} is unset](https://github.com/BetterThanTomorrow/calva-backseat-driver/issues/74)
+
 ## [0.0.89] - 2026-11-22
 
 - Support starting the MCP server without specififying port file for harnesses running inside VS Code
