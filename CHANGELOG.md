@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.90] - 2026-11-25
+
 - Fix: [Generated ECA config fails on Windows: ${env:HOME} is unset](https://github.com/BetterThanTomorrow/calva-backseat-driver/issues/74)
 
 ## [0.0.89] - 2026-11-22
