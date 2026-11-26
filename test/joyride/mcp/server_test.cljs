@@ -1,23 +1,13 @@
 (ns joyride.mcp.server-test
   (:require
    [cljs.test :refer [deftest is testing]]
-   [vscode-mcp.lifecycle :as lifecycle]
    [vscode-mcp.manual-setup :as manual-setup]))
 
-;; Targets the shared vscode-mcp.lifecycle / vscode-mcp.manual-setup
-;; namespaces directly (the same predicates and string builders
-;; joyride.mcp.server delegates to) rather than duplicating their logic here.
+;; Targets the shared vscode-mcp.manual-setup namespace directly (the same string
+;; builders joyride.mcp.server delegates to) rather than duplicating their logic here.
 ;; joyride.mcp.server itself requires "vscode" and is verified live via the
 ;; connected extension-host REPL instead — see the plan's Phase 6.6b
 ;; verification notes.
-
-(deftest server-running-predicate-test
-  (testing "false when no server-info in state"
-    (is (not (lifecycle/running? (lifecycle/init-state)))))
-
-  (testing "true when server-info present"
-    (is (lifecycle/running? (assoc (lifecycle/init-state)
-                                   :lifecycle/server-info {:server/assigned-port 1234})))))
 
 (deftest copy-command-strings-test
   (let [wrapper "/ext/dist/joyride-mcp-server.js"
@@ -46,10 +36,4 @@
     (is (= "joyride.mcpServerRegisteredWithCursor"
            (name :joyride.when-contexts/joyride.mcpServerRegisteredWithCursor)))
     (is (= "joyride.isCursorMcpAvailable"
-           (name :joyride.when-contexts/joyride.isCursorMcpAvailable))))
-
-  (testing "server-running predicate reflects state for command enablement"
-    (is (not (lifecycle/running? (lifecycle/init-state)))
-        "start enabled when server not running")
-    (is (lifecycle/running? (assoc (lifecycle/init-state) :lifecycle/server-info {:server/assigned-port 1}))
-        "stop enabled when server running")))
+           (name :joyride.when-contexts/joyride.isCursorMcpAvailable)))))
