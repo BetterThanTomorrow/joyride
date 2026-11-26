@@ -3,8 +3,11 @@
    [cljs.test :refer [deftest is testing]]
    [vscode-mcp.manifest :as manifest]))
 
-(defn- mock-context [tools]
-  #js {:extension #js {:packageJSON #js {:contributes #js {:languageModelTools tools}}}})
+(defn- mock-context
+  "The manifest as data, of an extension with `tools`."
+  [tools]
+  (manifest/manifest-data
+   #js {:extension #js {:packageJSON #js {:contributes #js {:languageModelTools tools}}}}))
 
 (deftest joyride-evaluate-code-gating-test
   (let [ctx (mock-context

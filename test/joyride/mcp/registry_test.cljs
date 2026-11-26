@@ -38,8 +38,8 @@
                        :registry/debounce-ms 15
                        :registry/heartbeat-ms 10000
                        :registry/custom-data (registry/compact-data)
-                       :cursor/server-name "joyride"
-                       :cursor/script-relative-path "dist/joyride-mcp-server.js"
+                       :server/name "joyride"
+                       :wrapper/script-relative-path "dist/joyride-mcp-server.js"
                        :lifecycle/wrapper-install-dir dir
                        :server/host "127.0.0.1"}
                info {:server/instance-slug "ws-abc"

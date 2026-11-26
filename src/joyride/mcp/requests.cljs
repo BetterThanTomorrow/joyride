@@ -38,12 +38,13 @@
 (defn handle-request
   [{:keys [extension-context]} request]
   (let [{:keys [method params id]} request
-        opts (request-opts)]
+        opts (request-opts)
+        manifest-data (manifest/manifest-data extension-context)]
     (case method
       "tools/call"
       (let [tool-name (:name params)
             args (:arguments params)
-            allowed (manifest/tool-call-allowed? extension-context tool-name {:settings (:settings opts)})]
+            allowed (manifest/tool-call-allowed? manifest-data tool-name {:settings (:settings opts)})]
         (cond
           (= :disabled allowed) (responses/error-response id -32601 "Unknown tool")
           :else (-> (p/let [lm-result (call-tool-impl tool-name args)]
@@ -51,4 +52,4 @@
                     (p/catch (fn [e]
                                (responses/success-response id {:content [{:type "text" :text (.-message e)}]
                                                                :isError true}))))))
-      (mcp-requests/handle-manifest-request extension-context request opts))))
+      (mcp-requests/handle-manifest-request manifest-data request opts))))
