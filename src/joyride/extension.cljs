@@ -25,9 +25,9 @@
     (.push (.-subscriptions context) disposable)))
 
 (defn- clear-disposables! []
-  (-> (p/run! (fn [^js disposable]
-                (.dispose disposable))
-              (:disposables @db/!app-db))
+  (-> (p/run (fn [^js disposable]
+               (.dispose disposable))
+             (:disposables @db/!app-db))
       (.then (fn []
                (swap! db/!app-db assoc :disposables [])))))
 
