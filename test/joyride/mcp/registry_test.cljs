@@ -37,8 +37,7 @@
                        :registry/dir dir
                        :registry/debounce-ms 15
                        :registry/heartbeat-ms 10000
-                       :registry/custom-data+ (fn [_]
-                                                (p/resolved (registry/compact-data)))
+                       :registry/custom-data (registry/compact-data)
                        :cursor/server-name "joyride"
                        :cursor/script-relative-path "dist/joyride-mcp-server.js"
                        :lifecycle/wrapper-install-dir dir
