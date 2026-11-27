@@ -86,6 +86,11 @@
           (catch js/Error _
             @joyride-sci/!last-ns))))))
 
+(defn- thenable?
+  "True when `x` has a `then` function, as a native promise and a promesa promise both have."
+  [x]
+  (fn? (some-> x .-then)))
+
 (defn- eval-in-ns [code ns]
   (sci/binding [sci/ns (resolve-ns ns)]
     (joyride-sci/eval-string code)))
@@ -143,7 +148,7 @@
     (.then (js/Promise. (fn [resolve]
                           (resolve (vreset! !raw (eval-in-ns code ns)))))
            (fn [v]
-             {:result v :promise? (instance? js/Promise @!raw) :wait-for-promise? true :who who})
+             {:result v :promise? (thenable? @!raw) :wait-for-promise? true :who who})
            (fn [e]
              {:error (printing/error-message e) :who who}))))
 
@@ -164,7 +169,7 @@
 (defn- execute-sync [{:keys [code ns who]} capture]
   (try
     (let [result (eval-in-ns code ns)
-          promise? (instance? js/Promise result)]
+          promise? (thenable? result)]
       (when promise?
         (log-late-rejection! result who (str @sci/ns)))
       (make-result {:result result :promise? promise? :who who} capture))

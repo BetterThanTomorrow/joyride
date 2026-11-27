@@ -3,6 +3,7 @@
    The name doesn't end in `-test`, so the node test build leaves them out. Run them from the
    Extension Development Host REPL with `(cljs.test/run-tests 'joyride.lm.evaluation-host-tests)`."
   (:require [cljs.test :refer [async deftest is]]
+            [clojure.string :as string]
             [joyride.db :as db]
             [joyride.lm.evaluation :as evaluation]
             [sci.core :as sci]))
@@ -166,3 +167,35 @@
                      "Ended in reverse order, print-fn goes back to the function set between the starts")))
         (.catch (fn [e] (is (nil? e) "The evaluations settle")))
         (.finally done))))
+
+(deftest promesa-promise-awaited
+  (async done
+    (-> (evaluation/execute-code+ {:code "(promesa.core/resolved 1)"
+                                   :ns "user"
+                                   :wait-for-promise? true
+                                   :who "host-tests"})
+        (.then (fn [result]
+                 (is (= "#<Promise 1>" (:result result))
+                     "An awaited promesa promise prints like a native one")))
+        (.catch (fn [e] (is (nil? e) "The evaluation resolves to a result")))
+        (.finally done))))
+
+(deftest promesa-promise-not-awaited
+  (async done
+    (let [{:keys [logged undo!]} (record-calva-log!)
+          result (evaluation/execute-code+ {:code "(promesa.core/rejected (js/Error. \"late promesa\"))"
+                                            :ns "user"
+                                            :wait-for-promise? false
+                                            :who "host-tests"})]
+      (is (string/includes? (:result result) "not awaited")
+          "A promesa promise that isn't awaited gets the not awaited message")
+      (-> (js/Promise. (fn [resolve] (js/setTimeout resolve 50)))
+          (.then (fn []
+                   (is (= ["late promesa"]
+                          (->> @logged
+                               (filter #(= "evaluationErrorOutput" (:category %)))
+                               (map :text)))
+                       "Its late rejection is logged")))
+          (.finally (fn []
+                      (undo!)
+                      (done)))))))
