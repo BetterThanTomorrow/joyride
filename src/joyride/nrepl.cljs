@@ -161,12 +161,20 @@
                                          @sci/ns))
                   send-fn))
 
-(defn handle-clone [request send-fn]
-  (send-fn request {"new-session" (str (random-uuid))
-                    "status" ["done"]}))
+(defn handle-clone [{:keys [client-name] :as request} send-fn]
+  (let [session (str (random-uuid))]
+    (swap! !db assoc-in [::sessions session] {:client-name client-name})
+    (send-fn request {"new-session" session
+                      "status" ["done"]})))
 
-(defn handle-close [request send-fn]
+(defn handle-close [{:keys [session] :as request} send-fn]
+  (swap! !db update ::sessions dissoc session)
   (send-fn request {"status" ["done" "session-closed"]}))
+
+(defn calva-session?
+  "True when Calva cloned the nREPL `session`, as it says in the `client-name` it clones with."
+  [session]
+  (= "Calva" (get-in @!db [::sessions session :client-name])))
 
 #_(defn handle-classpath [request send-fn]
     (send-fn

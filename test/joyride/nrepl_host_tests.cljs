@@ -36,3 +36,29 @@
           (.finally (fn []
                       (fs/rmSync root #js {:recursive true :force true})
                       (done)))))))
+
+(defn- clone-session
+  "Clones a session with `client-name` and returns the new session's id."
+  [client-name]
+  (let [!response (atom nil)]
+    (nrepl/handle-clone (cond-> {:op :clone}
+                          client-name (assoc :client-name client-name))
+                        (fn [_ response] (reset! !response response)))
+    (get @!response "new-session")))
+
+(deftest sessions-remember-their-client
+  (let [calva-session (clone-session "Calva")
+        other-session (clone-session "CIDER")
+        nameless-session (clone-session nil)]
+    (is (nrepl/calva-session? calva-session)
+        "A session Calva cloned is Calva's")
+    (is (not (nrepl/calva-session? other-session))
+        "A session another client cloned isn't Calva's")
+    (is (not (nrepl/calva-session? nameless-session))
+        "A session cloned without a client name isn't Calva's")
+    (is (not (nrepl/calva-session? nil))
+        "A request without a session isn't Calva's")
+    (doseq [session [calva-session other-session nameless-session]]
+      (nrepl/handle-close {:op :close :session session} (fn [_ _])))
+    (is (not (nrepl/calva-session? calva-session))
+        "A closed session is forgotten")))
