@@ -280,45 +280,49 @@
       {})))
 
 (defn- echo-result!
-  "Appends `res` to Joyride Output. A promise is appended when it settles, as `#<Promise …>` within the
-   `joyride.lm` result limits, or as its rejection."
-  [res]
+  "Appends `res` to Joyride's output, with the output `context`. A promise is appended when it settles,
+   as `#<Promise …>` within the `joyride.lm` result limits, or as its rejection."
+  [res context]
   (let [{:keys [fallback-length fallback-level] :as opts} (print-fallback-opts)]
     (if (instance? js/Promise res)
       (.then res
              (fn [v]
                (output/append-promise-result! (printing/value->str v (assoc opts
                                                                             :print-length fallback-length
-                                                                            :print-level fallback-level))))
+                                                                            :print-level fallback-level))
+                                              context))
              (fn [e]
-               (output/append-line-eval-err! (printing/error-message e))))
-      (output/append-eval-result! (printing/value->str res opts)))))
+               (output/append-line-eval-err! (printing/error-message e) context)))
+      (output/append-eval-result! (printing/value->str res opts) context))))
 
 (defn- call-echoing-error!
-  "Calls `f`. Appends what it throws to Joyride Output and rethrows it."
-  [f]
+  "Calls `f`. Appends what it throws to Joyride's output, with the output `context`, and rethrows it."
+  [f context]
   (try
     (f)
     (catch :default e
-      (output/append-line-eval-err! (printing/error-message e))
+      (output/append-line-eval-err! (printing/error-message e) context)
       (throw e))))
 
 (defn eval-string
   "Evaluates the forms in `s`, starting in the SCI namespace `start-ns`, or in the last namespace.
-   The namespace the evaluation ends in becomes the last namespace."
+   The namespace the evaluation ends in becomes the last namespace. What the evaluation prints, its
+   result and its errors are echoed with the output `context` of the evaluation."
   ([s]
    (eval-string s @!last-ns))
   ([s start-ns]
+   (eval-string s start-ns nil))
+  ([s start-ns context]
    (sci/binding [sci/ns start-ns
-                 sci/print-fn (wrap-print-fn "stdout" @sci/print-fn output/append-eval-out!)
-                 sci/print-err-fn (wrap-print-fn "stderr" @sci/print-err-fn output/append-eval-err!)]
+                 sci/print-fn (wrap-print-fn "stdout" @sci/print-fn #(output/append-eval-out! % context))
+                 sci/print-err-fn (wrap-print-fn "stderr" @sci/print-err-fn #(output/append-eval-err! % context))]
      (let [reader (sci/reader (str s))]
        (loop [res nil]
-         (let [form (call-echoing-error! #(sci/parse-next (store/get-ctx) reader))]
+         (let [form (call-echoing-error! #(sci/parse-next (store/get-ctx) reader) context)]
            (if (= :sci.core/eof form)
              (do
                (vreset! !last-ns @sci/ns)
-               (echo-result! res)
+               (echo-result! res context)
                res)
-             (recur (call-echoing-error! #(sci/eval-form (store/get-ctx) form))))))))))
+             (recur (call-echoing-error! #(sci/eval-form (store/get-ctx) form) context)))))))))
 

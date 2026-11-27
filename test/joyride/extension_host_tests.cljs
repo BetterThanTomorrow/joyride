@@ -19,8 +19,8 @@
                    (set! output/append-line-eval-err! eval-err)
                    (set! output/append-line-other-err! other-err)
                    (set! output/show-terminal! show-terminal))]
-    (set! output/append-line-eval-err! #(swap! !lines conj %))
-    (set! output/append-line-other-err! #(swap! !lines conj %))
+    (set! output/append-line-eval-err! (fn ([m] (swap! !lines conj m)) ([m _] (swap! !lines conj m))))
+    (set! output/append-line-other-err! (fn ([m] (swap! !lines conj m)) ([m _] (swap! !lines conj m))))
     (set! output/show-terminal! (fn ([] nil) ([_] nil)))
     (-> (extension/run-code+ code)
         (.then (constantly nil) (constantly nil))
@@ -55,8 +55,8 @@
   (let [!echoed (atom [])
         append-eval-result output/append-eval-result!
         append-promise-result output/append-promise-result!]
-    (set! output/append-eval-result! #(swap! !echoed conj %))
-    (set! output/append-promise-result! #(swap! !echoed conj (str "#<Promise " % ">")))
+    (set! output/append-eval-result! (fn ([m] (swap! !echoed conj m)) ([m _] (swap! !echoed conj m))))
+    (set! output/append-promise-result! (fn ([m] (swap! !echoed conj (str "#<Promise " m ">"))) ([m _] (swap! !echoed conj (str "#<Promise " m ">")))))
     (-> (js/Promise.all (into-array (map jsci/eval-string codes)))
         (.then (fn [_] @!echoed))
         (.finally (fn []

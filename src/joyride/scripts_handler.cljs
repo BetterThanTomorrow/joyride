@@ -10,6 +10,7 @@
             [joyride.sci :as jsci]
             [joyride.utils :refer [cljify jsify]]
             [joyride.vscode-utils :as utils]
+            [joyride.who-tracking :as who-tracking]
             [promesa.core :as p]
             [sci.core :as sci]
             [clojure.string :as string]))
@@ -99,8 +100,8 @@
           (js/require resolved))")))
 
 (defn- read-script+
-  "Reads the script at `script-path` and announces it in Joyride Output. Resolves to its absolute path and code."
-  [base-path scripts-path script-path]
+  "Reads the script at `script-path` and announces it in Joyride's output, as `who`. Resolves to its absolute path and code."
+  [base-path scripts-path script-path who]
   (p/let [abs-path (path/join base-path scripts-path script-path)
           script-uri (vscode/Uri.file abs-path)
           code (if (.endsWith script-path ".js")
@@ -114,43 +115,48 @@
           message (if script-kind
                     (str "Evaluating " script-kind " script: " script-path)
                     (str "Evaluating script: " script-path))]
-    (output/append-line-other-out! message)
+    (output/append-line-other-out! message {:output/who who})
     {:script/abs-path abs-path
      :script/code code}))
 
 (defn- report-script-error!
-  "Appends the failed script run to Joyride Output, with `message` when there is one, and offers to reveal it."
-  [title script-path message]
-  (output/append-line-other-err! (str title " Failed: " script-path (some->> message (str " "))))
+  "Appends the failed script run to Joyride's output, as `who`, with `message` when there is one, and offers to reveal it."
+  [title script-path message who]
+  (output/append-line-other-err! (str title " Failed: " script-path (some->> message (str " "))) {:output/who who})
   (utils/show-message-offering-output+ vscode/window.showErrorMessage (str title " error")))
 
 (defn- eval-script+
-  "Evaluates the script's `code` as the invoked script `abs-path` and resolves to its result. A failure is
+  "Evaluates the script's `code` as the invoked script `abs-path`, as `who`, and resolves to its result. A failure is
    reported under `title`, with its error only when the evaluation's echo didn't show it: when the script
    ended in a thenable that isn't a native promise."
-  [title script-path {:script/keys [abs-path code]}]
+  [title script-path who {:script/keys [abs-path code]}]
   (swap! db/!app-db assoc :invoked-script abs-path)
+  (who-tracking/record-evaluation! who)
   (let [!result (volatile! nil)]
     (-> (js/Promise. (fn [resolve]
                        (resolve (vreset! !result (sci/with-bindings {sci/file abs-path}
-                                                   (jsci/eval-string code))))))
+                                                   (jsci/eval-string code @jsci/!last-ns {:output/who who}))))))
         (.finally #(swap! db/!app-db assoc :invoked-script nil))
         (.catch (fn [error]
                   (let [result @!result]
                     (report-script-error! title script-path
                                           (when (and (some? result)
                                                      (not (instance? js/Promise result)))
-                                            (printing/error-message error)))))))))
+                                            (printing/error-message error))
+                                          who)))))))
 
 (defn run-script+
+  "Runs a script picked from `menu-conf+`, or the script at `script-path`, as `who`, by default `joyride-user`."
   ([menu-conf+ base-path scripts-path]
    (handle-script-menu-selection+ menu-conf+ run-script+ base-path scripts-path))
   ([title base-path scripts-path script-path]
-   (-> (js/Promise.resolve (read-script+ base-path scripts-path script-path))
+   (run-script+ title base-path scripts-path script-path "joyride-user"))
+  ([title base-path scripts-path script-path who]
+   (-> (js/Promise.resolve (read-script+ base-path scripts-path script-path who))
        (.then (fn [script]
-                (eval-script+ title script-path script))
+                (eval-script+ title script-path who script))
               (fn [read-error]
-                (report-script-error! title script-path (printing/error-message read-error)))))))
+                (report-script-error! title script-path (printing/error-message read-error) who))))))
 
 (defn open-script+
   ([menu-conf+ base-path scripts-path]
@@ -439,7 +445,9 @@
                                  getting-started/maybe-create-workspace-activate-script+
                                  getting-started/maybe-create-workspace-hello-script+))))
   ([script]
-   (apply run-script+ (conj (run-or-open-workspace-script-args "Run") script))))
+   (apply run-script+ (conj (run-or-open-workspace-script-args "Run") script)))
+  ([script who]
+   (apply run-script+ (conj (run-or-open-workspace-script-args "Run") script who))))
 
 (defn open-workspace-script+
   ([]
@@ -491,7 +499,9 @@
                             getting-started/maybe-create-user-activate-script+
                             getting-started/maybe-create-user-hello-script+))))
   ([script]
-   (apply run-script+ (conj (run-or-open-user-script-args "Run") script))))
+   (apply run-script+ (conj (run-or-open-user-script-args "Run") script)))
+  ([script who]
+   (apply run-script+ (conj (run-or-open-user-script-args "Run") script who))))
 
 (defn open-user-script+
   ([]

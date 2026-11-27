@@ -17,7 +17,8 @@
    [sci.ctx-store :as store]
    [clojure.pprint :as pp]
    [clojure.string :as string]
-   [joyride.output :as output]))
+   [joyride.output :as output]
+   [joyride.output.route :as route]))
 
 (defonce !db (atom {::log-messages? false
                     ::server nil
@@ -105,23 +106,39 @@
       (catch :default _
         (printing/value->str x {})))))
 
-(defn do-handle-eval [{:keys [ns code _sci-ctx load-file? file who] :as request} send-fn]
-  (let [who (or who "ui")]
-    (sci/with-bindings
-      {sci/ns ns
-       sci/print-length @sci/print-length
-       sci/print-newline true
-       sci/file (or file @sci/file)}
-      (sci/alter-var-root sci/print-fn (constantly
-                                        (fn [s]
-                                          (send-fn request {"out" s}))))
-      (who-tracking/record-evaluation! who)
-      (if load-file?
-        (do
-          (output/maybe-append-info-line! {:who who :ns (str ns)})
-          (output/append-line-other-out! (str "Loading file: " file)))
-        (output/append-clojure-eval! code {:who who :ns (str ns)}))
-      (try (let [v (jsci/eval-string code)
+(defn calva-session?
+  "True when Calva cloned the nREPL `session`, as it says in the `client-name` it clones with."
+  [session]
+  (= "Calva" (get-in @!db [::sessions session :client-name])))
+
+(defn- start-nrepl-evaluation!
+  "Records the nREPL evaluation `request` and writes its code, or for `load-file` the file it loads.
+   Returns the evaluation, as `output/start-evaluation!` does."
+  [{:keys [ns code load-file? file session] :as request}]
+  (let [calva-client? (calva-session? session)
+        who (route/nrepl-who {:who (:who request) :calva-client? calva-client?})
+        context {:output/who who
+                 :output/ns (str ns)
+                 :output/calva-client? calva-client?}]
+    (who-tracking/record-evaluation! who)
+    (if load-file?
+      (do
+        (output/append-line-other-out! (str "Loading file: " file) context)
+        {:evaluation/context context
+         :evaluation/end! (fn [])})
+      (output/start-evaluation! code context))))
+
+(defn do-handle-eval [{:keys [ns code _sci-ctx file] :as request} send-fn]
+  (sci/with-bindings
+    {sci/ns ns
+     sci/print-length @sci/print-length
+     sci/print-newline true
+     sci/file (or file @sci/file)}
+    (sci/alter-var-root sci/print-fn (constantly
+                                      (fn [s]
+                                        (send-fn request {"out" s}))))
+    (let [{:evaluation/keys [context end!]} (start-nrepl-evaluation! request)]
+      (try (let [v (jsci/eval-string code @jsci/!last-ns context)
                  send-result! (fn [val promise?]
                                 (sci/alter-var-root sci/*3 (constantly @sci/*2))
                                 (sci/alter-var-root sci/*2 (constantly @sci/*1))
@@ -133,7 +150,8 @@
                                                               (str "#<Promise " formatted ">")
                                                               formatted)
                                                     "ns" (str @sci/ns)}))
-                                (send-fn request {"status" ["done"]}))]
+                                (send-fn request {"status" ["done"]})
+                                (end!))]
              (if (instance? js/Promise v)
                (-> v
                    (.then (fn [resolved]
@@ -143,7 +161,8 @@
                              (send-fn request {"err" (str (error-str rejected) "\n")})
                              (send-fn request {"ex" (error-str rejected)
                                                "ns" (str @sci/ns)
-                                               "status" ["done"]}))))
+                                               "status" ["done"]})
+                             (end!))))
                (send-result! v false)))
            (catch :default e
              (sci/alter-var-root sci/*e (constantly e))
@@ -152,7 +171,8 @@
                  (send-fn request {"err" (str (error-str message) "\n")}))
                (send-fn request {"ex" (error-str e)
                                  "ns" (str @sci/ns)
-                                 "status" ["done"]})))))))
+                                 "status" ["done"]})
+               (end!)))))))
 
 (defn handle-eval [{:keys [ns sci-ctx] :as request} send-fn]
   (do-handle-eval (assoc request :ns (or (when ns
@@ -170,11 +190,6 @@
 (defn handle-close [{:keys [session] :as request} send-fn]
   (swap! !db update ::sessions dissoc session)
   (send-fn request {"status" ["done" "session-closed"]}))
-
-(defn calva-session?
-  "True when Calva cloned the nREPL `session`, as it says in the `client-name` it clones with."
-  [session]
-  (= "Calva" (get-in @!db [::sessions session :client-name])))
 
 #_(defn handle-classpath [request send-fn]
     (send-fn

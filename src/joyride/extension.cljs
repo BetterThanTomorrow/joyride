@@ -40,13 +40,16 @@
      (when input
        (run-code+ input))))
   ([code]
-   (who-tracking/record-evaluation! "ui")
-   (output/append-clojure-eval! code {:who "ui" :ns (str @jsci/!last-ns)})
-   (-> (js/Promise. (fn [resolve]
-                      (resolve (jsci/eval-string code))))
-       (.catch (fn [e]
-                 (output/show-terminal!)
-                 (throw (js/Error. e)))))))
+   (who-tracking/record-evaluation! "joyride-user")
+   (let [{:evaluation/keys [context end!]} (output/start-evaluation! code
+                                                                     {:output/who "joyride-user"
+                                                                      :output/ns (str @jsci/!last-ns)})]
+     (-> (js/Promise. (fn [resolve]
+                        (resolve (jsci/eval-string code @jsci/!last-ns context))))
+         (.finally end!)
+         (.catch (fn [e]
+                   (output/show-terminal!)
+                   (throw (js/Error. e))))))))
 
 (defn evaluate-selection+
   "Evaluates the selection by first copying it to the clipboard and reading it from there.
@@ -134,10 +137,10 @@
                          (js/console.error "Joyride: Error while creating user project content" e)))
                       (p/then
                        (fn [_r]
-                         (p/do! (life-cycle/maybe-run-init-script+ scripts-handler/run-user-script+
+                         (p/do! (life-cycle/maybe-run-init-script+ #(scripts-handler/run-user-script+ % "joyride")
                                                                    (:user (life-cycle/init-scripts)))
                                 (when vscode/workspace.rootPath
-                                  (life-cycle/maybe-run-init-script+ scripts-handler/run-workspace-script+
+                                  (life-cycle/maybe-run-init-script+ #(scripts-handler/run-workspace-script+ % "joyride")
                                                                      (:workspace (life-cycle/init-scripts))))
                                 (output/append-line-other-out! "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
     (js/console.timeLog "activation" "Joyride activate END")

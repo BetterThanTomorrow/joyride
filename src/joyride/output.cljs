@@ -4,6 +4,7 @@
    ["vscode" :as vscode]
    [clojure.string :as string]
    [joyride.db :as db]
+   [joyride.output.route :as route]
    [zprint.core :as zp]))
 
 (def terminal-name "Joyride Output")
@@ -290,46 +291,11 @@
   [message]
   (append! (str message "\n")))
 
-(defn append-eval-out!
-  "Append stdout generated during evaluation."
-  [message]
-  (append! (colorize-by-category :output/eval-out message)))
-
-(defn append-eval-err!
-  "Append stderr generated during evaluation."
-  [message]
-  (append! (colorize-by-category :output/eval-err message)))
-
-(defn append-line-eval-err!
-  "Append stderr and ensure a newline."
-  [message]
-  (append-line! (colorize-by-category :output/eval-err message)))
-
-(defn append-other-out!
-  "Append non-evaluation stdout messages."
-  [message]
-  (append! (colorize-by-category :output/other-out message)))
-
-(defn append-line-other-out!
-  "Append non-evaluation stdout and ensure newline."
-  [message]
-  (append-line! (colorize-by-category :output/other-out message)))
-
-(defn append-other-err!
-  "Append non-evaluation stderr messages."
-  [message]
-  (append! (colorize-by-category :output/other-err message)))
-
-(defn append-line-other-err!
-  "Append non-evaluation stderr and ensure newline."
-  [message]
-  (append-line! (colorize-by-category :output/other-err message)))
-
 (defn- info-line
   "Build the info line string with optional who badge and ns badge.
-   The who badge is suppressed when who is \"ui\" (matching Calva's pattern)."
+   The who badge is left out for the who values Joyride sets itself."
   [{:keys [who ns]}]
-  (let [who-badge (when (and who (not= who "ui"))
+  (let [who-badge (when (and who (route/who-badge? who))
                     (str (colorize-by-category :output/eval-who (str " " who " ")) " "))
         ns-badge (colorize-by-category :output/eval-ns (str " " ns " "))]
     (str (colorize-by-category :output/info "; ") (or who-badge "") ns-badge)))
@@ -339,26 +305,134 @@
   [{:keys [who ns]}]
   (not= (:output/last-info @db/!app-db) {:who who :ns ns}))
 
-(defn maybe-append-info-line!
+(defn- maybe-append-info-line!
   "Append info line if who or ns has changed since last output."
   [opts]
   (when (info-changed? opts)
     (swap! db/!app-db assoc :output/last-info (select-keys opts [:who :ns]))
     (append-line! (info-line opts))))
 
+;; ============================================================================
+;; Output messages
+;; ============================================================================
+
+(def ^:private stream-colors
+  {:output.category/evaluation-output :output/eval-out
+   :output.category/evaluation-error-output :output/eval-err
+   :output.category/other-output :output/other-out
+   :output.category/other-error-output :output/other-err})
+
+(defn- write-stream-to-joyride-output!
+  "Writes the stream `message` to the Joyride Output terminal in its category's color. An `other-output`
+   message with an ns, which nREPL `load-file` writes, gets the info line before it."
+  [{:output/keys [category text who ns line?]}]
+  (when (and ns (= :output.category/other-output category))
+    (maybe-append-info-line! {:who who :ns ns}))
+  (let [colored (colorize-by-category (stream-colors category) text)]
+    (if line?
+      (append-line! colored)
+      (append! colored))))
+
+(defn- write-to-joyride-output!
+  "Writes `message` to the Joyride Output terminal."
+  [{:output/keys [category text who ns promise?] :as message}]
+  (case category
+    :output.category/evaluated-code (do (maybe-append-info-line! {:who who :ns ns})
+                                        (append-line! (syntax-highlight-clojure text)))
+    :output.category/evaluation-results (append-line! (if promise?
+                                                        (str "#<Promise " (syntax-highlight-clojure text) ">")
+                                                        (syntax-highlight-clojure text)))
+    (write-stream-to-joyride-output! message)))
+
+(defn- write!
+  "Writes `message` where Joyride's output goes, unless it has nothing to write. Returns the
+   evaluation id Calva gave an evaluation's code, when it gave one."
+  [{:output/keys [text line?] :as message} _evaluation]
+  (when (or (seq text) line?)
+    (write-to-joyride-output! message)
+    nil))
+
+(def ^:private default-context {:output/who "joyride"})
+
+(defn- write-text!
+  "Writes `text` in `category`, as a line when `line?`, with the output `context` of the evaluation or the writer."
+  [category line? text context]
+  (write! (merge default-context
+                 context
+                 {:output/category category
+                  :output/text (str text)
+                  :output/line? line?})
+          nil))
+
+(defn append-eval-out!
+  "Append stdout generated during evaluation, with the evaluation's output `context`."
+  ([message] (append-eval-out! message nil))
+  ([message context] (write-text! :output.category/evaluation-output false message context)))
+
+(defn append-eval-err!
+  "Append stderr generated during evaluation, with the evaluation's output `context`."
+  ([message] (append-eval-err! message nil))
+  ([message context] (write-text! :output.category/evaluation-error-output false message context)))
+
+(defn append-line-eval-err!
+  "Append stderr and ensure a newline, with the evaluation's output `context`."
+  ([message] (append-line-eval-err! message nil))
+  ([message context] (write-text! :output.category/evaluation-error-output true message context)))
+
+(defn append-other-out!
+  "Append non-evaluation stdout messages, with the writer's output `context`."
+  ([message] (append-other-out! message nil))
+  ([message context] (write-text! :output.category/other-output false message context)))
+
+(defn append-line-other-out!
+  "Append non-evaluation stdout and ensure newline, with the writer's output `context`."
+  ([message] (append-line-other-out! message nil))
+  ([message context] (write-text! :output.category/other-output true message context)))
+
+(defn append-other-err!
+  "Append non-evaluation stderr messages, with the writer's output `context`."
+  ([message] (append-other-err! message nil))
+  ([message context] (write-text! :output.category/other-error-output false message context)))
+
+(defn append-line-other-err!
+  "Append non-evaluation stderr and ensure newline, with the writer's output `context`."
+  ([message] (append-line-other-err! message nil))
+  ([message context] (write-text! :output.category/other-error-output true message context)))
+
 (defn append-eval-result!
-  "Append the value returned from an evaluation."
-  [data]
-  (append-line! (syntax-highlight-clojure data)))
+  "Append the value returned from an evaluation, with the evaluation's output `context`."
+  ([data] (append-eval-result! data nil))
+  ([data context]
+   (write! (merge default-context
+                  context
+                  {:output/category :output.category/evaluation-results
+                   :output/text data})
+           nil)))
 
 (defn append-promise-result!
-  "Appends the printed value a promise from an evaluation settled to, as `#<Promise <value>>`."
-  [data]
-  (append-line! (str "#<Promise " (syntax-highlight-clojure data) ">")))
+  "Appends the printed value a promise from an evaluation settled to, as `#<Promise <value>>`, with the
+   evaluation's output `context`."
+  ([data] (append-promise-result! data nil))
+  ([data context]
+   (write! (merge default-context
+                  context
+                  {:output/category :output.category/evaluation-results
+                   :output/text data
+                   :output/promise? true})
+           nil)))
 
-(defn append-clojure-eval!
-  "Echo evaluated code to the terminal with namespace and who context."
-  [code opts]
-  (maybe-append-info-line! opts)
-  (let [highlighted (syntax-highlight-clojure code)]
-    (append-line! highlighted)))
+(defn start-evaluation!
+  "Writes `code` as the code of an evaluation. Returns the evaluation's output context, `context` with
+   the evaluation id Calva gave it, as `:evaluation/context`, and the function that ends the evaluation,
+   as `:evaluation/end!`. The caller calls it once the evaluation has settled, on every path."
+  [code context]
+  (let [!end (volatile! nil)
+        evaluation (js/Promise. (fn [resolve] (vreset! !end resolve)))
+        evaluation-id (write! (merge default-context
+                                     context
+                                     {:output/category :output.category/evaluated-code
+                                      :output/text code})
+                              evaluation)]
+    {:evaluation/context (cond-> context
+                           evaluation-id (assoc :output/evaluation-id evaluation-id))
+     :evaluation/end! (fn [] (@!end nil))}))

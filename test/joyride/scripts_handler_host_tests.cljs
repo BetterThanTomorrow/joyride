@@ -33,8 +33,8 @@
                    (set! output/append-line-other-err! other-err)
                    (set! output/show-terminal! show-terminal)
                    (set! (.-showErrorMessage vscode/window) show-error-message))]
-    (set! output/append-line-eval-err! #(swap! !reports conj %))
-    (set! output/append-line-other-err! #(swap! !reports conj %))
+    (set! output/append-line-eval-err! (fn ([m] (swap! !reports conj m)) ([m _] (swap! !reports conj m))))
+    (set! output/append-line-other-err! (fn ([m] (swap! !reports conj m)) ([m _] (swap! !reports conj m))))
     (set! output/show-terminal! (fn reveal ([] (reveal false)) ([_] (swap! !reports conj :output-revealed))))
     (set! (.-showErrorMessage vscode/window) (fn [message & _]
                                                 (swap! !reports conj message)

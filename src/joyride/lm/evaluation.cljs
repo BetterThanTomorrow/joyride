@@ -92,10 +92,10 @@
   (fn? (some-> x .-then)))
 
 (defn- eval-in-ns
-  "Evaluates `code`, starting in the namespace named `ns`. Returns the `:value`, and the name of
-   the namespace the evaluation ended in as `:ns`."
-  [code ns]
-  (let [value (joyride-sci/eval-string code (resolve-ns ns))]
+  "Evaluates `code`, starting in the namespace named `ns`, echoing with the output `context`. Returns
+   the `:value`, and the name of the namespace the evaluation ended in as `:ns`."
+  [code ns context]
+  (let [value (joyride-sci/eval-string code (resolve-ns ns) context)]
     {:value value
      :ns (str @joyride-sci/!last-ns)}))
 
@@ -144,12 +144,12 @@
       (seq other-whos) (assoc "otherWhosSinceLast" other-whos))))
 
 (defn- awaited-outcome+
-  "Evaluates `code` and resolves to the evaluation's outcome, with a promise result awaited.
+  "Evaluates `code` with the output `context` and resolves to the evaluation's outcome, with a promise result awaited.
    Native promise calls keep a rejection with `nil` a rejection, which promesa turns into a resolution."
-  [{:keys [code ns who]}]
+  [{:keys [code ns who]} context]
   (let [!evaluation (volatile! {:ns ns})]
     (.then (js/Promise. (fn [resolve]
-                          (resolve (:value (vreset! !evaluation (eval-in-ns code ns))))))
+                          (resolve (:value (vreset! !evaluation (eval-in-ns code ns context))))))
            (fn [v]
              {:result v
               :promise? (thenable? (:value @!evaluation))
@@ -159,10 +159,12 @@
            (fn [e]
              {:error (printing/error-message e) :who who :ns (:ns @!evaluation)}))))
 
-(defn- execute-awaited+ [input capture]
-  (-> (awaited-outcome+ input)
+(defn- execute-awaited+ [input capture {:evaluation/keys [context end!]}]
+  (-> (awaited-outcome+ input context)
       (.then #(make-result % capture))
-      (.finally #(end-capture! capture))))
+      (.finally (fn []
+                  (end-capture! capture)
+                  (end!)))))
 
 (defn- log-late-rejection!
   "Logs a rejection of the not awaited `promise` to the Calva output log, under `who` and `ns`."
@@ -173,9 +175,9 @@
                                               :who who
                                               :ns ns}))))
 
-(defn- execute-sync [{:keys [code ns who]} capture]
+(defn- execute-sync [{:keys [code ns who]} capture {:evaluation/keys [context end!]}]
   (try
-    (let [{:keys [value] result-ns :ns} (eval-in-ns code ns)
+    (let [{:keys [value] result-ns :ns} (eval-in-ns code ns context)
           promise? (thenable? value)]
       (when promise?
         (log-late-rejection! value who result-ns))
@@ -183,15 +185,18 @@
     (catch :default e
       (make-result {:error (printing/error-message e) :who who :ns ns} capture))
     (finally
-      (end-capture! capture))))
+      (end-capture! capture)
+      (end!))))
 
-(defn- log-evaluation! [{:keys [code who ns]}]
+(defn- log-evaluation!
+  "Records and writes the evaluation of `code`, and returns the evaluation from `output/start-evaluation!`."
+  [{:keys [code who ns]}]
   (who-tracking/record-evaluation! who)
-  (output/append-clojure-eval! code {:who who :ns ns})
   (calva-int/log-to-calva! {:category "evaluatedCode"
                             :text code
                             :who who
-                            :ns ns}))
+                            :ns ns})
+  (output/start-evaluation! code {:output/who who :output/ns ns}))
 
 (defn execute-code+
   "Execute ClojureScript code in Joyride's SCI environment with VS Code APIs.
@@ -202,12 +207,11 @@
   (let [bracket-validation (validation/validate-brackets code)]
     (if-not (:valid? bracket-validation)
       (bracket-error-result ns bracket-validation)
-      (do
-        (log-evaluation! input)
-        (let [capture (start-capture!)]
-          (if wait-for-promise?
-            (execute-awaited+ input capture)
-            (execute-sync input capture)))))))
+      (let [evaluation (log-evaluation! input)
+            capture (start-capture!)]
+        (if wait-for-promise?
+          (execute-awaited+ input capture evaluation)
+          (execute-sync input capture evaluation))))))
 
 (defn prepare-invocation
   "Prepare confirmation message with rich code preview"
