@@ -42,7 +42,3 @@
       (.appendLine channel "🟢 Joyride VS Code with Clojure. 🚗💨\n")
       channel)))
 
-(defn output-terminal
-  "Returns the Joyride Output terminal instance."
-  []
-  (:output/terminal @!app-db))
