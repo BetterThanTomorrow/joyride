@@ -103,3 +103,29 @@
   (is (= "joyride-nrepl" (route/nrepl-who {})) "Other clients without a who")
   (is (= "joyride-nrepl" (route/nrepl-who {:who "ui"})) "A reserved who is replaced")
   (is (= "joyride-nrepl" (route/nrepl-who {:who "api" :calva-client? true})) "A reserved who is replaced also for Calva"))
+
+(deftest holding-messages
+  (is (= [:a :b] (route/hold [:a] :b))
+      "A held message goes last")
+  (is (= [:a] (route/hold nil :a))
+      "Holding starts from nothing")
+  (let [held (reduce route/hold [] (range 1005))]
+    (is (= 1000 (count held))
+        "Only the newest messages are kept")
+    (is (= [5 1004] [(first held) (peek held)])
+        "The oldest are the ones dropped")))
+
+(deftest holding-copies-for-subscribers
+  (let [starting (assoc calva-on :calva/state :inactive :joyride/starting? true)]
+    (is (true? (route/hold-copy-for-subscribers? (assoc starting :setting/use-calva? false) :joyride-output))
+        "With the setting off, Joyride's startup messages are held for Calva's subscribers")
+    (is (true? (route/hold-copy-for-subscribers? (assoc starting :calva/display? false) :joyride-output))
+        "With a Calva too old to show them, too")
+    (is (false? (route/hold-copy-for-subscribers? starting :hold))
+        "A held message isn't copied")
+    (is (false? (route/hold-copy-for-subscribers? (assoc starting :output/who "joyride-user") :joyride-output))
+        "People's output isn't held")
+    (is (false? (route/hold-copy-for-subscribers? (assoc starting :calva/state :absent) :joyride-output))
+        "Without Calva, nothing waits for it")
+    (is (false? (route/hold-copy-for-subscribers? (assoc starting :joyride/starting? false) :joyride-output))
+        "Once Joyride has started, nothing is held")))

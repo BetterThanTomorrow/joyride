@@ -48,6 +48,29 @@
          (= "joyride" who)) :hold
     :else :joyride-output))
 
+(defn hold-copy-for-subscribers?
+  "True when a message that went to Joyride Output on `route` is also held for Calva's output subscribers:
+   Joyride's own message while Joyride starts, before a Calva that is installed has started."
+  [{:calva/keys [state]
+    :joyride/keys [starting?]
+    :output/keys [who]}
+   route]
+  (boolean (and (= :joyride-output route)
+                (= :inactive state)
+                starting?
+                (= "joyride" who))))
+
+(def ^:private held-cap 1000)
+
+(defn hold
+  "Returns `held` with `entry` last, keeping the newest 1000 entries."
+  [held entry]
+  (let [held (conj (or held []) entry)
+        n (count held)]
+    (if (> n held-cap)
+      (subvec held (- n held-cap))
+      held)))
+
 (defn joyride-output-after-calva?
   "True when a message written to Calva goes to Joyride Output too: when Calva's `log()` returned
    nothing, or printed it nowhere but skipped a destination."

@@ -116,9 +116,9 @@
   (when context
     (swap! db/!app-db assoc
            :extension-context context
-           :workspace-root-path vscode/workspace.rootPath)
-    (output/register-lifecycle! context)
-    (output/ensure-terminal!))
+           :workspace-root-path vscode/workspace.rootPath
+           :joyride/starting? true)
+    (output/register-lifecycle! context))
 
   (let [{:keys [extension-context]} @db/!app-db]
     (register-commands! extension-context)
@@ -142,7 +142,10 @@
                                 (when vscode/workspace.rootPath
                                   (life-cycle/maybe-run-init-script+ #(scripts-handler/run-workspace-script+ % "joyride")
                                                                      (:workspace (life-cycle/init-scripts))))
-                                (output/append-line-other-out! "🟢 Joyride VS Code with Clojure. 🚗💨"))))))
+                                (output/append-line-other-out! "🟢 Joyride VS Code with Clojure. 🚗💨"))))
+                      (p/finally
+                       (fn [& _]
+                         (swap! db/!app-db assoc :joyride/starting? false)))))
     (js/console.timeLog "activation" "Joyride activate END")
     (js/console.timeEnd "activation")
     api))

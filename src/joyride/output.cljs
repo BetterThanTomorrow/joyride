@@ -260,15 +260,6 @@
              :output/did-last-terminate-line true)
       pty)))
 
-(defn show-terminal!
-  "Reveal the Joyride output terminal if it exists or can be created."
-  ([] (show-terminal! true))
-  ([preserve-focus?]
-   (ensure-terminal!)
-   (when-let [terminal (:output/terminal @db/!app-db)]
-     (.show terminal preserve-focus?)
-     terminal)))
-
 (defn- write-to-terminal!
   "Write a raw message to the Joyride terminal."
   [message]
@@ -355,18 +346,18 @@
 (defn- use-calva-setting? []
   (.get (vscode/workspace.getConfiguration "joyride") "useCalvaOutputDestinations" true))
 
-(defn- route-of
-  "Returns where `message` goes now, as `route/route` decides."
+(defn- route-inputs
+  "Returns what decides where `message` goes now."
   [{:output/keys [who calva-client?]}]
   (let [calva-state (calva/state)]
-    (route/route {:setting/use-calva? (use-calva-setting?)
-                  :calva/state calva-state
-                  :calva/display? (route/display-api? (calva/version))
-                  :joyride/starting? false
-                  :terminal/live? (and (= :inactive calva-state)
-                                       (output-terminal-live?))
-                  :output/who who
-                  :output/calva-client? calva-client?})))
+    {:setting/use-calva? (use-calva-setting?)
+     :calva/state calva-state
+     :calva/display? (route/display-api? (calva/version))
+     :joyride/starting? (boolean (:joyride/starting? @db/!app-db))
+     :terminal/live? (and (= :inactive calva-state)
+                          (output-terminal-live?))
+     :output/who who
+     :output/calva-client? calva-client?}))
 
 (defn- calva-message
   "Returns `message` as Calva's `log()` takes it, or `nil` when it has no text, which `log()` refuses."
@@ -393,17 +384,103 @@
         (write-to-joyride-output! message))
       (:calva/evaluation-id result))))
 
+;; ============================================================================
+;; Held output
+;; ============================================================================
+
+(defn- take-held!
+  "Empties the held messages and returns them."
+  []
+  (let [[{:output/keys [held]}] (swap-vals! db/!app-db assoc :output/held [])]
+    held))
+
+(defn- flush-held-to-calva!
+  "Writes the held messages to Calva, in order: to its Output Destinations, or only to its output
+   subscribers for those already shown in Joyride Output."
+  []
+  (doseq [{:held/keys [message shown?]} (take-held!)]
+    (if shown?
+      (log-message-for-subscribers! message)
+      (write-to-calva! message nil))))
+
+(defn- flush-held-to-joyride-output!
+  "Writes the held messages not yet shown to Joyride Output, in order, and keeps them all held, as
+   shown, for Calva's output subscribers."
+  []
+  (let [held (take-held!)]
+    (swap! db/!app-db update :output/held (fnil into []) (map #(assoc % :held/shown? true) held))
+    (doseq [{:held/keys [message shown?]} held]
+      (when-not shown?
+        (write-to-joyride-output! message)))))
+
+(defn- stop-held-check! []
+  (when-let [interval (:output/held-check @db/!app-db)]
+    (js/clearInterval interval)
+    (swap! db/!app-db dissoc :output/held-check)))
+
+(defn- check-held!
+  "Writes the held messages to Calva once it has started, and stops checking when nothing is held."
+  []
+  (when (= :active (calva/state))
+    (flush-held-to-calva!))
+  (when (empty? (:output/held @db/!app-db))
+    (stop-held-check!)))
+
+(defn- ensure-held-check!
+  "Checks every second whether Calva has started, while messages are held. The check is disposed with
+   Joyride's disposables, at hot reload and deactivation."
+  []
+  (when-not (:output/held-check @db/!app-db)
+    (swap! db/!app-db assoc :output/held-check (js/setInterval check-held! 1000))
+    (swap! db/!app-db update :disposables conj #js {:dispose stop-held-check!})))
+
+(defn- hold!
+  "Holds `message` until Calva starts, as already `shown?` in Joyride Output or not."
+  [message shown?]
+  (swap! db/!app-db update :output/held route/hold {:held/message message
+                                                    :held/shown? shown?})
+  (ensure-held-check!)
+  nil)
+
+;; ============================================================================
+;; Routing
+;; ============================================================================
+
 (defn- write!
-  "Writes `message` where Joyride's output goes. Returns the evaluation id Calva gave an evaluation's
-   code, when it gave one."
+  "Writes `message` where Joyride's output goes, after the messages held before it. Returns the
+   evaluation id Calva gave an evaluation's code, when it gave one."
   [{:output/keys [calva-client?] :as message} evaluation]
-  (case (route-of message)
-    :calva (write-to-calva! message evaluation)
-    :joyride-output (do (write-to-joyride-output! message)
-                        (when-not calva-client?
-                          (log-message-for-subscribers! message))
-                        nil)
-    :nowhere nil))
+  (let [inputs (route-inputs message)
+        where (route/route inputs)]
+    (case where
+      :hold (hold! message false)
+      :calva (do (flush-held-to-calva!)
+                 (write-to-calva! message evaluation))
+      :joyride-output (do (flush-held-to-joyride-output!)
+                          (write-to-joyride-output! message)
+                          (when-not calva-client?
+                            (log-message-for-subscribers! message))
+                          (when (route/hold-copy-for-subscribers? inputs where)
+                            (hold! message true))
+                          nil)
+      :nowhere nil)))
+
+(defn show-terminal!
+  "Reveal the Joyride output terminal, created when missing, with the held messages written to it."
+  ([] (show-terminal! true))
+  ([preserve-focus?]
+   (flush-held-to-joyride-output!)
+   (ensure-terminal!)
+   (when-let [terminal (:output/terminal @db/!app-db)]
+     (.show terminal preserve-focus?)
+     terminal)))
+
+(defn output-terminal
+  "Returns the Joyride Output terminal, created when missing, with the held messages written to it."
+  []
+  (flush-held-to-joyride-output!)
+  (ensure-terminal!)
+  (:output/terminal @db/!app-db))
 
 (def ^:private default-context {:output/who "joyride"})
 
