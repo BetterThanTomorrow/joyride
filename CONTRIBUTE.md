@@ -46,6 +46,8 @@ This runs the tests headless in a Docker container, so you need Docker. The cont
 
 To run the tests on your own machine instead, add `--local`: `npm run integration-test -- --local`. VS Code Insiders then opens on your desktop. (If some test results in an error, VS Code Insiders might be left hanging. You then need to force quit it.)
 
+To run the tests in another VS Code-like editor, such as Cursor, give its executable with `--vscode-executable`, together with `--local`: `npm run integration-test -- --local --vscode-executable /Applications/Cursor.app/Contents/MacOS/Cursor`. The editor gets extensions and user data directories of its own, so the runs don't share them with VS Code Insiders. On this machine, the test `wrapper-fails-outside-every-window` fails when an editor window is open on the Joyride repo, since the wrapper then finds that window.
+
 You can also run tests from the [development](#development) extension host. However, the test suite is designed to run with a special environment, to give it control over the user script content. This environment is set as part of the test run when run from the command line. If you run the tests from the REPL, some of them might not work, and _some of them might even mess with your user scripts content_. It's our recommendation to only run specific tests from the REPL and to use the command line for the full suite.
 
 ## Development

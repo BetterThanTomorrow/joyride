@@ -67,14 +67,29 @@ function init() {
   });
 }
 
-async function main(joyrideVSIXPathOrLabel, testWorkspace) {
+// An editor that isn't the downloaded VS Code gets extensions and user data directories
+// of its own, named by its executable, so it doesn't share them with the VS Code runs.
+function profileArgsForEditor(vscodeExecutablePath, args) {
+  const editorName = path
+    .basename(vscodeExecutablePath)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-");
+  return args.map((arg) =>
+    arg.replace(/^(--(?:extensions-dir|user-data-dir)=.*)$/, `$1-${editorName}`)
+  );
+}
+
+async function main(joyrideVSIXPathOrLabel, testWorkspace, vscodeExecutable) {
   try {
     const extensionTestsPath = path.resolve(__dirname, "runTests");
-    const vscodeExecutablePath = resolveDarwinVSCodeExecutable(
-      await downloadAndUnzipVSCode("insiders")
-    );
-    const [cliPath, ...args] =
+    const vscodeExecutablePath = vscodeExecutable
+      ? vscodeExecutable
+      : resolveDarwinVSCodeExecutable(await downloadAndUnzipVSCode("insiders"));
+    const [cliPath, ...defaultArgs] =
       resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
+    const args = vscodeExecutable
+      ? profileArgsForEditor(vscodeExecutablePath, defaultArgs)
+      : defaultArgs;
 
     const launchArgs = [
       testWorkspace,
@@ -98,7 +113,8 @@ async function main(joyrideVSIXPathOrLabel, testWorkspace) {
     const runOptions = {
       vscodeExecutablePath,
       extensionTestsPath,
-      launchArgs: [testWorkspace],
+      // With an editor of our own choosing, its directories go to the test run too
+      launchArgs: [testWorkspace, ...(vscodeExecutable ? args : [])],
     };
     if (joyrideVSIXPathOrLabel === "extension-development") {
       runOptions.extensionDevelopmentPath = path.resolve(__dirname, "..");
@@ -120,6 +136,16 @@ async function main(joyrideVSIXPathOrLabel, testWorkspace) {
 const args = require("minimist")(process.argv.slice(2), {
   boolean: ["local"],
 });
+// The editor to run the tests in, such as Cursor, in place of the VS Code Insiders that is downloaded
+const vscodeExecutable = args["vscode-executable"]
+  ? path.resolve(args["vscode-executable"])
+  : undefined;
+if (vscodeExecutable && !args.local) {
+  console.error(
+    "--vscode-executable needs --local: the container runs the VS Code it downloads"
+  );
+  process.exit(1);
+}
 // Without --local the tests run in a container, see run-containerized.sh
 if (!args.local) {
   const containerRunner = path.resolve(__dirname, "run-containerized.sh");
@@ -135,11 +161,13 @@ const testWorkspace = args["test-workspace"]
   ? path.resolve(args["test-workspace"])
   : path.resolve(__dirname, "..", "seatbelt-e2e", "workspace-1");
 console.info(
-  `Using:\n  Joyride: ${joyrideVSIX}\n  Test workspace: ${testWorkspace}`
+  `Using:\n  Joyride: ${joyrideVSIX}\n  Test workspace: ${testWorkspace}\n  Editor: ${
+    vscodeExecutable || "VS Code Insiders, downloaded"
+  }`
 );
 
 void init()
-  .then(() => main(joyrideVSIX, testWorkspace))
+  .then(() => main(joyrideVSIX, testWorkspace, vscodeExecutable))
   .catch((error) => {
     console.error("Failed to initialize test running environment:", error);
     process.exit(1);
