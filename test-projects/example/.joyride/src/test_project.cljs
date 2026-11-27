@@ -262,9 +262,7 @@
   (flare/close! tic-tac-toe-key)
   (await (disconnect!+ "tic-tac-toe"))
   (await (disconnect!+ "joyride"))
-  ;; The command doesn't settle when the port file is gone already, so it gets ten
-  ;; seconds. The server has stopped by then.
-  (await (with-timeout+ (vscode/commands.executeCommand "joyride.stopNReplServer") 10000))
+  (await (vscode/commands.executeCommand "joyride.stopNReplServer"))
   (let [stopped? (await (wait-for!+ #(.then (sessions+)
                                             (fn [sessions]
                                               (not-any? (comp session-keys :replSessionKey) sessions)))
