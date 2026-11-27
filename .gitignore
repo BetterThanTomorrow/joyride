@@ -38,3 +38,5 @@ dist/
 **/.joyride/mcp-server/port
 
 .eca/config.json
+
+.tmp/
