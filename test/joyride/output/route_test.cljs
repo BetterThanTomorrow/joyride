@@ -5,7 +5,8 @@
 (def ^:private calva-on {:setting/use-calva? true
                          :calva/state :active
                          :joyride/starting? false
-                         :terminal/live? false})
+                         :terminal/live? false
+                         :output/who "joyride"})
 
 (deftest route-table
   (is (= :joyride-output (route/route (assoc calva-on :setting/use-calva? false)))
@@ -18,7 +19,9 @@
       "An active Calva gets the output also while Joyride starts")
   (testing "Calva installed but not started"
     (is (= :hold (route/route (assoc calva-on :calva/state :inactive :joyride/starting? true)))
-        "Output is held while Joyride starts")
+        "Joyride's own output is held while Joyride starts")
+    (is (= :joyride-output (route/route (assoc calva-on :calva/state :inactive :joyride/starting? true :output/who "joyride-user")))
+        "People's output is never held")
     (is (= :joyride-output (route/route (assoc calva-on :calva/state :inactive :joyride/starting? true :terminal/live? true)))
         "Output goes to a live Joyride Output terminal also while Joyride starts")
     (is (= :joyride-output (route/route (assoc calva-on :calva/state :inactive)))
@@ -43,22 +46,34 @@
 (deftest calva-message
   (is (= {:category "evaluationResults" :text "3" :who "joyride-user" :ns "user" :replSessionKey "joyride" :evaluationId 5}
          (route/calva-message {:output/category :output.category/evaluation-results
-                               :output/text "3\n"
+                               :output/text "3"
+                               :output/line? true
                                :output/who "joyride-user"
                                :output/ns "user"
                                :output/evaluation-id 5}))
-      "Results lose their line end, since Calva adds its own")
+      "Calva ends a result's line itself")
+  (is (= {:category "evaluationResults" :text "#<Promise [1 2]>" :who "x" :replSessionKey "joyride"}
+         (route/calva-message {:output/category :output.category/evaluation-results
+                               :output/text "[1 2]"
+                               :output/promise? true
+                               :output/who "x"}))
+      "A promise's value reads as the promise")
   (is (= {:category "evaluatedCode" :text "(+ 1 2)" :who "x" :ns "user" :replSessionKey "joyride"}
          (route/calva-message {:output/category :output.category/evaluated-code
-                               :output/text "(+ 1 2)\n"
+                               :output/text "(+ 1 2)"
                                :output/who "x"
                                :output/ns "user"}))
-      "Evaluated code loses its line end")
+      "Evaluated code as it is")
   (is (= {:category "otherOutput" :text "hello\n" :who "joyride" :replSessionKey "joyride"}
          (route/calva-message {:output/category :output.category/other-output
-                               :output/text "hello\n"
+                               :output/text "hello"
+                               :output/line? true
                                :output/who "joyride"}))
-      "Stream output keeps its text, and no ns means no ns"))
+      "A stream line gets its line end, and no ns means no ns")
+  (is (= "hello" (:text (route/calva-message {:output/category :output.category/evaluation-output
+                                              :output/text "hello"
+                                              :output/who "x"})))
+      "Stream text that isn't a line is kept as it is"))
 
 (deftest who-badges
   (is (false? (route/who-badge? "joyride-user")) "People's evaluations get no badge")

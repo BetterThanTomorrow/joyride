@@ -20,17 +20,20 @@
 
 (defn route
   "Returns where a message goes: `:calva`, `:hold`, `:joyride-output`, or `:nowhere` for an nREPL
-   evaluation Calva sent, which Calva shows itself."
+   evaluation Calva sent, which Calva shows itself. Only Joyride's own messages are held."
   [{:setting/keys [use-calva?]
     :calva/keys [state]
     :joyride/keys [starting?]
     :terminal/keys [live?]
-    :output/keys [calva-client?]}]
+    :output/keys [who calva-client?]}]
   (cond
     (not use-calva?) :joyride-output
     (and (= :active state) calva-client?) :nowhere
     (= :active state) :calva
-    (and (= :inactive state) starting? (not live?)) :hold
+    (and (= :inactive state)
+         starting?
+         (not live?)
+         (= "joyride" who)) :hold
     :else :joyride-output))
 
 (defn joyride-output-after-calva?
@@ -41,13 +44,20 @@
       (boolean (and (empty? printed-to)
                     (seq skipped)))))
 
+(defn- calva-text
+  "Returns the text Calva shows for a message: a promise's value as the promise, and a stream line
+   with its line end. Calva ends evaluated code and results itself."
+  [{:output/keys [category text promise? line?]}]
+  (cond
+    promise? (str "#<Promise " text ">")
+    (and line? (not (categories-calva-ends category))) (str text "\n")
+    :else text))
+
 (defn calva-message
   "Returns `message` as Calva's `log()` takes it, in the `joyride` session."
-  [{:output/keys [category text who ns evaluation-id]}]
+  [{:output/keys [category who ns evaluation-id] :as message}]
   (cond-> {:category (calva-categories category)
-           :text (if (categories-calva-ends category)
-                   (subs text 0 (- (count text) (if (.endsWith text "\n") 1 0)))
-                   text)
+           :text (calva-text message)
            :who who
            :replSessionKey "joyride"}
     ns (assoc :ns ns)
