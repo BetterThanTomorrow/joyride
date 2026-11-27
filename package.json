@@ -109,7 +109,7 @@
           "joyride.useCalvaOutputDestinations": {
             "type": "boolean",
             "default": true,
-            "markdownDescription": "When Calva is running, write Joyride's output to Calva's [Output Destinations](https://calva.io/output/), configured with `calva.outputDestinations`, instead of the Joyride Output terminal. Output that Calva would send only to the REPL Window goes to the Joyride Output terminal."
+            "markdownDescription": "When Calva is running, write Joyride's output to Calva's [Output Destinations](https://calva.io/output/), configured with `calva.outputDestinations`, instead of the Joyride Output terminal. Except if the destination is the REPL Window, where output goes to the Joyride Output terminal instead."
           }
         }
       }

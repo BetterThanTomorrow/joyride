@@ -5,6 +5,7 @@ Changes to Joyride
 ## [Unreleased]
 
 - Fix: The nREPL server ignores the namespace a client evaluates in, and evaluates in whatever namespace the previous evaluation ended in
+- Output moves to Calva's output destinations by default, new setting `joyride.useCalvaOutputDestinations`
 
 ## [0.0.91] - 2026-11-27
 
