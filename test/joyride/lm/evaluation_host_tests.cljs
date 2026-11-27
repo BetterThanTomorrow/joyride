@@ -6,6 +6,7 @@
             [clojure.string :as string]
             [joyride.db :as db]
             [joyride.lm.evaluation :as evaluation]
+            [joyride.sci :as joyride-sci]
             [sci.core :as sci]))
 
 (defn- gate!
@@ -199,3 +200,26 @@
           (.finally (fn []
                       (undo!)
                       (done)))))))
+
+(defn- evaluate-sync [code ns]
+  (evaluation/execute-code+ {:code code
+                             :ns ns
+                             :wait-for-promise? false
+                             :who "host-tests"}))
+
+(deftest evaluation-runs-in-requested-ns
+  (let [last-ns-before @joyride-sci/!last-ns]
+    (try
+      (let [moved (evaluate-sync "(ns joyride-host-tests.elsewhere)" "user")
+            in-user (evaluate-sync "(str *ns*)" "user")
+            in-other (evaluate-sync "(str *ns*)" "joyride-host-tests.other")]
+        (is (= "joyride-host-tests.elsewhere" (:ns moved))
+            "The result reports the namespace the evaluation ended in")
+        (is (= ["\"user\"" "user"] ((juxt :result :ns) in-user))
+            "After another namespace was entered, an evaluation in user runs in user")
+        (is (= ["\"joyride-host-tests.other\"" "joyride-host-tests.other"] ((juxt :result :ns) in-other))
+            "An evaluation runs in the namespace it names")
+        (is (= "joyride-host-tests.other" (str @joyride-sci/!last-ns))
+            "The last namespace follows the evaluation, for Run Code and scripts"))
+      (finally
+        (vreset! joyride-sci/!last-ns last-ns-before)))))

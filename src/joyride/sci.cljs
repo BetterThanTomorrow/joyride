@@ -303,17 +303,22 @@
       (output/append-line-eval-err! (printing/error-message e))
       (throw e))))
 
-(defn eval-string [s]
-  (sci/binding [sci/ns @!last-ns
-                sci/print-fn (wrap-print-fn "stdout" @sci/print-fn output/append-eval-out!)
-                sci/print-err-fn (wrap-print-fn "stderr" @sci/print-err-fn output/append-eval-err!)]
-    (let [reader (sci/reader (str s))]
-      (loop [res nil]
-        (let [form (call-echoing-error! #(sci/parse-next (store/get-ctx) reader))]
-          (if (= :sci.core/eof form)
-            (do
-              (vreset! !last-ns @sci/ns)
-              (echo-result! res)
-              res)
-            (recur (call-echoing-error! #(sci/eval-form (store/get-ctx) form)))))))))
+(defn eval-string
+  "Evaluates the forms in `s`, starting in the SCI namespace `start-ns`, or in the last namespace.
+   The namespace the evaluation ends in becomes the last namespace."
+  ([s]
+   (eval-string s @!last-ns))
+  ([s start-ns]
+   (sci/binding [sci/ns start-ns
+                 sci/print-fn (wrap-print-fn "stdout" @sci/print-fn output/append-eval-out!)
+                 sci/print-err-fn (wrap-print-fn "stderr" @sci/print-err-fn output/append-eval-err!)]
+     (let [reader (sci/reader (str s))]
+       (loop [res nil]
+         (let [form (call-echoing-error! #(sci/parse-next (store/get-ctx) reader))]
+           (if (= :sci.core/eof form)
+             (do
+               (vreset! !last-ns @sci/ns)
+               (echo-result! res)
+               res)
+             (recur (call-echoing-error! #(sci/eval-form (store/get-ctx) form))))))))))
 

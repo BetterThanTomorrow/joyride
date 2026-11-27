@@ -91,9 +91,13 @@
   [x]
   (fn? (some-> x .-then)))
 
-(defn- eval-in-ns [code ns]
-  (sci/binding [sci/ns (resolve-ns ns)]
-    (joyride-sci/eval-string code)))
+(defn- eval-in-ns
+  "Evaluates `code`, starting in the namespace named `ns`. Returns the `:value`, and the name of
+   the namespace the evaluation ended in as `:ns`."
+  [code ns]
+  (let [value (joyride-sci/eval-string code (resolve-ns ns))]
+    {:value value
+     :ns (str @joyride-sci/!last-ns)}))
 
 (defn- result-str
   "Returns `result` printed within the `joyride.lm` result limits. An awaited promise's value
@@ -126,16 +130,15 @@
 
 (defn- make-result
   "Returns the tool result for an evaluation `outcome`, with the output `capture` collected, and logs it to Calva."
-  [{:keys [result error who] :as outcome} {:capture/keys [out err]}]
+  [{:keys [result error who ns] :as outcome} {:capture/keys [out err]}]
   (let [printed (result-str result outcome)
         other-whos (who-tracking/get-other-whos-since-last! who)
-        result-ns (str @sci/ns)
         stdout @out
         stderr @err]
-    (log-result! {:error error :result-str printed :stdout stdout :stderr stderr :who who :ns result-ns})
+    (log-result! {:error error :result-str printed :stdout stdout :stderr stderr :who who :ns ns})
     (cond-> {:result printed
              :error error
-             :ns result-ns
+             :ns ns
              :stdout stdout
              :stderr stderr}
       (seq other-whos) (assoc "otherWhosSinceLast" other-whos))))
@@ -144,13 +147,17 @@
   "Evaluates `code` and resolves to the evaluation's outcome, with a promise result awaited.
    Native promise calls keep a rejection with `nil` a rejection, which promesa turns into a resolution."
   [{:keys [code ns who]}]
-  (let [!raw (volatile! nil)]
+  (let [!evaluation (volatile! {:ns ns})]
     (.then (js/Promise. (fn [resolve]
-                          (resolve (vreset! !raw (eval-in-ns code ns)))))
+                          (resolve (:value (vreset! !evaluation (eval-in-ns code ns))))))
            (fn [v]
-             {:result v :promise? (thenable? @!raw) :wait-for-promise? true :who who})
+             {:result v
+              :promise? (thenable? (:value @!evaluation))
+              :wait-for-promise? true
+              :who who
+              :ns (:ns @!evaluation)})
            (fn [e]
-             {:error (printing/error-message e) :who who}))))
+             {:error (printing/error-message e) :who who :ns (:ns @!evaluation)}))))
 
 (defn- execute-awaited+ [input capture]
   (-> (awaited-outcome+ input)
@@ -168,23 +175,23 @@
 
 (defn- execute-sync [{:keys [code ns who]} capture]
   (try
-    (let [result (eval-in-ns code ns)
-          promise? (thenable? result)]
+    (let [{:keys [value] result-ns :ns} (eval-in-ns code ns)
+          promise? (thenable? value)]
       (when promise?
-        (log-late-rejection! result who (str @sci/ns)))
-      (make-result {:result result :promise? promise? :who who} capture))
+        (log-late-rejection! value who result-ns))
+      (make-result {:result value :promise? promise? :who who :ns result-ns} capture))
     (catch :default e
-      (make-result {:error (printing/error-message e) :who who} capture))
+      (make-result {:error (printing/error-message e) :who who :ns ns} capture))
     (finally
       (end-capture! capture))))
 
-(defn- log-evaluation! [{:keys [code who]}]
+(defn- log-evaluation! [{:keys [code who ns]}]
   (who-tracking/record-evaluation! who)
-  (output/append-clojure-eval! code {:who who :ns (str @sci/ns)})
+  (output/append-clojure-eval! code {:who who :ns ns})
   (calva-int/log-to-calva! {:category "evaluatedCode"
                             :text code
                             :who who
-                            :ns (str @sci/ns)}))
+                            :ns ns}))
 
 (defn execute-code+
   "Execute ClojureScript code in Joyride's SCI environment with VS Code APIs.
