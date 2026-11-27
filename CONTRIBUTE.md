@@ -55,7 +55,7 @@ You can also run tests from the [development](#development) extension host. Howe
 We assume you are using [Calva](https://marketplace.visualstudio.com/items?itemName=betterthantomorrow.calva).
 
 0. `npm i`
-1. In VS Code, **Tasks: Run Build Task**: <kbd>cmd/ctrl+shift+b</kbd>.
+1. In VS Code, **Tasks: Run Task**, and pick **Watch**.
    - This starts the nREPL server
    - Wait for shadow-cljs to signal that building is done.
 1. Start the extension in debug mode: <kbd>F5</kbd>
