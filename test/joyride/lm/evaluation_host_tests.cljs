@@ -4,7 +4,7 @@
    Extension Development Host REPL with `(cljs.test/run-tests 'joyride.lm.evaluation-host-tests)`."
   (:require [cljs.test :refer [async deftest is]]
             [clojure.string :as string]
-            [joyride.db :as db]
+            [joyride.integrations.calva :as calva]
             [joyride.lm.evaluation :as evaluation]
             [joyride.sci :as joyride-sci]
             [sci.core :as sci]))
@@ -64,13 +64,11 @@
   "Points Calva logging at a recorder and returns the recorded messages and a function that undoes it."
   []
   (let [!logged (atom [])
-        original (get @db/!app-db :calva/log-fn ::none)]
-    (swap! db/!app-db assoc :calva/log-fn (fn [msg]
-                                           (swap! !logged conj (js->clj msg :keywordize-keys true))))
+        original calva/log-to-calva!]
+    (set! calva/log-to-calva! (fn [msg]
+                                (swap! !logged conj msg)))
     {:logged !logged
-     :undo! #(if (= ::none original)
-               (swap! db/!app-db dissoc :calva/log-fn)
-               (swap! db/!app-db assoc :calva/log-fn original))}))
+     :undo! #(set! calva/log-to-calva! original)}))
 
 (deftest late-rejection-logged-to-calva
   (async done
