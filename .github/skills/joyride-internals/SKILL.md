@@ -42,7 +42,7 @@ Subsystem contracts, state architecture, and temporal sequences for the Joyride 
     flares:               {key → FlareState}
     flare-sidebar-views:  {slot → WebviewView}
   }
-  | access_via_functions: (db/extension-context) (db/output-terminal) | ¬direct_deref_in_helpers
+  | access_via_functions: (db/extension-context) (db/invoked-script) | ¬direct_deref_in_helpers
   | inspection_safety: (dissoc @db/!app-db :extension-context) | circular_ref_guard
   | mutation: swap! ∧ reset! | ¬deep_nested_mutation
 

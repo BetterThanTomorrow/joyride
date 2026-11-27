@@ -24,7 +24,7 @@ applyTo: 'src/joyride/**,test/joyride/**'
 
 - App state in `db/!app-db` central atom
 - Domain state in isolated atoms (`when-contexts/!db`, `nrepl/!db`)
-- Access via accessor functions: `(db/extension-context)`, `(db/output-terminal)` — never direct deref in helpers
+- Access via accessor functions: `(db/extension-context)`, `(db/invoked-script)` — never direct deref in helpers
 - Pass data explicitly to helper functions — helpers must not access atoms directly
 - Deprecated accessors: `^{:deprecated "version"}` metadata with migration path documented
 
