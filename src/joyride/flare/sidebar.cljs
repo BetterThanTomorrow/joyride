@@ -78,16 +78,23 @@
     #js {:resolveWebviewView resolve-webview-view}))
 
 (defn register-flare-provider!
-  "Register a flare webview provider with VS Code"
+  "Registers the flare webview provider for `slot` with VS Code, unless it is registered. Returns
+   the registration's disposable. Disposing it also forgets the registration, so that after the
+   disposal a hot reload makes, the next call registers the provider again."
   [slot]
   (if (get-in @db/!app-db [:flare-sidebar-views slot :provider-registered?])
     (get-in @db/!app-db [:flare-sidebar-views slot :provider-disposable])
     (let [provider (create-flare-webview-provider! slot)
           provider-id (str "joyride.flare.sidebar-" slot)
-          disposable (vscode/window.registerWebviewViewProvider
-                      provider-id
-                      provider
-                      #js {:webviewOptions #js {:retainContextWhenHidden true}})]
+          registration (vscode/window.registerWebviewViewProvider
+                        provider-id
+                        provider
+                        #js {:webviewOptions #js {:retainContextWhenHidden true}})
+          disposable (vscode/Disposable.
+                      (fn []
+                        (.dispose registration)
+                        (swap! db/!app-db update-in [:flare-sidebar-views slot]
+                               dissoc :provider-registered? :provider-disposable)))]
       (swap! db/!app-db update :disposables conj disposable)
       (.push (.-subscriptions ^js (:extension-context @db/!app-db)) disposable)
       (swap! db/!app-db assoc-in [:flare-sidebar-views slot :provider-registered?] true)
