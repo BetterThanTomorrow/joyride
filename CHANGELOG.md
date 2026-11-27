@@ -4,6 +4,14 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- The MCP server installs Joyride's skills in `~/.config/vscode-mcp/skills/joyride/` each time it starts, and its instructions tell agents where to find them.
+- Fix: Starting or stopping the MCP server while it is still starting up, as it does at activation in Cursor, can leave it half started
+- Fix: A skill description that is quoted in the skill's frontmatter is listed with YAML quotes retained
+- Fix: `joyride_evaluate_code` ignores its `namespace` argument, and evaluates in whatever namespace the previous evaluation ended in
+- Fix: `joyride_evaluate_code` doesn't treat a promesa promise, like the one `flare!+` returns, as a promise. When awaited, the value is printed without `#<Promise …>` around it, and when not awaited, a later rejection isn't logged
+- Fix: **Joyride: Stop nREPL Server** never finishes when Calva or another client is connected, or when the port file is already gone, and Joyride then keeps treating the server as running
+- Dependency bumps for scripting: SCI 0.15.60, rewrite-clj 1.3.59 and Replicant 2026.07.1
+
 ## [0.0.90] - 2026-11-25
 
 - Fix: [Generated ECA config fails on Windows: ${env:HOME} is unset](https://github.com/BetterThanTomorrow/calva-backseat-driver/issues/74)
