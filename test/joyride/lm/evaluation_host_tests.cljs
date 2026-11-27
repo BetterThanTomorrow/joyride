@@ -2,12 +2,21 @@
   "Tests for `joyride.lm.evaluation` that need the Extension Development Host.
    The name doesn't end in `-test`, so the node test build leaves them out. Run them from the
    Extension Development Host REPL with `(cljs.test/run-tests 'joyride.lm.evaluation-host-tests)`."
-  (:require [cljs.test :refer [async deftest is]]
+  (:require [cljs.test :refer [async deftest is use-fixtures]]
             [clojure.string :as string]
             [joyride.integrations.calva :as calva]
             [joyride.lm.evaluation :as evaluation]
             [joyride.sci :as joyride-sci]
             [sci.core :as sci]))
+
+(def ^:private !calva-state (atom nil))
+
+(use-fixtures :once
+  {:before (fn []
+             (reset! !calva-state calva/state)
+             (set! calva/state (constantly :absent)))
+   :after (fn []
+            (set! calva/state @!calva-state))})
 
 (defn- gate!
   "Puts a promise at `js/globalThis[k]` and returns the function that resolves it."
@@ -61,14 +70,20 @@
                     (done))))))
 
 (defn- record-calva-log!
-  "Points Calva logging at a recorder and returns the recorded messages and a function that undoes it."
+  "Stands in a running Calva that shows each message, records what Joyride logs to it, and returns the
+   recorded messages and a function that undoes it."
   []
   (let [!logged (atom [])
-        original calva/log-to-calva!]
-    (set! calva/log-to-calva! (fn [msg]
-                                (swap! !logged conj msg)))
+        original-state calva/state
+        original-log calva/log!]
+    (set! calva/state (constantly :active))
+    (set! calva/log! (fn [message _options]
+                       (swap! !logged conj message)
+                       {:calva/printed-to ["terminal"] :calva/skipped []}))
     {:logged !logged
-     :undo! #(set! calva/log-to-calva! original)}))
+     :undo! (fn []
+              (set! calva/state original-state)
+              (set! calva/log! original-log))}))
 
 (deftest late-rejection-logged-to-calva
   (async done
@@ -84,13 +99,13 @@
       (-> (js/Promise. (fn [resolve] (js/setTimeout resolve 50)))
           (.then (fn []
                    (is (= [{:category "evaluationErrorOutput"
-                            :text "late"
+                            :text "late\n"
                             :who "host-tests"
                             :ns "user"}]
                           (->> @logged
                                (filter #(= "evaluationErrorOutput" (:category %)))
                                (map #(select-keys % [:category :text :who :ns]))))
-                       "The late rejection is logged once, and the resolved promise logs no error")))
+                       "The late rejection reaches Calva once, through the echo, and the resolved promise logs no error")))
           (.finally (fn []
                       (undo!)
                       (done)))))))
@@ -194,7 +209,7 @@
                           (->> @logged
                                (filter #(= "evaluationErrorOutput" (:category %)))
                                (map :text)))
-                       "Its late rejection is logged")))
+                       "Its late rejection reaches Calva once, though the echo doesn't follow a promesa promise")))
           (.finally (fn []
                       (undo!)
                       (done)))))))

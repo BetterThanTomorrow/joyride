@@ -105,6 +105,11 @@
             "type": "number",
             "default": 7,
             "markdownDescription": "Maximum nesting depth for evaluation results returned to the agent; deeper structures are replaced with `#`. Use `0` to disable depth limiting."
+          },
+          "joyride.useCalvaOutputDestinations": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "When Calva is running, write Joyride's output to Calva's [Output Destinations](https://calva.io/output/), configured with `calva.outputDestinations`, instead of the Joyride Output terminal. Output that Calva would send only to the REPL Window goes to the Joyride Output terminal."
           }
         }
       }

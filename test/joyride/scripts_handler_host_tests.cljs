@@ -6,9 +6,19 @@
             ["os" :as os]
             ["path" :as path]
             ["vscode" :as vscode]
-            [cljs.test :refer [async deftest is]]
+            [cljs.test :refer [async deftest is use-fixtures]]
+            [joyride.integrations.calva :as calva]
             [joyride.output :as output]
             [joyride.scripts-handler :as scripts-handler]))
+
+(def ^:private !calva-state (atom nil))
+
+(use-fixtures :once
+  {:before (fn []
+             (reset! !calva-state calva/state)
+             (set! calva/state (constantly :absent)))
+   :after (fn []
+            (set! calva/state @!calva-state))})
 
 (defn- write-scripts!
   "Writes each `script-name` → `code` in `scripts` to a new temporary directory's `scripts` folder. Returns the directory."

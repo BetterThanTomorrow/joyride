@@ -7,7 +7,6 @@
    [joyride.printing :as printing]
    [joyride.repl-utils :as repl-utils]
    [joyride.sci :as joyride-sci]
-   [joyride.integrations.calva :as calva-int]
    [joyride.who-tracking :as who-tracking]
    [promesa.core :as p]
    [sci.core :as sci]
@@ -116,72 +115,77 @@
                                   :toString (str result)}
                                  opts))))
 
-(defn- log-result!
-  [{:keys [error result-str stdout stderr who ns]}]
-  (let [log! (fn [category text]
-               (calva-int/log-to-calva! {:category category :text text :who who :ns ns}))]
-    (if error
-      (log! "evaluationErrorOutput" error)
-      (log! "evaluationResults" result-str))
-    (when (seq stdout)
-      (log! "evaluationOutput" stdout))
-    (when (seq stderr)
-      (log! "evaluationErrorOutput" stderr))))
-
 (defn- make-result
-  "Returns the tool result for an evaluation `outcome`, with the output `capture` collected, and logs it to Calva."
+  "Returns the tool result for an evaluation `outcome`, with the output `capture` collected."
   [{:keys [result error who ns] :as outcome} {:capture/keys [out err]}]
   (let [printed (result-str result outcome)
-        other-whos (who-tracking/get-other-whos-since-last! who)
-        stdout @out
-        stderr @err]
-    (log-result! {:error error :result-str printed :stdout stdout :stderr stderr :who who :ns ns})
+        other-whos (who-tracking/get-other-whos-since-last! who)]
     (cond-> {:result printed
              :error error
              :ns ns
-             :stdout stdout
-             :stderr stderr}
+             :stdout @out
+             :stderr @err}
       (seq other-whos) (assoc "otherWhosSinceLast" other-whos))))
 
 (defn- awaited-outcome+
-  "Evaluates `code` with the output `context` and resolves to the evaluation's outcome, with a promise result awaited.
+  "Evaluates `code` with the output `context` and resolves to the evaluation's outcome, with a promise result awaited,
+   and with how much the `capture` held when `eval-string` returned, as `:echoed-out` and `:echoed-err`.
    Native promise calls keep a rejection with `nil` a rejection, which promesa turns into a resolution."
-  [{:keys [code ns who]} context]
+  [{:keys [code ns who]} context {:capture/keys [out err]}]
   (let [!evaluation (volatile! {:ns ns})]
     (.then (js/Promise. (fn [resolve]
-                          (resolve (:value (vreset! !evaluation (eval-in-ns code ns context))))))
+                          (resolve (:value (vreset! !evaluation (assoc (eval-in-ns code ns context)
+                                                                       :echoed-out (count @out)
+                                                                       :echoed-err (count @err)))))))
            (fn [v]
-             {:result v
-              :promise? (thenable? (:value @!evaluation))
-              :wait-for-promise? true
-              :who who
-              :ns (:ns @!evaluation)})
+             (merge (select-keys @!evaluation [:echoed-out :echoed-err])
+                    {:result v
+                     :promise? (thenable? (:value @!evaluation))
+                     :wait-for-promise? true
+                     :who who
+                     :ns (:ns @!evaluation)}))
            (fn [e]
-             {:error (printing/error-message e) :who who :ns (:ns @!evaluation)}))))
+             (merge (select-keys @!evaluation [:echoed-out :echoed-err])
+                    {:error (printing/error-message e) :who who :ns (:ns @!evaluation)})))))
+
+(defn- log-unechoed-output!
+  "Hands what an awaited evaluation printed after `eval-string` returned, which its echo didn't see,
+   to Calva's output subscribers, with the evaluation's output `context`."
+  [{:keys [echoed-out echoed-err]} {:capture/keys [out err]} context]
+  (output/log-for-subscribers! :output.category/evaluation-output
+                               (subs @out (or echoed-out (count @out)))
+                               context)
+  (output/log-for-subscribers! :output.category/evaluation-error-output
+                               (subs @err (or echoed-err (count @err)))
+                               context))
 
 (defn- execute-awaited+ [input capture {:evaluation/keys [context end!]}]
-  (-> (awaited-outcome+ input context)
-      (.then #(make-result % capture))
+  (-> (awaited-outcome+ input context capture)
+      (.then (fn [outcome]
+               (log-unechoed-output! outcome capture context)
+               (make-result outcome capture)))
       (.finally (fn []
                   (end-capture! capture)
                   (end!)))))
 
-(defn- log-late-rejection!
-  "Logs a rejection of the not awaited `promise` to the Calva output log, under `who` and `ns`."
-  [promise who ns]
-  (.catch promise (fn [e]
-                    (calva-int/log-to-calva! {:category "evaluationErrorOutput"
-                                              :text (printing/error-message e)
-                                              :who who
-                                              :ns ns}))))
+(defn- log-unechoed-rejection!
+  "Hands the rejection of `value`, a thenable that isn't a native promise, which the echo doesn't follow,
+   to Calva's output subscribers, with the evaluation's output `context`."
+  [value context]
+  (when (and (thenable? value)
+             (not (instance? js/Promise value)))
+    (.then value
+           nil
+           (fn [e]
+             (output/log-for-subscribers! :output.category/evaluation-error-output
+                                          (printing/error-message e)
+                                          context)))))
 
 (defn- execute-sync [{:keys [code ns who]} capture {:evaluation/keys [context end!]}]
   (try
-    (let [{:keys [value] result-ns :ns} (eval-in-ns code ns context)
-          promise? (thenable? value)]
-      (when promise?
-        (log-late-rejection! value who result-ns))
-      (make-result {:result value :promise? promise? :who who :ns result-ns} capture))
+    (let [{:keys [value] result-ns :ns} (eval-in-ns code ns context)]
+      (log-unechoed-rejection! value context)
+      (make-result {:result value :promise? (thenable? value) :who who :ns result-ns} capture))
     (catch :default e
       (make-result {:error (printing/error-message e) :who who :ns ns} capture))
     (finally
@@ -192,10 +196,6 @@
   "Records and writes the evaluation of `code`, and returns the evaluation from `output/start-evaluation!`."
   [{:keys [code who ns]}]
   (who-tracking/record-evaluation! who)
-  (calva-int/log-to-calva! {:category "evaluatedCode"
-                            :text code
-                            :who who
-                            :ns ns})
   (output/start-evaluation! code {:output/who who :output/ns ns}))
 
 (defn execute-code+

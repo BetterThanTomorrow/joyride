@@ -4,6 +4,7 @@
    ["vscode" :as vscode]
    [clojure.string :as string]
    [joyride.db :as db]
+   [joyride.integrations.calva :as calva]
    [joyride.output.route :as route]
    [zprint.core :as zp]))
 
@@ -344,13 +345,47 @@
                                                         (syntax-highlight-clojure text)))
     (write-stream-to-joyride-output! message)))
 
+(defn- use-calva-setting? []
+  (.get (vscode/workspace.getConfiguration "joyride") "useCalvaOutputDestinations" true))
+
+(defn- route-of
+  "Returns where `message` goes now, as `route/route` decides."
+  [{:output/keys [who calva-client?]}]
+  (route/route {:setting/use-calva? (use-calva-setting?)
+                :calva/state (calva/state)
+                :joyride/starting? false
+                :terminal/live? (output-terminal-live?)
+                :output/who who
+                :output/calva-client? calva-client?}))
+
+(defn- log-message-for-subscribers!
+  "Hands `message` to Calva's output subscribers, such as Backseat Driver, without showing it, when Calva is running."
+  [message]
+  (calva/log! (route/calva-message message) {}))
+
+(defn- write-to-calva!
+  "Writes `message` to Calva's Output Destinations, with the `evaluation` promise of its code, and to
+   Joyride Output too when Calva shows it nowhere people read. Returns the evaluation id Calva gave it."
+  [message evaluation]
+  (let [result (calva/log! (route/calva-message message)
+                           (cond-> {:display true}
+                             evaluation (assoc :evaluation evaluation)))]
+    (when (route/joyride-output-after-calva? result)
+      (write-to-joyride-output! message))
+    (:calva/evaluation-id result)))
+
 (defn- write!
   "Writes `message` where Joyride's output goes, unless it has nothing to write. Returns the
    evaluation id Calva gave an evaluation's code, when it gave one."
-  [{:output/keys [text line?] :as message} _evaluation]
+  [{:output/keys [text line? calva-client?] :as message} evaluation]
   (when (or (seq text) line?)
-    (write-to-joyride-output! message)
-    nil))
+    (case (route-of message)
+      :calva (write-to-calva! message evaluation)
+      :joyride-output (do (write-to-joyride-output! message)
+                          (when-not calva-client?
+                            (log-message-for-subscribers! message))
+                          nil)
+      :nowhere nil)))
 
 (def ^:private default-context {:output/who "joyride"})
 
@@ -363,6 +398,16 @@
                   :output/text (str text)
                   :output/line? line?})
           nil))
+
+(defn log-for-subscribers!
+  "Hands `text` in `category`, with the output `context`, to Calva's output subscribers, such as
+   Backseat Driver, without showing it anywhere."
+  [category text context]
+  (when (seq text)
+    (log-message-for-subscribers! (merge default-context
+                                         context
+                                         {:output/category category
+                                          :output/text text}))))
 
 (defn append-eval-out!
   "Append stdout generated during evaluation, with the evaluation's output `context`."

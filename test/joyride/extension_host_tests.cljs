@@ -2,11 +2,21 @@
   "Tests for `joyride.extension` that need the Extension Development Host.
    The name doesn't end in `-test`, so the node test build leaves them out. Run them from the
    Extension Development Host REPL with `(cljs.test/run-tests 'joyride.extension-host-tests)`."
-  (:require [cljs.test :refer [async deftest is]]
+  (:require [cljs.test :refer [async deftest is use-fixtures]]
             [clojure.string :as str]
             [joyride.extension :as extension]
+            [joyride.integrations.calva :as calva]
             [joyride.output :as output]
             [joyride.sci :as jsci]))
+
+(def ^:private !calva-state (atom nil))
+
+(use-fixtures :once
+  {:before (fn []
+             (reset! !calva-state calva/state)
+             (set! calva/state (constantly :absent)))
+   :after (fn []
+            (set! calva/state @!calva-state))})
 
 (defn- run-code-err-lines+
   "Runs `code` with Run Code and resolves to the error lines it appends to Joyride Output."
