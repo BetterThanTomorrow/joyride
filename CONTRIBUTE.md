@@ -86,6 +86,8 @@ You will have two REPLs.
 
 By default, the debug extension host session opens up [the integration testing project](seatbelt-e2e/workspace-1/), which is part of this repository/project. (See [Tests](#tests) for more on the tests.) This makes it easy to test Joyride with relevant sample content, manually, or via integration test code. It also means that content you create or change there can be committed back to the repository. Please note that we want any Joyride content in this integration test project's `script` and `src` directories to be consumed by integration tests, so if you think some content should be added, please also add integration tests for it.
 
+The launch configuration **Launch Extension w/ test project** opens [the test project](test-projects/example/) instead. When its window opens, it starts Joyride's nREPL server and connects Calva to it, and opens a Scittle tic-tac-toe in a Flare, with Calva connected to the Scittle REPL. Its `joyride-testing` skill is for an AI agent that tests the Joyride under development there.
+
 ## Feedback welcome
 
 Please let us know how the development process works for you.

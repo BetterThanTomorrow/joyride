@@ -38,6 +38,23 @@
             }
         },
         {
+            "name": "Launch Extension w/ test project",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceRoot}",
+                "--folder-uri=${workspaceRoot}/test-projects/example"
+             ],
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ],
+            "sourceMapPathOverrides": {
+                "joyride/*": "${workspaceFolder}/src/joyride/*"
+            }
+        },
+        {
             "name": "Launch Extension w/o folder",
             "type": "extensionHost",
             "request": "launch",

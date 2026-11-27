@@ -1,0 +1,47 @@
+{
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "testProjectStart",
+      "type": "command",
+      "command": "joyride.runCode",
+      "args": "(require '[test-project] :reload) (test-project/start!) \"ok\""
+    },
+    {
+      "id": "testProjectStop",
+      "type": "command",
+      "command": "joyride.runCode",
+      "args": "(require '[test-project] :reload) (test-project/stop!) \"ok\""
+    }
+  ],
+  "tasks": [
+    {
+      "label": "test project: start",
+      "detail": "Start Joyride's nREPL server and connect Calva to it, and open the tic-tac-toe Flare with Calva connected to its Scittle REPL",
+      "type": "shell",
+      "command": "echo ${input:testProjectStart}",
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "close": true,
+        "panel": "shared",
+        "showReuseMessage": false
+      }
+    },
+    {
+      "label": "test project: stop",
+      "detail": "Close the tic-tac-toe Flare, disconnect both REPLs, and stop Joyride's nREPL server",
+      "type": "shell",
+      "command": "echo ${input:testProjectStop}",
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "close": true,
+        "panel": "shared",
+        "showReuseMessage": false
+      }
+    }
+  ]
+}

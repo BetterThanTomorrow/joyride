@@ -1,0 +1,13 @@
+//// The test project for the Joyride under development, in the dev Extension Host.
+//// The REPLs and the tic-tac-toe Flare are started by .joyride/src/test_project.cljs,
+//// when the window opens and with the task "test project: start".
+{
+  "joyride.mcp.autoStartServer": true,
+  "calva.autoOpenInspector": false,
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#FFD300",
+    "titleBar.activeForeground": "#222222",
+    "titleBar.inactiveBackground": "#FFD300cc",
+    "titleBar.inactiveForeground": "#222222cc"
+  }
+}
