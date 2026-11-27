@@ -127,37 +127,52 @@
              :stderr @err}
       (seq other-whos) (assoc "otherWhosSinceLast" other-whos))))
 
+(defn- unechoed-thenable?
+  "True when `x` is a thenable that isn't a native promise, which the echo doesn't follow."
+  [x]
+  (and (thenable? x)
+       (not (instance? js/Promise x))))
+
 (defn- awaited-outcome+
   "Evaluates `code` with the output `context` and resolves to the evaluation's outcome, with a promise result awaited,
-   and with how much the `capture` held when `eval-string` returned, as `:echoed-out` and `:echoed-err`.
+   with how much the `capture` held when `eval-string` returned, as `:echoed-out` and `:echoed-err`, and
+   whether the echo missed how the result settled, as `:unechoed-settle?`.
    Native promise calls keep a rejection with `nil` a rejection, which promesa turns into a resolution."
   [{:keys [code ns who]} context {:capture/keys [out err]}]
-  (let [!evaluation (volatile! {:ns ns})]
+  (let [!evaluation (volatile! {:ns ns})
+        echo-facts (fn []
+                     (-> (select-keys @!evaluation [:echoed-out :echoed-err])
+                         (assoc :unechoed-settle? (unechoed-thenable? (:value @!evaluation)))))]
     (.then (js/Promise. (fn [resolve]
                           (resolve (:value (vreset! !evaluation (assoc (eval-in-ns code ns context)
                                                                        :echoed-out (count @out)
                                                                        :echoed-err (count @err)))))))
            (fn [v]
-             (merge (select-keys @!evaluation [:echoed-out :echoed-err])
+             (merge (echo-facts)
                     {:result v
                      :promise? (thenable? (:value @!evaluation))
                      :wait-for-promise? true
                      :who who
                      :ns (:ns @!evaluation)}))
            (fn [e]
-             (merge (select-keys @!evaluation [:echoed-out :echoed-err])
+             (merge (echo-facts)
                     {:error (printing/error-message e) :who who :ns (:ns @!evaluation)})))))
 
 (defn- log-unechoed-output!
-  "Hands what an awaited evaluation printed after `eval-string` returned, which its echo didn't see,
-   to Calva's output subscribers, with the evaluation's output `context`."
-  [{:keys [echoed-out echoed-err]} {:capture/keys [out err]} context]
+  "Hands what the echo of an awaited evaluation didn't see to Calva's output subscribers, with the
+   evaluation's output `context`: what it printed after `eval-string` returned, and how a thenable that
+   isn't a native promise settled."
+  [{:keys [echoed-out echoed-err unechoed-settle? result error] :as outcome} {:capture/keys [out err]} context]
   (output/log-for-subscribers! :output.category/evaluation-output
                                (subs @out (or echoed-out (count @out)))
                                context)
   (output/log-for-subscribers! :output.category/evaluation-error-output
                                (subs @err (or echoed-err (count @err)))
-                               context))
+                               context)
+  (when unechoed-settle?
+    (if error
+      (output/log-for-subscribers! :output.category/evaluation-error-output error context)
+      (output/log-for-subscribers! :output.category/evaluation-results (result-str result outcome) context))))
 
 (defn- execute-awaited+ [input capture {:evaluation/keys [context end!]}]
   (-> (awaited-outcome+ input context capture)
@@ -169,11 +184,10 @@
                   (end!)))))
 
 (defn- log-unechoed-rejection!
-  "Hands the rejection of `value`, a thenable that isn't a native promise, which the echo doesn't follow,
-   to Calva's output subscribers, with the evaluation's output `context`."
+  "Hands the rejection of `value`, when it is a thenable the echo doesn't follow, to Calva's output
+   subscribers, with the evaluation's output `context`."
   [value context]
-  (when (and (thenable? value)
-             (not (instance? js/Promise value)))
+  (when (unechoed-thenable? value)
     (.then value
            nil
            (fn [e]

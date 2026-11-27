@@ -137,7 +137,11 @@
     (sci/alter-var-root sci/print-fn (constantly
                                       (fn [s]
                                         (send-fn request {"out" s}))))
-    (let [{:evaluation/keys [context end!]} (start-nrepl-evaluation! request)]
+    (sci/alter-var-root sci/print-err-fn (constantly
+                                          (fn [s]
+                                            (send-fn request {"err" s}))))
+    (let [{:evaluation/keys [context end!]} (start-nrepl-evaluation! request)
+          !pending-promise? (volatile! false)]
       (try (let [v (jsci/eval-string code @jsci/!last-ns context)
                  send-result! (fn [val promise?]
                                 (sci/alter-var-root sci/*3 (constantly @sci/*2))
@@ -150,19 +154,20 @@
                                                               (str "#<Promise " formatted ">")
                                                               formatted)
                                                     "ns" (str @sci/ns)}))
-                                (send-fn request {"status" ["done"]})
-                                (end!))]
+                                (send-fn request {"status" ["done"]}))]
              (if (instance? js/Promise v)
-               (-> v
-                   (.then (fn [resolved]
-                            (send-result! resolved true)))
-                   (.catch (fn [rejected]
-                             (sci/alter-var-root sci/*e (constantly rejected))
-                             (send-fn request {"err" (str (error-str rejected) "\n")})
-                             (send-fn request {"ex" (error-str rejected)
-                                               "ns" (str @sci/ns)
-                                               "status" ["done"]})
-                             (end!))))
+               (do
+                 (vreset! !pending-promise? true)
+                 (-> v
+                     (.then (fn [resolved]
+                              (send-result! resolved true)))
+                     (.catch (fn [rejected]
+                               (sci/alter-var-root sci/*e (constantly rejected))
+                               (send-fn request {"err" (str (error-str rejected) "\n")})
+                               (send-fn request {"ex" (error-str rejected)
+                                                 "ns" (str @sci/ns)
+                                                 "status" ["done"]})))
+                     (.finally end!)))
                (send-result! v false)))
            (catch :default e
              (sci/alter-var-root sci/*e (constantly e))
@@ -171,7 +176,9 @@
                  (send-fn request {"err" (str (error-str message) "\n")}))
                (send-fn request {"ex" (error-str e)
                                  "ns" (str @sci/ns)
-                                 "status" ["done"]})
+                                 "status" ["done"]})))
+           (finally
+             (when-not @!pending-promise?
                (end!)))))))
 
 (defn handle-eval [{:keys [ns sci-ctx] :as request} send-fn]
@@ -378,6 +385,7 @@
                                  (do (output/append-other-err! "There is no nREPL Server running")
                                      (reject (js/Error. "There is no nREPL Server running"))))))]
     (sci/alter-var-root sci/print-fn (constantly *print-fn*))
+    (sci/alter-var-root sci/print-err-fn (constantly *print-err-fn*))
     stopped+))
 
 (defn enable-message-logging! []

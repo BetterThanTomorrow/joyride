@@ -18,16 +18,28 @@
 
 (def ^:private reserved-whos #{"ui" "api"})
 
+(def ^:private first-display-version
+  "The first Calva version whose `log()` writes to the Output Destinations."
+  [2 0 613])
+
+(defn display-api?
+  "True when Calva `version` has the display option of `log()`."
+  [version]
+  (let [numbers (mapv js/parseInt (take 3 (re-seq #"\d+" (str version))))]
+    (and (= 3 (count numbers))
+         (not (neg? (compare numbers first-display-version))))))
+
 (defn route
   "Returns where a message goes: `:calva`, `:hold`, `:joyride-output`, or `:nowhere` for an nREPL
-   evaluation Calva sent, which Calva shows itself. Only Joyride's own messages are held."
+   evaluation Calva sent, which Calva shows itself. Only Joyride's own messages are held, and only
+   for a Calva that can show them."
   [{:setting/keys [use-calva?]
-    :calva/keys [state]
+    :calva/keys [state display?]
     :joyride/keys [starting?]
     :terminal/keys [live?]
     :output/keys [who calva-client?]}]
   (cond
-    (not use-calva?) :joyride-output
+    (not (and use-calva? display?)) :joyride-output
     (and (= :active state) calva-client?) :nowhere
     (= :active state) :calva
     (and (= :inactive state)

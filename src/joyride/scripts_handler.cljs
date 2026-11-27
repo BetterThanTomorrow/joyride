@@ -131,7 +131,8 @@
    ended in a thenable that isn't a native promise."
   [title script-path who {:script/keys [abs-path code]}]
   (swap! db/!app-db assoc :invoked-script abs-path)
-  (who-tracking/record-evaluation! who)
+  (when-not (= "joyride" who)
+    (who-tracking/record-evaluation! who))
   (let [!result (volatile! nil)]
     (-> (js/Promise. (fn [resolve]
                        (resolve (vreset! !result (sci/with-bindings {sci/file abs-path}

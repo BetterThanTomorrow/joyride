@@ -4,6 +4,7 @@
 
 (def ^:private calva-on {:setting/use-calva? true
                          :calva/state :active
+                         :calva/display? true
                          :joyride/starting? false
                          :terminal/live? false
                          :output/who "joyride"})
@@ -13,6 +14,8 @@
       "The setting off gives Joyride Output")
   (is (= :joyride-output (route/route (assoc calva-on :calva/state :absent)))
       "No Calva gives Joyride Output")
+  (is (= :joyride-output (route/route (assoc calva-on :calva/display? false)))
+      "A Calva too old to show Joyride's output gives Joyride Output")
   (is (= :calva (route/route calva-on))
       "An active Calva gets the output")
   (is (= :calva (route/route (assoc calva-on :joyride/starting? true :terminal/live? true)))
@@ -20,6 +23,8 @@
   (testing "Calva installed but not started"
     (is (= :hold (route/route (assoc calva-on :calva/state :inactive :joyride/starting? true)))
         "Joyride's own output is held while Joyride starts")
+    (is (= :joyride-output (route/route (assoc calva-on :calva/state :inactive :joyride/starting? true :calva/display? false)))
+        "Nothing is held for a Calva too old to show it")
     (is (= :joyride-output (route/route (assoc calva-on :calva/state :inactive :joyride/starting? true :output/who "joyride-user")))
         "People's output is never held")
     (is (= :joyride-output (route/route (assoc calva-on :calva/state :inactive :joyride/starting? true :terminal/live? true)))
@@ -31,7 +36,18 @@
   (is (= :nowhere (route/route (assoc calva-on :output/calva-client? true)))
       "Calva shows its own nREPL evaluations")
   (is (= :joyride-output (route/route (assoc calva-on :output/calva-client? true :setting/use-calva? false)))
-      "With the setting off, Calva's nREPL evaluations show in Joyride Output, as before"))
+      "With the setting off, Calva's nREPL evaluations show in Joyride Output, as before")
+  (is (= :joyride-output (route/route (assoc calva-on :output/calva-client? true :calva/display? false)))
+      "A Calva too old to show Joyride's output leaves its nREPL evaluations in Joyride Output, as before")
+  (is (= :joyride-output (route/route (assoc calva-on :output/calva-client? true :calva/state :inactive)))
+      "A Calva that isn't running leaves its nREPL evaluations in Joyride Output"))
+
+(deftest display-api
+  (is (true? (route/display-api? "2.0.613")) "The first version with display")
+  (is (true? (route/display-api? "2.0.613-api-log-display-4fdf7343d-vj")) "A pre-release of it")
+  (is (true? (route/display-api? "2.1.0")) "A later version")
+  (is (false? (route/display-api? "2.0.612")) "An earlier version")
+  (is (false? (route/display-api? nil)) "No version"))
 
 (deftest joyride-output-after-calva
   (is (true? (route/joyride-output-after-calva? nil))

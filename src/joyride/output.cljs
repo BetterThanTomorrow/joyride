@@ -1,5 +1,6 @@
 (ns joyride.output
-  "Terminal output utilities for Joyride evaluations."
+  "Joyride's output: decides, message by message, whether it goes to Calva's Output Destinations or to
+   the Joyride Output terminal, and writes it there."
   (:require
    ["vscode" :as vscode]
    [clojure.string :as string]
@@ -192,7 +193,7 @@
 ;; Terminal Management
 ;; ============================================================================
 
-(defn normalize-line-endings
+(defn- normalize-line-endings
   "Convert Unix line endings to terminal friendly CRLF sequences."
   [message]
   (string/replace message #"\r?\n" "\r\n"))
@@ -268,18 +269,18 @@
      (.show terminal preserve-focus?)
      terminal)))
 
-(defn write-to-terminal!
+(defn- write-to-terminal!
   "Write a raw message to the Joyride terminal."
   [message]
   (let [pty (ensure-terminal!)]
     (.write pty message)))
 
-(defn update-line-state!
+(defn- update-line-state!
   "Track whether the last appended message terminated the line."
   [normalized-message]
   (set-did-last-terminate-line! (string/ends-with? normalized-message "\r\n")))
 
-(defn append!
+(defn- append!
   "Append message without forcing a trailing newline."
   [message]
   (when (some? message)
@@ -287,7 +288,7 @@
       (write-to-terminal! normalized)
       (update-line-state! normalized))))
 
-(defn append-line!
+(defn- append-line!
   "Append message and ensure a trailing newline."
   [message]
   (append! (str message "\n")))
@@ -301,16 +302,22 @@
         ns-badge (colorize-by-category :output/eval-ns (str " " ns " "))]
     (str (colorize-by-category :output/info "; ") (or who-badge "") ns-badge)))
 
+(defn- info-key
+  "Returns what the info line shows for `who` and `ns`: the who only when it gets a badge."
+  [{:keys [who ns]}]
+  {:who (when (route/who-badge? who) who)
+   :ns ns})
+
 (defn- info-changed?
   "Check if the info line context has changed since last output."
-  [{:keys [who ns]}]
-  (not= (:output/last-info @db/!app-db) {:who who :ns ns}))
+  [opts]
+  (not= (:output/last-info @db/!app-db) (info-key opts)))
 
 (defn- maybe-append-info-line!
   "Append info line if who or ns has changed since last output."
   [opts]
   (when (info-changed? opts)
-    (swap! db/!app-db assoc :output/last-info (select-keys opts [:who :ns]))
+    (swap! db/!app-db assoc :output/last-info (info-key opts))
     (append-line! (info-line opts))))
 
 ;; ============================================================================
@@ -351,41 +358,52 @@
 (defn- route-of
   "Returns where `message` goes now, as `route/route` decides."
   [{:output/keys [who calva-client?]}]
-  (route/route {:setting/use-calva? (use-calva-setting?)
-                :calva/state (calva/state)
-                :joyride/starting? false
-                :terminal/live? (output-terminal-live?)
-                :output/who who
-                :output/calva-client? calva-client?}))
+  (let [calva-state (calva/state)]
+    (route/route {:setting/use-calva? (use-calva-setting?)
+                  :calva/state calva-state
+                  :calva/display? (route/display-api? (calva/version))
+                  :joyride/starting? false
+                  :terminal/live? (and (= :inactive calva-state)
+                                       (output-terminal-live?))
+                  :output/who who
+                  :output/calva-client? calva-client?})))
+
+(defn- calva-message
+  "Returns `message` as Calva's `log()` takes it, or `nil` when it has no text, which `log()` refuses."
+  [message]
+  (let [calva-message (route/calva-message message)]
+    (when (seq (:text calva-message))
+      calva-message)))
 
 (defn- log-message-for-subscribers!
   "Hands `message` to Calva's output subscribers, such as Backseat Driver, without showing it, when Calva is running."
   [message]
-  (calva/log! (route/calva-message message) {}))
+  (some-> (calva-message message)
+          (calva/log! {})))
 
 (defn- write-to-calva!
   "Writes `message` to Calva's Output Destinations, with the `evaluation` promise of its code, and to
    Joyride Output too when Calva shows it nowhere people read. Returns the evaluation id Calva gave it."
   [message evaluation]
-  (let [result (calva/log! (route/calva-message message)
-                           (cond-> {:display true}
-                             evaluation (assoc :evaluation evaluation)))]
-    (when (route/joyride-output-after-calva? result)
-      (write-to-joyride-output! message))
-    (:calva/evaluation-id result)))
+  (when-let [calva-message (calva-message message)]
+    (let [result (calva/log! calva-message
+                             (cond-> {:display true}
+                               evaluation (assoc :evaluation evaluation)))]
+      (when (route/joyride-output-after-calva? result)
+        (write-to-joyride-output! message))
+      (:calva/evaluation-id result))))
 
 (defn- write!
-  "Writes `message` where Joyride's output goes, unless it has nothing to write. Returns the
-   evaluation id Calva gave an evaluation's code, when it gave one."
-  [{:output/keys [text line? calva-client?] :as message} evaluation]
-  (when (or (seq text) line?)
-    (case (route-of message)
-      :calva (write-to-calva! message evaluation)
-      :joyride-output (do (write-to-joyride-output! message)
-                          (when-not calva-client?
-                            (log-message-for-subscribers! message))
-                          nil)
-      :nowhere nil)))
+  "Writes `message` where Joyride's output goes. Returns the evaluation id Calva gave an evaluation's
+   code, when it gave one."
+  [{:output/keys [calva-client?] :as message} evaluation]
+  (case (route-of message)
+    :calva (write-to-calva! message evaluation)
+    :joyride-output (do (write-to-joyride-output! message)
+                        (when-not calva-client?
+                          (log-message-for-subscribers! message))
+                        nil)
+    :nowhere nil))
 
 (def ^:private default-context {:output/who "joyride"})
 
@@ -403,11 +421,10 @@
   "Hands `text` in `category`, with the output `context`, to Calva's output subscribers, such as
    Backseat Driver, without showing it anywhere."
   [category text context]
-  (when (seq text)
-    (log-message-for-subscribers! (merge default-context
-                                         context
-                                         {:output/category category
-                                          :output/text text}))))
+  (log-message-for-subscribers! (merge default-context
+                                       context
+                                       {:output/category category
+                                        :output/text text})))
 
 (defn append-eval-out!
   "Append stdout generated during evaluation, with the evaluation's output `context`."

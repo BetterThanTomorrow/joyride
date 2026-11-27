@@ -29,6 +29,12 @@
   []
   (state-of (calva-extension)))
 
+(defn version
+  "Returns the version of Calva in this window, or `nil` without one. Readable before Calva has started."
+  []
+  (when-let [^js extension (calva-extension)]
+    (some-> extension .-packageJSON .-version)))
+
 (defn- log-result
   "Returns the `result` of Calva's `log()` as data."
   [^js result]

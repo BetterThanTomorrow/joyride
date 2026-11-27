@@ -75,14 +75,17 @@
   []
   (let [!logged (atom [])
         original-state calva/state
+        original-version calva/version
         original-log calva/log!]
     (set! calva/state (constantly :active))
+    (set! calva/version (constantly "2.0.613"))
     (set! calva/log! (fn [message _options]
                        (swap! !logged conj message)
                        {:calva/printed-to ["terminal"] :calva/skipped []}))
     {:logged !logged
      :undo! (fn []
               (set! calva/state original-state)
+              (set! calva/version original-version)
               (set! calva/log! original-log))}))
 
 (deftest late-rejection-logged-to-calva
@@ -236,3 +239,31 @@
             "The last namespace follows the evaluation, for Run Code and scripts"))
       (finally
         (vreset! joyride-sci/!last-ns last-ns-before)))))
+
+(deftest promesa-promise-awaited-reaches-calva
+  (async done
+    (let [{:keys [logged undo!]} (record-calva-log!)]
+      (-> (evaluation/execute-code+ {:code "(promesa.core/resolved 1)"
+                                     :ns "user"
+                                     :wait-for-promise? true
+                                     :who "host-tests"})
+          (.then (fn [_]
+                   (evaluation/execute-code+ {:code "(promesa.core/rejected (js/Error. \"awaited promesa\"))"
+                                              :ns "user"
+                                              :wait-for-promise? true
+                                              :who "host-tests"})))
+          (.then (fn [_]
+                   (is (= ["#<Promise 1>"]
+                          (->> @logged
+                               (filter #(and (= "evaluationResults" (:category %))
+                                             (= "#<Promise 1>" (:text %))))
+                               (map :text)))
+                       "An awaited promesa promise's value reaches Calva once")
+                   (is (= ["awaited promesa"]
+                          (->> @logged
+                               (filter #(= "evaluationErrorOutput" (:category %)))
+                               (map :text)))
+                       "An awaited promesa promise's rejection reaches Calva once")))
+          (.finally (fn []
+                      (undo!)
+                      (done)))))))
