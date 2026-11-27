@@ -489,7 +489,8 @@
    resolves it: `~/` against the home directory, and a relative path against the first workspace folder."
   [destination]
   (cond
-    (.startsWith destination "~/") (path/join (os/homedir) (subs destination 2))
+    (or (.startsWith destination "~/")
+        (.startsWith destination "~\\")) (path/join (os/homedir) (subs destination 2))
     (path/isAbsolute destination) destination
     :else (let [^js folder (some-> vscode/workspace.workspaceFolders first)]
             (path/resolve (or (some-> folder .-uri .-fsPath) "")
@@ -501,7 +502,10 @@
   []
   (let [{:reveal/keys [command file]} (route/reveal-target (:output/last-place @db/!app-db))]
     (cond
-      command (vscode/commands.executeCommand command)
+      command (-> (vscode/commands.executeCommand command)
+                  (.then identity
+                         (fn [e]
+                           (js/console.warn "Joyride: Could not reveal Calva's output:" (.-message e)))))
       file (-> (vscode/window.showTextDocument (vscode/Uri.file (destination-file-path file))
                                                #js {:preserveFocus true})
                (.then identity
