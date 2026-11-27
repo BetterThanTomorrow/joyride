@@ -51,6 +51,7 @@
                                                 (js/Promise.resolve choice)))
     (-> (scripts-handler/run-script+ "Run Test Script" base-path "scripts" script-name)
         (.then (constantly nil) (constantly nil))
+        (.then #(js/Promise. (fn [resolve] (js/setTimeout resolve 20))))
         (.then (fn [_] @!reports))
         (.finally restore!))))
 

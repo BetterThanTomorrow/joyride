@@ -2,6 +2,8 @@
   "Joyride's output: decides, message by message, whether it goes to Calva's Output Destinations or to
    the Joyride Output terminal, and writes it there."
   (:require
+   ["os" :as os]
+   ["path" :as path]
    ["vscode" :as vscode]
    [clojure.string :as string]
    [joyride.db :as db]
@@ -383,7 +385,8 @@
       (if (route/joyride-output-after-calva? result)
         (do (write-to-joyride-output! message)
             (swap! db/!app-db dissoc :output/last-place))
-        (swap! db/!app-db assoc :output/last-place (select-keys result [:calva/printed-to])))
+        (when (seq (:calva/printed-to result))
+          (swap! db/!app-db assoc :output/last-place (select-keys result [:calva/printed-to]))))
       (:calva/evaluation-id result))))
 
 ;; ============================================================================
@@ -458,7 +461,9 @@
       :hold (hold! message false)
       :calva (do (flush-held-to-calva!)
                  (write-to-calva! message evaluation))
-      :joyride-output (do (flush-held-to-joyride-output!)
+      :joyride-output (do (when (= :active (:calva/state inputs))
+                            (flush-held-to-calva!))
+                          (flush-held-to-joyride-output!)
                           (write-to-joyride-output! message)
                           (swap! db/!app-db dissoc :output/last-place)
                           (when-not calva-client?
@@ -466,7 +471,8 @@
                           (when (route/hold-copy-for-subscribers? inputs where)
                             (hold! message true))
                           nil)
-      :nowhere nil)))
+      :nowhere (when (= :active (:calva/state inputs))
+                 (flush-held-to-calva!)))))
 
 (defn show-terminal!
   "Reveal the Joyride output terminal, created when missing, with the held messages written to it."
@@ -478,6 +484,17 @@
      (.show terminal preserve-focus?)
      terminal)))
 
+(defn- destination-file-path
+  "Returns the absolute path of the Calva file path destination `destination`, resolved as Calva
+   resolves it: `~/` against the home directory, and a relative path against the first workspace folder."
+  [destination]
+  (cond
+    (.startsWith destination "~/") (path/join (os/homedir) (subs destination 2))
+    (path/isAbsolute destination) destination
+    :else (let [^js folder (some-> vscode/workspace.workspaceFolders first)]
+            (path/resolve (or (some-> folder .-uri .-fsPath) "")
+                          destination))))
+
 (defn reveal!
   "Reveals where Joyride's last message went: the Calva Output Destination it was printed to, or
    Joyride Output, with the held messages written to it."
@@ -485,7 +502,11 @@
   (let [{:reveal/keys [command file]} (route/reveal-target (:output/last-place @db/!app-db))]
     (cond
       command (vscode/commands.executeCommand command)
-      file (vscode/window.showTextDocument (vscode/Uri.file file) #js {:preserveFocus true})
+      file (-> (vscode/window.showTextDocument (vscode/Uri.file (destination-file-path file))
+                                               #js {:preserveFocus true})
+               (.then identity
+                      (fn [e]
+                        (js/console.warn "Joyride: Could not open the output file:" (.-message e)))))
       :else (show-terminal!))))
 
 (defn output-terminal

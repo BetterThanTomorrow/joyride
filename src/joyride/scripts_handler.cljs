@@ -120,10 +120,12 @@
      :script/code code}))
 
 (defn- report-script-error!
-  "Appends the failed script run to Joyride's output, as `who`, with `message` when there is one, and offers to reveal it."
+  "Appends the failed script run to Joyride's output, as `who`, with `message` when there is one, and offers to
+   reveal it, without waiting for the answer."
   [title script-path message who]
   (output/append-line-other-err! (str title " Failed: " script-path (some->> message (str " "))) {:output/who who})
-  (utils/show-message-offering-output+ vscode/window.showErrorMessage (str title " error")))
+  (utils/show-message-offering-output+ vscode/window.showErrorMessage (str title " error"))
+  nil)
 
 (defn- eval-script+
   "Evaluates the script's `code` as the invoked script `abs-path`, as `who`, and resolves to its result. A failure is
