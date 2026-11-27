@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+## [0.0.91] - 2026-11-27
+
 - The MCP server installs Joyride's skills in `~/.config/vscode-mcp/skills/joyride/` each time it starts, and its instructions tell agents where to find them.
 - Fix: Starting or stopping the MCP server while it is still starting up, as it does at activation in Cursor, can leave it half started
 - Fix: A skill description that is quoted in the skill's frontmatter is listed with YAML quotes retained
