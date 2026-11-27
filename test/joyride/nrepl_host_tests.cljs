@@ -5,8 +5,20 @@
   (:require ["fs" :as fs]
             ["os" :as os]
             ["path" :as path]
-            [cljs.test :refer [async deftest is]]
-            [joyride.nrepl :as nrepl]))
+            [cljs.test :refer [async deftest is use-fixtures]]
+            [joyride.integrations.calva :as calva]
+            [joyride.nrepl :as nrepl]
+            [joyride.sci :as jsci]
+            [sci.ctx-store :as store]))
+
+(def ^:private !calva-state (atom nil))
+
+(use-fixtures :once
+  {:before (fn []
+             (reset! !calva-state calva/state)
+             (set! calva/state (constantly :absent)))
+   :after (fn []
+            (set! calva/state @!calva-state))})
 
 (defn- temp-root []
   (fs/mkdtempSync (path/join (os/tmpdir) "joyride-nrepl-host-tests-")))
@@ -62,3 +74,19 @@
       (nrepl/handle-close {:op :close :session session} (fn [_ _])))
     (is (not (nrepl/calva-session? calva-session))
         "A closed session is forgotten")))
+
+(deftest eval-runs-in-the-requested-ns
+  (let [!responses (atom [])
+        eval! (fn [request]
+                (reset! !responses [])
+                (nrepl/handle-eval (merge {:op :eval :sci-ctx (store/get-ctx)} request)
+                                   (fn [_ response] (swap! !responses conj response)))
+                (some #(get % "value") @!responses))]
+    (jsci/eval-string "(ns joyride-host-tests.nrepl-ns) (def y 43)")
+    (jsci/eval-string "(in-ns 'user)")
+    (is (= "[43 \"joyride-host-tests.nrepl-ns\"]"
+           (eval! {:code "[y (str *ns*)]" :ns "joyride-host-tests.nrepl-ns"}))
+        "An evaluation runs in the namespace the request names, not the last one used")
+    (is (= "\"joyride-host-tests.nrepl-ns\""
+           (eval! {:code "(str *ns*)"}))
+        "Without a namespace, an evaluation runs in the last one used")))

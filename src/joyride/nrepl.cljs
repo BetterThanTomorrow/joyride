@@ -142,7 +142,7 @@
                                             (send-fn request {"err" s}))))
     (let [{:evaluation/keys [context end!]} (start-nrepl-evaluation! request)
           !pending-promise? (volatile! false)]
-      (try (let [v (jsci/eval-string code @jsci/!last-ns context)
+      (try (let [v (jsci/eval-string code ns context)
                  send-result! (fn [val promise?]
                                 (sci/alter-var-root sci/*3 (constantly @sci/*2))
                                 (sci/alter-var-root sci/*2 (constantly @sci/*1))
@@ -210,7 +210,7 @@
     (do-handle-eval (assoc request
                            :code file
                            :load-file? true
-                           :ns @sci/ns
+                           :ns (or @jsci/!last-ns @sci/ns)
                            :file file-path)
                     send-fn)))
 

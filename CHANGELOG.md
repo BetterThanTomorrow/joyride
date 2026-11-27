@@ -4,6 +4,8 @@ Changes to Joyride
 
 ## [Unreleased]
 
+- Fix: The nREPL server ignores the namespace a client evaluates in, and evaluates in whatever namespace the previous evaluation ended in
+
 ## [0.0.91] - 2026-11-27
 
 - The MCP server installs Joyride's skills in `~/.config/vscode-mcp/skills/joyride/` each time it starts, and its instructions tell agents where to find them.
