@@ -226,6 +226,7 @@
 
 (defn on-connect [opts socket]
   (debug "Connection accepted")
+  (swap! !db update ::sockets (fnil conj #{}) socket)
   (.setNoDelay ^node-net/Socket socket true)
   (let [handler (make-request-handler opts)
         response-handler (make-response-handler socket)
@@ -244,6 +245,7 @@
                (handler request response-handler))))))
   (.on ^node-net/Socket socket "close"
        (fn [had-error?]
+         (swap! !db update ::sockets disj socket)
          (if had-error?
            (debug "Connection lost")
            (debug "Connection closed")))))
@@ -252,13 +254,13 @@
   (vscode/Uri.file
    (path/join root-uri ".joyride" ".nrepl-port")))
 
-(defn remove-port-file [^js path]
-  (let [uri (port-file-uri path)]
-    (-> uri
-        vscode/workspace.fs.stat
-        (p/then (fn [stat]
-                  (when stat
-                    (vscode/workspace.fs.delete uri)))))))
+(defn remove-port-file
+  "Deletes the nREPL port file under `path`. Resolves when the file is gone, also when it wasn't there."
+  [^js path]
+  (-> (vscode/workspace.fs.delete (port-file-uri path))
+      (p/catch (fn [e]
+                 (when-not (= "FileNotFound" (.-code e))
+                   (throw e))))))
 
 (defn server-running? []
   (when-contexts/context ::when-contexts/joyride.isNReplServerRunning))
@@ -328,7 +330,10 @@
       (info "The nREPL server is already running")
       (p/rejected (js/Error. "The nREPL server is already running" {})))))
 
-(defn stop-server+ []
+(defn stop-server+
+  "Stops the nREPL server and ends its open connections, which the server waits for before it
+   closes. Resolves to the server once its port file is removed."
+  []
   (p/let [stopped+ (p/create (fn [resolve reject]
                                (if (server-running?)
                                  (let [server (::server @!db)]
@@ -339,10 +344,14 @@
                                              (p/do
                                                (when-contexts/set-context! ::when-contexts/joyride.isNReplServerRunning false)
                                                (-> (remove-port-file (::root-path @!db))
+                                                   (p/catch (fn [e]
+                                                              (warn "Could not remove the nREPL port file" e)))
                                                    (p/then (fn []
                                                              (swap! !db dissoc ::root-path)
                                                              (output/append-other-out! "nREPL server stopped")
-                                                             (resolve server))))))))
+                                                             (resolve server)))))))
+                                   (doseq [^node-net/Socket socket (::sockets @!db)]
+                                     (.destroy socket)))
                                  (do (output/append-other-err! "There is no nREPL Server running")
                                      (reject (js/Error. "There is no nREPL Server running"))))))]
     (sci/alter-var-root sci/print-fn (constantly *print-fn*))
