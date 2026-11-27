@@ -1,6 +1,6 @@
 ---
 name: joyride-testing
-description: 'Testing the Joyride under development, in the dev Extension Host. Use when: testing Joyride, smoke testing after a change or a dependency bump, validating joyride_evaluate_code, awaitResult and who-tracking, testing the nREPL server through Calva, testing Flares and their messages, testing a Scittle REPL in a Flare, testing workspace scripts, or checking that the MCP server publishes its skills.'
+description: 'Testing the Joyride under development, in the dev Extension Host. Use when: testing Joyride, smoke testing after a change or a dependency bump, validating joyride_evaluate_code, awaitResult and who-tracking, testing the nREPL server through Calva, testing Flares, sidebar Flares and their messages, testing a Scittle REPL in a Flare, testing workspace scripts, or checking that the MCP server publishes its skills.'
 ---
 
 # Joyride testing
@@ -27,7 +27,13 @@ This window is the dev Extension Host. Its Joyride is the one under development,
 
 Use `"joyride-tester"` as the `who` for your evaluations, and other slugs only where a section asks for them.
 
-This window uses the user's real Joyride directory, `~/.config/joyride`. Don't create, change or delete anything there. Test files go in the test project, under `.joyride/`, and are deleted at the end of the run, as are Flares you opened. Leave the tic-tac-toe Flare open and start a new game at the end.
+This window uses the user's real Joyride directory, `~/.config/joyride`. Don't create, change or delete anything there. Test files go in the test project, under `.joyride/`.
+
+Some steps wait for a page to answer. `test-project/wait-for!+` takes a function and a timeout in milliseconds, calls the function every half second until it returns something truthy, and resolves to the last value. Evaluate it with `awaitResult: true`.
+
+The tic-tac-toe Flare keeps its page while other editors cover it, so a section can open panel Flares while a game is going. Once the Joyride sidebar has been shown, `(flare/ls)` also lists `:sidebar-1`, the placeholder view of the first sidebar slot. It isn't something a test left behind.
+
+Each section ends by cleaning up after itself: it closes the Flares it opened, deletes its test files, and removes its namespaces after switching back to `user`. Leave the tic-tac-toe Flare open, with a new game.
 
 ## Evaluation through MCP
 
@@ -39,14 +45,17 @@ This window uses the user's real Joyride directory, `~/.config/joyride`. Don't c
 4. With `awaitResult: true`, `(js/Promise.reject (js/Error. "nope"))` gives `"type":"error"` and `"error":"nope"`.
 5. `(throw (ex-info "boom" {:a 1}))` gives `"type":"error"` and `"error":"boom"`.
 6. As `who` `"joyride-tester-b"`, evaluate `(ns joyride-tester.scratch) (def x 42)`. Then as `"joyride-tester"`, evaluate `x` with `namespace` `"joyride-tester.scratch"`. Expect `"result":"42"` and `"otherWhosSinceLast":["joyride-tester-b"]`.
+7. Still as `"joyride-tester"`, evaluate `(str *ns*)` with `namespace` `"user"`. Expect `"result":"\"user\""` and `"ns":"user"`: the evaluation runs in the namespace it names, not in the one step 6 ended in.
+8. Clean up with `(in-ns 'user) (remove-ns 'joyride-tester.scratch)`.
 
 ## nREPL through Calva
 
 `clojure_evaluate_code` with `replSessionKey` `"joyride"`. This is the same SCI as the MCP tool.
 
 1. `(+ 1 2)` in `user` gives `3`.
-2. `joyride-tester.scratch/x`, defined in the MCP section, gives `42`. Run that section first, or def it here.
+2. Evaluate `(ns joyride-tester.nrepl) (def y 43)`. Then, through `joyride_evaluate_code`, `joyride-tester.nrepl/y` gives `"result":"43"`.
 3. `(some? (find-ns 'test-project))` gives `true`: the activation script loaded the test project's library.
+4. Clean up with `(in-ns 'user) (remove-ns 'joyride-tester.nrepl)`.
 
 ## Flares
 
@@ -64,9 +73,40 @@ Through `joyride_evaluate_code`, with `(require '[joyride.flare :as flare])` fir
    ```
    With `awaitResult: true` it resolves to a map with the key `:joyride-test`.
 2. `(keys (flare/ls))` has `:joyride-test` and `:tic-tac-toe`.
-3. `(flare/post-message!+ :joyride-test {:hello "flare"})` with `awaitResult: true` gives `"#<Promise true>"`. Half a second later, `@!msgs` is `[{:echo {:hello "flare"}}]`.
+3. `(flare/post-message!+ :joyride-test {:hello "flare"})` with `awaitResult: true` gives `"#<Promise true>"`. Then `(test-project/wait-for!+ #(not-empty @!msgs) 2000)` resolves to `[{:echo {:hello "flare"}}]`.
 4. `(flare/flare!+ {:html [:p "sidebar"] :key :sidebar-2 :title "Sidebar test"})` opens a sidebar Flare, and its key is in `(flare/ls)`.
 5. `(flare/close! :joyride-test)` and `(flare/close! :sidebar-2)` each give `true`, and the keys are gone from `(flare/ls)`.
+
+## Sidebar Flare messages
+
+Through `joyride_evaluate_code`, with `(require '[joyride.flare :as flare])` first. The page in a sidebar Flare and Joyride talk both ways: the page says it is ready, the message handler answers it, and then Joyride starts a round trip of its own.
+
+1. Open a Flare in sidebar slot 3, with a handler that keeps every message and answers `ready` with a `welcome`:
+   ```clojure
+   (def !sidebar-msgs (atom []))
+   (flare/flare!+
+    {:html [:div [:h3 "Sidebar messages"]
+            [:script "const vscode = acquireVsCodeApi();
+                      let received = 0;
+                      window.addEventListener('message', e => {
+                        const m = e.data;
+                        received++;
+                        if (m.type === 'welcome') vscode.postMessage({type: 'welcomed', text: m.text, received});
+                        if (m.type === 'ping') vscode.postMessage({type: 'pong', n: m.n + 1, received});
+                      });
+                      vscode.postMessage({type: 'ready'});"]]
+     :title "Sidebar messages"
+     :key :sidebar-3
+     :message-handler (fn [m]
+                        (let [msg (js->clj m :keywordize-keys true)]
+                          (swap! !sidebar-msgs conj msg)
+                          (when (= "ready" (:type msg))
+                            (flare/post-message!+ :sidebar-3 {:type "welcome" :text "hello sidebar"}))))})
+   ```
+   With `awaitResult: true` it resolves to a map with the key `:sidebar-3`.
+2. `(test-project/wait-for!+ #(when (= 2 (count @!sidebar-msgs)) @!sidebar-msgs) 3000)` resolves to `[{:type "ready"} {:type "welcomed", :text "hello sidebar", :received 1}]`: the page's `ready` reached the handler, the handler's `welcome` reached the page, and the page's answer came back.
+3. `(flare/post-message!+ :sidebar-3 {:type "ping" :n 41})` with `awaitResult: true` gives `"#<Promise true>"`. Then `(test-project/wait-for!+ #(when (= 3 (count @!sidebar-msgs)) (last @!sidebar-msgs)) 3000)` resolves to `{:type "pong", :n 42, :received 2}`.
+4. `(flare/close! :sidebar-3)` gives `true`, and `:sidebar-3` is gone from `(flare/ls)`.
 
 ## A Scittle REPL in a Flare
 
@@ -74,14 +114,15 @@ Through `joyride_evaluate_code`, with `(require '[joyride.flare :as flare])` fir
 
 1. `(some? (js/document.querySelector "#app"))` gives `true`: the evaluation runs in the Flare's page.
 2. `(replicant-tictactoe.core/event-handler! {} [:tic 1 1])`, then `(:tics @replicant-tictactoe.core/!store)`, gives `{[1 1] :x}`. A second move, `[:tic 0 0]`, is an `:o`.
-3. Reload the Flare with `(test-project/open-tic-tac-toe!+)` through `joyride_evaluate_code`. Calva keeps its WebSocket server and takes the page back when it reconnects: within a few seconds, the session answers again, and `(:tics @replicant-tictactoe.core/!store)` is `nil`, since the page started a new game.
-4. End with `(replicant-tictactoe.core/event-handler! {} [:reset])`.
+3. Cover the Flare. Through `joyride_evaluate_code`, with `(require '[joyride.flare :as flare])` first, open `(flare/flare!+ {:html [:p "cover"] :title "Cover test" :key :joyride-test-cover})` with `awaitResult: true`, then `(flare/close! :joyride-test-cover)`. The game is still `{[1 1] :x, [0 0] :o}`: the page kept its state while it was covered.
+4. Through `joyride_evaluate_code`, with `awaitResult: true`, `(test-project/reload-tic-tac-toe!+)` gives `"#<Promise :reloaded>"`. It closes the Flare, opens it again, and resolves when the session answers from the new page. `(:tics @replicant-tictactoe.core/!store)` is now `nil`, since the new page started a new game.
+5. End with `(replicant-tictactoe.core/event-handler! {} [:reset])`.
 
 ## Workspace scripts
 
 1. Create `.joyride/scripts/joyride_tester_script.cljs` in the test project, with `(ns joyride-tester-script)` and `(+ 40 2)`.
 2. Through `joyride_evaluate_code`, with `awaitResult: true`: `(vscode/commands.executeCommand "joyride.runWorkspaceScript" "joyride_tester_script.cljs")` gives `"#<Promise 42>"`.
-3. Delete the script.
+3. Delete the script, and clean up with `(in-ns 'user) (remove-ns 'joyride-tester-script)`.
 
 ## Bundled skills
 
@@ -94,7 +135,7 @@ Note which surface you used. The test passes when the skills are found and load 
 
 ## Delegation to `joyride-tester`
 
-The `joyride-tester` agent loads this skill, runs one test task, and reports. After **Before you start**, the sections without a dependency on each other can run in parallel tester agents: Evaluation through MCP, Flares, A Scittle REPL in a Flare, Workspace scripts, and Bundled skills. nREPL through Calva reads what the MCP section defined. Pass each agent its section, the session keys you found, and its own `who`.
+The `joyride-tester` agent loads this skill, runs one test task, and reports. After **Before you start**, every section can run in its own tester agent, in parallel. Pass each agent its section, the session keys you found, and its own `who`. In a parallel run, `otherWhosSinceLast` in MCP step 6 also lists the other agents.
 
 ## Reporting
 

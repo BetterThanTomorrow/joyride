@@ -177,17 +177,30 @@
     [:div#app]]])
 
 (defn open-tic-tac-toe!+
-  "Opens the tic-tac-toe Flare, or reloads it when it is open. Its page connects
-   to Calva's WebSocket server for the `tic-tac-toe` session."
+  "Opens the tic-tac-toe Flare, or reveals it when it is open. The page stays
+   loaded while other editors cover the Flare. It connects to Calva's WebSocket
+   server for the `tic-tac-toe` session."
   []
   (flare/flare!+ {:html (tic-tac-toe-html)
                   :title "Tic-tac-toe"
                   :key tic-tac-toe-key
                   :reveal? true
-                  :preserve-focus? true}))
+                  :preserve-focus? true
+                  :webview-options {:retainContextWhenHidden true}}))
 
 (defn- tic-tac-toe-open? []
   (contains? (flare/ls) tic-tac-toe-key))
+
+(defn ^:async reload-tic-tac-toe!+
+  "Closes the tic-tac-toe Flare and opens it again, which loads a new page with a
+   new game. Resolves to `:reloaded` when the `tic-tac-toe` session answers from
+   the new page, or to `:timed-out`."
+  []
+  (flare/close! tic-tac-toe-key)
+  (await (open-tic-tac-toe!+))
+  (if (await (wait-for!+ #(answers?+ "tic-tac-toe") 60000))
+    :reloaded
+    :timed-out))
 
 (defn ^:async ensure-tic-tac-toe!+
   "Makes the `tic-tac-toe` session answer from the Flare. An open Flare gets
@@ -195,13 +208,19 @@
    `:was-connected`, `:opened`, `:reloaded` or `:timed-out`."
   [grace-ms]
   (let [open? (tic-tac-toe-open?)]
-    (if (and open?
-             (await (wait-for!+ #(answers?+ "tic-tac-toe") grace-ms)))
+    (cond
+      (and open?
+           (await (wait-for!+ #(answers?+ "tic-tac-toe") grace-ms)))
       :was-connected
+
+      open?
+      (await (reload-tic-tac-toe!+))
+
+      :else
       (do
         (await (open-tic-tac-toe!+))
         (if (await (wait-for!+ #(answers?+ "tic-tac-toe") 60000))
-          (if open? :reloaded :opened)
+          :opened
           :timed-out)))))
 
 ;; Start and stop
@@ -260,4 +279,5 @@
   (sessions+)
   (answers?+ "tic-tac-toe")
   (open-tic-tac-toe!+)
+  (reload-tic-tac-toe!+)
   :rcf)
