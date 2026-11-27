@@ -24,14 +24,14 @@
   (let [!lines (atom [])
         eval-err output/append-line-eval-err!
         other-err output/append-line-other-err!
-        show-terminal output/show-terminal!
+        reveal output/reveal!
         restore! (fn []
                    (set! output/append-line-eval-err! eval-err)
                    (set! output/append-line-other-err! other-err)
-                   (set! output/show-terminal! show-terminal))]
+                   (set! output/reveal! reveal))]
     (set! output/append-line-eval-err! (fn ([m] (swap! !lines conj m)) ([m _] (swap! !lines conj m))))
     (set! output/append-line-other-err! (fn ([m] (swap! !lines conj m)) ([m _] (swap! !lines conj m))))
-    (set! output/show-terminal! (fn ([] nil) ([_] nil)))
+    (set! output/reveal! (fn [] nil))
     (-> (extension/run-code+ code)
         (.then (constantly nil) (constantly nil))
         (.then #(js/Promise. (fn [resolve] (js/setTimeout resolve 20))))

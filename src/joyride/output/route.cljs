@@ -112,3 +112,20 @@
     (some? who) who
     calva-client? "joyride-user"
     :else "joyride-nrepl"))
+
+(def ^:private calva-reveal-commands
+  {"terminal" "calva.showOutputTerminal"
+   "output-channel" "calva.showOutputChannel"
+   "output-view" "calva.showReplOutputView"
+   "output-sidebar" "calva.showReplOutputSidebar"})
+
+(defn reveal-target
+  "Returns how to reveal where the last message went, from `last-place`, Calva's result for it:
+   the Calva command for the first destination it printed to, the file of a file path destination,
+   or Joyride Output when it went there or is held."
+  [{:calva/keys [printed-to]}]
+  (let [destination (first printed-to)]
+    (cond
+      (nil? destination) {:reveal/joyride-output true}
+      (calva-reveal-commands destination) {:reveal/command (calva-reveal-commands destination)}
+      :else {:reveal/file destination})))

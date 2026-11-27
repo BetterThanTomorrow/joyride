@@ -380,8 +380,10 @@
     (let [result (calva/log! calva-message
                              (cond-> {:display true}
                                evaluation (assoc :evaluation evaluation)))]
-      (when (route/joyride-output-after-calva? result)
-        (write-to-joyride-output! message))
+      (if (route/joyride-output-after-calva? result)
+        (do (write-to-joyride-output! message)
+            (swap! db/!app-db dissoc :output/last-place))
+        (swap! db/!app-db assoc :output/last-place (select-keys result [:calva/printed-to])))
       (:calva/evaluation-id result))))
 
 ;; ============================================================================
@@ -458,6 +460,7 @@
                  (write-to-calva! message evaluation))
       :joyride-output (do (flush-held-to-joyride-output!)
                           (write-to-joyride-output! message)
+                          (swap! db/!app-db dissoc :output/last-place)
                           (when-not calva-client?
                             (log-message-for-subscribers! message))
                           (when (route/hold-copy-for-subscribers? inputs where)
@@ -474,6 +477,16 @@
    (when-let [terminal (:output/terminal @db/!app-db)]
      (.show terminal preserve-focus?)
      terminal)))
+
+(defn reveal!
+  "Reveals where Joyride's last message went: the Calva Output Destination it was printed to, or
+   Joyride Output, with the held messages written to it."
+  []
+  (let [{:reveal/keys [command file]} (route/reveal-target (:output/last-place @db/!app-db))]
+    (cond
+      command (vscode/commands.executeCommand command)
+      file (vscode/window.showTextDocument (vscode/Uri.file file) #js {:preserveFocus true})
+      :else (show-terminal!))))
 
 (defn output-terminal
   "Returns the Joyride Output terminal, created when missing, with the held messages written to it."

@@ -36,12 +36,12 @@
   vscode/workspace.rootPath)
 
 (defn show-message-offering-output+
-  "Shows `message` with `show-message`, such as `vscode/window.showErrorMessage`, and a button that reveals Joyride Output."
+  "Shows `message` with `show-message`, such as `vscode/window.showErrorMessage`, and a button that reveals where Joyride's output went."
   [show-message message]
-  (.then (show-message message "Reveal output terminal")
+  (.then (show-message message "Reveal output")
          (fn [choice]
            (when choice
-             (output/show-terminal!)))))
+             (output/reveal!)))))
 
 (defn info [title & xs]
   (output/append-line-other-err! (str title "\n" (str/join " " (mapv str xs))))

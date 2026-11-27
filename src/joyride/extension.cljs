@@ -48,7 +48,7 @@
                         (resolve (jsci/eval-string code @jsci/!last-ns context))))
          (.finally end!)
          (.catch (fn [e]
-                   (output/show-terminal!)
+                   (output/reveal!)
                    (throw (js/Error. e))))))))
 
 (defn evaluate-selection+
@@ -69,9 +69,9 @@
         (run-code+ selection)))))
 
 (defn reveal-output-terminal
-  "Reveal the Joyride output terminal without taking focus."
+  "Reveals where Joyride's output went, without taking focus."
   []
-  (output/show-terminal! true))
+  (output/reveal!))
 
 (defn choose-file [default-uri]
   (vscode/window.showOpenDialog #js {:canSelectMany false

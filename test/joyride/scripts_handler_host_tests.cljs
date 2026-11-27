@@ -31,21 +31,21 @@
 
 (defn- run-script-reports+
   "Runs `script-name`, answering error popups with `choice`. Resolves to the error lines in Joyride Output,
-   error popups and reveals of Joyride Output it produced."
+   error popups and reveals of its output it produced."
   [base-path script-name choice]
   (let [!reports (atom [])
         eval-err output/append-line-eval-err!
         other-err output/append-line-other-err!
-        show-terminal output/show-terminal!
+        reveal output/reveal!
         show-error-message (.-showErrorMessage vscode/window)
         restore! (fn []
                    (set! output/append-line-eval-err! eval-err)
                    (set! output/append-line-other-err! other-err)
-                   (set! output/show-terminal! show-terminal)
+                   (set! output/reveal! reveal)
                    (set! (.-showErrorMessage vscode/window) show-error-message))]
     (set! output/append-line-eval-err! (fn ([m] (swap! !reports conj m)) ([m _] (swap! !reports conj m))))
     (set! output/append-line-other-err! (fn ([m] (swap! !reports conj m)) ([m _] (swap! !reports conj m))))
-    (set! output/show-terminal! (fn reveal ([] (reveal false)) ([_] (swap! !reports conj :output-revealed))))
+    (set! output/reveal! (fn [] (swap! !reports conj :output-revealed)))
     (set! (.-showErrorMessage vscode/window) (fn [message & _]
                                                 (swap! !reports conj message)
                                                 (js/Promise.resolve choice)))
@@ -71,7 +71,7 @@
 (deftest script-failure-reveals-output-on-click
   (async done
     (let [base-path (write-scripts! {"boom.cljs" "(throw (js/Error. \"boom\"))"})]
-      (-> (run-script-reports+ base-path "boom.cljs" "Reveal output terminal")
+      (-> (run-script-reports+ base-path "boom.cljs" "Reveal output")
           (.then (fn [reports]
                    (is (= ["boom"
                            "Run Test Script Failed: boom.cljs"

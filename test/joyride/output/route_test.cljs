@@ -129,3 +129,23 @@
         "Without Calva, nothing waits for it")
     (is (false? (route/hold-copy-for-subscribers? (assoc starting :joyride/starting? false) :joyride-output))
         "Once Joyride has started, nothing is held")))
+
+(deftest reveal-targets
+  (is (= {:reveal/command "calva.showOutputTerminal"}
+         (route/reveal-target {:calva/printed-to ["terminal" "output-sidebar"]}))
+      "The first destination Calva printed to")
+  (is (= {:reveal/command "calva.showOutputChannel"}
+         (route/reveal-target {:calva/printed-to ["output-channel"]}))
+      "The output channel")
+  (is (= {:reveal/command "calva.showReplOutputView"}
+         (route/reveal-target {:calva/printed-to ["output-view"]}))
+      "The output view")
+  (is (= {:reveal/command "calva.showReplOutputSidebar"}
+         (route/reveal-target {:calva/printed-to ["output-sidebar"]}))
+      "The REPL Output sidebar")
+  (is (= {:reveal/file "/tmp/out.txt"}
+         (route/reveal-target {:calva/printed-to ["/tmp/out.txt"]}))
+      "A file path destination opens the file")
+  (is (= {:reveal/joyride-output true}
+         (route/reveal-target nil))
+      "Output that went to Joyride Output, or is held, reveals Joyride Output"))
